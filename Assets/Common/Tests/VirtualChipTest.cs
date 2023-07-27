@@ -29,6 +29,9 @@ public class VirtualChipTest : MonoBehaviour
             throw new KeyNotFoundException("first grandchild of a must be aaa.");
         }
         var vc5 = new VirtualChip(keys2, vals2, 0, vc4);
+        var vc6 = new VirtualChip(keys2, vals2, 1, vc4);
+        var vc7 = new VirtualChip(keys2, vals2, 2, vc4);
+        var vc8 = new VirtualChip(keys2, vals2, 3, vc4);
         var coreobject = GameObject.Find("coretest");
         var core = coreobject.GetComponent<CommonChip>();
         print("core name: "+core.name);
