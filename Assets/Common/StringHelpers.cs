@@ -28,6 +28,7 @@ public class StringHelpers {
     }
     public static bool IsVariableName(string input)
     {
+        if (string.IsNullOrEmpty(input)) { return false; }
         char firstChar = input[0];
         return IsAlphanumericOrContainsUnderscore(input) && (char.IsLetter(firstChar) || firstChar == '_');
     }

@@ -25,4 +25,23 @@ public class PRINT
     {
         UnityEngine.Debug.Log(MakePrintable(o));
     }
+    public static void VisualizePosition(Vector3 position, Color colour)
+    {
+        var newObject = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        newObject.transform.position = position;
+        newObject.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+        ChangeObjectColor(newObject, colour);
+    }
+    public static void ChangeObjectColor(GameObject targetObject, Color newColor)
+    {
+        Renderer objectRenderer = targetObject.GetComponent<Renderer>();
+        if (objectRenderer != null)
+        {
+            objectRenderer.material.color = newColor;
+        }
+        else
+        {
+            Debug.Log("No renderer on the target object.");
+        }
+    }
 }

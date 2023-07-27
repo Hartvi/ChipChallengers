@@ -7,9 +7,11 @@ public class VirtualChipTest : MonoBehaviour
     void Start()
     {
         string[] keys1 = new string[] { "Name", "Angle", "Value", "Option", "Type" };
-        string[] vals1 = new string[] { "joe", "1.2", "5", "1", "Core" };
+        string[] vals1 = new string[] { "joe", "40", "5", "1", "Core" };
         string[] keys = new string[] { "Name", "Angle", "Value", "Option", "Type" };
-        string[] vals = new string[] { "joe", "1.2", "5", "1", "Chip" };
+        string[] vals = new string[] { "joe", "20", "5", "1", "Chip" };
+        string[] keys2 = new string[] { "Name", "Angle", "Value", "Option", "Type", "Spring", "Damper" };
+        string[] vals2 = new string[] { "joe", "20", "5", "1", "Chip", "10", "10" };
         var vc = new VirtualChip(keys1, vals1, 0, null);
         PRINT.print("vckeys", vc.keys);
         PRINT.print("vcvals", vc.vals);
@@ -22,10 +24,11 @@ public class VirtualChipTest : MonoBehaviour
         if(vc3.id != "ab") {
             throw new KeyNotFoundException("second child of a must be ab.");
         }
-        var vc4 = new VirtualChip(keys, vals, 1, vc2);
+        var vc4 = new VirtualChip(keys, vals, 0, vc2);
         if(vc4.id != "aaa") {
             throw new KeyNotFoundException("first grandchild of a must be aaa.");
         }
+        var vc5 = new VirtualChip(keys2, vals2, 0, vc4);
         var coreobject = GameObject.Find("coretest");
         var core = coreobject.GetComponent<CommonChip>();
         print("core name: "+core.name);

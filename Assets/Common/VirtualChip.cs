@@ -15,6 +15,13 @@ public enum Orientation {
 
 public class VirtualChip {
     public const string typeStr = "Type";
+    public const string angleStr = "Angle";
+    public const string springStr = "Spring";
+    public const string damperStr = "Damper";
+
+    public const string coreStr = "Core";
+    public const string cowlStr = "Cowl";
+
     public const string chipsFolderStr = "Chips/";
     [NonSerialized]
     public static readonly Dictionary<string, Type> propertyTypes;
@@ -35,8 +42,8 @@ public class VirtualChip {
 
     static VirtualChip() {
         propertyTypes = new Dictionary<string, Type>() {
-            {"Angle",  typeof(float)},
-            {"Value",  typeof(float)},
+            {"Angle",  typeof(string)},
+            {"Value",  typeof(string)},
             {"Colour", typeof(string)},
             {"Spring", typeof(float)},
             {"Damper", typeof(float)},
@@ -85,7 +92,7 @@ public class VirtualChip {
     [NonSerialized]
     public List<VirtualChip> children = new List<VirtualChip>();
     [NonSerialized]
-    public Dictionary<string, string> instanceProperties;
+    public Dictionary<string, object> instanceProperties;
 
     public VirtualChip(string[] keys, string[] vals, int orientation, VirtualChip parentChip) {
         if(!keys.Contains(typeStr)) {
@@ -99,7 +106,7 @@ public class VirtualChip {
         this.vals = vals;
         CheckAndSetVals();
         this.parentChip = parentChip;
-        instanceProperties = keys.Zip(vals, (k, v) => new { k, v }).ToDictionary(x => x.k, x => x.v);
+        instanceProperties = keys.Zip(objectVals, (k, v) => new { k, v }).ToDictionary(x => x.k, x => x.v);
 
         if(parentChip != null) {
             id = parentChip.GetNewChildID(this);
@@ -107,6 +114,20 @@ public class VirtualChip {
             id = "a";
         }
         PRINT.print(id);
+    }
+
+    public bool TryGetProperty<T>(string key, out T val) {
+        try { 
+            val = (T)(instanceProperties[key]); 
+            return true; 
+        } catch { 
+            val = default(T); 
+            return false; 
+        }
+    }
+
+    public T GetProperty<T>(string key) {
+        return (T)(instanceProperties[key]);
     }
 
     public string GetNewChildID(VirtualChip childChip) {
@@ -127,7 +148,7 @@ public class VirtualChip {
     }
 
     public string GetChipType() {
-        return instanceProperties[typeStr];
+        return instanceProperties[typeStr] as string;
     }
 
     public void CheckAndSetVals() {
@@ -154,9 +175,11 @@ public class VirtualChip {
 
             if (expectedType == typeof(float)) {
                 if (!float.TryParse(vals[i], out float result)) {
-                    throw new ArgumentException($"Value at index {i} cannot be converted to float.");
+                    //PRINT.print($"'{keys[i]}': '{vals[i]}' is a string, perhaps variable");
+                    throw new ArgumentException($"Value {vals[i]} at index {i} cannot be converted to float.");
+                } else {
+                    objectVals[i] = result;
                 }
-                objectVals[i] = result;
             }
             else if (expectedType == typeof(string)) { // String does not require conversion
                 objectVals[i] = vals[i];
