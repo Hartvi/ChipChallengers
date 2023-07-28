@@ -40,6 +40,9 @@ public class VirtualChip {
     [NonSerialized]
     public static readonly Dictionary<string, CommonChip> chipTemplates;
 
+    public bool IsCore { get { return this.ChipType == VirtualChip.coreStr; } }
+    public string ChipType { get { return instanceProperties[typeStr] as string; } }
+
     static VirtualChip() {
         propertyTypes = new Dictionary<string, Type>() {
             {"Angle",  typeof(string)},
@@ -82,11 +85,12 @@ public class VirtualChip {
     // INSTANCE VARIABLES
     public string[] keys;
     public string[] vals;
-    public object[] objectVals;
     public string id = null;
     // CONNECTION DATA
     public int orientation = 0;
 
+    [NonSerialized]
+    public object[] objectVals;
     [NonSerialized] // TODO: link this from the text saved version
     public VirtualChip parentChip;
     [NonSerialized]
@@ -113,7 +117,7 @@ public class VirtualChip {
         } else {
             id = "a";
         }
-        PRINT.print(id);
+        //PRINT.print(id);
     }
 
     public bool TryGetProperty<T>(string key, out T val) {
@@ -147,9 +151,13 @@ public class VirtualChip {
         }
     }
 
-    public string GetChipType() {
-        return instanceProperties[typeStr] as string;
-    }
+    //public string GetChipType() {
+    //    return instanceProperties[typeStr] as string;
+    //}
+
+    //public bool IsCore() {
+    //    return this.GetChipType() == VirtualChip.coreStr;
+    //}
 
     public void CheckAndSetVals() {
         if (keys.Length != vals.Length) {

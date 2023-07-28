@@ -13,9 +13,9 @@ public class VirtualChipTest : MonoBehaviour
         string[] keys2 = new string[] { "Name", "Angle", "Value", "Option", "Type", "Spring", "Damper" };
         string[] vals2 = new string[] { "joe", "20", "5", "1", "Chip", "10", "10" };
         var vc = new VirtualChip(keys1, vals1, 0, null);
-        PRINT.print("vckeys", vc.keys);
-        PRINT.print("vcvals", vc.vals);
-        PRINT.print("vcobjectVals", vc.objectVals);
+        //PRINT.print("vckeys", vc.keys);
+        //PRINT.print("vcvals", vc.vals);
+        //PRINT.print("vcobjectVals", vc.objectVals);
         var vc2 = new VirtualChip(keys, vals, 0, vc);
         if(vc2.id != "aa") {
             throw new KeyNotFoundException("single child of a must be aa.");
@@ -34,7 +34,7 @@ public class VirtualChipTest : MonoBehaviour
         var vc8 = new VirtualChip(keys2, vals2, 3, vc4);
         var coreobject = GameObject.Find("coretest");
         var core = coreobject.GetComponent<CommonChip>();
-        print("core name: "+core.name);
+        //print("core name: "+core.name);
         core.TriggerSpawn(vc);
     }
 }
