@@ -4,12 +4,36 @@ using UnityEngine;
 
 public class VirtualVariable
 {
-    ///asd
-    /*
-     # control:
-     if "a":
-       power = power + 1
-     */
     public string name;
     public float defaultValue, maxValue, minValue, backstep;
+
+    public string ToLuaString()
+    {
+        // Initialize string with beginning of table
+        string luaCode = "{";
+
+        // Add fixed fields
+        luaCode += $"name = '{name}', ";
+        luaCode += $"defaultValue = {defaultValue}, ";
+        luaCode += $"maxValue = {maxValue}, ";
+        luaCode += $"minValue = {minValue}, ";
+        luaCode += $"backstep = {backstep}, ";
+
+        // Close table and return
+        luaCode += "}";
+        return luaCode;
+    }
+
+    public static string ArrayToLuaString(VirtualVariable[] variables)
+    {
+        string luaCode = "{";
+
+        foreach (VirtualVariable variable in variables)
+        {
+            luaCode += variable.ToLuaString() + ", ";
+        }
+
+        luaCode += "}";
+        return luaCode;
+    }
 }

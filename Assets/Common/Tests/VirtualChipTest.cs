@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using MoonSharp.Interpreter;
 
 public class VirtualChipTest : MonoBehaviour
 {
@@ -17,15 +18,18 @@ public class VirtualChipTest : MonoBehaviour
         //PRINT.print("vcvals", vc.vals);
         //PRINT.print("vcobjectVals", vc.objectVals);
         var vc2 = new VirtualChip(keys, vals, 0, vc);
-        if(vc2.id != "aa") {
+        if (vc2.id != "aa")
+        {
             throw new KeyNotFoundException("single child of a must be aa.");
         }
         var vc3 = new VirtualChip(keys, vals, 1, vc);
-        if(vc3.id != "ab") {
+        if (vc3.id != "ab")
+        {
             throw new KeyNotFoundException("second child of a must be ab.");
         }
         var vc4 = new VirtualChip(keys, vals, 0, vc2);
-        if(vc4.id != "aaa") {
+        if (vc4.id != "aaa")
+        {
             throw new KeyNotFoundException("first grandchild of a must be aaa.");
         }
         var vc5 = new VirtualChip(keys2, vals2, 0, vc4);
@@ -36,5 +40,10 @@ public class VirtualChipTest : MonoBehaviour
         var core = coreobject.GetComponent<CommonChip>();
         //print("core name: "+core.name);
         core.TriggerSpawn(vc);
+        string vc8_str = "a=" + vc8.ToLuaString();
+        print("lua string: " + vc8_str);
+        var sc = new Script();
+        sc.DoString(vc8_str);
+        print("globals a: " + sc.Globals["a"]);
     }
 }

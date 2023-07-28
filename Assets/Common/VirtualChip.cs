@@ -3,17 +3,20 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 
-public enum CProp {
+public enum CProp
+{
     Angle, Value, Colour, Spring, Damper, Option, Name, Type
 }
-public enum Orientation {
+public enum Orientation
+{
     North, West, South, East
 }
 //public enum CType {
 //    Chip, Rudder, Axle, Telescope, Fan, Wheel, Balloon, Cowl
 //}
 
-public class VirtualChip {
+public class VirtualChip
+{
     public const string typeStr = "Type";
     public const string angleStr = "Angle";
     public const string springStr = "Spring";
@@ -43,7 +46,8 @@ public class VirtualChip {
     public bool IsCore { get { return this.ChipType == VirtualChip.coreStr; } }
     public string ChipType { get { return instanceProperties[typeStr] as string; } }
 
-    static VirtualChip() {
+    static VirtualChip()
+    {
         propertyTypes = new Dictionary<string, Type>() {
             {"Angle",  typeof(string)},
             {"Value",  typeof(string)},
@@ -67,14 +71,16 @@ public class VirtualChip {
         };
 
         var tmpDict = new Dictionary<string, CommonChip>();
-        foreach (var chipName in chipNames) {
+        foreach (var chipName in chipNames)
+        {
             var resourceChipName = chipsFolderStr + chipName;
             try
             {
                 var resourceObject = Resources.Load<GameObject>(resourceChipName).GetComponent<CommonChip>();
 
                 tmpDict.Add(chipName, resourceObject);
-            } catch
+            }
+            catch
             {
                 throw new ArgumentNullException($"Couldn't load {resourceChipName} chip. Mayhaps it doesn't exist in the Resources folder?");
             }
@@ -88,6 +94,7 @@ public class VirtualChip {
     public string id = null;
     // CONNECTION DATA
     public int orientation = 0;
+    public string parentId = null;
 
     [NonSerialized]
     public object[] objectVals;
@@ -98,11 +105,14 @@ public class VirtualChip {
     [NonSerialized]
     public Dictionary<string, object> instanceProperties;
 
-    public VirtualChip(string[] keys, string[] vals, int orientation, VirtualChip parentChip) {
-        if(!keys.Contains(typeStr)) {
+    public VirtualChip(string[] keys, string[] vals, int orientation, VirtualChip parentChip)
+    {
+        if (!keys.Contains(typeStr))
+        {
             throw new ArgumentException($"VirtualChip doesn't contain {typeStr} field.");
         }
-        if (orientation < 0 || orientation > 3) {
+        if (orientation < 0 || orientation > 3)
+        {
             throw new IndexOutOfRangeException($"Orienation w.r.t. parent can only be in [0, 3]; currently attempting to set to {orientation}");
         }
         this.orientation = orientation;
@@ -112,37 +122,50 @@ public class VirtualChip {
         this.parentChip = parentChip;
         instanceProperties = keys.Zip(objectVals, (k, v) => new { k, v }).ToDictionary(x => x.k, x => x.v);
 
-        if(parentChip != null) {
+        if (parentChip != null)
+        {
             id = parentChip.GetNewChildID(this);
-        } else {
+        }
+        else
+        {
             id = "a";
         }
         //PRINT.print(id);
     }
 
-    public bool TryGetProperty<T>(string key, out T val) {
-        try { 
-            val = (T)(instanceProperties[key]); 
-            return true; 
-        } catch { 
-            val = default(T); 
-            return false; 
+    public bool TryGetProperty<T>(string key, out T val)
+    {
+        try
+        {
+            val = (T)(instanceProperties[key]);
+            return true;
+        }
+        catch
+        {
+            val = default(T);
+            return false;
         }
     }
 
-    public T GetProperty<T>(string key) {
+    public T GetProperty<T>(string key)
+    {
         return (T)(instanceProperties[key]);
     }
 
-    public string GetNewChildID(VirtualChip childChip) {
-        if(id == null) {
+    public string GetNewChildID(VirtualChip childChip)
+    {
+        if (id == null)
+        {
             throw new FieldAccessException($"VirtualChip's id is null.");
         }
 
-        if(children.Count == 0) {
+        if (children.Count == 0)
+        {
             children.Add(childChip);
             return id + "a";
-        } else {
+        }
+        else
+        {
             var lastSibling = children.Last();
             children.Add(childChip);
 
@@ -159,47 +182,100 @@ public class VirtualChip {
     //    return this.GetChipType() == VirtualChip.coreStr;
     //}
 
-    public void CheckAndSetVals() {
-        if (keys.Length != vals.Length) {
+    public void CheckAndSetVals()
+    {
+        if (keys.Length != vals.Length)
+        {
             throw new ArgumentException("Keys and Values arrays should have the same length.");
         }
-        if (keys.Length == 0 || vals.Length == 0) {
+        if (keys.Length == 0 || vals.Length == 0)
+        {
             throw new FieldAccessException("Keys or Values arrays are empty.");
         }
 
         objectVals = new object[vals.Length];
 
-        for (int i = 0; i < keys.Length; i++) {
-            if (keys[i] == "Name") {
-                if (!StringHelpers.IsVariableName(vals[i])) {
+        for (int i = 0; i < keys.Length; i++)
+        {
+            if (keys[i] == "Name")
+            {
+                if (!StringHelpers.IsVariableName(vals[i]))
+                {
                     throw new ArgumentException($"Chip name is not a variable name: {vals[i]}");
                 }
             }
-            if (!propertyTypes.ContainsKey(keys[i])) {
+            if (!propertyTypes.ContainsKey(keys[i]))
+            {
                 throw new ArgumentException($"Unknown key: {keys[i]}");
             }
 
             Type expectedType = propertyTypes[keys[i]];
 
-            if (expectedType == typeof(float)) {
-                if (!float.TryParse(vals[i], out float result)) {
+            if (expectedType == typeof(float))
+            {
+                if (!float.TryParse(vals[i], out float result))
+                {
                     //PRINT.print($"'{keys[i]}': '{vals[i]}' is a string, perhaps variable");
                     throw new ArgumentException($"Value {vals[i]} at index {i} cannot be converted to float.");
-                } else {
+                }
+                else
+                {
                     objectVals[i] = result;
                 }
             }
-            else if (expectedType == typeof(string)) { // String does not require conversion
+            else if (expectedType == typeof(string))
+            { // String does not require conversion
                 objectVals[i] = vals[i];
-            } else if (expectedType == typeof(uint)) {
-                if (!uint.TryParse(vals[i], out uint result)) {
+            }
+            else if (expectedType == typeof(uint))
+            {
+                if (!uint.TryParse(vals[i], out uint result))
+                {
                     throw new ArgumentException($"Value at index {i} cannot be converted to uint.");
                 }
                 objectVals[i] = result;
-            } else {
+            }
+            else
+            {
                 throw new NotSupportedException($"Conversion not supported for type: {expectedType}");
             }
         }
     }
+
+    // Returns a string representing this VirtualChip as Lua code
+    public string ToLuaString()
+    {
+        // Initialize string with beginning of table
+        string luaCode = "{";
+
+        // Add fixed fields
+        if (id != null)
+        {
+            luaCode += $"id = '{id}', ";
+        }
+        luaCode += $"orientation = {orientation}, parentId = '{parentId}', ";
+
+        // Add keys and values from arrays
+        for (int i = 0; i < keys.Length; i++)
+        {
+            luaCode += $"{keys[i]} = '{vals[i]}', ";
+        }
+
+        // Close table and return
+        luaCode += "}";
+        return luaCode;
+    }
+
+    public static string ArrayToLuaString(VirtualChip[] chips)
+    {
+        string luaCode = "{";
+
+        foreach (VirtualChip chip in chips)
+        {
+            luaCode += chip.ToLuaString() + ", ";
+        }
+
+        luaCode += "}";
+        return luaCode;
+    }
 }
- 
