@@ -1,7 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using MoonSharp.Interpreter;
+using System.Linq;
 
 public class VirtualModel
 {
@@ -11,27 +13,23 @@ public class VirtualModel
 
     public string ToLuaString()
     {
-        // Initialize string with beginning of table
         string luaCode = "{";
 
-        // Convert chips to Lua table string
-        if (chips != null)
+        if (this.chips != null)
         {
-            string chipsLuaCode = VirtualChip.ArrayToLuaString(chips);
+            string chipsLuaCode = VirtualChip.ArrayToLuaString(this.chips);
             luaCode += $"chips = {chipsLuaCode}, ";
         }
 
-        // Convert variables to Lua table string
-        if (variables != null)
+        if (this.variables != null)
         {
-            string variablesLuaCode = VirtualVariable.ArrayToLuaString(variables);
+            string variablesLuaCode = VirtualVariable.ArrayToLuaString(this.variables);
             luaCode += $"variables = {variablesLuaCode}, ";
         }
 
-        // Add script
-        if (script != null)
+        if (this.script != null)
         {
-            luaCode += $"script = '{script}' ";
+            luaCode += $"script = '{this.script}' ";
         }
 
         // Close table and return
@@ -39,16 +37,56 @@ public class VirtualModel
         return luaCode;
     }
     public VirtualModel() { }
-    public VirtualModel(string luaModel)
+    public static VirtualModel FromLuaModel(string luaModel)
     {
-        PRINT.print(luaModel);
+        //PRINT.print(luaModel);
         string a = "a=" + luaModel;
         var scriptObj = new Script();
         scriptObj.DoString(a);
         var luaA = scriptObj.Globals["a"];
-        PRINT.print(luaA);
-        //new VirtualModel();
-        //return null;
+        //PRINT.print((Table)(luaA));
+        return new VirtualModel((Table)luaA);
     }
+
+    public VirtualModel(Table luaTable)
+    {
+        var chipsTable = luaTable.Get("chips").Table;
+        if (chipsTable != null)
+        {
+            this.chips = chipsTable.Values.Select(t => new VirtualChip(t.Table)).ToArray();
+        }
+
+        var variablesTable = (Table)luaTable["variables"];
+        if (variablesTable != null)
+        {
+            this.variables = VirtualVariable.FromLuaTables(variablesTable.Values.Cast<Table>().ToArray());
+            // TODO VARIABLES
+            PRINT.print(this.variables);
+        }
+
+        this.script = (string)luaTable["script"];
+        bool coreFound = false;
+        foreach(var virtualChip in this.chips)
+        {
+            var parentChips = this.chips.Where(x => x.id == virtualChip.parentId).ToArray();
+            if (parentChips.Length > 1)
+            {
+                throw new ArgumentException($"Chip {virtualChip} cannot have more than one parent: {PRINT.MakePrintable(parentChips)}.");
+            }
+            else if (parentChips.Length == 0)
+            {
+                if (coreFound)
+                {
+                    throw new ArgumentException($"Cannot have more than one core. Chip {virtualChip.id} has no parent.");
+                }
+                coreFound = true;
+            }
+            else
+            {
+                virtualChip.parentChip = parentChips[0];
+            }
+        }
+    }
+
 }
 

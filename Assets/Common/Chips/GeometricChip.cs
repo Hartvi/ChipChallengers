@@ -160,17 +160,17 @@ public abstract class GeometricChip : StaticChip
 
     public T Parent<T>() where T : GeometricChip
     {
-        return (T)(parentChip);
+        return (T)(this.parentChip);
     }
 
     public void SetChild(GeometricChip childChip)
     {
         // we don't want duplicates
-        if (childChips.Contains(childChip))
+        if (this.childChips.Contains(childChip))
         {
             throw new ArgumentException($"Chip {this} already has child {childChip}");
         }
-        childChips.Add(childChip);
+        this.childChips.Add(childChip);
     }
 
     public void SetParent(GeometricChip parentChip)

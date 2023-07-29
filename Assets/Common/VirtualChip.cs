@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
-
+using MoonSharp.Interpreter;
 public enum CProp
 {
     Angle, Value, Colour, Spring, Damper, Option, Name, Type
@@ -105,30 +105,23 @@ public class VirtualChip
     [NonSerialized]
     public Dictionary<string, object> instanceProperties;
 
+    //[Obsolete("Remove this in the future and load only through editor.")]
     public VirtualChip(string[] keys, string[] vals, int orientation, VirtualChip parentChip)
     {
-        if (!keys.Contains(typeStr))
-        {
-            throw new ArgumentException($"VirtualChip doesn't contain {typeStr} field.");
-        }
-        if (orientation < 0 || orientation > 3)
-        {
-            throw new IndexOutOfRangeException($"Orienation w.r.t. parent can only be in [0, 3]; currently attempting to set to {orientation}");
-        }
         this.orientation = orientation;
         this.keys = keys;
         this.vals = vals;
-        CheckAndSetVals();
         this.parentChip = parentChip;
-        instanceProperties = keys.Zip(objectVals, (k, v) => new { k, v }).ToDictionary(x => x.k, x => x.v);
+        CheckAndSetVals();
 
         if (parentChip != null)
         {
-            id = parentChip.GetNewChildID(this);
+            this.id = parentChip.GetNewChildID(this);
+            this.parentId = parentChip.id;
         }
         else
         {
-            id = "a";
+            this.id = "a";
         }
         //PRINT.print(id);
     }
@@ -137,7 +130,7 @@ public class VirtualChip
     {
         try
         {
-            val = (T)(instanceProperties[key]);
+            val = (T)(this.instanceProperties[key]);
             return true;
         }
         catch
@@ -149,25 +142,25 @@ public class VirtualChip
 
     public T GetProperty<T>(string key)
     {
-        return (T)(instanceProperties[key]);
+        return (T)(this.instanceProperties[key]);
     }
 
     public string GetNewChildID(VirtualChip childChip)
     {
-        if (id == null)
+        if (this.id == null)
         {
             throw new FieldAccessException($"VirtualChip's id is null.");
         }
 
-        if (children.Count == 0)
+        if (this.children.Count == 0)
         {
-            children.Add(childChip);
+            this.children.Add(childChip);
             return id + "a";
         }
         else
         {
-            var lastSibling = children.Last();
-            children.Add(childChip);
+            var lastSibling = this.children.Last();
+            this.children.Add(childChip);
 
             var olderSiblingId = lastSibling.id;
             return olderSiblingId.Substring(0, olderSiblingId.Length - 1) + (char)(olderSiblingId.Last() + 1);
@@ -184,62 +177,71 @@ public class VirtualChip
 
     public void CheckAndSetVals()
     {
-        if (keys.Length != vals.Length)
+        if (!this.keys.Contains(VirtualChip.typeStr))
+        {
+            throw new ArgumentException($"VirtualChip doesn't contain {VirtualChip.typeStr} field.");
+        }
+        if (this.orientation < 0 || this.orientation > 3)
+        {
+            throw new IndexOutOfRangeException($"Orientation w.r.t. parent can only be in [0, 3]; currently attempting to set to {this.orientation}");
+        }
+        if (this.keys.Length != this.vals.Length)
         {
             throw new ArgumentException("Keys and Values arrays should have the same length.");
         }
-        if (keys.Length == 0 || vals.Length == 0)
+        if (this.keys.Length == 0 || this.vals.Length == 0)
         {
             throw new FieldAccessException("Keys or Values arrays are empty.");
         }
 
-        objectVals = new object[vals.Length];
+        this.objectVals = new object[this.vals.Length];
 
-        for (int i = 0; i < keys.Length; i++)
+        for (int i = 0; i < this.keys.Length; i++)
         {
-            if (keys[i] == "Name")
+            if (this.keys[i] == "Name")
             {
-                if (!StringHelpers.IsVariableName(vals[i]))
+                if (!StringHelpers.IsVariableName(this.vals[i]))
                 {
-                    throw new ArgumentException($"Chip name is not a variable name: {vals[i]}");
+                    throw new ArgumentException($"Chip name is not a variable name: {this.vals[i]}");
                 }
             }
-            if (!propertyTypes.ContainsKey(keys[i]))
+            if (!VirtualChip.propertyTypes.ContainsKey(this.keys[i]))
             {
-                throw new ArgumentException($"Unknown key: {keys[i]}");
+                throw new ArgumentException($"Unknown key: {this.keys[i]}");
             }
 
-            Type expectedType = propertyTypes[keys[i]];
+            Type expectedType = VirtualChip.propertyTypes[this.keys[i]];
 
             if (expectedType == typeof(float))
             {
-                if (!float.TryParse(vals[i], out float result))
+                if (!float.TryParse(this.vals[i], out float result))
                 {
                     //PRINT.print($"'{keys[i]}': '{vals[i]}' is a string, perhaps variable");
-                    throw new ArgumentException($"Value {vals[i]} at index {i} cannot be converted to float.");
+                    throw new ArgumentException($"Value {this.vals[i]} at index {i} cannot be converted to float.");
                 }
                 else
                 {
-                    objectVals[i] = result;
+                    this.objectVals[i] = result;
                 }
             }
             else if (expectedType == typeof(string))
             { // String does not require conversion
-                objectVals[i] = vals[i];
+                this.objectVals[i] = this.vals[i];
             }
             else if (expectedType == typeof(uint))
             {
-                if (!uint.TryParse(vals[i], out uint result))
+                if (!uint.TryParse(this.vals[i], out uint result))
                 {
                     throw new ArgumentException($"Value at index {i} cannot be converted to uint.");
                 }
-                objectVals[i] = result;
+                this.objectVals[i] = result;
             }
             else
             {
                 throw new NotSupportedException($"Conversion not supported for type: {expectedType}");
             }
         }
+        this.instanceProperties = keys.Zip(this.objectVals, (k, v) => new { k, v }).ToDictionary(x => x.k, x => x.v);
     }
 
     // Returns a string representing this VirtualChip as Lua code
@@ -249,16 +251,16 @@ public class VirtualChip
         string luaCode = "{";
 
         // Add fixed fields
-        if (id != null)
+        if (this.id != null)
         {
-            luaCode += $"id = '{id}', ";
+            luaCode += $"id = '{this.id}', ";
         }
-        luaCode += $"orientation = {orientation}, parentId = '{parentId}', ";
+        luaCode += $"orientation = '{this.orientation}', parentId = '{this.parentId}', ";
 
         // Add keys and values from arrays
-        for (int i = 0; i < keys.Length; i++)
+        for (int i = 0; i < this.keys.Length; i++)
         {
-            luaCode += $"{keys[i]} = '{vals[i]}', ";
+            luaCode += $"{this.keys[i]} = '{this.vals[i]}', ";
         }
 
         // Close table and return
@@ -277,5 +279,28 @@ public class VirtualChip
 
         luaCode += "}";
         return luaCode;
+    }
+
+    public VirtualChip(Table luaTable)
+    {
+        this.id = (string)luaTable["id"];
+        this.orientation = int.Parse((string)luaTable["orientation"]);
+        this.parentId = (string)luaTable["parentId"];
+
+        var indices = luaTable.Keys.Select((item, index) => new { item, index })
+               .Where(x => VirtualChip.allPropertiesStr.Contains(x.item.String))
+               .Select(x => x.index)
+               .ToList();
+
+        var keysList = luaTable.Keys;
+        var valsList = luaTable.Values;
+        this.keys = keysList.Where((item, index) => indices.Contains(index)).Select(x=>x.String).ToArray();
+        this.vals = valsList.Where((item, index) => indices.Contains(index)).Select(x=>x.String).ToArray();
+        this.CheckAndSetVals();
+    }
+
+    public static VirtualChip[] FromLuaTables(Table[] luaTables)
+    {
+        return luaTables.Select(t => new VirtualChip(t)).ToArray();
     }
 }

@@ -9,7 +9,7 @@ public class PRINT
             List<string> l = new List<string>();
             IEnumerable eo = o as IEnumerable;
             foreach (var i in eo) {
-                l.Add(MakePrintable(i));
+                l.Add(PRINT.MakePrintable(i));
             }
             return string.Join(", ", l) + "\n";
         } else
@@ -19,18 +19,18 @@ public class PRINT
     }
     public static void print(object o)
     {
-        UnityEngine.Debug.Log(MakePrintable(o));
+        UnityEngine.Debug.Log(PRINT.MakePrintable(o));
     }
     public static void print(string comment, object o)
     {
-        UnityEngine.Debug.Log(MakePrintable(o));
+        UnityEngine.Debug.Log(PRINT.MakePrintable(o));
     }
     public static void VisualizePosition(Vector3 position, Color colour)
     {
         var newObject = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         newObject.transform.position = position;
         newObject.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
-        ChangeObjectColor(newObject, colour);
+        PRINT.ChangeObjectColor(newObject, colour);
     }
     public static void ChangeObjectColor(GameObject targetObject, Color newColor)
     {

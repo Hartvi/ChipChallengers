@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
+using MoonSharp.Interpreter;
 
 public class VirtualVariable
 {
@@ -36,4 +38,18 @@ public class VirtualVariable
         luaCode += "}";
         return luaCode;
     }
+
+    public VirtualVariable(Table luaTable)
+    {
+        this.name = (string)luaTable["name"];
+        this.minValue = float.Parse((string)luaTable["minValue"]);
+        this.maxValue = float.Parse((string)luaTable["maxValue"]);
+        this.backstep = float.Parse((string)luaTable["backstep"]);
+        this.defaultValue = float.Parse((string)luaTable["defaultValue"]);
+    }
+    public static VirtualVariable[] FromLuaTables(Table[] luaTables)
+    {
+        return luaTables.Select(t => new VirtualVariable(t)).ToArray();
+    }
+
 }

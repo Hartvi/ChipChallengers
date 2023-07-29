@@ -53,6 +53,7 @@ public class CommonChip : AngleChip
         get
         {
             // TODO REMOVE AND ADD OBJECT COMBINATION
+            Debug.LogWarning($"TODO real and virtual chips");
             return true;
             return this.DetermineJointElligibility();
         }
@@ -251,12 +252,15 @@ public class CommonChip : AngleChip
 //        //DynValue c = newScript.Globals.Get("c");
 //        print($"dyn: {dyn}, a: ");
 //        PRINT.print(((Table)a.Table[1]).Keys);
-        var modelLua = "a="+this.VirtualModel.ToLuaString();
-        print(modelLua);
-        var newScript = new Script();
-        DynValue a = newScript.DoString(modelLua);
-        print($"dyn: {a}, a: ");
-        VirtualModel fromluadmodel = new VirtualModel(this.VirtualModel.ToLuaString());
+        var modelLua = this.VirtualModel.ToLuaString();
+        IOHelpers.SaveTextFile("text.txt", modelLua);
+        var modelLua2 = IOHelpers.LoadTextFile("text.txt");
+        //print(modelLua);
+        //var newScript = new Script();
+        //DynValue a = newScript.DoString(modelLua);
+        //print($"dyn: {a}, a: ");
+        VirtualModel fromluadmodel = VirtualModel.FromLuaModel(modelLua2);
+        //print(modelLua2);
     }
 
 
