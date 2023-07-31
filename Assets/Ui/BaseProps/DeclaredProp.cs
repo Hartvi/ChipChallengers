@@ -2,11 +2,17 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class DeclaredProp : TopProp
+public class DeclaredProp : TopProp
 {
     protected virtual void Awake()
     {
+        this.Setup();
+        print($"rprop: {this} vprop: {this.vProp}");
         this.AddChildren();
+    }
+    protected override void Setup()
+    {
+        this.vProp.rProp = this;
     }
 
 }

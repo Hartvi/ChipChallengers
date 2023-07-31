@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-public abstract class BaseButton : TopProp
+public class BaseButton : TopProp
 {
     public Button btn;
     public TMP_Text text;

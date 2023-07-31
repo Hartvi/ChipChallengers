@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-public abstract class BaseSlider : TopProp
+public class BaseSlider : TopProp
 {
     public Slider slider;
     protected override void Setup()

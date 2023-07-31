@@ -4,13 +4,14 @@ using UnityEngine;
 
 public class MainMenu : DeclaredProp
 {
-    protected override VirtualProp GetVProp()
+    protected override void Setup()
     {
-        return new VirtualProp(PropType.Panel, 1f, Vector2Int.down,
+        this.vProp = new VirtualProp(PropType.Panel, 1f, Vector2Int.down,
             new VirtualProp(PropType.Image, 1f, Vector2Int.down,
-                new VirtualProp(PropType.Panel, 0.3f),
+                //new VirtualProp(PropType.Panel, 0.3f),
                 new VirtualProp(PropType.Text, 0.4f, typeof(LoadingText))
             )
         );
+        base.Setup();
     }
 }

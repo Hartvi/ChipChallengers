@@ -12,6 +12,7 @@ public enum PropType
 }
 
 
+//[Serializable]
 public class VirtualProp
 {
     public PropType MyType = PropType.Panel;
@@ -88,6 +89,7 @@ public class VirtualProp
                 throw new ArgumentException($"Invalid PropType: {this.MyType}");
         }
         TopProp newChild = uiGameObject.AddComponent(this.MyBehaviour) as TopProp;
+        PRINT.print($"newChild: {newChild} and its vProp: {this}");
         newChild.Link(this);
         return newChild;
     }
@@ -173,6 +175,7 @@ public class VirtualProp
     {
         foreach (var child in children)
         {
+            PRINT.print($"setting parent {this} of {child}");
             child.Parent = this;
         }
     }
@@ -208,6 +211,10 @@ public class VirtualProp
     public static Vector2Int SignV2I(Vector2Int v2)
     {
         return new Vector2Int(Math.Sign(v2.x), Math.Sign(v2.y));
+    }
+    public override string ToString()
+    {
+        return this.MyType.ToString()+","+this.GetHashCode().ToString();
     }
 }
 

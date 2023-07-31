@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 
-public abstract class BaseImage : TopProp
+public class BaseImage : TopProp
 {
     public Image image;
     protected override void Setup()

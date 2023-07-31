@@ -6,33 +6,44 @@ using UnityEngine;
 
 public class TopProp : TopUI
 {
-    private VirtualProp _vProp = new VirtualProp();
-    public VirtualProp vProp { get { return this.GetVProp(); } set { this._vProp = value; } }
+    //private VirtualProp _vProp = new VirtualProp();
+    //public VirtualProp vProp { get { return this.GetVProp(); } set { this._vProp = value; } }
+    public VirtualProp vProp = new VirtualProp();
+    //{ 
+    //    get
+    //    {
+    //        return this._vProp;
+    //    }
+    //    set 
+    //    {
+    //        this._vProp = value;
+    //        value.rProp = this;
+    //        var rParent = this._vProp.Parent.rProp;
+    //        this.vParent = rParent.vProp;
+    //        this.vChildren = this._vProp.Children;
+    //        this.rParent = rParent;
+    //        this.rParent.rChildren.Add(this);
+    //    }
+    //}
     public VirtualProp vParent;
     public TopProp rParent;
     public List<VirtualProp> vChildren = new List<VirtualProp>();
     public List<TopProp> rChildren = new List<TopProp>();
 
-    protected virtual VirtualProp GetVProp()
-    {
-        return _vProp;
-    }
-
-    protected virtual void Setup()
-    {
-
-    }
+    protected virtual void Setup() {}
 
     public void Link(VirtualProp vProp)
     {
-        var rParent = this.vProp.Parent.rProp;
-        this.Setup();
-        this.transform.SetParent(rParent.transform);
+        // sets all the other contingent variables
         this.vProp = vProp;
+        vProp.rProp = this;
+        print($"Link parent: {this.vProp.Parent} of {this.vProp} is null: {this.vProp.Parent == null}");
+        var rParent = this.vProp.Parent.rProp;
+        this.transform.SetParent(rParent.transform);
+        this.Setup();
         this.vParent = rParent.vProp;
         this.vChildren = vProp.Children;
         this.rParent = rParent;
-        vProp.rProp = this;
         this.rParent.rChildren.Add(this);
     }
 
@@ -53,7 +64,9 @@ public class TopProp : TopUI
 
         foreach (VirtualProp childProp in this.vProp.Children)
         {
-            TopProp newChild = this.vProp.Spawn();
+            print("parent prop: "+this.vProp+" rprop is null: "+(this.vProp.rProp==null));
+            print("child prop: "+childProp);
+            TopProp newChild = childProp.Spawn();
             // SETUP TRANSFORM
             RectTransform childRT = newChild.RT;
             childRT.anchoredPosition = sizeDelta * (edge + 0.5f * childProp.Size * stackDir);
