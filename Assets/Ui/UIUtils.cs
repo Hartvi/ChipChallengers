@@ -1,6 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.UIElements;
+using TMPro;
 
 public static class UIUtils
 {
@@ -8,28 +11,32 @@ public static class UIUtils
     {
         get
         {
-            return Screen.width * Screen.height / 1.5e5f;
+            return (Screen.width + Screen.height) / 1e2f;
         }
     }
     public static float MediumFontSize
     {
         get
         {
-            return Screen.width * Screen.height / 1e5f;
+            return (2*Screen.width + Screen.height) / 7.5e1f;
         }
     }
     public static float LargeFontSize
     {
         get
         {
-            return Screen.width * Screen.height / 7.5e4f;
+            return (2*Screen.width + Screen.height) / 5e1f;
         }
     }
-    public static GameObject Panel, Button, Toggle, Image, Slider, Dropdown, Input, RawImage, ScrollView, Scrollbar, Text, FullscreenPanel;
+    public static readonly GameObject Panel, Button, Toggle, Image, Slider, Dropdown, Input, RawImage, ScrollView, Scrollbar, Text;//, FullscreenPanel;
+    public static readonly TMP_FontAsset MediumFont;
+    public static readonly Color DarkRed = 0.5f*Color.red + 0.5f*Color.black;
+    public static readonly GameObject[] TextBearingUI;
     static UIUtils()
     {
         Panel = Resources.Load("UI/Panel") as GameObject;
-        PRINT.print("INSTANTIATING UIUtils");
+        
+        //PRINT.print("INSTANTIATING UIUtils");
         Button = Resources.Load("UI/Button") as GameObject;
         Toggle = Resources.Load("UI/Toggle") as GameObject;
         Image = Resources.Load("UI/Image") as GameObject;
@@ -40,7 +47,32 @@ public static class UIUtils
         ScrollView = Resources.Load("UI/Scroll View") as GameObject;
         Scrollbar = Resources.Load("UI/Scrollbar") as GameObject;
         Text = Resources.Load("UI/Text (TMP)") as GameObject;
-        FullscreenPanel = Resources.Load("UI/FullscreenPanel") as GameObject;
+
+        TextBearingUI = new GameObject[]{ Button, Toggle, Dropdown, Input, Text };
+
+        string mediumFontName = "DraftingMono-Medium SDF";
+        MediumFont = Resources.Load<TMP_FontAsset>($"Fonts/{mediumFontName}");
+        foreach(var tbui in UIUtils.TextBearingUI)
+        {
+            //PRINT.print($"tbui: {tbui}");
+            UnityEngine.Debug.Log(tbui);
+            //PRINT.print($"tbui txts:: {tbui.GetComponentsInChildren<TMP_Text>()}");
+            foreach(var txt in tbui.GetComponentsInChildren<TMP_Text>())
+            {
+                UIUtils.SetFont(txt, mediumFontName);
+                txt.color = UIUtils.DarkRed;
+            }
+        }
+
+        //FullscreenPanel = Resources.Load("UI/FullscreenPanel") as GameObject;
+    }
+    public static void SetFont(TMP_Text textObject, string fontName)
+    {
+        TMP_FontAsset myFont = UIUtils.MediumFont;
+
+        textObject.font = myFont;
+
+        textObject.ForceMeshUpdate();
     }
 
 }

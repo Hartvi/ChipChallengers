@@ -11,11 +11,12 @@ public class BaseMainMenu : BaseMenu
     }
     protected override void Setup()
     {
+        base.Setup();
         BaseMenu.MainMenu = this;
         BaseMainMenu.instance = this;
         this.isSelected = true;
-        BaseMenu.allMenus.Clear();
-        BaseMenu.allMenuTypes.Clear();
+        //BaseMenu.allMenus.Clear();
+        //BaseMenu.allMenuTypes.Clear();
     }
 
 }

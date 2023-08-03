@@ -175,7 +175,7 @@ public class VirtualProp
     {
         foreach (var child in children)
         {
-            PRINT.print($"setting parent {this} of {child}");
+            //PRINT.print($"setting parent {this} of {child}");
             child.Parent = this;
         }
     }

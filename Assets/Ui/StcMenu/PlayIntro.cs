@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PlayIntro : TopProp
 {
-    string[] keys = new string[] { "F1", "ESC" };
+    string[] keys = new string[] { "F1\n", "ESC" };
     string[] values = new string[] { "Show quick help", "Show menu" };
     BaseText[] textBases;
     BaseRawImage rawImageBase;

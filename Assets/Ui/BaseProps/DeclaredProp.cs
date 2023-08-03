@@ -7,12 +7,7 @@ public class DeclaredProp : TopProp
     protected virtual void Awake()
     {
         this.Setup();
-        print($"rprop: {this} vprop: {this.vProp}");
+        //print($"rprop: {this} vprop: {this.vProp}");
         this.AddChildren();
     }
-    protected override void Setup()
-    {
-        this.vProp.rProp = this;
-    }
-
 }
