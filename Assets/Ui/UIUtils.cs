@@ -29,7 +29,7 @@ public static class UIUtils
         }
     }
     public static readonly GameObject Panel, Button, Toggle, Image, Slider, Dropdown, Input, RawImage, ScrollView, Scrollbar, Text;//, FullscreenPanel;
-    public static readonly TMP_FontAsset MediumFont;
+    public static readonly TMP_FontAsset DefaultFont;
     public static readonly Color DarkRed = 0.5f*Color.red + 0.5f*Color.black;
     public static readonly GameObject[] TextBearingUI;
     static UIUtils()
@@ -51,7 +51,7 @@ public static class UIUtils
         TextBearingUI = new GameObject[]{ Button, Toggle, Dropdown, Input, Text };
 
         string mediumFontName = "DraftingMono-Medium SDF";
-        MediumFont = Resources.Load<TMP_FontAsset>($"Fonts/{mediumFontName}");
+        DefaultFont = Resources.Load<TMP_FontAsset>($"Fonts/{mediumFontName}");
         foreach(var tbui in UIUtils.TextBearingUI)
         {
             //PRINT.print($"tbui: {tbui}");
@@ -68,11 +68,16 @@ public static class UIUtils
     }
     public static void SetFont(TMP_Text textObject, string fontName)
     {
-        TMP_FontAsset myFont = UIUtils.MediumFont;
+        TMP_FontAsset myFont = UIUtils.DefaultFont;
 
         textObject.font = myFont;
 
         textObject.ForceMeshUpdate();
+    }
+
+    public static string DisplayFloat(float f)
+    {
+        return (Mathf.Round(f * 100f) * 0.01f).ToString();
     }
 
 }

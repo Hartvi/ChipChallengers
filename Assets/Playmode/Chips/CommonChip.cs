@@ -6,10 +6,36 @@ using MoonSharp.Interpreter;
 
 public class CommonChip : AngleChip
 {
+    protected List<Action> _ModelUpdatedEvent;
+    public List<Action> ModelUpdatedEvent
+    {
+        get
+        {
+            if (!this.equivalentVirtualChip.IsCore)
+            {
+                throw new ArgumentException($"Cannot access ModelUpdatedEvent in non-core chip.");
+            }
 
+            if(this._ModelUpdatedEvent == null)
+            {
+                this._ModelUpdatedEvent = new List<Action>();
+            }
+
+            return _ModelUpdatedEvent;
+        }
+    }
+
+    public bool IsFocusable
+    {
+        get
+        {
+            UnityEngine.Debug.LogWarning("IsFocusable not fully implemented.");
+            return this.equivalentVirtualChip.IsCore;
+        }
+    }
 
     private Rigidbody _rb;
-    protected Rigidbody rb
+    public Rigidbody rb
     {
         get
         {
@@ -261,6 +287,15 @@ public class CommonChip : AngleChip
         //print($"dyn: {a}, a: ");
         VirtualModel fromluadmodel = VirtualModel.FromLuaModel(modelLua2);
         //print(modelLua2);
+
+        TriggerEvent(ModelUpdatedEvent);
+    }
+    private void TriggerEvent(List<Action> acs)
+    {
+        foreach(var ev in acs)
+        {
+            ev();
+        }
     }
 
 

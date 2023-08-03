@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class MainTitle : BaseText
 {
@@ -8,7 +9,7 @@ public class MainTitle : BaseText
     {
         base.Setup();
         this.text.fontSize = UIUtils.LargeFontSize;
-        this.text.horizontalAlignment = TMPro.HorizontalAlignmentOptions.Center;
+        this.text.horizontalAlignment = HorizontalAlignmentOptions.Center;
         this.text.text = UIStrings.GameTitle;
     }
 }

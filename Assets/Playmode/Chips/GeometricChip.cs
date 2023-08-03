@@ -6,6 +6,7 @@ using UnityEngine;
 
 public abstract class GeometricChip : StaticChip
 {
+
     public GeometricChip parentChip = null;
     protected List<GeometricChip> childChips = new List<GeometricChip>();
     //public IReadOnlyList<GeometricChip> ChildChips => childChips;
@@ -45,11 +46,12 @@ public abstract class GeometricChip : StaticChip
         }
     }
 
+
     public VirtualVariable[] AllVirtualVariables
     {
         get
         {
-            if (!this.equivalentVirtualChip.IsCore) throw new FieldAccessException("Trying to access all virtual chips from a non-core object.");
+            if (!this.equivalentVirtualChip.IsCore) throw new FieldAccessException("Trying to access all virtual variables from a non-core object.");
             return this.VirtualVariables.ToArray();
         }
     }

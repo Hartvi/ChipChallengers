@@ -20,22 +20,7 @@ public class TopProp : TopUI
             this._vProp.rProp = this;
         }
     }
-    //{ 
-    //    get
-    //    {
-    //        return this._vProp;
-    //    }
-    //    set 
-    //    {
-    //        this._vProp = value;
-    //        value.rProp = this;
-    //        var rParent = this._vProp.Parent.rProp;
-    //        this.vParent = rParent.vProp;
-    //        this.vChildren = this._vProp.Children;
-    //        this.rParent = rParent;
-    //        this.rParent.rChildren.Add(this);
-    //    }
-    //}
+
     public VirtualProp vParent;
     public TopProp rParent;
     public List<VirtualProp> vChildren = new List<VirtualProp>();
@@ -110,6 +95,7 @@ public class TopProp : TopUI
                 }
             }
             cumulativeSize += childPropSize;
+            print($"prop: {childProp} edge: {edge} stackDir: {stackDir}");
             childRT.anchoredPosition = sizeDelta * (edge + 0.5f * childPropSize * stackDir);
             childRT.rotation = TopProp.Rot2Rot(childProp.Rotation);
             // retain dimension orthogonal to stacking & scale by Size in stacking axis
@@ -121,45 +107,32 @@ public class TopProp : TopUI
         }
     }
 
-    public T GetSibling<T>()
+    public void StackFrom<T>(List<T> props) where T : TopProp
     {
-        IEnumerable<TopProp> siblings = from x in this.vProp.Parent.Children select x.rProp;
-        foreach (var o in siblings)
-        {
-            if (o is T result) return result;
-        }
-        return default(T);
-    }
+        
+        Vector2 childPropSize = props[0].RT.sizeDelta;
 
-    public List<T> GetSiblings<T>()
-    {
-        List<T> ret = new List<T>();
-        IEnumerable<TopProp> siblings = from x in this.vProp.Parent.Children select x.rProp;
-        foreach (var o in siblings)
-        {
-            if (o is T result) ret.Add(result);
-        }
-        return ret;
-    }
+        // if it's going down => start at maximum to go to zero
+        Vector2 stackDir = props[0].rParent.vProp.StackDir;
+        Vector2 deltaPosition = stackDir * childPropSize;
 
-    public T GetChild<T>()
-    {
-        IEnumerable<TopProp> siblings = this.rChildren;
-        foreach (var o in siblings)
+        Vector2 currentPosition = props[0].RT.anchoredPosition;
+
+        var _children = props;
+        int _childCount = _children.Count;
+
+        for (int i = 0; i < _childCount; ++i)
         {
-            if (o is T result) return result;
+            var childProp = _children[i];
+            // SETUP TRANSFORM
+            RectTransform childRT = childProp.RT;
+            // fix any top/down/left/right assumptions, since we are using only size and position
+            childRT.anchorMin = new Vector2(0.5f, 0.5f);
+            childRT.anchorMax = new Vector2(0.5f, 0.5f);
+
+            childRT.anchoredPosition = currentPosition;
+            currentPosition += deltaPosition;
         }
-        return default(T);
-    }
-    public List<T> GetChildren<T>()
-    {
-        List<T> ret = new List<T>();
-        IEnumerable<TopProp> siblings = this.rChildren;
-        foreach (var o in siblings)
-        {
-            if (o is T result) ret.Add(result);
-        }
-        return ret;
     }
 
     public static Quaternion Rot2Rot(Vector2Int rotation)
