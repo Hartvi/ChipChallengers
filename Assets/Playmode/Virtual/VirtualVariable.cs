@@ -39,6 +39,14 @@ public class VirtualVariable
         return luaCode;
     }
 
+    public VirtualVariable()
+    {
+        this.name = "name";
+        this.minValue = -1f;
+        this.maxValue = 1f;
+        this.backstep = 1f;
+        this.defaultValue = 0f;
+    }
     public VirtualVariable(Table luaTable)
     {
         this.name = (string)luaTable["name"];

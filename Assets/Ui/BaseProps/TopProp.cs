@@ -107,9 +107,10 @@ public class TopProp : TopUI
         }
     }
 
-    public void StackFrom<T>(List<T> props) where T : TopProp
+    public void StackFrom<T>(T[] props) where T : TopProp
     {
-        
+
+        if (props.Length == 0) return;
         Vector2 childPropSize = props[0].RT.sizeDelta;
 
         // if it's going down => start at maximum to go to zero
@@ -119,7 +120,7 @@ public class TopProp : TopUI
         Vector2 currentPosition = props[0].RT.anchoredPosition;
 
         var _children = props;
-        int _childCount = _children.Count;
+        int _childCount = _children.Length;
 
         for (int i = 0; i < _childCount; ++i)
         {

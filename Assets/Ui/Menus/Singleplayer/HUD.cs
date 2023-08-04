@@ -10,7 +10,14 @@ public class HUD : TopProp
 
     public CommonChip Focus
     {
-        get { return _Focus; }
+        get
+        {
+            if (this._Focus == null)
+            {
+                this._Focus = CommonChip.ClientCore;
+            }
+            return _Focus;
+        }
         set
         {
             if(!value.IsFocusable)
@@ -25,69 +32,59 @@ public class HUD : TopProp
     public bool UpdatedModel;
     VirtualVariable[] variables { get { return Focus.AllVirtualVariables; } }
 
-    List<ItemBase> NameItems;
-    List<ItemBase> ValueItems;
+    ItemBase NameItem;
+    ItemBase ValueItem;
 
     List<TMP_Text> variableNames = new List<TMP_Text>();
     List<TMP_Text> variableValues = new List<TMP_Text>();
 
     void UpdateVariableDisplay()
     {
+
         var vars = this.variables;
-        var numVars = vars.Length;
-        var numTexts = variableNames.Count;
-        
-        if(variableNames.Count != variableValues.Count)
-        {
-            throw new ArithmeticException($"Number of variable name text boxes ({variableNames.Count}) and variable value text boxes is equal ({variableValues.Count}).");
-        }
+        // test
+        //var vars = new VirtualVariable[] { new VirtualVariable(), new VirtualVariable(), new VirtualVariable() };
 
-        for(int i = 0; i < Math.Max(numTexts, numVars); ++i)
-        {
-            if(i < numVars)
-            {
-                if (i == variableNames.Count)
-                {
-                    //variableNames.Add();
-                    //variableValues.Add();
-                }
-                variableNames[i].gameObject.SetActive(true);
-                variableNames[i].SetText(vars[i].name);
+        var nameItems = NameItem.DisplayNItems(vars.Length);
+        var valueItems = ValueItem.DisplayNItems(vars.Length);
 
-                variableValues[i].gameObject.SetActive(true);
-                variableValues[i].SetText(UIUtils.DisplayFloat(vars[i].defaultValue));
-            }
-            else
-            {
-                variableNames[i].gameObject.SetActive(false);
-                variableValues[i].gameObject.SetActive(false);
-            }
+        for(int i = 0; i < nameItems.Length; ++i)
+        {
+            var nameTxt = nameItems[i].GetComponent<TMP_Text>();
+            nameTxt.SetText(vars[i].name);
+            nameTxt.fontSize = UIUtils.SmallFontSize;
+
+            var valueTxt = valueItems[i].GetComponent<TMP_Text>();
+            valueTxt.SetText(UIUtils.DisplayFloat(vars[i].defaultValue));
+            valueTxt.fontSize = UIUtils.SmallFontSize;
         }
+        StackFrom(NameItem.Siblings<ItemBase>(takeInactive: false));
+        StackFrom(ValueItem.Siblings<ItemBase>(takeInactive: false));
     }
 
     void Start()
     {
-        NameItems = new List<ItemBase>();
-        ValueItems = new List<ItemBase>();
         var items = GetComponentsInChildren<ItemBase>();
         foreach(var it in items)
         {
             it.GetComponent<TMP_Text>().fontSize = UIUtils.SmallFontSize;
         }
-        NameItems.Add(items[0]);
-        ValueItems.Add(items[1]);
+        NameItem = items[0];
+        ValueItem = items[1];
+        // TEST
+        UpdateVariableDisplay();
     }
 
     int testInt = 0;
     void Update()
     {
-        if(testInt++ < 5) {
-            NameItems.Add(NameItems[0].AddItem());
-            ValueItems.Add(ValueItems[0].AddItem());
-        } else if (testInt == 6)
-        {
-            StackFrom(NameItems);
-            StackFrom(ValueItems);
-        }
+        //if(testInt++ < 5) {
+        //    NameItems.Add(NameItems[0].AddItem());
+        //    ValueItems.Add(ValueItems[0].AddItem());
+        //} else if (testInt == 6)
+        //{
+        //    StackFrom(NameItems);
+        //    StackFrom(ValueItems);
+        //}
     }
 }

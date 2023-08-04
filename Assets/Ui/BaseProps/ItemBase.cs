@@ -55,4 +55,26 @@ public class ItemBase : TopProp
         newSibling.transform.SetParent(this.transform.parent);
         return newSibling;
     }
+    public void HideItem()
+    {
+        var siblings = this.Siblings<ItemBase>(takeInactive: false);
+        siblings[siblings.Length -1].gameObject.SetActive(false);
+    }
+    public ItemBase[] DisplayNItems(int n)
+    {
+        var siblings = this.Siblings<ItemBase>(takeInactive: true);
+        if (n > siblings.Length)
+        {
+            for(int i = 0; i < n - siblings.Length; ++i)
+            {
+                AddItem();
+            }
+            siblings = this.Siblings<ItemBase>(takeInactive: true);
+        }
+        for(int i = 0; i < siblings.Length; ++i)
+        {
+            siblings[i].gameObject.SetActive(i < n);
+        }
+        return this.Siblings<ItemBase>(takeInactive: false);
+    }
 }

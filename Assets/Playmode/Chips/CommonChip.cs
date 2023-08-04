@@ -6,6 +6,22 @@ using MoonSharp.Interpreter;
 
 public class CommonChip : AngleChip
 {
+    public static CommonChip ClientCore {
+        get
+        {
+            foreach(var o in GameObject.FindObjectsOfType<CommonChip>())
+            {
+                if(o.IsOnClient && o.equivalentVirtualChip.IsCore)
+                {
+                    return o;
+                }
+            }
+            throw new NullReferenceException($"Couldn't find client's core.");
+        }
+    }
+
+    public bool IsOnClient { get { Debug.LogWarning($"TODO check if it's on client in multiplayer."); return true; } }
+
     protected List<Action> _ModelUpdatedEvent;
     public List<Action> ModelUpdatedEvent
     {
