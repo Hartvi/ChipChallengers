@@ -19,7 +19,7 @@ public class VirtualProp
     public Vector2 PropSize = new Vector2(1f, 1f);
     public Vector2 InheritedPropSize = new Vector2(1f, 1f);
     public float Size = 1f;
-    public Vector2Int StackDir;// = Vector2Int.right;  // forward = top, doesnt actually do anything
+    public Vector2 StackDir = Vector2.down;  // use zero for z-stacking
     public Vector2Int Rotation = Vector2Int.up;
 
     public VirtualProp Parent;
@@ -203,6 +203,9 @@ public class VirtualProp
                 break;
             case PropType.Panel:
                 this.MyBehaviour = typeof(BasePanel);
+                break;
+            case PropType.Scrollbar:
+                this.MyBehaviour = typeof(BaseScrollbar);
                 break;
             default:
                 throw new ArgumentException($"Invalid propType: {propType}");

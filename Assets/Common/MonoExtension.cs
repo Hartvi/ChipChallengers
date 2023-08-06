@@ -26,4 +26,10 @@ public static class MonoExtension
         }
         return ret.ToArray();
     }
+
+    public static Vector2 V2(this Vector3 v3)
+    {
+        return new Vector2(v3.x, v3.y);
+    }
+
 }

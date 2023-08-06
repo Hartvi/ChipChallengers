@@ -55,7 +55,7 @@ public static class UIUtils
         foreach(var tbui in UIUtils.TextBearingUI)
         {
             //PRINT.print($"tbui: {tbui}");
-            UnityEngine.Debug.Log(tbui);
+            //UnityEngine.Debug.Log(tbui);
             //PRINT.print($"tbui txts:: {tbui.GetComponentsInChildren<TMP_Text>()}");
             foreach(var txt in tbui.GetComponentsInChildren<TMP_Text>())
             {

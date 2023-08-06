@@ -18,4 +18,9 @@ public class SafeCode
         return currentValue++ < currentLimit;
     }
 
+    //public static For(int l)
+    //{
+
+    //}
+
 }

@@ -20,6 +20,8 @@ public class TopProp : TopUI
             this._vProp.rProp = this;
         }
     }
+    public Vector2 StackDirection { get { return this.vProp.StackDir; } }
+    public Vector2 Rotation { get { return this.vProp.Rotation; } }
 
     public VirtualProp vParent;
     public TopProp rParent;
@@ -95,7 +97,7 @@ public class TopProp : TopUI
                 }
             }
             cumulativeSize += childPropSize;
-            print($"prop: {childProp} edge: {edge} stackDir: {stackDir}");
+            //print($"prop: {childProp} edge: {edge} stackDir: {stackDir}");
             childRT.anchoredPosition = sizeDelta * (edge + 0.5f * childPropSize * stackDir);
             childRT.rotation = TopProp.Rot2Rot(childProp.Rotation);
             // retain dimension orthogonal to stacking & scale by Size in stacking axis
