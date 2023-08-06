@@ -4,6 +4,8 @@ using UnityEngine;
 
 public static class UIStrings
 {
+    public const string Core = "Core";
+
     public const string GameTitle = "Chip Challengers";
     public const string Editor = "Editor";
     public const string Singleplayer = "Singleplayer";

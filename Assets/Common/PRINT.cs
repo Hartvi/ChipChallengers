@@ -19,7 +19,7 @@ public class PRINT
     }
     public static void print(object o)
     {
-        ////UnityEngine.Debug.Log(PRINT.MakePrintable(o));
+        UnityEngine.Debug.Log(PRINT.MakePrintable(o));
     }
     public static void print(string comment, object o)
     {

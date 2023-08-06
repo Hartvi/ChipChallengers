@@ -5,8 +5,16 @@ using MoonSharp.Interpreter;
 
 public class VirtualChipTest : MonoBehaviour
 {
+    bool testedOnce = false;
     void Start()
     {
+        if (testedOnce) return;
+        var coreobject = GameObject.Find(UIStrings.Core);
+        if (coreobject == null)
+        {
+            print($"{this} CORE IS NULL");
+        }
+
         string[] keys1 = new string[] { "Name", "Angle", "Value", "Option", "Type" };
         string[] vals1 = new string[] { "joe", "40", "5", "1", "Core" };
         string[] keys = new string[] { "Name", "Angle", "Value", "Option", "Type" };
@@ -36,7 +44,6 @@ public class VirtualChipTest : MonoBehaviour
         var vc6 = new VirtualChip(keys2, vals2, 1, vc4);
         var vc7 = new VirtualChip(keys2, vals2, 2, vc4);
         var vc8 = new VirtualChip(keys2, vals2, 3, vc4);
-        var coreobject = GameObject.Find("coretest");
         var core = coreobject.GetComponent<CommonChip>();
         //print("core name: "+core.name);
         core.TriggerSpawn(vc);
@@ -45,5 +52,6 @@ public class VirtualChipTest : MonoBehaviour
         var sc = new Script();
         sc.DoString(vc8_str);
         print("globals a: " + sc.Globals["a"]);
+        this.testedOnce = true;
     }
 }

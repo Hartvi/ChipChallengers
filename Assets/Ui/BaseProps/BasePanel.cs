@@ -5,9 +5,4 @@ using UnityEngine.UI;
 
 public class BasePanel : TopProp
 {
-    public Image image;
-    protected override void Setup()
-    {
-        this.image = GetComponent<Image>();
-    }
 }

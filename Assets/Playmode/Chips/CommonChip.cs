@@ -59,7 +59,15 @@ public class CommonChip : AngleChip
             {
                 if (this.IsReal)
                 {
-                    this._rb = this.gameObject.AddComponent<Rigidbody>();
+                    this._rb = this.gameObject.GetComponent<Rigidbody>();
+                    if(this._rb == null)
+                    {
+                        this._rb = this.gameObject.AddComponent<Rigidbody>();
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"Rigidbody has been added from the outside?");
+                    }
                 }
                 else
                 {
@@ -260,6 +268,7 @@ public class CommonChip : AngleChip
 
     public void TriggerSpawn(VirtualChip core)
     {
+        this.transform.localScale = StaticChip.ChipSize;
         this.equivalentVirtualChip = core;
 
         if (!this.equivalentVirtualChip.IsCore)

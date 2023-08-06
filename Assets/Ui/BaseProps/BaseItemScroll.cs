@@ -85,18 +85,6 @@ public class BaseItemScroll : BasePanel
         this.realEdge = - 0.5f * this.realSize * StackDirection;
         //print($"realsize: {this.realSize}, real edge: {this.realEdge}, real item size: {this.realItemSize}");
 
-        // contains names and relative positions
-        VirtualItem[] visibleItems = this.virtualContainer.MoveItems(0f);
-        //print($"visible items: {visibleItems.Length}");
-        
-        // real position: real position * realSize
-        // real position (wrt this panel): (panel position - 0.5*panelsize*stackDirection) + realsize * relative position
-        Vector2[] realPositions = visibleItems.Select(x => this.RealPosition(x.relativePosition)).ToArray();
-        //print($"realpositions: {realPositions.Length}");
-        if(realPositions.Length > this.items.Length)
-        {
-            throw new ArgumentException($"Number of positions: {realPositions.Length} does not match number of UI elements: {this.items.Length}.");
-        }
         for(int i = 0; i < this.items.Length; ++i)
         {
             //print($"Item: {i}: {this.items[i]}");
@@ -105,21 +93,7 @@ public class BaseItemScroll : BasePanel
                 throw new NullReferenceException($"TopProp items[{i}] out of {this._NumberOfSpawnedItems} is null.");
             }
         }
-        for(int i = 0; i < this.items.Length; ++i) {
-            if (i >= realPositions.Length)
-            {
-                this.items[i].gameObject.SetActive(false);
-                continue;
-            }
-            // set label of visible item
-            var btn = (this.items[i] as BaseButton);
-            btn.text.text = visibleItems[i].label;
-            btn.btn.onClick.AddListener(() => action(visibleItems[i].label));
-
-            this.items[i].gameObject.SetActive(true);
-            //print($"i: {i} pos: {realPositions[i]}");
-            this.items[i].RT.anchoredPosition = realPositions[i];
-        }
+        Scroll(0f);
         //var positions = realPositions.Zip(this.items, (x, y) => y.transform.position = x);
         //print($"positions: {positions.Count()}");
         //PRINT.print(positions);
@@ -137,7 +111,38 @@ public class BaseItemScroll : BasePanel
         base.Setup();
         //this._DisplayItem
     }
+    
+    public void Scroll(float x)
+    {
+        // contains names and relative positions
+        VirtualItem[] visibleItems = this.virtualContainer.MoveItems(x);
+        //print($"visible items: {visibleItems.Length}");
+        
+        // real position: real position * realSize
+        // real position (wrt this panel): (panel position - 0.5*panelsize*stackDirection) + realsize * relative position
+        Vector2[] realPositions = visibleItems.Select(x => this.RealPosition(x.relativePosition)).ToArray();
+        //print($"realpositions: {realPositions.Length}");
+        if(realPositions.Length > this.items.Length)
+        {
+            throw new ArgumentException($"Number of positions: {realPositions.Length} does not match number of UI elements: {this.items.Length}.");
+        }
+        for(int i = 0; i < this.items.Length; ++i) {
+            if (i >= realPositions.Length)
+            {
+                this.items[i].gameObject.SetActive(false);
+                continue;
+            }
+            // set label of visible item
+            var btn = (this.items[i] as BaseButton);
+            btn.text.text = visibleItems[i].label;
+            btn.btn.onClick.RemoveAllListeners();
+            btn.btn.onClick.AddListener(() => action(btn.text.text));
 
+            this.items[i].gameObject.SetActive(true);
+            //print($"i: {i} pos: {realPositions[i]}");
+            this.items[i].RT.anchoredPosition = realPositions[i];
+        }
+    }
 }
 
 public class VirtualItem
@@ -186,7 +191,7 @@ public class VirtualContainer
     {
         // display size is normalized to one
         this.NumberToDisplay = numberToDisplay;
-        this.virtualItems = new VirtualItem[labels.Length];
+        //UnityEngine.Debug.Log($"number to display: {numberToDisplay}");
 
         this.NumberOfSpawned = numberToDisplay + 2;
 
@@ -201,16 +206,18 @@ public class VirtualContainer
          ___ -- 0.5 * defaultInterval
          ___ -- 1.5 * defaultInterval
         */
-        
-        VirtualItem[] virtualItems = labels.Select((x, i) => new VirtualItem(x, defaultOffset + i * defaultInterval)).ToArray();
+        this.Update(labels);
+    }
+    public void Update(string[] labels)
+    {
+        VirtualItem[] virtualItems = labels.Select((x, i) => new VirtualItem(x, this.DefaultOffset + i * this.DefaultInterval)).ToArray();
         
         this.virtualItems = virtualItems;
 
         // labels.Length = T = M+N elements. M displayed. N not displayed.
         // Maximum position shift is the last not-displayed element to the last displayed position.
-        // N not displayed + 1 to display position
-        this.MaxMoveDelta = (NumberOfItems + 1 - NumberToDisplay) / (float)(NumberOfItems);
-        //UnityEngine.Debug.Log($"MaxMoveDelta: {this.MaxMoveDelta}");
+        // Total*interval - displayed*interval
+        this.MaxMoveDelta = (this.NumberOfItems - this.NumberToDisplay) * this.DefaultInterval;
     }
 
     public VirtualItem[] MoveItems(float x)

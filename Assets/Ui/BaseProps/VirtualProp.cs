@@ -50,6 +50,7 @@ public class VirtualProp
     public TopProp Spawn()
     {
         GameObject uiGameObject;
+
         switch (this.MyType)
         {
             case PropType.Panel:
@@ -89,7 +90,7 @@ public class VirtualProp
                 throw new ArgumentException($"Invalid PropType: {this.MyType}");
         }
         TopProp newChild = uiGameObject.AddComponent(this.MyBehaviour) as TopProp;
-        PRINT.print($"newChild: {newChild} and its vProp: {this}");
+        //PRINT.print($"newChild: {newChild} and its vProp: {this}");
         newChild.Link(this);
         return newChild;
     }
