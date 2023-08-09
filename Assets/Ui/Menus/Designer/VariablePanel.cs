@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class VariablePanel : BasePanel
 {
+    BaseItemScroll itemScroll;
     protected override void Setup()
     {
         base.Setup();
@@ -20,15 +21,20 @@ public class VariablePanel : BasePanel
     }
     void Start()
     {
-        Action<string> action = x => UnityEngine.Debug.Log(x);
-        int numItems = 6;
-        string[] items = { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z" };
-        var baseScroll = this.GetComponentInChildren<BaseItemScroll>();
-        print($"basescroll: {baseScroll}");
-        baseScroll.SetupItemList(action, numItems, items);
-        var scrollbar = baseScroll.Siblings<BaseScrollbar>(false)[0];
-        scrollbar.scrollbar.onValueChanged.AddListener(baseScroll.Scroll);
-        baseScroll.Scroll(0f);
-        scrollbar.scrollbar.value = 0f;
+        this.itemScroll = this.GetComponentInChildren<BaseItemScroll>();
+        //Action<string> action = 
+        //this.itemScroll.SetupItemList(action, numItems, items);
+        //Action<string> action = x => UnityEngine.Debug.Log(x);
+        //int numItems = 7;
+        //string[] items = { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z" };
+        //var baseScroll = this.GetComponentInChildren<BaseItemScroll>();
+        //print($"basescroll: {baseScroll}");
+        //baseScroll.SetupItemList(action, numItems, items);
+        //var scrollbar = baseScroll.Siblings<BaseScrollbar>(false)[0];
+        //scrollbar.scrollbar.onValueChanged.AddListener(baseScroll.Scroll);
+        //baseScroll.Scroll(0f);
+        //scrollbar.scrollbar.value = 0f;
     }
+
+    //void LoadModel
 }

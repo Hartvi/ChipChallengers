@@ -42,6 +42,10 @@ public class HUD : TopProp
     {
 
         var vars = this.variables;
+        if(vars is null)
+        {
+            return;
+        }
         // test
         //var vars = new VirtualVariable[] { new VirtualVariable(), new VirtualVariable(), new VirtualVariable() };
 

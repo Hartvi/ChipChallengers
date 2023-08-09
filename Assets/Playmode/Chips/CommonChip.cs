@@ -123,7 +123,7 @@ public class CommonChip : AngleChip
     }
 
     // FUNCTIONS:
-    public List<CommonChip> AddChild(VirtualChip childChip)
+    public CommonChip[] AddChild(VirtualChip childChip)
     {
         var childType = childChip.ChipType;
 
@@ -158,13 +158,16 @@ public class CommonChip : AngleChip
                 );
             this.ConfigureJointAxis(cj);
         }
-        var newChildren = newChild.AddChildren();
+
+        var _newChildren = newChild.AddChildren();
+        CommonChip[] newChildrenArr = new CommonChip[_newChildren.Length + 1];
         // this is the changing part that fills up the list
-        newChildren.Add(newChild);
-        return newChildren;
+        _newChildren.CopyTo(newChildrenArr, 0);// (newChild);
+        newChildrenArr[_newChildren.Length] = newChild;
+        return newChildrenArr;
     }
 
-    public List<CommonChip> AddChildren()
+    public CommonChip[] AddChildren()
     {
         List<CommonChip> chips = new List<CommonChip>();
         // when there are no Children left then the recursion stops
@@ -172,7 +175,7 @@ public class CommonChip : AngleChip
         {
             chips.AddRange(this.AddChild(childChip));
         }
-        return chips;
+        return chips.ToArray();
     }
 
     private void ConfigureJointAxis(ConfigurableJoint cj)
@@ -266,9 +269,14 @@ public class CommonChip : AngleChip
         return this._IsJointElligible;
     }
 
-    public void TriggerSpawn(VirtualChip core)
+    public void TriggerSpawn(VirtualModel virtualModel)
     {
+        this.VirtualModel = virtualModel;
         this.transform.localScale = StaticChip.ChipSize;
+
+        // this should replace the argument
+        VirtualChip core = this.VirtualModel.Core;
+
         this.equivalentVirtualChip = core;
 
         if (!this.equivalentVirtualChip.IsCore)

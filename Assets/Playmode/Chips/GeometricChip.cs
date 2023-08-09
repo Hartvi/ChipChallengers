@@ -13,6 +13,7 @@ public abstract class GeometricChip : StaticChip
 
     public VirtualChip equivalentVirtualChip;
 
+    public bool IsCore { get { return this.equivalentVirtualChip.IsCore; } }
     public GeometricChip[] AllChips
     {
         get
@@ -31,47 +32,45 @@ public abstract class GeometricChip : StaticChip
         }
     }
 
-    private List<VirtualVariable> _VirtualVariables;
-    protected List<VirtualVariable> VirtualVariables { 
-        get
-        {
-            if (!this.equivalentVirtualChip.IsCore) throw new FieldAccessException("Trying to access virtual variables from a non-core object.");
-            if(this._VirtualVariables == null) { return new List<VirtualVariable>(); }
-            return this._VirtualVariables;
-        }
-        set
-        {
-            if (!this.equivalentVirtualChip.IsCore) throw new FieldAccessException("Trying to access virtual variables from a non-core object.");
-            this._VirtualVariables = value;
-        }
-    }
-
-
     public VirtualVariable[] AllVirtualVariables
     {
         get
         {
             if (!this.equivalentVirtualChip.IsCore) throw new FieldAccessException("Trying to access all virtual variables from a non-core object.");
-            return this.VirtualVariables.ToArray();
+            //return this.VirtualVariables.ToArray();
+            return this.VirtualModel.variables;
         }
     }
 
-    protected string script;
+    //protected string script;
 
+    private VirtualModel _VirtualModel;
     public VirtualModel VirtualModel
     {
         get
         {
-            var newModel = new VirtualModel();
-            newModel.chips = this.AllVirtualChips;
-            newModel.variables = this.AllVirtualVariables;
-            newModel.script = this.script ?? "";
-            return newModel;
+            if (!this.IsCore) throw new FieldAccessException("Trying to access virtual model from a non-core object.");
+            if(this._VirtualModel == null)
+            {
+                throw new NullReferenceException($"Virtual model of core is null.");
+                //this._VirtualModel = new VirtualModel();
+            }
+            // taking chips away goes through real chips
+            // adding chips goes through VirtualModel
+            //this._VirtualModel.chips = this.AllVirtualChips;
+            //this._VirtualModel.variables = this.AllVirtualVariables;
+            //this._VirtualModel.script = this.script ?? "";
+            return this._VirtualModel;
+        }
+        set
+        {
+            this._VirtualModel = value;
+            this.equivalentVirtualChip = value.Core;
         }
     }
 
-    private List<CommonChip> _AllChildren = new List<CommonChip>();
-    public List<CommonChip> AllChildren
+    private CommonChip[] _AllChildren;
+    public CommonChip[] AllChildren
     {
         get
         {
@@ -87,11 +86,14 @@ public abstract class GeometricChip : StaticChip
             {
                 throw new MemberAccessException($"Set: Only chip designated as core can access all Children.");
             }
-            foreach (CommonChip child in this._AllChildren)
+            if (this._AllChildren is not null)
             {
-                GameObject.Destroy(child.gameObject);
+                foreach (CommonChip child in this._AllChildren)
+                {
+                    GameObject.Destroy(child.gameObject);
+                }
             }
-            this._AllChildren.Clear();
+            //this._AllChildren.Clear();
             this._AllChildren = value;
         }
     }

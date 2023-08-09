@@ -46,7 +46,9 @@ public class VirtualChipTest : MonoBehaviour
         var vc8 = new VirtualChip(keys2, vals2, 3, vc4);
         var core = coreobject.GetComponent<CommonChip>();
         //print("core name: "+core.name);
-        core.TriggerSpawn(vc);
+        var VirtualModel = new VirtualModel();
+        VirtualModel.chips = new VirtualChip[] { vc, vc2, vc3, vc4, vc5, vc6, vc7, vc8 };
+        core.TriggerSpawn(VirtualModel);
         string vc8_str = "a=" + vc8.ToLuaString();
         print("lua string: " + vc8_str);
         var sc = new Script();

@@ -11,6 +11,61 @@ public class VirtualModel
     public VirtualVariable[] variables;
     public string script;
 
+    private VirtualVariable _SelectedVariable;
+
+    /// <summary>
+    /// Assign string variable name, returns VirtualVariable
+    /// </summary>
+    public object SelectedVariable
+    {
+        get
+        {
+            if (this._SelectedVariable == null) throw new NullReferenceException($"Selected variable is null. Set it first.");
+
+            return this._SelectedVariable;
+        }
+        set
+        {
+            var v = this.variables.First(x => x.name == (string)value);
+
+            if(v == null)
+            {
+                throw new NullReferenceException($"Variable {(string)value} doesn't exist in {this}.variables");
+            }
+            this._SelectedVariable = v;
+        }
+    }
+
+    private VirtualChip _SelectedChip;
+    public VirtualChip SelectedChip
+    {
+        get
+        {
+            if (this._SelectedChip == null) throw new NullReferenceException($"Selected chip is null. Set it first.");
+
+            return this._SelectedChip;
+        }
+        set
+        {
+            if (value == null) throw new ArgumentNullException($"Cannot assign null to selected chip.");
+
+            this._SelectedChip = value;
+        }
+    }
+
+    public VirtualChip Core
+    {
+        get
+        {
+            var core = this.chips.First(x => x.IsCore);
+            if (core is null)
+            {
+                throw new NullReferenceException($"Model {this} doesn't have a core.");
+            }
+            return core;
+        }
+    }
+
     public string ToLuaString()
     {
         string luaCode = "{";
@@ -36,6 +91,7 @@ public class VirtualModel
         luaCode += "}";
         return luaCode;
     }
+
     public VirtualModel() { }
     public static VirtualModel FromLuaModel(string luaModel)
     {
