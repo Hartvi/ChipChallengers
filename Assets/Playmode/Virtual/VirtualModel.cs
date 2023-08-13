@@ -16,25 +16,56 @@ public class VirtualModel
     /// <summary>
     /// Assign string variable name, returns VirtualVariable
     /// </summary>
-    public object SelectedVariable
+    public VirtualVariable GetSelectedVariable() {
+        if (this._SelectedVariable == null) throw new NullReferenceException($"Selected variable is null. Set it first.");
+        return this._SelectedVariable;
+    }
+
+    /// <summary>
+    /// Assign string variable name, get VirtualVariable later
+    /// </summary>
+    //public void SetSelectedVariable<T>(T value)
+    //{
+    //    if (value is string)
+    //    {
+    //        var v = this.variables.First(x => x.name == value);
+
+    //        if (v == null)
+    //        {
+    //            throw new NullReferenceException($"Variable {value} doesn't exist in {this}.variables");
+    //        }
+    //        this._SelectedVariable = v;
+    //    } else if(value is VirtualVariable)
+    //    {
+    //        this._SelectedVariable = value;
+    //    } else
+    //    {
+    //        throw new TypeLoadException($"Cannot set variable from non [string, VirtualVariable] types.");
+    //    }
+    //}
+
+    public void SetSelectedVariable(object value)
     {
-        get
+        if (value is string stringValue)
         {
-            if (this._SelectedVariable == null) throw new NullReferenceException($"Selected variable is null. Set it first.");
+            var v = this.variables.FirstOrDefault(x => x.name == stringValue);
 
-            return this._SelectedVariable;
-        }
-        set
-        {
-            var v = this.variables.First(x => x.name == (string)value);
-
-            if(v == null)
+            if (v == null)
             {
-                throw new NullReferenceException($"Variable {(string)value} doesn't exist in {this}.variables");
+                throw new NullReferenceException($"Variable {value} doesn't exist in {this}.variables");
             }
             this._SelectedVariable = v;
         }
+        else if (value is VirtualVariable virtualVariable)
+        {
+            this._SelectedVariable = virtualVariable;
+        }
+        else
+        {
+            throw new TypeLoadException($"Cannot set variable from non [string, VirtualVariable] types.");
+        }
     }
+
 
     private VirtualChip _SelectedChip;
     public VirtualChip SelectedChip
@@ -143,6 +174,17 @@ public class VirtualModel
                 virtualChip.parentChip = parentChips[0];
             }
         }
+    }
+
+    public void AddVariable(VirtualVariable v)
+    {
+        this.variables = this.variables.Concat(new VirtualVariable[]{ v }).ToArray();
+    }
+
+    public void AddAndSelectVariable(VirtualVariable v)
+    {
+        this.AddVariable(v);
+        this.SetSelectedVariable(v);
     }
 
 }

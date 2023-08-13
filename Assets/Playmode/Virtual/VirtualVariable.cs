@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -59,5 +60,21 @@ public class VirtualVariable
     {
         return luaTables.Select(t => new VirtualVariable(t)).ToArray();
     }
+    public string[] ToStringArray()
+    {
+        return new string[] { this.name, this.defaultValue.ToString(), this.minValue.ToString(), this.maxValue.ToString(), this.backstep.ToString() };
+    }
+    public VirtualVariable(string[] vals)
+    {
+        if (vals.Length < 5) // Ensure there are enough elements in the array
+            throw new ArgumentException("vals must contain at least 5 elements");
+
+        this.name = vals[0];
+        this.defaultValue = float.Parse(vals[1]);
+        this.minValue = float.Parse(vals[2]);
+        this.maxValue = float.Parse(vals[3]);
+        this.backstep = float.Parse(vals[4]);
+    }
 
 }
+

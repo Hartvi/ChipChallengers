@@ -1,6 +1,8 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public static class MonoExtension
 {
@@ -30,6 +32,26 @@ public static class MonoExtension
     public static Vector2 V2(this Vector3 v3)
     {
         return new Vector2(v3.x, v3.y);
+    }
+
+    public static void SetTextSizesOf(this MonoBehaviour m, MonoBehaviour[] behaviours, float fontSize)
+    {
+        if(behaviours is null)
+        {
+            throw new ArgumentNullException($"SetTextSize: behaviours array is null.");
+        }
+        foreach(var b in behaviours)
+        {
+            TMP_Text[] ts = b.GetComponentsInChildren<TMP_Text>();
+            if(ts is null)
+            {
+                continue;
+            }
+            foreach(var t in ts)
+            {
+                t.fontSize = fontSize;
+            }
+        }
     }
 
 }

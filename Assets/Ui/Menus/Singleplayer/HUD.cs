@@ -46,6 +46,7 @@ public class HUD : TopProp
         {
             return;
         }
+
         // test
         //var vars = new VirtualVariable[] { new VirtualVariable(), new VirtualVariable(), new VirtualVariable() };
 
@@ -69,12 +70,14 @@ public class HUD : TopProp
     void Start()
     {
         var items = GetComponentsInChildren<ItemBase>();
+
         foreach(var it in items)
         {
             it.GetComponent<TMP_Text>().fontSize = UIUtils.SmallFontSize;
         }
         NameItem = items[0];
         ValueItem = items[1];
+
         // TEST
         UpdateVariableDisplay();
     }
