@@ -26,7 +26,7 @@ public class BaseItemScroll : BasePanel
         }
     }
     protected Action<string> action;
-    protected VirtualContainer virtualContainer;
+    public VirtualContainer virtualContainer;
 
     protected TopProp[] items;
 
@@ -114,6 +114,7 @@ public class BaseItemScroll : BasePanel
     
     public void Scroll(float x)
     {
+        //print($"SCROLLING TO {x}");
         // contains names and relative positions
         VirtualItem[] visibleItems = this.virtualContainer.MoveItems(x);
         //print($"visible items: {visibleItems.Length}");
@@ -206,9 +207,10 @@ public class VirtualContainer
          ___ -- 0.5 * defaultInterval
          ___ -- 1.5 * defaultInterval
         */
-        this.Update(labels);
+        this.UpdateLabels(labels);
     }
-    public void Update(string[] labels)
+
+    public void UpdateLabels(string[] labels)
     {
         VirtualItem[] virtualItems = labels.Select((x, i) => new VirtualItem(x, this.DefaultOffset + i * this.DefaultInterval)).ToArray();
         
@@ -230,7 +232,7 @@ public class VirtualContainer
         for(int i = 0; i < this.virtualItems.Length; ++i)
         {
             var vItem = this.virtualItems[i];
-            vItem.relativePosition = vItem.defaultPosition - this.MaxMoveDelta * x;
+            vItem.relativePosition = vItem.defaultPosition - this.MaxMoveDelta * x * (int)(this.virtualItems.Length / this.NumberToDisplay);
             // offset = 0.5*item height
             // top item: offset, bottom item: number of display items - offset
             // visible items: +-1 the edges

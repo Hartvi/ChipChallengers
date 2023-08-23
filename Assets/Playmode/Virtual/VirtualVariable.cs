@@ -42,7 +42,7 @@ public class VirtualVariable
 
     public VirtualVariable()
     {
-        this.name = "name";
+        this.name = "";
         this.minValue = -1f;
         this.maxValue = 1f;
         this.backstep = 1f;
@@ -51,10 +51,15 @@ public class VirtualVariable
     public VirtualVariable(Table luaTable)
     {
         this.name = (string)luaTable["name"];
-        this.minValue = float.Parse((string)luaTable["minValue"]);
-        this.maxValue = float.Parse((string)luaTable["maxValue"]);
-        this.backstep = float.Parse((string)luaTable["backstep"]);
-        this.defaultValue = float.Parse((string)luaTable["defaultValue"]);
+        PRINT.print($"{luaTable["minValue"].GetType()}");
+        //this.minValue = float.Parse((string)luaTable["minValue"].ToString());
+        //this.maxValue = float.Parse((string)luaTable["maxValue"]);
+        //this.backstep = float.Parse((string)luaTable["backstep"]);
+        //this.defaultValue = float.Parse((string)luaTable["defaultValue"]);
+        this.minValue = float.Parse(luaTable["minValue"].ToString());
+        this.maxValue = float.Parse(luaTable["maxValue"].ToString());
+        this.backstep = float.Parse(luaTable["backstep"].ToString());
+        this.defaultValue = float.Parse(luaTable["defaultValue"].ToString());
     }
     public static VirtualVariable[] FromLuaTables(Table[] luaTables)
     {
@@ -75,6 +80,9 @@ public class VirtualVariable
         this.maxValue = float.Parse(vals[3]);
         this.backstep = float.Parse(vals[4]);
     }
-
+    public override string ToString()
+    {
+        return this.name;
+    }
 }
 

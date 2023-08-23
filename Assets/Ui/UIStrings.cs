@@ -24,8 +24,12 @@ public static class UIStrings
     public const string Backstep = "Backstep";
     public static readonly string[] VariableArray = { Name, Default, Minimum, Maximum, Backstep };
 
+    public static readonly string[] DefaultVariableValues = { "EmptyVariable", "0", "0", "0", "0" };
+
     public const string Add = "Add";
     public const string Delete = "Delete";
-    public static readonly string[] AddDelete = { Add, Delete};
+    public static readonly string[] AddDelete = { Add, Delete };
+
+
 
 }

@@ -7,64 +7,23 @@ using System.Linq;
 
 public class VirtualModel
 {
+    public static VirtualVariable EmptyVariable
+    {
+        get
+        {
+            return new VirtualVariable();
+        }
+    }
+
     public VirtualChip[] chips;
     public VirtualVariable[] variables;
     public string script;
 
     private VirtualVariable _SelectedVariable;
 
-    /// <summary>
-    /// Assign string variable name, returns VirtualVariable
-    /// </summary>
-    public VirtualVariable GetSelectedVariable() {
-        if (this._SelectedVariable == null) throw new NullReferenceException($"Selected variable is null. Set it first.");
-        return this._SelectedVariable;
-    }
-
-    /// <summary>
-    /// Assign string variable name, get VirtualVariable later
-    /// </summary>
-    //public void SetSelectedVariable<T>(T value)
-    //{
-    //    if (value is string)
-    //    {
-    //        var v = this.variables.First(x => x.name == value);
-
-    //        if (v == null)
-    //        {
-    //            throw new NullReferenceException($"Variable {value} doesn't exist in {this}.variables");
-    //        }
-    //        this._SelectedVariable = v;
-    //    } else if(value is VirtualVariable)
-    //    {
-    //        this._SelectedVariable = value;
-    //    } else
-    //    {
-    //        throw new TypeLoadException($"Cannot set variable from non [string, VirtualVariable] types.");
-    //    }
-    //}
-
-    public void SetSelectedVariable(object value)
-    {
-        if (value is string stringValue)
-        {
-            var v = this.variables.FirstOrDefault(x => x.name == stringValue);
-
-            if (v == null)
-            {
-                throw new NullReferenceException($"Variable {value} doesn't exist in {this}.variables");
-            }
-            this._SelectedVariable = v;
-        }
-        else if (value is VirtualVariable virtualVariable)
-        {
-            this._SelectedVariable = virtualVariable;
-        }
-        else
-        {
-            throw new TypeLoadException($"Cannot set variable from non [string, VirtualVariable] types.");
-        }
-    }
+    private Action<string>[] SelectedActions = new Action<string>[] { };
+    private Action<string>[] AddedActions = new Action<string>[] { };
+    private Action<string>[] DeleteActions = new Action<string>[] { };
 
 
     private VirtualChip _SelectedChip;
@@ -123,7 +82,12 @@ public class VirtualModel
         return luaCode;
     }
 
-    public VirtualModel() { }
+    public VirtualModel()
+    {
+        this.variables = new VirtualVariable[] { VirtualModel.EmptyVariable };
+        //this.chips
+    }
+
     public static VirtualModel FromLuaModel(string luaModel)
     {
         //PRINT.print(luaModel);
@@ -146,7 +110,8 @@ public class VirtualModel
         var variablesTable = (Table)luaTable["variables"];
         if (variablesTable != null)
         {
-            this.variables = VirtualVariable.FromLuaTables(variablesTable.Values.Cast<Table>().ToArray());
+            //PRINT.print(variablesTable.Values.Count());
+            this.variables = VirtualVariable.FromLuaTables(variablesTable.Values.Select(x => x.Table).ToArray());
             // TODO VARIABLES
             PRINT.print("variables:");
             PRINT.print(this.variables);
@@ -178,13 +143,88 @@ public class VirtualModel
 
     public void AddVariable(VirtualVariable v)
     {
-        this.variables = this.variables.Concat(new VirtualVariable[]{ v }).ToArray();
+        VirtualVariable existingVariable = this.variables.FirstOrDefault(x => x.name == v.name);
+
+        if (existingVariable is null)
+        {
+            this.variables = this.variables.Concat(new VirtualVariable[] { v }).ToArray();
+        }
+        else
+        {
+            int i = Array.IndexOf(this.variables, existingVariable);
+            VirtualVariable[] varArr = this.variables.Where((x, y) => y != i).ToArray();
+            VirtualVariable[] newVarArr = varArr.Concat(new VirtualVariable[] { v }).ToArray();
+            this.variables = newVarArr;
+            // TODO TEST THIS
+        }
+
+        foreach(var action in this.AddedActions)
+        {
+            action(v.name);
+        }
     }
 
     public void AddAndSelectVariable(VirtualVariable v)
     {
         this.AddVariable(v);
-        this.SetSelectedVariable(v);
+        this.SetSelectedVariable(v.name);
+    }
+
+    public VirtualVariable GetSelectedVariable()
+    {
+        if (this._SelectedVariable == null) throw new NullReferenceException($"Selected variable is null. Set it first.");
+        return this._SelectedVariable;
+    }
+
+    public void DeleteSelectedVariable()
+    {
+        VirtualVariable selectedVar = this.GetSelectedVariable();
+        string selectedVarName = selectedVar.name;
+
+        this.variables = this.variables.Where(x => x != selectedVar).ToArray(); //  .Concat(new VirtualVariable[]{ v }).ToArray();
+        this.SetSelectedVariable(string.Empty);
+        
+        foreach(var action in this.DeleteActions)
+        {
+            action(selectedVarName);
+        }
+    }
+
+    public void SetSelectedVariable(string value)
+    {
+        PRINT.print($"Selecting variable {value}");
+        var NonNullVar = this.variables.FirstOrDefault(x => x.name == value);
+
+        if (NonNullVar is null)
+        {
+            //throw new NullReferenceException($"Variable {value} doesn't exist in {this}.variables");
+            this._SelectedVariable = VirtualModel.EmptyVariable;
+        }
+        else
+        {
+            this._SelectedVariable = NonNullVar;
+        }
+
+
+        foreach(var action in this.SelectedActions)
+        {
+            action(value);
+        }
+    }
+
+    public void AddSetSelectedVariableListener(Action<string> action)
+    {
+        this.SelectedActions = this.SelectedActions.Concat(new Action<string>[] { action }).ToArray();
+    }
+
+    public void AddAddedVariableListener(Action<string> action)
+    {
+        this.AddedActions = this.AddedActions.Concat(new Action<string>[] { action }).ToArray();
+    }
+
+    public void AddDeleteVariableListener(Action<string> action)
+    {
+        this.DeleteActions = this.DeleteActions.Concat(new Action<string>[] { action }).ToArray();
     }
 
 }
