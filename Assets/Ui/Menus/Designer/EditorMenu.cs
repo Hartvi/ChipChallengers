@@ -41,6 +41,11 @@ public class EditorMenu : BaseMenu
         base.Start();
 
         _camera = Camera.main;
+
+        this.HighlightingChip = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        GameObject.Destroy(this.HighlightingChip.GetComponent<Collider>());
+        this.HighlightingChip.GetComponent<MeshRenderer>().material.color = new Color(0.8f, 0.8f, 0.8f, 0.1f);
+        this.HighlightingChip.SetActive(false);
     }
 
     private Camera _camera;
@@ -60,30 +65,55 @@ public class EditorMenu : BaseMenu
         }
     }
 
-    public GameObject GetObjectFromScreenClick()
-    {
-        if (Input.GetMouseButtonDown(0))  // 0 means left mouse button
-        {
-            Ray ray = _camera.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
+    private GameObject HighlightingChip;
+    private Action<VChip>[] HighlightCallbacks = new Action<VChip>[] { };
 
-            if (Physics.Raycast(ray, out hit))
-            {
-                return hit.collider.gameObject;
-            }
-        }
-        return null;
+    public void AddHighlightCallback(Action<VChip> vc) {
+        this.HighlightCallbacks = this.HighlightCallbacks.Concat(new Action<VChip>[] { vc }).ToArray();
     }
 
+    public T GetObjectFromScreenClick<T>()
+    {
+        Ray ray = _camera.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
+
+        if (Physics.Raycast(ray, out hit))
+        {
+            return hit.collider.gameObject.GetComponent<T>();
+        }
+        
+        return default(T);
+    }
 
     void Update()
     {
-        GameObject clickedObject = this.GetObjectFromScreenClick();
+        if (Input.GetMouseButtonDown(0))  // 0 means left mouse button
+        {
+            this.HighlightChip();
+        }
+    }
+
+    void HighlightChip()
+    {
+        CommonChip clickedObject = this.GetObjectFromScreenClick<CommonChip>();
 
         if (clickedObject is not null)
         {
-            this.selectedChip = clickedObject.GetComponent<GeometricChip>();
-            print(this.selectedChip);
+            this.selectedChip = clickedObject;
+            var hc = this.HighlightingChip;
+            hc.SetActive(true);
+            hc.transform.position = this.selectedChip.transform.position;
+            hc.transform.rotation = this.selectedChip.transform.rotation;
+            hc.transform.localScale = 1.1f * this.selectedChip.transform.localScale;
+
+            foreach(var c in this.HighlightCallbacks)
+            {
+                c(clickedObject.equivalentVirtualChip);
+            }
+        }
+        else
+        {
+            this.HighlightingChip.SetActive(false);
         }
     }
 

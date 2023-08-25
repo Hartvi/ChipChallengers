@@ -15,21 +15,21 @@ public class ChipPanel : BasePanel
             new VirtualProp(PropType.Panel, 0.5f, down,
                 new VirtualProp(PropType.Panel, 1/3f, right,
                     new VirtualProp(PropType.Panel, 1/3f),
-                    new VirtualProp(PropType.Image, 1/3f), 
-                    new VirtualProp(PropType.Panel, 1/3f)
-                ),
-                new VirtualProp(PropType.Panel, 1/3f, right,
-                    new VirtualProp(PropType.Image, 1/3f),
                     new VirtualProp(PropType.Panel, 1/3f), 
-                    new VirtualProp(PropType.Image, 1/3f)
+                    new VirtualProp(PropType.Panel, 1/3f)
                 ),
                 new VirtualProp(PropType.Panel, 1/3f, right,
                     new VirtualProp(PropType.Panel, 1/3f),
-                    new VirtualProp(PropType.Image, 1/3f), 
+                    new VirtualProp(PropType.Panel, 1/3f), 
+                    new VirtualProp(PropType.Panel, 1/3f)
+                ),
+                new VirtualProp(PropType.Panel, 1/3f, right,
+                    new VirtualProp(PropType.Panel, 1/3f),
+                    new VirtualProp(PropType.Panel, 1/3f), 
                     new VirtualProp(PropType.Panel, 1/3f)
                 )
             ),
-            new VirtualProp(PropType.Image, -1f, right,
+            new VirtualProp(PropType.Panel, -1f, right,
                 new VirtualProp(PropType.Panel, 0.5f, up,
                     new VirtualProp(PropType.Text, 1f/(float)VChip.allPropertiesStr.Length, typeof(ItemBase))
                 ),
@@ -43,8 +43,15 @@ public class ChipPanel : BasePanel
     ItemBase NameItem;
     ItemBase ValueItem;
 
-    void DisplayChipProperties(string[] leftTexts, string[] rightTexts)
+    TMP_InputField[] DisplayChipProperties(string[] leftTexts, string[] rightTexts)
     {
+        if(leftTexts.Length != rightTexts.Length)
+        {
+            throw new ArgumentException($"Left texts {leftTexts.Length} aren't the same length as right texts {rightTexts.Length}.");
+        }
+
+        TMP_InputField[] inputs = new TMP_InputField[rightTexts.Length];
+
         ItemBase[] nameItems = NameItem.DisplayNItems(leftTexts.Length);
         ItemBase[] valueItems = ValueItem.DisplayNItems(rightTexts.Length);
 
@@ -60,11 +67,15 @@ public class ChipPanel : BasePanel
             valueTxt.SetTextWithoutNotify(rightTexts[reverseIndex]);
             valueTxt.textComponent.fontSize = UIUtils.SmallFontSize;
 
+            inputs[i] = valueTxt;
+
             Debug.LogWarning($"Todo: add callback to update chip values.");
         }
 
         TopProp.StackFrom(NameItem.Siblings<ItemBase>(takeInactive: false));
         TopProp.StackFrom(ValueItem.Siblings<ItemBase>(takeInactive: false));
+
+        return inputs;
     }
 
     void Start()
@@ -75,14 +86,33 @@ public class ChipPanel : BasePanel
         ValueItem = items[1];
 
         // TEST
-        DisplayChipProperties(VChip.allPropertiesStr, VChip.allPropertiesDefaults);
+        //DisplayChipProperties(VChip.allPropertiesStr, VChip.allPropertiesDefaults);
         // TEST
-        DisplayChip(CommonChip.ClientCore.equivalentVirtualChip);
+        //DisplayChip(CommonChip.ClientCore.equivalentVirtualChip);
+        EditorMenu em = this.GetComponentInParent<EditorMenu>();
+        em.AddHighlightCallback(this.DisplayChip);
     }
 
     public void DisplayChip(VChip vc)
     {
         string[] propertiesThisChipHas = ArrayExtensions.AccessLikeDict(vc.instanceProperties[VChip.typeStr], VChip.chipData.keys, VChip.chipData.values);
+        string[] propertyValues = new string[propertiesThisChipHas.Length];
+
+        for(int i = 0; i < propertiesThisChipHas.Length; ++i)
+        {
+            object val;
+            if(vc.instanceProperties.TryGetValue(propertiesThisChipHas[i], out val))
+            {
+                propertyValues[i] = val.ToString();
+            }
+            else
+            {
+                propertyValues[i] = ArrayExtensions.AccessLikeDict(propertiesThisChipHas[i], VChip.allPropertiesStr, VChip.allPropertiesDefaults);
+                //throw new ArgumentNullException($"Property {propertiesThisChipHas[i]} doesn't exist in chip {vc} of type {vc.ChipType}.");
+            }
+        }
+        TMP_InputField[] inputs = DisplayChipProperties(propertiesThisChipHas, propertyValues);
+
         //print("properties:");
         //PRINT.print(properties);
     }

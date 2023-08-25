@@ -32,7 +32,7 @@ public class VChip
 
     public static readonly Dictionary<string, Type> propertyTypes;
     public static readonly string[] allPropertiesStr = new string[] { "Angle", "Value", "Colour", "Spring", "Damper", "Option", "Name", "Type" };
-    public static readonly string[] allPropertiesDefaults = new string[] { "0", "0", "#000000", "0", "0", "0", "this_is_the_name", "Chip" };
+    public static readonly string[] allPropertiesDefaults = new string[] { "0", "0", "#000000", "0", "0", "0", "chipName", "Chip" };
     public static readonly string[] dynamicPropertiesStr = new string[] { "Angle", "Value", "Colour" };
     public static readonly string[] staticPropertiesStr = new string[] { "Spring", "Damper", "Option", "Name", "Type" };
     public static readonly CPR[] staticPropertiesEnum = new CPR[] { CPR.Spring, CPR.Damper, CPR.Option, CPR.Name, CPR.Type };
@@ -144,6 +144,7 @@ public class VChip
         }
         catch
         {
+            
             val = default(T);
             return false;
         }
