@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,7 +9,24 @@ public class BaseMenu : DeclaredProp
     public static HashSet<BaseMenu> allMenus = new HashSet<BaseMenu>();
     public static HashSet<Type> allMenuTypes = new HashSet<Type>();
     public static Stack<BaseMenu> lastMenu = new Stack<BaseMenu>();
+
+    protected Action[] selectedCallbacks = new Action[] { };
+
+    private bool _isSelected
+    {
+        get { return this._isSelected; }
+        set
+        {
+            this._isSelected = value;
+            if (!value) return;
+            foreach (var c in this.selectedCallbacks)
+            {
+                c();
+            }
+        }
+    }
     public bool isSelected = false;
+
     private static BaseMenu mainMenu;
     protected static BaseMenu MainMenu
     {
@@ -22,6 +40,12 @@ public class BaseMenu : DeclaredProp
             mainMenu = value;
         }
     }
+
+    public void AddSelectionCallback(Action action)
+    {
+        this.selectedCallbacks = this.selectedCallbacks.Concat(new Action[] { action }).ToArray();
+    }
+
     protected override void Setup()
     {
         //Type MyType = GetType();
@@ -30,10 +54,12 @@ public class BaseMenu : DeclaredProp
         allMenus.Add(this);
         allMenuTypes.Add(this.GetType());
     }
+
     protected virtual void Start()
     {
         gameObject.SetActive(isSelected);
     }
+
     public static void SwitchToMenu(Type menuType, bool switchingBack=false) {
         bool menuExists = allMenuTypes.Contains(menuType);
         if (!menuExists && menuType != null)

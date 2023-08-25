@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using MoonSharp.Interpreter;
-public enum CProp
+
+public enum CPR
 {
     Angle, Value, Colour, Spring, Damper, Option, Name, Type
 }
@@ -11,12 +12,14 @@ public enum Orientation
 {
     North, West, South, East
 }
-//public enum CType {
-//    Chip, Rudder, Axle, Telescope, Fan, Wheel, Balloon, Cowl
-//}
-
-public class VirtualChip
+public enum CTP
 {
+    Chip, Rudder, Axle, Telescope, Wheel, Fan, Sensor, Cowl
+}
+
+public class VChip
+{
+    public const string nameStr = "Name";
     public const string typeStr = "Type";
     public const string angleStr = "Angle";
     public const string springStr = "Spring";
@@ -26,27 +29,26 @@ public class VirtualChip
     public const string cowlStr = "Cowl";
 
     public const string chipsFolderStr = "Chips/";
-    [NonSerialized]
-    public static readonly Dictionary<string, Type> propertyTypes;
-    [NonSerialized]
-    public static readonly string[] allPropertiesStr = new string[] { "Angle", "Value", "Colour", "Spring", "Damper", "Option", "Name", "Type" };
-    [NonSerialized]
-    public static readonly string[] dynamicPropertiesStr = new string[] { "Angle", "Value", "Colour" };
-    [NonSerialized]
-    public static readonly string[] staticPropertiesStr = new string[] { "Spring", "Damper", "Option", "Name", "Type" };
-    [NonSerialized]
-    public static readonly CProp[] staticPropertiesEnum = new CProp[] { CProp.Spring, CProp.Damper, CProp.Option, CProp.Name, CProp.Type };
-    [NonSerialized]
-    public static readonly Dictionary<string, CProp> str2ChipProperty;
-    [NonSerialized]
-    public static readonly string[] chipNames = new string[] { "Chip", "Rudder", "Axle", "Telescope", "Wheel", "Fan", "Sensor", "Cowl" };
-    [NonSerialized]
-    public static readonly Dictionary<string, CommonChip> chipTemplates;
 
-    public bool IsCore { get { return this.ChipType == VirtualChip.coreStr; } }
+    public static readonly Dictionary<string, Type> propertyTypes;
+    public static readonly string[] allPropertiesStr = new string[] { "Angle", "Value", "Colour", "Spring", "Damper", "Option", "Name", "Type" };
+    public static readonly string[] allPropertiesDefaults = new string[] { "0", "0", "#000000", "0", "0", "0", "this_is_the_name", "Chip" };
+    public static readonly string[] dynamicPropertiesStr = new string[] { "Angle", "Value", "Colour" };
+    public static readonly string[] staticPropertiesStr = new string[] { "Spring", "Damper", "Option", "Name", "Type" };
+    public static readonly CPR[] staticPropertiesEnum = new CPR[] { CPR.Spring, CPR.Damper, CPR.Option, CPR.Name, CPR.Type };
+
+    public static readonly string[] chipNames = new string[] { "Chip", "Rudder", "Axle", "Telescope", "Wheel", "Fan", "Sensor", "Cowl" };
+    public static readonly CTP[] chipEnums = new CTP[] { CTP.Chip, CTP.Rudder, CTP.Axle, CTP.Telescope, CTP.Wheel, CTP.Fan, CTP.Sensor, CTP.Cowl };
+
+    public static readonly Dictionary<string, CPR> str2ChipProperty;
+    public static readonly Dictionary<string, CommonChip> chipTemplates;
+    public static readonly ChipData chipData;
+    public static readonly Dictionary<CTP, string> chipEnumToName;
+
+    public bool IsCore { get { return this.ChipType == VChip.coreStr; } }
     public string ChipType { get { return instanceProperties[typeStr] as string; } }
 
-    static VirtualChip()
+    static VChip()
     {
         propertyTypes = new Dictionary<string, Type>() {
             {"Angle",  typeof(string)},
@@ -59,15 +61,15 @@ public class VirtualChip
             {"Type",   typeof(string)},
         };
 
-        str2ChipProperty = new Dictionary<string, CProp>() {
-            {"Angle",  CProp.Angle},
-            {"Value",  CProp.Value},
-            {"Colour", CProp.Colour},
-            {"Spring", CProp.Spring},
-            {"Damper", CProp.Damper},
-            {"Option", CProp.Option},
-            {"Name",   CProp.Name},
-            {"Type",   CProp.Type},
+        str2ChipProperty = new Dictionary<string, CPR>() {
+            {"Angle",  CPR.Angle},
+            {"Value",  CPR.Value},
+            {"Colour", CPR.Colour},
+            {"Spring", CPR.Spring},
+            {"Damper", CPR.Damper},
+            {"Option", CPR.Option},
+            {"Name",   CPR.Name},
+            {"Type",   CPR.Type},
         };
 
         var tmpDict = new Dictionary<string, CommonChip>();
@@ -86,6 +88,13 @@ public class VirtualChip
             }
         }
         chipTemplates = tmpDict;
+
+        chipEnumToName = ArrayExtensions.ToDictionaryFromArrays(chipEnums, chipNames);
+
+        VChip.chipData = LUALoader.LoadChipProperties("chips.lua");
+        //PRINT.print(VChip.chipToPropertyDict.Keys);
+        //PRINT.print(VChip.chipToPropertyDict.Values);
+
     }
 
     // INSTANCE VARIABLES
@@ -99,14 +108,14 @@ public class VirtualChip
     [NonSerialized]
     public object[] objectVals;
     [NonSerialized] // TODO: link this from the text saved version
-    public VirtualChip parentChip;
+    public VChip parentChip;
     [NonSerialized]
-    public List<VirtualChip> children = new List<VirtualChip>();
+    public List<VChip> children = new List<VChip>();
     [NonSerialized]
     public Dictionary<string, object> instanceProperties;
 
     //[Obsolete("Remove this in the future and load only through editor.")]
-    public VirtualChip(string[] keys, string[] vals, int orientation, VirtualChip parentChip)
+    public VChip(string[] keys, string[] vals, int orientation, VChip parentChip)
     {
         this.orientation = orientation;
         this.keys = keys;
@@ -145,7 +154,7 @@ public class VirtualChip
         return (T)(this.instanceProperties[key]);
     }
 
-    public string GetNewChildID(VirtualChip childChip)
+    public string GetNewChildID(VChip childChip)
     {
         if (this.id == null)
         {
@@ -167,19 +176,12 @@ public class VirtualChip
         }
     }
 
-    //public string GetChipType() {
-    //    return instanceProperties[typeStr] as string;
-    //}
-
-    //public bool IsCore() {
-    //    return this.GetChipType() == VirtualChip.coreStr;
-    //}
 
     public void CheckAndSetVals()
     {
-        if (!this.keys.Contains(VirtualChip.typeStr))
+        if (!this.keys.Contains(VChip.typeStr))
         {
-            throw new ArgumentException($"VirtualChip doesn't contain {VirtualChip.typeStr} field.");
+            throw new ArgumentException($"VirtualChip doesn't contain {VChip.typeStr} field.");
         }
         if (this.orientation < 0 || this.orientation > 3)
         {
@@ -205,12 +207,12 @@ public class VirtualChip
                     throw new ArgumentException($"Chip name is not a variable name: {this.vals[i]}");
                 }
             }
-            if (!VirtualChip.propertyTypes.ContainsKey(this.keys[i]))
+            if (!VChip.propertyTypes.ContainsKey(this.keys[i]))
             {
                 throw new ArgumentException($"Unknown key: {this.keys[i]}");
             }
 
-            Type expectedType = VirtualChip.propertyTypes[this.keys[i]];
+            Type expectedType = VChip.propertyTypes[this.keys[i]];
 
             if (expectedType == typeof(float))
             {
@@ -268,11 +270,11 @@ public class VirtualChip
         return luaCode;
     }
 
-    public static string ArrayToLuaString(VirtualChip[] chips)
+    public static string ArrayToLuaString(VChip[] chips)
     {
         string luaCode = "{";
 
-        foreach (VirtualChip chip in chips)
+        foreach (VChip chip in chips)
         {
             luaCode += chip.ToLuaString() + ", ";
         }
@@ -281,14 +283,14 @@ public class VirtualChip
         return luaCode;
     }
 
-    public VirtualChip(Table luaTable)
+    public VChip(Table luaTable)
     {
         this.id = (string)luaTable["id"];
         this.orientation = int.Parse((string)luaTable["orientation"]);
         this.parentId = (string)luaTable["parentId"];
 
         var indices = luaTable.Keys.Select((item, index) => new { item, index })
-               .Where(x => VirtualChip.allPropertiesStr.Contains(x.item.String))
+               .Where(x => VChip.allPropertiesStr.Contains(x.item.String))
                .Select(x => x.index)
                .ToList();
 
@@ -299,8 +301,8 @@ public class VirtualChip
         this.CheckAndSetVals();
     }
 
-    public static VirtualChip[] FromLuaTables(Table[] luaTables)
+    public static VChip[] FromLuaTables(Table[] luaTables)
     {
-        return luaTables.Select(t => new VirtualChip(t)).ToArray();
+        return luaTables.Select(t => new VChip(t)).ToArray();
     }
 }

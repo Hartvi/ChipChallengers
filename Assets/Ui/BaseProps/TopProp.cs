@@ -109,7 +109,7 @@ public class TopProp : TopUI
         }
     }
 
-    public void StackFrom<T>(T[] props) where T : TopProp
+    public static void StackFrom<T>(T[] props) where T : TopProp
     {
 
         if (props.Length == 0) return;

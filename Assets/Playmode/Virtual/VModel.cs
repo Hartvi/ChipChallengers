@@ -5,29 +5,29 @@ using UnityEngine;
 using MoonSharp.Interpreter;
 using System.Linq;
 
-public class VirtualModel
+public class VModel
 {
-    public static VirtualVariable EmptyVariable
+    public static VVar EmptyVariable
     {
         get
         {
-            return new VirtualVariable();
+            return new VVar();
         }
     }
 
-    public VirtualChip[] chips;
-    public VirtualVariable[] variables;
+    public VChip[] chips;
+    public VVar[] variables;
     public string script;
 
-    private VirtualVariable _SelectedVariable;
+    private VVar _SelectedVariable;
 
     private Action<string>[] SelectedActions = new Action<string>[] { };
     private Action<string>[] AddedActions = new Action<string>[] { };
     private Action<string>[] DeleteActions = new Action<string>[] { };
 
 
-    private VirtualChip _SelectedChip;
-    public VirtualChip SelectedChip
+    private VChip _SelectedChip;
+    public VChip SelectedChip
     {
         get
         {
@@ -43,7 +43,7 @@ public class VirtualModel
         }
     }
 
-    public VirtualChip Core
+    public VChip Core
     {
         get
         {
@@ -62,13 +62,13 @@ public class VirtualModel
 
         if (this.chips != null)
         {
-            string chipsLuaCode = VirtualChip.ArrayToLuaString(this.chips);
+            string chipsLuaCode = VChip.ArrayToLuaString(this.chips);
             luaCode += $"chips = {chipsLuaCode}, ";
         }
 
         if (this.variables != null)
         {
-            string variablesLuaCode = VirtualVariable.ArrayToLuaString(this.variables);
+            string variablesLuaCode = VVar.ArrayToLuaString(this.variables);
             luaCode += $"variables = {variablesLuaCode}, ";
         }
 
@@ -82,13 +82,13 @@ public class VirtualModel
         return luaCode;
     }
 
-    public VirtualModel()
+    public VModel()
     {
-        this.variables = new VirtualVariable[] { VirtualModel.EmptyVariable };
+        this.variables = new VVar[] { VModel.EmptyVariable };
         //this.chips
     }
 
-    public static VirtualModel FromLuaModel(string luaModel)
+    public static VModel FromLuaModel(string luaModel)
     {
         //PRINT.print(luaModel);
         string a = "a=" + luaModel;
@@ -96,22 +96,22 @@ public class VirtualModel
         scriptObj.DoString(a);
         var luaA = scriptObj.Globals["a"];
         //PRINT.print((Table)(luaA));
-        return new VirtualModel((Table)luaA);
+        return new VModel((Table)luaA);
     }
 
-    public VirtualModel(Table luaTable)
+    public VModel(Table luaTable)
     {
         var chipsTable = luaTable.Get("chips").Table;
         if (chipsTable != null)
         {
-            this.chips = chipsTable.Values.Select(t => new VirtualChip(t.Table)).ToArray();
+            this.chips = chipsTable.Values.Select(t => new VChip(t.Table)).ToArray();
         }
 
         var variablesTable = (Table)luaTable["variables"];
         if (variablesTable != null)
         {
             //PRINT.print(variablesTable.Values.Count());
-            this.variables = VirtualVariable.FromLuaTables(variablesTable.Values.Select(x => x.Table).ToArray());
+            this.variables = VVar.FromLuaTables(variablesTable.Values.Select(x => x.Table).ToArray());
             // TODO VARIABLES
             PRINT.print("variables:");
             PRINT.print(this.variables);
@@ -141,19 +141,19 @@ public class VirtualModel
         }
     }
 
-    public void AddVariable(VirtualVariable v)
+    public void AddVariable(VVar v)
     {
-        VirtualVariable existingVariable = this.variables.FirstOrDefault(x => x.name == v.name);
+        VVar existingVariable = this.variables.FirstOrDefault(x => x.name == v.name);
 
         if (existingVariable is null)
         {
-            this.variables = this.variables.Concat(new VirtualVariable[] { v }).ToArray();
+            this.variables = this.variables.Concat(new VVar[] { v }).ToArray();
         }
         else
         {
             int i = Array.IndexOf(this.variables, existingVariable);
-            VirtualVariable[] varArr = this.variables.Where((x, y) => y != i).ToArray();
-            VirtualVariable[] newVarArr = varArr.Concat(new VirtualVariable[] { v }).ToArray();
+            VVar[] varArr = this.variables.Where((x, y) => y != i).ToArray();
+            VVar[] newVarArr = varArr.Concat(new VVar[] { v }).ToArray();
             this.variables = newVarArr;
             // TODO TEST THIS
         }
@@ -164,13 +164,13 @@ public class VirtualModel
         }
     }
 
-    public void AddAndSelectVariable(VirtualVariable v)
+    public void AddAndSelectVariable(VVar v)
     {
         this.AddVariable(v);
         this.SetSelectedVariable(v.name);
     }
 
-    public VirtualVariable GetSelectedVariable()
+    public VVar GetSelectedVariable()
     {
         if (this._SelectedVariable == null) throw new NullReferenceException($"Selected variable is null. Set it first.");
         return this._SelectedVariable;
@@ -178,7 +178,7 @@ public class VirtualModel
 
     public void DeleteSelectedVariable()
     {
-        VirtualVariable selectedVar = this.GetSelectedVariable();
+        VVar selectedVar = this.GetSelectedVariable();
         string selectedVarName = selectedVar.name;
 
         this.variables = this.variables.Where(x => x != selectedVar).ToArray(); //  .Concat(new VirtualVariable[]{ v }).ToArray();
@@ -198,7 +198,7 @@ public class VirtualModel
         if (NonNullVar is null)
         {
             //throw new NullReferenceException($"Variable {value} doesn't exist in {this}.variables");
-            this._SelectedVariable = VirtualModel.EmptyVariable;
+            this._SelectedVariable = VModel.EmptyVariable;
         }
         else
         {

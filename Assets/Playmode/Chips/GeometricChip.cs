@@ -11,7 +11,7 @@ public abstract class GeometricChip : StaticChip
     protected List<GeometricChip> childChips = new List<GeometricChip>();
     //public IReadOnlyList<GeometricChip> ChildChips => childChips;
 
-    public VirtualChip equivalentVirtualChip;
+    public VChip equivalentVirtualChip;
 
     public bool IsCore { get { return this.equivalentVirtualChip.IsCore; } }
     public GeometricChip[] AllChips
@@ -22,7 +22,7 @@ public abstract class GeometricChip : StaticChip
         }
     }
 
-    public VirtualChip[] AllVirtualChips
+    public VChip[] AllVirtualChips
     {
         get
         {
@@ -32,7 +32,7 @@ public abstract class GeometricChip : StaticChip
         }
     }
 
-    public VirtualVariable[] AllVirtualVariables
+    public VVar[] AllVirtualVariables
     {
         get
         {
@@ -44,8 +44,8 @@ public abstract class GeometricChip : StaticChip
 
     //protected string script;
 
-    private VirtualModel _VirtualModel;
-    public VirtualModel VirtualModel
+    private VModel _VirtualModel;
+    public VModel VirtualModel
     {
         get
         {

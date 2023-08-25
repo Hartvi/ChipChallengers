@@ -88,7 +88,7 @@ public class CommonChip : AngleChip
         {
             if (this._IsReal) return true;
             string chipType = this.equivalentVirtualChip.ChipType;
-            if (this.IsJointElligible || chipType == VirtualChip.coreStr)
+            if (this.IsJointElligible || chipType == VChip.coreStr)
             {
                 this._IsReal = true;
                 return true;
@@ -123,7 +123,7 @@ public class CommonChip : AngleChip
     }
 
     // FUNCTIONS:
-    public CommonChip[] AddChild(VirtualChip childChip)
+    public CommonChip[] AddChild(VChip childChip)
     {
         var childType = childChip.ChipType;
 
@@ -171,7 +171,7 @@ public class CommonChip : AngleChip
     {
         List<CommonChip> chips = new List<CommonChip>();
         // when there are no Children left then the recursion stops
-        foreach (VirtualChip childChip in this.equivalentVirtualChip.children)
+        foreach (VChip childChip in this.equivalentVirtualChip.children)
         {
             chips.AddRange(this.AddChild(childChip));
         }
@@ -234,7 +234,7 @@ public class CommonChip : AngleChip
         if (this._IsJointElligible) return true;
 
         string angleVal;
-        if (!this.equivalentVirtualChip.TryGetProperty<string>(VirtualChip.angleStr, out angleVal))
+        if (!this.equivalentVirtualChip.TryGetProperty<string>(VChip.angleStr, out angleVal))
         {
             this._IsJointElligible = false;
         }
@@ -247,14 +247,14 @@ public class CommonChip : AngleChip
 
         float springVal;
         bool springDamperExists = true;
-        if (!this.equivalentVirtualChip.TryGetProperty<float>(VirtualChip.springStr, out springVal))
+        if (!this.equivalentVirtualChip.TryGetProperty<float>(VChip.springStr, out springVal))
         {
             this._IsJointElligible = false;
             springDamperExists = false;
         }
 
         float damperVal;
-        if (!this.equivalentVirtualChip.TryGetProperty<float>(VirtualChip.damperStr, out damperVal))
+        if (!this.equivalentVirtualChip.TryGetProperty<float>(VChip.damperStr, out damperVal))
         {
             this._IsJointElligible = false;
             springDamperExists = false;
@@ -269,13 +269,13 @@ public class CommonChip : AngleChip
         return this._IsJointElligible;
     }
 
-    public void TriggerSpawn(VirtualModel virtualModel)
+    public void TriggerSpawn(VModel virtualModel)
     {
         this.VirtualModel = virtualModel;
         this.transform.localScale = StaticChip.ChipSize;
 
         // this should replace the argument
-        VirtualChip core = this.VirtualModel.Core;
+        VChip core = this.VirtualModel.Core;
 
         this.equivalentVirtualChip = core;
 
@@ -318,7 +318,7 @@ public class CommonChip : AngleChip
         //var newScript = new Script();
         //DynValue a = newScript.DoString(modelLua);
         //print($"dyn: {a}, a: ");
-        VirtualModel fromluadmodel = VirtualModel.FromLuaModel(modelLua2);
+        VModel fromluadmodel = VModel.FromLuaModel(modelLua2);
         //print(modelLua2);
 
         TriggerEvent(ModelUpdatedEvent);

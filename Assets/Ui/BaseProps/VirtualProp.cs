@@ -42,7 +42,7 @@ public class VirtualProp
             }
             else
             {
-                throw new ArgumentException("Type must be TopProp or a derived class");
+                throw new ArgumentException($"Type of {value} must be TopProp or a derived class");
             }
         }
     }

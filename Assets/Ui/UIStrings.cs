@@ -30,6 +30,7 @@ public static class UIStrings
     public const string Delete = "Delete";
     public static readonly string[] AddDelete = { Add, Delete };
 
+    public static readonly string[] EditorPanels = { "Chip", "Variables", "Controls", "Script" };
 
 
 }

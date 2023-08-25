@@ -56,7 +56,7 @@ public class VariablePanel : BasePanel
     {
         CommonChip clientCore = CommonChip.ClientCore;
         clientCore.VirtualModel.SetSelectedVariable(variableName);
-        VirtualVariable v = clientCore.VirtualModel.GetSelectedVariable();
+        VVar v = clientCore.VirtualModel.GetSelectedVariable();
 
         this.variableFields.PopulateFields(v);
         this.itemScroll.virtualContainer.UpdateLabels(this.myLabels);

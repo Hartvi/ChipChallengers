@@ -20,5 +20,23 @@ public static class ArrayExtensions
     {
         return source.Where(e => !e.Equals(item)).ToArray();
     }
+
+    public static Dictionary<TKey, TValue> ToDictionaryFromArrays<TKey, TValue>(TKey[] keys, TValue[] values)
+    {
+        if (keys == null || values == null)
+            throw new ArgumentNullException("Both keys and values arrays must be provided.");
+
+        if (keys.Length != values.Length)
+            throw new ArgumentException("Keys and values arrays must be of the same length.");
+
+        return keys.Zip(values, (k, v) => new { Key = k, Value = v })
+                   .ToDictionary(x => x.Key, x => x.Value);
+    }
+
+    public static TValue AccessLikeDict<TKey, TValue>(TKey key, TKey[] keys, TValue[] vals)
+    {
+        int index = Array.IndexOf(keys, key);
+        return vals[index];
+    }
 }
 

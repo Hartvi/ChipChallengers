@@ -63,7 +63,7 @@ public class VariableFields : BaseImage
         this.SetTextSizesOf(this.buttons, UIUtils.SmallFontSize);
     }
 
-    public void PopulateFields(VirtualVariable virtualVariable)
+    public void PopulateFields(VVar virtualVariable)
     {
         string[] variableStrings = virtualVariable.ToStringArray();
         for (int i = 0; i < this.inputs.Length; ++i) {
@@ -74,7 +74,7 @@ public class VariableFields : BaseImage
     public void AddVariable()
     {
         string[] vals = this.inputs.Select(x => x.input.text).ToArray();
-        VirtualVariable v = new VirtualVariable(vals);
+        VVar v = new VVar(vals);
         CommonChip.ClientCore.VirtualModel.AddAndSelectVariable(v);
         // add variable, select it
         // update the display panel for variables
@@ -154,6 +154,7 @@ public class VariableFields : BaseImage
             } 
             AddVariable();
             // TODO: doesn't work ofc, somehow it selects the second guy instead
+            UnityEngine.Debug.LogWarning($"Selecting the first input field is still not working for some reason after pressing enter.");
             this.inputs[0].input.Select();
         }
     }

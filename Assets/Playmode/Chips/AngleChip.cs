@@ -9,7 +9,7 @@ public abstract class AngleChip : GeometricChip {
         // TODO: make it variable-compatible
         //float angle = (float)(this.equivalentVirtualChip.instanceProperties[VirtualChip.angleStr]);
         string angleStr;
-        if (!this.equivalentVirtualChip.TryGetProperty<string>(VirtualChip.angleStr, out angleStr)) {
+        if (!this.equivalentVirtualChip.TryGetProperty<string>(VChip.angleStr, out angleStr)) {
             return 0f;
         }
 

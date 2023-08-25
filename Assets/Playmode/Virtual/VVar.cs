@@ -5,7 +5,7 @@ using UnityEngine;
 using System.Linq;
 using MoonSharp.Interpreter;
 
-public class VirtualVariable
+public class VVar
 {
     public string name;
     public float defaultValue, maxValue, minValue, backstep;
@@ -27,11 +27,11 @@ public class VirtualVariable
         return luaCode;
     }
 
-    public static string ArrayToLuaString(VirtualVariable[] variables)
+    public static string ArrayToLuaString(VVar[] variables)
     {
         string luaCode = "{";
 
-        foreach (VirtualVariable variable in variables)
+        foreach (VVar variable in variables)
         {
             luaCode += variable.ToLuaString() + ", ";
         }
@@ -40,7 +40,7 @@ public class VirtualVariable
         return luaCode;
     }
 
-    public VirtualVariable()
+    public VVar()
     {
         this.name = "";
         this.minValue = -1f;
@@ -48,7 +48,7 @@ public class VirtualVariable
         this.backstep = 1f;
         this.defaultValue = 0f;
     }
-    public VirtualVariable(Table luaTable)
+    public VVar(Table luaTable)
     {
         this.name = (string)luaTable["name"];
         PRINT.print($"{luaTable["minValue"].GetType()}");
@@ -61,15 +61,15 @@ public class VirtualVariable
         this.backstep = float.Parse(luaTable["backstep"].ToString());
         this.defaultValue = float.Parse(luaTable["defaultValue"].ToString());
     }
-    public static VirtualVariable[] FromLuaTables(Table[] luaTables)
+    public static VVar[] FromLuaTables(Table[] luaTables)
     {
-        return luaTables.Select(t => new VirtualVariable(t)).ToArray();
+        return luaTables.Select(t => new VVar(t)).ToArray();
     }
     public string[] ToStringArray()
     {
         return new string[] { this.name, this.defaultValue.ToString(), this.minValue.ToString(), this.maxValue.ToString(), this.backstep.ToString() };
     }
-    public VirtualVariable(string[] vals)
+    public VVar(string[] vals)
     {
         if (vals.Length < 5) // Ensure there are enough elements in the array
             throw new ArgumentException("vals must contain at least 5 elements");

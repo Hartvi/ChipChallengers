@@ -56,10 +56,10 @@ public abstract class StaticChip : MonoBehaviour
     }
 
     public static T InstantiateChip<T>(string type) where T: GeometricChip {
-        if(!VirtualChip.chipTemplates.ContainsKey(type)) {
+        if(!VChip.chipTemplates.ContainsKey(type)) {
             throw new ArgumentException($"Chip of type {type} doesn't exist.");
         }
-        var newChip = Instantiate(VirtualChip.chipTemplates[type]);
+        var newChip = Instantiate(VChip.chipTemplates[type]);
 
         return newChip.gameObject.GetComponent<T>();
     }

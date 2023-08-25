@@ -30,13 +30,10 @@ public class HUD : TopProp
 
     Vector3 velocity { get { return _Focus.rb.velocity; } }
     public bool UpdatedModel;
-    VirtualVariable[] variables { get { return Focus.AllVirtualVariables; } }
+    VVar[] variables { get { return Focus.AllVirtualVariables; } }
 
     ItemBase NameItem;
     ItemBase ValueItem;
-
-    List<TMP_Text> variableNames = new List<TMP_Text>();
-    List<TMP_Text> variableValues = new List<TMP_Text>();
 
     void UpdateVariableDisplay()
     {
