@@ -14,7 +14,7 @@ public class ChipData
 
 public static class LUALoader
 {
-    public static ChipData LoadChipProperties(string filePath)
+    public static ChipData LoadChipSpecification(string filePath)
     {
         string luaCode = IOHelpers.LoadTextFile(filePath);
         //PRINT.print($"lua code:\n{luaCode}");

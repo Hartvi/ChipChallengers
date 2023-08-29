@@ -43,7 +43,7 @@ public class ChipPanel : BasePanel
     ItemBase NameItem;
     ItemBase ValueItem;
 
-    TMP_InputField[] DisplayChipProperties(string[] leftTexts, string[] rightTexts)
+    (TMP_Text[], TMP_InputField[]) DisplayChipProperties(string[] leftTexts, string[] rightTexts)
     {
         if(leftTexts.Length != rightTexts.Length)
         {
@@ -51,6 +51,7 @@ public class ChipPanel : BasePanel
         }
 
         TMP_InputField[] inputs = new TMP_InputField[rightTexts.Length];
+        TMP_Text[] texts = new TMP_Text[rightTexts.Length];
 
         ItemBase[] nameItems = NameItem.DisplayNItems(leftTexts.Length);
         ItemBase[] valueItems = ValueItem.DisplayNItems(rightTexts.Length);
@@ -60,11 +61,13 @@ public class ChipPanel : BasePanel
         {
             int reverseIndex = offset - i;
             var nameTxt = nameItems[i].GetComponent<TMP_Text>();
-            nameTxt.SetText(leftTexts[reverseIndex]);
+            nameTxt.SetText(leftTexts[i]);
             nameTxt.fontSize = UIUtils.SmallFontSize;
 
+            texts[i] = nameTxt;
+
             var valueTxt = valueItems[i].GetComponent<TMP_InputField>();
-            valueTxt.SetTextWithoutNotify(rightTexts[reverseIndex]);
+            valueTxt.SetTextWithoutNotify(rightTexts[i]);
             valueTxt.textComponent.fontSize = UIUtils.SmallFontSize;
 
             inputs[i] = valueTxt;
@@ -75,7 +78,7 @@ public class ChipPanel : BasePanel
         TopProp.StackFrom(NameItem.Siblings<ItemBase>(takeInactive: false));
         TopProp.StackFrom(ValueItem.Siblings<ItemBase>(takeInactive: false));
 
-        return inputs;
+        return (texts, inputs);
     }
 
     void Start()
@@ -95,27 +98,68 @@ public class ChipPanel : BasePanel
 
     public void DisplayChip(VChip vc)
     {
-        string[] propertiesThisChipHas = ArrayExtensions.AccessLikeDict(vc.instanceProperties[VChip.typeStr], VChip.chipData.keys, VChip.chipData.values);
-        string[] propertyValues = new string[propertiesThisChipHas.Length];
+        string[] newKeys = ArrayExtensions.AccessLikeDict(vc.instanceProperties[VChip.typeStr], VChip.chipData.keys, VChip.chipData.values);
+        string[] newValues = new string[newKeys.Length];
 
-        for(int i = 0; i < propertiesThisChipHas.Length; ++i)
+        for(int i = 0; i < newKeys.Length; ++i)
         {
-            object val;
-            if(vc.instanceProperties.TryGetValue(propertiesThisChipHas[i], out val))
+            string currentProperty = newKeys[i];
+            print($"current property: {currentProperty}");
+            string val = ArrayExtensions.AccessLikeDict(currentProperty, vc.keys, vc.vals);
+
+            if(val is not null)
             {
-                propertyValues[i] = val.ToString();
+                newValues[i] = val.ToString();
             }
             else
             {
-                propertyValues[i] = ArrayExtensions.AccessLikeDict(propertiesThisChipHas[i], VChip.allPropertiesStr, VChip.allPropertiesDefaults);
+                newValues[i] = ArrayExtensions.AccessLikeDict(currentProperty, VChip.allPropertiesStr, VChip.allPropertiesDefaults);
                 //throw new ArgumentNullException($"Property {propertiesThisChipHas[i]} doesn't exist in chip {vc} of type {vc.ChipType}.");
             }
         }
-        TMP_InputField[] inputs = DisplayChipProperties(propertiesThisChipHas, propertyValues);
+
+        // This is so we can set it below using callbacks that index assuming the full length of properties
+        vc.vals = newValues;
+        vc.keys = newKeys;
+
+        (TMP_Text[] texts, TMP_InputField[] inputs) = this.DisplayChipProperties(newKeys, newValues);
+
+        for(int i = 0; i < inputs.Length; ++i)
+        {
+            int _i = i;
+            //Debug.LogWarning($"TODO: Check whether value entered is valid!");
+            //inputs[i].onValueChanged.AddListener
+            inputs[_i].onEndEdit.AddListener(x => 
+                {
+                    string validityMsg = vc.CheckValidityOfPropertyForThisChip(texts[_i].text, x);
+                    if(validityMsg is not null)
+                    {
+                        //
+                        inputs[_i].SetTextWithoutNotify(vc.vals[_i]);
+                        DisplaySingleton.Instance.DisplayText(ChipPanel.SetFormatMsg(validityMsg), 3f);
+                    }
+                    else
+                    {
+                        print($"Changing val {vc.vals[_i]} to {inputs[_i].text}");
+                        vc.vals[_i] = x;
+                    }
+                }
+            );
+        }
 
         //print("properties:");
         //PRINT.print(properties);
     }
 
+    static Action<TMP_Text> SetFormatMsg(string msg)
+    {
+        Action<TMP_Text> action = x =>
+        {
+            x.SetText(msg);
+            DisplaySingleton.ErrorMsgModification(x);
+        };
+        return action;
+    }
+    
 }
 

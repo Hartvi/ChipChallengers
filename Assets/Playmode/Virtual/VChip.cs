@@ -22,8 +22,11 @@ public class VChip
     public const string nameStr = "Name";
     public const string typeStr = "Type";
     public const string angleStr = "Angle";
+    public const string colourStr = "Colour";
+    public const string valueStr = "Value";
     public const string springStr = "Spring";
     public const string damperStr = "Damper";
+    public const string optionStr = "Option";
 
     public const string coreStr = "Core";
     public const string cowlStr = "Cowl";
@@ -32,7 +35,7 @@ public class VChip
 
     public static readonly Dictionary<string, Type> propertyTypes;
     public static readonly string[] allPropertiesStr = new string[] { "Angle", "Value", "Colour", "Spring", "Damper", "Option", "Name", "Type" };
-    public static readonly string[] allPropertiesDefaults = new string[] { "0", "0", "#000000", "0", "0", "0", "chipName", "Chip" };
+    public static readonly string[] allPropertiesDefaults = new string[] { "0", "0", "#000000", "0", "0", "0", "chip_name", "Chip" };
     public static readonly string[] dynamicPropertiesStr = new string[] { "Angle", "Value", "Colour" };
     public static readonly string[] staticPropertiesStr = new string[] { "Spring", "Damper", "Option", "Name", "Type" };
     public static readonly CPR[] staticPropertiesEnum = new CPR[] { CPR.Spring, CPR.Damper, CPR.Option, CPR.Name, CPR.Type };
@@ -42,7 +45,8 @@ public class VChip
 
     public static readonly Dictionary<string, CPR> str2ChipProperty;
     public static readonly Dictionary<string, CommonChip> chipTemplates;
-    public static readonly ChipData chipData;
+    public static readonly ChipData chipData, optionNames;
+
     public static readonly Dictionary<CTP, string> chipEnumToName;
 
     public bool IsCore { get { return this.ChipType == VChip.coreStr; } }
@@ -91,7 +95,9 @@ public class VChip
 
         chipEnumToName = ArrayExtensions.ToDictionaryFromArrays(chipEnums, chipNames);
 
-        VChip.chipData = LUALoader.LoadChipProperties("chips.lua");
+        VChip.chipData = LUALoader.LoadChipSpecification("chips.lua");
+        VChip.optionNames = LUALoader.LoadChipSpecification("optionNames.lua");
+
         //PRINT.print(VChip.chipToPropertyDict.Keys);
         //PRINT.print(VChip.chipToPropertyDict.Values);
 
@@ -247,6 +253,94 @@ public class VChip
         this.instanceProperties = keys.Zip(this.objectVals, (k, v) => new { k, v }).ToDictionary(x => x.k, x => x.v);
     }
 
+    public string CheckValidityOfPropertyForThisChip(string property, string value)
+    {
+        if(property == VChip.optionStr)
+        {
+            string[] options = this.GetOptions();
+            uint option;
+            if (uint.TryParse(value, out option))
+            {
+                if (option >= options.Length)
+                {
+                    return UIStrings.OptionTooHigh(value);
+                }
+            }
+        }
+        return this.CheckValidityOfProperty(property, value);
+    }
+
+    string CheckValidityOfProperty(string property, string value)
+    {
+
+        if (this.HasProperty(property))
+        {
+            return VChip.PropertyFormatMessage(property, value);
+        }
+        else
+        {
+            throw new ArgumentException($"Chip type {this.ChipType} doesn't have property: {property}.");
+        }
+    }
+
+    static string PropertyFormatMessage(string property, string value)
+    {
+
+        string msg = null;
+        switch (property)
+        {
+            case VChip.nameStr:
+                if (!StringHelpers.IsVariableName(value))
+                {
+                    msg = UIStrings.NotAVariableMsg(value);
+                }
+                break;
+            case VChip.colourStr:
+                if (!StringHelpers.IsVariableName(value))
+                {
+                    msg = UIStrings.NotAVariableMsg(value);
+                }
+                else if (!StringHelpers.IsColourString(value))
+                {
+                    msg = UIStrings.NotAColour(value);
+                }
+                break;
+            case VChip.angleStr:
+            case VChip.valueStr:
+                if (!StringHelpers.IsVariableName(value))
+                {
+                    msg = UIStrings.NotAVariableMsg(value);
+                }
+                else if (!StringHelpers.IsFloat(value))
+                {
+                    msg = UIStrings.NotAFloat(value);
+                }
+                break;
+            case VChip.springStr:
+            case VChip.damperStr:
+                if (!StringHelpers.IsFloat(value))
+                {
+                    msg = UIStrings.NotAFloat(value);
+                }
+                break;
+            case VChip.typeStr:
+                if (!VChip.chipNames.Contains(value))
+                {
+                    msg = UIStrings.NotAType(value);
+                }
+                break;
+            case VChip.optionStr:
+                if (!StringHelpers.IsUInt(value))
+                {
+                    msg = UIStrings.NotAUInt(value);
+                }
+                break;
+            default:
+                throw new ArgumentException($"Unknown chip property {property}.");
+        }
+        return msg;
+    }
+
     // Returns a string representing this VirtualChip as Lua code
     public string ToLuaString()
     {
@@ -306,4 +400,14 @@ public class VChip
     {
         return luaTables.Select(t => new VChip(t)).ToArray();
     }
+
+    public bool HasProperty(string property)
+    {
+        return ArrayExtensions.AccessLikeDict(this.ChipType, VChip.chipData.keys, VChip.chipData.values).Contains(property);
+    }
+
+    public string[] GetOptions() {
+        return ArrayExtensions.AccessLikeDict(this.ChipType, VChip.optionNames.keys, VChip.optionNames.values);
+    }
 }
+

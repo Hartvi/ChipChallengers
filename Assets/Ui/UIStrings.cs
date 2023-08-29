@@ -32,5 +32,33 @@ public static class UIStrings
 
     public static readonly string[] EditorPanels = { "Chip", "Variables", "Controls", "Script" };
 
+    public static string NotAVariableMsg(string value) {
+         return $"{value} is not in variable name format: '_' or [a-zA-Z] at the beginning.";
+    }
+
+    public static string NotAFloat(string value)
+    {
+        return $"{value} is not in float number format: a decimal number, e.g. '1.2'.";
+    }
+
+    public static string NotAColour(string value)
+    {
+        return $"{value} is not in colour format: #RRGGBB in hexadecimal, e.g. '#FF55BB' or an integer.";
+    }
+
+    public static string NotAType(string value)
+    {
+        return $"{value} is not one of the permitted chip types.";
+    }
+
+    public static string NotAUInt(string value)
+    {
+        return $"{value} is not a non-negative integer.";
+    }
+
+    public static string OptionTooHigh(string value)
+    {
+        return $"Option {value} is a too high value";
+    }
 
 }

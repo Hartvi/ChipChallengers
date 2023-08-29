@@ -16,10 +16,12 @@ public static class ArrayExtensions
         newArray[source.Length] = item;
         return newArray;
     }
+    
     public static T[] RemoveElement<T>(this T[] source, T item)
     {
         return source.Where(e => !e.Equals(item)).ToArray();
     }
+
 
     public static Dictionary<TKey, TValue> ToDictionaryFromArrays<TKey, TValue>(TKey[] keys, TValue[] values)
     {
@@ -36,6 +38,10 @@ public static class ArrayExtensions
     public static TValue AccessLikeDict<TKey, TValue>(TKey key, TKey[] keys, TValue[] vals)
     {
         int index = Array.IndexOf(keys, key);
+        if(index == -1)
+        {
+            return default(TValue);
+        }
         return vals[index];
     }
 }
