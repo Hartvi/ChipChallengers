@@ -8,6 +8,26 @@ using TMPro;
 public class ChipPanel : BasePanel
 {
 
+    void Start()
+    {
+        var items = GetComponentsInChildren<ItemBase>();
+
+        NameItem = items[0];
+        ValueItem = items[1];
+
+        // TEST
+        //DisplayChipProperties(VChip.allPropertiesStr, VChip.allPropertiesDefaults);
+        // TEST
+        //DisplayChip(CommonChip.ClientCore.equivalentVirtualChip);
+
+        // Link highlighting in the editor in general to displaying in this menu
+        EditorMenu em = this.GetComponentInParent<EditorMenu>();
+        em.AddHighlightCallback(this.DisplayChip);
+        // add default values so it renders fine at the start
+        //print("STARTING CHIP PANEL");
+        this.DisplayChip(CommonChip.ClientCore.equivalentVirtualChip);
+    }
+
     protected override void Setup()
     {
         base.Setup();
@@ -81,30 +101,16 @@ public class ChipPanel : BasePanel
         return (texts, inputs);
     }
 
-    void Start()
-    {
-        var items = GetComponentsInChildren<ItemBase>();
-
-        NameItem = items[0];
-        ValueItem = items[1];
-
-        // TEST
-        //DisplayChipProperties(VChip.allPropertiesStr, VChip.allPropertiesDefaults);
-        // TEST
-        //DisplayChip(CommonChip.ClientCore.equivalentVirtualChip);
-        EditorMenu em = this.GetComponentInParent<EditorMenu>();
-        em.AddHighlightCallback(this.DisplayChip);
-    }
-
     public void DisplayChip(VChip vc)
     {
+        //print($"DisplayChip: Chip type: {vc.ChipType}");
         string[] newKeys = ArrayExtensions.AccessLikeDict(vc.instanceProperties[VChip.typeStr], VChip.chipData.keys, VChip.chipData.values);
         string[] newValues = new string[newKeys.Length];
 
         for(int i = 0; i < newKeys.Length; ++i)
         {
             string currentProperty = newKeys[i];
-            print($"current property: {currentProperty}");
+            //print($"current property: {currentProperty}");
             string val = ArrayExtensions.AccessLikeDict(currentProperty, vc.keys, vc.vals);
 
             if(val is not null)
@@ -122,38 +128,40 @@ public class ChipPanel : BasePanel
         vc.vals = newValues;
         vc.keys = newKeys;
 
+        //PRINT.print(newKeys);
+        //PRINT.print(newValues);
+
         (TMP_Text[] texts, TMP_InputField[] inputs) = this.DisplayChipProperties(newKeys, newValues);
 
         for(int i = 0; i < inputs.Length; ++i)
         {
             int _i = i;
-            //Debug.LogWarning($"TODO: Check whether value entered is valid!");
-            //inputs[i].onValueChanged.AddListener
-            inputs[_i].onEndEdit.AddListener(x => 
-                {
+
+            inputs[_i].onEndEdit.RemoveAllListeners();
+            inputs[_i].onEndEdit.AddListener(
+                x => {
+                    //print($"chip type in callback: {vc.ChipType}, text: {texts[_i].text}, val: {x}");
                     string validityMsg = vc.CheckValidityOfPropertyForThisChip(texts[_i].text, x);
                     if(validityMsg is not null)
                     {
-                        //
                         inputs[_i].SetTextWithoutNotify(vc.vals[_i]);
                         DisplaySingleton.Instance.DisplayText(ChipPanel.SetFormatMsg(validityMsg), 3f);
                     }
                     else
                     {
-                        print($"Changing val {vc.vals[_i]} to {inputs[_i].text}");
+                        //print($"Changing val {vc.vals[_i]} to {inputs[_i].text}");
+                        // TODO CALL BACK FOR CHIP CHANGED TO PROPAGATE TO MODEL CHANGED
+                        Debug.LogWarning($"TODO: make chip changed callback propagate to model changed callback.");
                         vc.vals[_i] = x;
                     }
                 }
             );
         }
-
-        //print("properties:");
-        //PRINT.print(properties);
     }
 
     static Action<TMP_Text> SetFormatMsg(string msg)
     {
-        Action<TMP_Text> action = x =>
+        Action<TMP_Text> action = x => 
         {
             x.SetText(msg);
             DisplaySingleton.ErrorMsgModification(x);

@@ -51,7 +51,7 @@ public class VVar
     public VVar(Table luaTable)
     {
         this.name = (string)luaTable["name"];
-        PRINT.print($"{luaTable["minValue"].GetType()}");
+        //PRINT.print($"{luaTable["minValue"].GetType()}");
         //this.minValue = float.Parse((string)luaTable["minValue"].ToString());
         //this.maxValue = float.Parse((string)luaTable["maxValue"]);
         //this.backstep = float.Parse((string)luaTable["backstep"]);

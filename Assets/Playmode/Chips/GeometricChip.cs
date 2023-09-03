@@ -11,7 +11,19 @@ public abstract class GeometricChip : StaticChip
     protected List<GeometricChip> childChips = new List<GeometricChip>();
     //public IReadOnlyList<GeometricChip> ChildChips => childChips;
 
-    public VChip equivalentVirtualChip;
+    private VChip _equivalentVirtualChip;
+    public VChip equivalentVirtualChip
+    {
+        get
+        {
+            return this._equivalentVirtualChip;
+        }
+        set
+        {
+            this._equivalentVirtualChip = value;
+            value.rChip = (CommonChip)this;
+        }
+    }
 
     public bool IsCore { get { return this.equivalentVirtualChip.IsCore; } }
     public GeometricChip[] AllChips

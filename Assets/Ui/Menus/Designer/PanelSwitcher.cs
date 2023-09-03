@@ -7,6 +7,7 @@ public class PanelSwitcher : BasePanel
 {
     BaseButton[] btns = new BaseButton[4];
     Type[] panels = new Type[] { typeof(ChipPanel), typeof(VariablePanel), typeof(ControlsPanel), typeof(ScriptPanel) };
+    Type DefaultPanel = typeof(ChipPanel);
     GameObject[] panelObjects;
 
     GameObjectSwitcher switcher;
@@ -30,6 +31,7 @@ public class PanelSwitcher : BasePanel
             this.btns[i].btn.onClick.AddListener(() => this.switcher.Switch(x => x == this.panelObjects[_i]));
 
         }
+        this.switcher.Switch(x => x.GetComponentInChildren(DefaultPanel) != null);
     }
     
 }

@@ -136,10 +136,15 @@ public class CommonChip : AngleChip
         newChild.transform.position = newChildGlobalPosition;
         newChild.transform.rotation = this.transform.rotation;
 
-        float angle = this.GetAngle();
+        // TODO fix get angle to take from `keys` and `values`
+        float angle = newChild.GetAngle();
+        print($"chip: {childChip.ChipType}, angle: {angle}, child angle: {childChip.keys[0]}");
 
         (Vector3 origin, Vector3 direction) = StaticChip.GetThisAxisOfRotationWrtParent(newChild);
         newChild.transform.RotateAround(origin, direction, angle);
+
+        float YrotationAngle = Vector3.Dot((origin - newChild.transform.position).normalized, -newChild.transform.right);
+        newChild.transform.RotateAround(newChild.transform.position, newChild.transform.up, 90f*YrotationAngle);
 
         if (!newChild.IsJointElligible)
         {
@@ -269,8 +274,9 @@ public class CommonChip : AngleChip
         return this._IsJointElligible;
     }
 
-    public void TriggerSpawn(VModel virtualModel)
+    public void TriggerSpawn(VModel virtualModel, bool freeze)
     {
+        print("TRIGGER SPAWN");
         this.VirtualModel = virtualModel;
         this.transform.localScale = StaticChip.ChipSize;
 
@@ -322,12 +328,27 @@ public class CommonChip : AngleChip
         //print(modelLua2);
 
         TriggerEvent(ModelUpdatedEvent);
+        //c.transform.position = c.transform.position + Vector3.up;
+        if (freeze)
+        {
+            CommonChip.FreezeModel();
+        }
     }
     private void TriggerEvent(List<Action> acs)
     {
         foreach(var ev in acs)
         {
             ev();
+        }
+    }
+
+    public static void FreezeModel()
+    {
+        var c = CommonChip.ClientCore;
+
+        foreach(var chip in c.AllChips)
+        {
+            chip.GetComponent<Rigidbody>().isKinematic = true;
         }
     }
 

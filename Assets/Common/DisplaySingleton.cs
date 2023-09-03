@@ -13,7 +13,7 @@ public class DisplaySingleton : MonoBehaviour
     {
         get
         {
-            return instance ?? (instance = new GameObject().AddComponent<DisplaySingleton>());
+            return DisplaySingleton.instance ?? (DisplaySingleton.instance = new GameObject().AddComponent<DisplaySingleton>());
         }
     }
 
@@ -58,7 +58,7 @@ public class DisplaySingleton : MonoBehaviour
         txt.gameObject.RT().position = new Vector3(Screen.width / 2f, Screen.height / 10f, 0f);
     }
 
-    public static void NoOverFlowEtc(TMP_Text txt)
+    public static void NoOverflowEtc(TMP_Text txt)
     {
         txt.enableWordWrapping = false;
         txt.alignment = TextAlignmentOptions.Center;
@@ -69,7 +69,7 @@ public class DisplaySingleton : MonoBehaviour
         DisplaySingleton.BasicRedModification(txt);
         DisplaySingleton.BasicMediumModification(txt);
         DisplaySingleton.BasicBottomModification(txt);
-        DisplaySingleton.NoOverFlowEtc(txt);
+        DisplaySingleton.NoOverflowEtc(txt);
     }
 
     void Update()

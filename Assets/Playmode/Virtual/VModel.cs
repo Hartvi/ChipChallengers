@@ -15,15 +15,54 @@ public class VModel
         }
     }
 
-    public VChip[] chips;
-    public VVar[] variables;
-    public string script;
+    private VChip[] _chips;
+    public VChip[] chips
+    {
+        get
+        {
+            return this._chips;
+        }
+        set
+        {
+            this._chips = value;
+            TriggerModelChanged();
+        }
+    }
+
+    private VVar[] _variables;
+    public VVar[] variables
+    {
+        get
+        {
+            return this._variables;
+        }
+        set
+        {
+            this._variables = value;
+            TriggerModelChanged();
+        }
+    }
+
+    private string _script;
+    public string script
+    {
+        get
+        {
+            return this._script;
+        }
+        set
+        {
+            this._script = value;
+            TriggerModelChanged();
+        }
+    }
 
     private VVar _SelectedVariable;
 
     private Action<string>[] SelectedActions = new Action<string>[] { };
     private Action<string>[] AddedActions = new Action<string>[] { };
     private Action<string>[] DeleteActions = new Action<string>[] { };
+    private Action<VModel>[] ModelChangedActions = new Action<VModel>[] { };
 
 
     private VChip _SelectedChip;
@@ -85,7 +124,6 @@ public class VModel
     public VModel()
     {
         this.variables = new VVar[] { VModel.EmptyVariable };
-        //this.chips
     }
 
     public static VModel FromLuaModel(string luaModel)
@@ -138,6 +176,20 @@ public class VModel
             {
                 virtualChip.parentChip = parentChips[0];
             }
+        }
+    }
+
+    public void AddModelChangedCallback(Action<VModel> action)
+    {
+        this.ModelChangedActions =  this.ModelChangedActions.AddWithoutDuplicate(action);
+        // add variable, add chip, change variable, change chip
+    }
+
+    void TriggerModelChanged()
+    {
+        foreach (var action in this.ModelChangedActions)
+        {
+            action(this);
         }
     }
 

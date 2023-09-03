@@ -95,7 +95,9 @@ public class VChip
 
         chipEnumToName = ArrayExtensions.ToDictionaryFromArrays(chipEnums, chipNames);
 
+        // chip_names[], chip_properties[][]
         VChip.chipData = LUALoader.LoadChipSpecification("chips.lua");
+        // chip_names[], option_names[][]
         VChip.optionNames = LUALoader.LoadChipSpecification("optionNames.lua");
 
         //PRINT.print(VChip.chipToPropertyDict.Keys);
@@ -119,6 +121,8 @@ public class VChip
     public List<VChip> children = new List<VChip>();
     [NonSerialized]
     public Dictionary<string, object> instanceProperties;
+    [NonSerialized]
+    public CommonChip rChip;
 
     //[Obsolete("Remove this in the future and load only through editor.")]
     public VChip(string[] keys, string[] vals, int orientation, VChip parentChip)
@@ -141,6 +145,30 @@ public class VChip
         //PRINT.print(id);
     }
 
+    public VChip(string chipType, LocalDirection localDirection, VChip parent)
+    {
+        string[] keys = new string[] { VChip.typeStr };
+        string[] vals = new string[] { chipType };
+
+        this.orientation = (int)localDirection;
+        this.parentChip = parent;
+        this.keys = keys;
+        this.vals = vals;
+
+        CheckAndSetVals();
+
+        if (parentChip != null)
+        {
+            this.id = parentChip.GetNewChildID(this);
+            this.parentId = parentChip.id;
+        }
+        else
+        {
+            this.id = "a";
+        }
+    }
+
+
     public bool TryGetProperty<T>(string key, out T val)
     {
         try
@@ -158,7 +186,28 @@ public class VChip
 
     public T GetProperty<T>(string key)
     {
+        string val = ArrayExtensions.AccessLikeDict(key, this.keys, this.vals);
+
+        PRINT.print($"type: {typeof(T)}, float: {typeof(float)}, are equal: {typeof(T) == typeof(float)}");
+        if (!this.instanceProperties.ContainsKey(key) && typeof(T) == typeof(float))
+        {
+            this.instanceProperties[key] = float.Parse(val);
+        }
+        if (!this.instanceProperties.ContainsKey(key) && typeof(T) == typeof(int))
+        {
+            this.instanceProperties[key] = int.Parse(val);
+        }
+        if (!this.instanceProperties.ContainsKey(key) && typeof(T) == typeof(string))
+        {
+            this.instanceProperties[key] = val;
+        }
+
+        PRINT.print($"key: {key}");
+        PRINT.print($"val: {this.instanceProperties[key]}");
+        PRINT.print($"type of val: {this.instanceProperties[key].GetType()}");
+        PRINT.print($"requested type: {typeof(T)}");
         return (T)(this.instanceProperties[key]);
+
     }
 
     public string GetNewChildID(VChip childChip)
@@ -285,60 +334,76 @@ public class VChip
 
     static string PropertyFormatMessage(string property, string value)
     {
-
-        string msg = null;
         switch (property)
         {
             case VChip.nameStr:
                 if (!StringHelpers.IsVariableName(value))
                 {
-                    msg = UIStrings.NotAVariableMsg(value);
+                    return UIStrings.NotAVariableMsg(value);
                 }
                 break;
             case VChip.colourStr:
+                if (StringHelpers.IsVariableName(value))
+                {
+                    return null;
+                }
+                if (StringHelpers.IsColourString(value))
+                {
+                    return null;
+                }
+
                 if (!StringHelpers.IsVariableName(value))
                 {
-                    msg = UIStrings.NotAVariableMsg(value);
+                    return UIStrings.NotAVariableMsg(value);
                 }
                 else if (!StringHelpers.IsColourString(value))
                 {
-                    msg = UIStrings.NotAColour(value);
+                    return UIStrings.NotAColour(value);
                 }
                 break;
             case VChip.angleStr:
             case VChip.valueStr:
+                if (StringHelpers.IsVariableName(value))
+                {
+                    return null;
+                }
+                if (StringHelpers.IsFloat(value))
+                {
+                    return null;
+                }
+
                 if (!StringHelpers.IsVariableName(value))
                 {
-                    msg = UIStrings.NotAVariableMsg(value);
+                    return UIStrings.NotAVariableMsg(value);
                 }
                 else if (!StringHelpers.IsFloat(value))
                 {
-                    msg = UIStrings.NotAFloat(value);
+                    return UIStrings.NotAFloat(value);
                 }
                 break;
             case VChip.springStr:
             case VChip.damperStr:
                 if (!StringHelpers.IsFloat(value))
                 {
-                    msg = UIStrings.NotAFloat(value);
+                    return UIStrings.NotAFloat(value);
                 }
                 break;
             case VChip.typeStr:
                 if (!VChip.chipNames.Contains(value))
                 {
-                    msg = UIStrings.NotAType(value);
+                    return UIStrings.NotAType(value);
                 }
                 break;
             case VChip.optionStr:
                 if (!StringHelpers.IsUInt(value))
                 {
-                    msg = UIStrings.NotAUInt(value);
+                    return UIStrings.NotAUInt(value);
                 }
                 break;
             default:
                 throw new ArgumentException($"Unknown chip property {property}.");
         }
-        return msg;
+        return null;
     }
 
     // Returns a string representing this VirtualChip as Lua code
@@ -391,9 +456,10 @@ public class VChip
 
         var keysList = luaTable.Keys;
         var valsList = luaTable.Values;
-        this.keys = keysList.Where((item, index) => indices.Contains(index)).Select(x=>x.String).ToArray();
-        this.vals = valsList.Where((item, index) => indices.Contains(index)).Select(x=>x.String).ToArray();
+        this.keys = keysList.Where((item, index) => indices.Contains(index)).Select(x => x.String).ToArray();
+        this.vals = valsList.Where((item, index) => indices.Contains(index)).Select(x => x.String).ToArray();
         this.CheckAndSetVals();
+        // TODO trigger model changed callback when variables and chips change
     }
 
     public static VChip[] FromLuaTables(Table[] luaTables)
