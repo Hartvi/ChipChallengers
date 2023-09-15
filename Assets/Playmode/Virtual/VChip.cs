@@ -35,19 +35,38 @@ public class VChip
 
     public static readonly Dictionary<string, Type> propertyTypes;
     public static readonly string[] allPropertiesStr = new string[] { "Angle", "Value", "Colour", "Spring", "Damper", "Option", "Name", "Type" };
-    public static readonly string[] allPropertiesDefaults = new string[] { "0", "0", "#000000", "0", "0", "0", "chip_name", "Chip" };
+    public static readonly string[] allPropertiesDefaults = new string[] { "0", "0", "#FFFFFF", "-1", "-1", "0", "chip_name", "Chip" };
     public static readonly string[] dynamicPropertiesStr = new string[] { "Angle", "Value", "Colour" };
     public static readonly string[] staticPropertiesStr = new string[] { "Spring", "Damper", "Option", "Name", "Type" };
     public static readonly CPR[] staticPropertiesEnum = new CPR[] { CPR.Spring, CPR.Damper, CPR.Option, CPR.Name, CPR.Type };
 
     public static readonly string[] chipNames = new string[] { "Chip", "Rudder", "Axle", "Telescope", "Wheel", "Fan", "Sensor", "Cowl" };
+
+    public static readonly CommonChip baseChip;
+    public const string baseChipName = "BaseChip";
+    
     public static readonly CTP[] chipEnums = new CTP[] { CTP.Chip, CTP.Rudder, CTP.Axle, CTP.Telescope, CTP.Wheel, CTP.Fan, CTP.Sensor, CTP.Cowl };
 
     public static readonly Dictionary<string, CPR> str2ChipProperty;
-    public static readonly Dictionary<string, CommonChip> chipTemplates;
+    public static readonly Dictionary<string, GameObject> chipTemplates;
     public static readonly ChipData chipData, optionNames;
 
     public static readonly Dictionary<CTP, string> chipEnumToName;
+
+    private VModel _MyModel;
+    
+    public VModel MyModel
+    {
+        get { return this._MyModel; }
+        set
+        {
+            //PRINT.print($"setting callback to model change trigger");
+            this.keys.SetSetListeners(new Action[] { value.TriggerModelChanged });
+            this.vals.SetSetListeners(new Action[] { value.TriggerModelChanged });
+            this._MyModel = value;
+            //value.TriggerModelChanged();
+        }
+    }
 
     public bool IsCore { get { return this.ChipType == VChip.coreStr; } }
     public string ChipType { get { return instanceProperties[typeStr] as string; } }
@@ -76,13 +95,18 @@ public class VChip
             {"Type",   CPR.Type},
         };
 
-        var tmpDict = new Dictionary<string, CommonChip>();
-        foreach (var chipName in chipNames)
+        var tmpDict = new Dictionary<string, GameObject>();
+
+        // base chip serves as base for all chips. The other chips are there purely for cosmetic reasons
+        VChip.baseChip = Resources.Load<GameObject>(VChip.chipsFolderStr + VChip.baseChipName).GetComponent<CommonChip>();
+
+        foreach (var chipName in VChip.chipNames)
         {
-            var resourceChipName = chipsFolderStr + chipName;
+            // "Chips/" + Chip/Rudder/Wheel/etc
+            var resourceChipName = VChip.chipsFolderStr + chipName;
             try
             {
-                var resourceObject = Resources.Load<GameObject>(resourceChipName).GetComponent<CommonChip>();
+                var resourceObject = Resources.Load<GameObject>(resourceChipName);
 
                 tmpDict.Add(chipName, resourceObject);
             }
@@ -91,9 +115,9 @@ public class VChip
                 throw new ArgumentNullException($"Couldn't load {resourceChipName} chip. Mayhaps it doesn't exist in the Resources folder?");
             }
         }
-        chipTemplates = tmpDict;
+        VChip.chipTemplates = tmpDict;
 
-        chipEnumToName = ArrayExtensions.ToDictionaryFromArrays(chipEnums, chipNames);
+        VChip.chipEnumToName = ArrayExtensions.ToDictionaryFromArrays(VChip.chipEnums, VChip.chipNames);
 
         // chip_names[], chip_properties[][]
         VChip.chipData = LUALoader.LoadChipSpecification("chips.lua");
@@ -106,8 +130,45 @@ public class VChip
     }
 
     // INSTANCE VARIABLES
-    public string[] keys;
-    public string[] vals;
+    private CustomArray<string> _keys;
+    public CustomArray<string> keys
+    {
+        get
+        {
+            return this._keys;
+        }
+        set
+        {
+            if(this._keys is null)
+            {
+                this._keys = value;
+            }
+            this._keys.ReplaceData(value);
+            //this._keys = value;
+            //PRINT.print($"Keys: {this._keys.Length}");
+            //PRINT.print($"value: {value}");
+            //value.SetSetListeners(new Action[] {});
+            //PRINT.print($"model: {MyModel == null}");
+            // TODO add this when the model is added, not the keys
+        }
+    }
+    private CustomArray<string> _vals;
+    public CustomArray<string> vals
+    {
+        get
+        {
+            return this._vals;
+        }
+        set
+        {
+            if(this._vals is null)
+            {
+                this._vals = value;
+            }
+            this._vals.ReplaceData(value);
+        }
+    }
+
     public string id = null;
     // CONNECTION DATA
     public int orientation = 0;
@@ -168,7 +229,6 @@ public class VChip
         }
     }
 
-
     public bool TryGetProperty<T>(string key, out T val)
     {
         try
@@ -186,7 +246,7 @@ public class VChip
 
     public T GetProperty<T>(string key)
     {
-        string val = ArrayExtensions.AccessLikeDict(key, this.keys, this.vals);
+        string val = ArrayExtensions.AccessLikeDict<string, string>(key, this.keys, this.vals);
 
         PRINT.print($"type: {typeof(T)}, float: {typeof(float)}, are equal: {typeof(T) == typeof(float)}");
         if (!this.instanceProperties.ContainsKey(key) && typeof(T) == typeof(float))

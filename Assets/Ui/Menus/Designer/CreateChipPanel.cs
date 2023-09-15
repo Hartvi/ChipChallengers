@@ -69,7 +69,7 @@ public class CreateChipPanel : BasePanel
 
         CommonChip.ClientCore.TriggerSpawn(vm, true);
 
-        this.editorMenu.SelectVChip(newChip.rChip);
+        this.editorMenu.SelectVChip(newChip.rChip.equivalentVirtualChip.id);
         this.gameObject.SetActive(false);
     }
 }

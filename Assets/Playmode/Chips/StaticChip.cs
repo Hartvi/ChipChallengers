@@ -59,9 +59,15 @@ public abstract class StaticChip : MonoBehaviour
         if(!VChip.chipTemplates.ContainsKey(type)) {
             throw new ArgumentException($"Chip of type {type} doesn't exist.");
         }
-        var newChip = Instantiate(VChip.chipTemplates[type]);
 
-        return newChip.gameObject.GetComponent<T>();
+        CommonChip baseChip = Instantiate(VChip.baseChip);
+
+        GameObject newChip = Instantiate(VChip.chipTemplates[type]);
+
+        newChip.transform.SetParent(baseChip.transform, false);
+        newChip.transform.localScale = Vector3.one;
+
+        return baseChip.gameObject.GetComponent<T>();
     }
 
 }

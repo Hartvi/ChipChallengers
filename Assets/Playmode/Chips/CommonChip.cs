@@ -22,25 +22,6 @@ public class CommonChip : AngleChip
 
     public bool IsOnClient { get { Debug.LogWarning($"TODO check if it's on client in multiplayer."); return true; } }
 
-    protected List<Action> _ModelUpdatedEvent;
-    public List<Action> ModelUpdatedEvent
-    {
-        get
-        {
-            if (!this.equivalentVirtualChip.IsCore)
-            {
-                throw new ArgumentException($"Cannot access ModelUpdatedEvent in non-core chip.");
-            }
-
-            if(this._ModelUpdatedEvent == null)
-            {
-                this._ModelUpdatedEvent = new List<Action>();
-            }
-
-            return _ModelUpdatedEvent;
-        }
-    }
-
     public bool IsFocusable
     {
         get
@@ -121,6 +102,7 @@ public class CommonChip : AngleChip
             return this._RealParent;
         }
     }
+    Action[] _AfterBuildActions = new Action[] { };
 
     // FUNCTIONS:
     public CommonChip[] AddChild(VChip childChip)
@@ -138,7 +120,7 @@ public class CommonChip : AngleChip
 
         // TODO fix get angle to take from `keys` and `values`
         float angle = newChild.GetAngle();
-        print($"chip: {childChip.ChipType}, angle: {angle}, child angle: {childChip.keys[0]}");
+        //print($"chip: {childChip.ChipType}, angle: {angle}, child angle: {childChip.keys[0]}");
 
         (Vector3 origin, Vector3 direction) = StaticChip.GetThisAxisOfRotationWrtParent(newChild);
         newChild.transform.RotateAround(origin, direction, angle);
@@ -174,6 +156,8 @@ public class CommonChip : AngleChip
 
     public CommonChip[] AddChildren()
     {
+        Color colour = this.GetColour();
+        this.GetComponentInChildren<MeshRenderer>().material.color = colour;
         List<CommonChip> chips = new List<CommonChip>();
         // when there are no Children left then the recursion stops
         foreach (VChip childChip in this.equivalentVirtualChip.children)
@@ -276,7 +260,7 @@ public class CommonChip : AngleChip
 
     public void TriggerSpawn(VModel virtualModel, bool freeze)
     {
-        print("TRIGGER SPAWN");
+        //print("TRIGGER SPAWN");
         this.VirtualModel = virtualModel;
         this.transform.localScale = StaticChip.ChipSize;
 
@@ -327,18 +311,15 @@ public class CommonChip : AngleChip
         VModel fromluadmodel = VModel.FromLuaModel(modelLua2);
         //print(modelLua2);
 
-        TriggerEvent(ModelUpdatedEvent);
         //c.transform.position = c.transform.position + Vector3.up;
         if (freeze)
         {
             CommonChip.FreezeModel();
         }
-    }
-    private void TriggerEvent(List<Action> acs)
-    {
-        foreach(var ev in acs)
+        foreach(var a in this._AfterBuildActions)
         {
-            ev();
+            print("after build action");
+            a();
         }
     }
 
@@ -352,6 +333,10 @@ public class CommonChip : AngleChip
         }
     }
 
+    public void SetAfterBuildListeners(Action[] actions)
+    {
+        this._AfterBuildActions = actions;
+    }
 
 
 }

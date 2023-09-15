@@ -5,6 +5,25 @@ using UnityEngine;
 
 public abstract class AngleChip : GeometricChip {
 
+    protected Color GetColour()
+    {
+        string colStr = ArrayExtensions.AccessLikeDict(VChip.colourStr, this.equivalentVirtualChip.keys, this.equivalentVirtualChip.vals);
+        if(colStr is null)
+        {
+            return Color.white;
+        }
+        if (ColorUtility.TryParseHtmlString(colStr, out Color col)) {
+            return col;
+        } 
+        else
+        {
+            print("Keys:");
+            PRINT.print(this.equivalentVirtualChip.keys);
+            print($"colour: {colStr}");
+            throw new NotImplementedException($"TODO: implement colours as variables and integers");
+        }
+    }
+
     protected float GetAngle() {
         // TODO: make it variable-compatible
         //float angle = (float)(this.equivalentVirtualChip.instanceProperties[VirtualChip.angleStr]);

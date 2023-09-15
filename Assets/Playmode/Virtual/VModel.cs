@@ -25,7 +25,11 @@ public class VModel
         set
         {
             this._chips = value;
-            TriggerModelChanged();
+            foreach(var v in value)
+            {
+                v.MyModel = this;
+            }
+            this.TriggerModelChanged();
         }
     }
 
@@ -39,7 +43,11 @@ public class VModel
         set
         {
             this._variables = value;
-            TriggerModelChanged();
+            foreach(var v in value)
+            {
+                v.MyModel = this;
+            }
+            this.TriggerModelChanged();
         }
     }
 
@@ -53,7 +61,7 @@ public class VModel
         set
         {
             this._script = value;
-            TriggerModelChanged();
+            this.TriggerModelChanged();
         }
     }
 
@@ -181,12 +189,14 @@ public class VModel
 
     public void AddModelChangedCallback(Action<VModel> action)
     {
-        this.ModelChangedActions =  this.ModelChangedActions.AddWithoutDuplicate(action);
+        PRINT.print($"Number of callbacks: {this.ModelChangedActions.Length}");
+        this.ModelChangedActions = this.ModelChangedActions.AddWithoutDuplicate(action);
         // add variable, add chip, change variable, change chip
     }
 
-    void TriggerModelChanged()
+    public void TriggerModelChanged()
     {
+        PRINT.print($"TRIGGER MODEL CHANGED");
         foreach (var action in this.ModelChangedActions)
         {
             action(this);
@@ -277,6 +287,29 @@ public class VModel
     public void AddDeleteVariableListener(Action<string> action)
     {
         this.DeleteActions = this.DeleteActions.Concat(new Action<string>[] { action }).ToArray();
+    }
+
+    public string SaveThisModelToFile(string modelName)
+    {
+        if (IOHelpers.ModelExists(modelName))
+        {
+            return UIStrings.ModelExists(modelName);
+        }
+        var modelLua = this.ToLuaString();
+
+        IOHelpers.SaveTextFile($"{modelName}.txt", modelLua);
+        return null;
+    }
+
+    public string LoadModelFromFile(string modelName)
+    {
+        if (!IOHelpers.ModelExists(modelName))
+        {
+            return null;
+        }
+
+        string luaModel = IOHelpers.LoadTextFile($"{modelName}.txt");
+        return luaModel;
     }
 
 }

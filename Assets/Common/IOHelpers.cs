@@ -5,6 +5,11 @@ using System.IO;
 
 public class IOHelpers
 {
+    public static bool ModelExists(string modelName)
+    {
+        return File.Exists(modelName);
+    }
+
     public static string LoadTextFile(string fileName)
     {
         // Get the full file path

@@ -11,8 +11,6 @@ GameObject:
   - component: {fileID: 3899163658571702771}
   - component: {fileID: 2420589966370618562}
   - component: {fileID: 3913282702218588705}
-  - component: {fileID: 5129022328417764777}
-  - component: {fileID: 4553511538369789950}
   m_Layer: 0
   m_Name: Axle
   m_TagString: Untagged
@@ -85,29 +83,3 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &5129022328417764777
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3803410701708488425}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &4553511538369789950
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3803410701708488425}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bf75288a61700944295c3422cd29df3a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  parentChip: {fileID: 0}

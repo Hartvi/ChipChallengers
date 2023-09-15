@@ -7,6 +7,25 @@ using MoonSharp.Interpreter;
 
 public class VVar
 {
+    private VModel _MyModel;
+    
+    [SetOnce]
+    public VModel MyModel
+    {
+        get { return this._MyModel; }
+        set
+        {
+            if(this._MyModel is null)
+            {
+                this._MyModel = value;
+            }
+            else
+            {
+                throw new InvalidOperationException("The property can only be set once.");
+            }
+        }
+    }
+
     public string name;
     public float defaultValue, maxValue, minValue, backstep;
 

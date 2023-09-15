@@ -48,6 +48,9 @@ public class VirtualChipTest : MonoBehaviour
         //print("core name: "+core.name);
         var VirtualModel = new VModel();
         VirtualModel.chips = new VChip[] { vc, vc2, vc3, vc4, vc5, vc6, vc7, vc8 };
+
+        VirtualModel.AddModelChangedCallback(x => core.TriggerSpawn(x, true));
+
         core.TriggerSpawn(VirtualModel, false);
         string vc8_str = "a=" + vc8.ToLuaString();
         print("lua string: " + vc8_str);

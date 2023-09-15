@@ -58,7 +58,17 @@ public static class UIStrings
 
     public static string OptionTooHigh(string value)
     {
-        return $"Option {value} is a too high value";
+        return $"Option {value} is too high of a value.";
+    }
+
+    public static string ModelExists(string modelName)
+    {
+        return $"Model {modelName} already exists.";
+    }
+
+    public static string ModelExistsNot(string modelName)
+    {
+        return $"Model {modelName} doesn't exist.";
     }
 
 }

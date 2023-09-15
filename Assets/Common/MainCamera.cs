@@ -10,7 +10,7 @@ public class MainCamera : MonoBehaviour
         core = GameObject.CreatePrimitive(PrimitiveType.Cube).AddComponent<CommonChip>();
         core.gameObject.AddComponent<Rigidbody>();
         core.name = UIStrings.Core;
-        print($"Core: {core}");
+        //print($"Core: {core}");
     }
     void Start()
     {

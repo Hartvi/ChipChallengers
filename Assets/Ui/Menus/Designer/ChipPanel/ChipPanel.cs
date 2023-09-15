@@ -92,7 +92,7 @@ public class ChipPanel : BasePanel
 
             inputs[i] = valueTxt;
 
-            Debug.LogWarning($"Todo: add callback to update chip values.");
+            //Debug.LogWarning($"Todo: add callback to update chip values.");
         }
 
         TopProp.StackFrom(NameItem.Siblings<ItemBase>(takeInactive: false));
