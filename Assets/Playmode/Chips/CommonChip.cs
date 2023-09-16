@@ -110,6 +110,7 @@ public class CommonChip : AngleChip
         var childType = childChip.ChipType;
 
         CommonChip newChild = GeometricChip.InstantiateChip<CommonChip>(childType);
+        print($"new child: {newChild}, id: {childChip.id}");
 
         newChild.equivalentVirtualChip = childChip;
         newChild.SetParent(this);
@@ -160,7 +161,8 @@ public class CommonChip : AngleChip
         this.GetComponentInChildren<MeshRenderer>().material.color = colour;
         List<CommonChip> chips = new List<CommonChip>();
         // when there are no Children left then the recursion stops
-        foreach (VChip childChip in this.equivalentVirtualChip.children)
+        //print($"Number of children: {this.equivalentVirtualChip.children.Count}");
+        foreach (VChip childChip in this.equivalentVirtualChip.Children)
         {
             chips.AddRange(this.AddChild(childChip));
         }
@@ -260,7 +262,7 @@ public class CommonChip : AngleChip
 
     public void TriggerSpawn(VModel virtualModel, bool freeze)
     {
-        //print("TRIGGER SPAWN");
+        print("TRIGGER SPAWN");
         this.VirtualModel = virtualModel;
         this.transform.localScale = StaticChip.ChipSize;
 

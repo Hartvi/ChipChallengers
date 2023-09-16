@@ -15,28 +15,33 @@ public class EditorMenu : BaseMenu
     private Action<VChip>[] HighlightCallbacks = new Action<VChip>[] { };
 
     public CreateChipPanel CreateChipPanel;
+    private LoadPanel LoadPanel;
 
     protected override void Setup()
     {
         base.Setup();
-        this.vProp = new VirtualProp(PropType.Panel, 1f, left,
-            new VirtualProp(PropType.Panel, 0.25f, up,
-                new VirtualProp(PropType.Panel, 0.9f, down,
-                    new VirtualProp(PropType.Panel, -1f, zero,
-                        new VirtualProp(PropType.Panel, 1f, typeof(ChipPanel)),
-                        new VirtualProp(PropType.Panel, 1f, typeof(VariablePanel)),
-                        new VirtualProp(PropType.Panel, 1f, typeof(ControlsPanel)),
-                        new VirtualProp(PropType.Panel, 1f, typeof(ScriptPanel))
+        //this.vProp = new VirtualProp(PropType.Panel, 1f, left,
+        this.vProp = new VirtualProp(PropType.Panel, 1f, zero,
+            new VirtualProp(PropType.Panel, 1f, left,
+                new VirtualProp(PropType.Panel, 0.25f, up,
+                    new VirtualProp(PropType.Panel, 0.9f, down,
+                        new VirtualProp(PropType.Panel, -1f, zero,
+                            new VirtualProp(PropType.Panel, 1f, typeof(ChipPanel)),
+                            new VirtualProp(PropType.Panel, 1f, typeof(VariablePanel)),
+                            new VirtualProp(PropType.Panel, 1f, typeof(ControlsPanel)),
+                            new VirtualProp(PropType.Panel, 1f, typeof(ScriptPanel))
+                        )
+                    ),
+                    new VirtualProp(PropType.Panel, -1f, right, typeof(PanelSwitcher),
+                        new VirtualProp(PropType.Button, 1/4f),
+                        new VirtualProp(PropType.Button, 1/4f),
+                        new VirtualProp(PropType.Button, 1/4f),
+                        new VirtualProp(PropType.Button, -1f)
                     )
                 ),
-                new VirtualProp(PropType.Panel, -1f, right, typeof(PanelSwitcher),
-                    new VirtualProp(PropType.Button, 1/4f),
-                    new VirtualProp(PropType.Button, 1/4f),
-                    new VirtualProp(PropType.Button, 1/4f),
-                    new VirtualProp(PropType.Button, -1f)
-                )
+                new VirtualProp(PropType.Panel, 0.125f, typeof(CreateChipPanel))
             ),
-            new VirtualProp(PropType.Panel, 0.125f, typeof(CreateChipPanel))
+            new VirtualProp(PropType.Panel, 1f, typeof(LoadPanel))
         );
     }
 
@@ -44,6 +49,7 @@ public class EditorMenu : BaseMenu
     {
         EditorMenu.Instance = this;
         this.CreateChipPanel = this.GetComponentInChildren<CreateChipPanel>();
+        this.LoadPanel = this.GetComponentInChildren<LoadPanel>();
 
         this.AddSelectionCallback(CommonChip.FreezeModel);
 
@@ -178,6 +184,11 @@ public class EditorMenu : BaseMenu
             else if (Input.GetKeyDown(KeyCode.S))
             {
 
+            }
+
+            if (Input.GetKeyDown(KeyCode.L))
+            {
+                LoadPanel.gameObject.SetActive(true);
             }
         }
 

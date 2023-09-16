@@ -82,7 +82,7 @@ public class BaseItemScroll : BasePanel
         //print($"size: {this.RT.sizeDelta} stack direction: {StackDirection} number of display items: {this.NumberOfDisplayItems}");
         this.realSize = Mathf.Max(Mathf.Abs(this.RT.sizeDelta.x * StackDirection.x), Mathf.Abs(this.RT.sizeDelta.y * StackDirection.y));
         this.realItemSize = this.realSize / NumberOfDisplayItems;
-        this.realEdge = - 0.5f * this.realSize * StackDirection;
+        this.realEdge = -0.5f * this.realSize * StackDirection;
         //print($"realsize: {this.realSize}, real edge: {this.realEdge}, real item size: {this.realItemSize}");
 
         for(int i = 0; i < this.items.Length; ++i)

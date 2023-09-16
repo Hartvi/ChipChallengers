@@ -178,8 +178,11 @@ public class VChip
     public object[] objectVals;
     [NonSerialized] // TODO: link this from the text saved version
     public VChip parentChip;
-    [NonSerialized]
-    public List<VChip> children = new List<VChip>();
+    //[NonSerialized]
+    //private List<VChip> _childrenList = new List<VChip>();
+
+    public VChip[] Children = { };
+
     [NonSerialized]
     public Dictionary<string, object> instanceProperties;
     [NonSerialized]
@@ -277,15 +280,18 @@ public class VChip
             throw new FieldAccessException($"VirtualChip's id is null.");
         }
 
-        if (this.children.Count == 0)
+        if (this.Children.Length == 0)
         {
-            this.children.Add(childChip);
+            this.Children = this.Children.Append(childChip).ToArray();
             return id + "a";
         }
         else
         {
-            var lastSibling = this.children.Last();
-            this.children.Add(childChip);
+            int indexOfLargestSibling = StringHelpers.GetIndexOfLargest(this.Children.Select(x => x.id).ToArray());
+            
+            VChip lastSibling = this.Children[indexOfLargestSibling];
+
+            this.Children = this.Children.Append(childChip).ToArray();
 
             var olderSiblingId = lastSibling.id;
             return olderSiblingId.Substring(0, olderSiblingId.Length - 1) + (char)(olderSiblingId.Last() + 1);

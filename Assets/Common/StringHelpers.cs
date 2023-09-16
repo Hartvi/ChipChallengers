@@ -1,9 +1,26 @@
 using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public static class StringHelpers {
+public static class StringHelpers
+{
+    public static string GetLargest(string[] input)
+    {
+        return input.OrderBy(s => s.Last()).Last();
+    }
+
+    public static int GetIndexOfLargest(string[] input)
+    {
+        var sorted = input
+            .Select((value, index) => new { value, index })
+            .OrderBy(item => item.value.Last())
+            .Last();
+
+        return sorted.index;
+    }
+
     public static bool IsFirstLetterAlphabeticOrUnderscore(this string input) {
         if (string.IsNullOrEmpty(input)) {
             throw new ArgumentException("Input string cannot be null or empty.");

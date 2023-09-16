@@ -34,15 +34,16 @@ public abstract class GeometricChip : StaticChip
         }
     }
 
-    public VChip[] AllVirtualChips
-    {
-        get
-        {
-            if (!this.equivalentVirtualChip.IsCore) throw new FieldAccessException("Trying to access all virtual chips from a non-core object.");
-            var virtualChips = this.AllChips.Select(child => child.equivalentVirtualChip).ToArray();
-            return virtualChips;
-        }
-    }
+    //public VChip[] AllVirtualChips
+    //{
+    //    get
+    //    {
+    //        if (!this.equivalentVirtualChip.IsCore) throw new FieldAccessException("Trying to access all virtual chips from a non-core object.");
+
+    //        var virtualChips = this.AllChips.Select(child => child.equivalentVirtualChip).ToArray();
+    //        return virtualChips;
+    //    }
+    //}
 
     public VVar[] AllVirtualVariables
     {

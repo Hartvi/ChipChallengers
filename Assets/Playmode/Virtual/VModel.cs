@@ -24,7 +24,19 @@ public class VModel
         }
         set
         {
+            PRINT.print($"Setting chips to length: {value.Length}");
             this._chips = value;
+            for(int i = 0; i < this._chips.Length; ++i)
+            {
+                // TODO link children to parents since we have all chips at once so we can quickly build the model
+                VChip chip = this._chips[i];
+                PRINT.print($"Id: {chip.id}");
+                for (int k = 0; k < this._chips.Length; ++k)
+                {
+                    VChip[] children = this._chips.Where(x => x.parentId == chip.id).ToArray();
+                    chip.Children = children;
+                }
+            }
             foreach(var v in value)
             {
                 v.MyModel = this;
@@ -141,6 +153,7 @@ public class VModel
         var scriptObj = new Script();
         scriptObj.DoString(a);
         var luaA = scriptObj.Globals["a"];
+        //PRINT.print($"MODEL:");
         //PRINT.print((Table)(luaA));
         return new VModel((Table)luaA);
     }
@@ -152,6 +165,10 @@ public class VModel
         {
             this.chips = chipsTable.Values.Select(t => new VChip(t.Table)).ToArray();
         }
+        else
+        {
+            throw new NullReferenceException($"Chips is null!");
+        }
 
         var variablesTable = (Table)luaTable["variables"];
         if (variablesTable != null)
@@ -162,15 +179,25 @@ public class VModel
             PRINT.print("variables:");
             PRINT.print(this.variables);
         }
+        else
+        {
+            throw new NullReferenceException($"Variables is null!");
+        }
 
         this.script = (string)luaTable["script"];
         bool coreFound = false;
+        PRINT.print($"Number of chips: {this.chips.Length}");
+        foreach (var virtualChip in this.chips)
+        {
+            PRINT.print($"Id: {virtualChip.id}");
+            PRINT.print($"parent id: {virtualChip.parentId}");
+        }
         foreach(var virtualChip in this.chips)
         {
             var parentChips = this.chips.Where(x => x.id == virtualChip.parentId).ToArray();
             if (parentChips.Length > 1)
             {
-                throw new ArgumentException($"Chip {virtualChip} cannot have more than one Parent: {PRINT.MakePrintable(parentChips)}.");
+                throw new ArgumentException($"Chip {virtualChip} cannot have more than one parent, id: {virtualChip.parentId}, num: {PRINT.MakePrintable(parentChips)}.");
             }
             else if (parentChips.Length == 0)
             {
@@ -189,14 +216,14 @@ public class VModel
 
     public void AddModelChangedCallback(Action<VModel> action)
     {
-        PRINT.print($"Number of callbacks: {this.ModelChangedActions.Length}");
+        //PRINT.print($"Number of callbacks: {this.ModelChangedActions.Length}");
         this.ModelChangedActions = this.ModelChangedActions.AddWithoutDuplicate(action);
         // add variable, add chip, change variable, change chip
     }
 
     public void TriggerModelChanged()
     {
-        PRINT.print($"TRIGGER MODEL CHANGED");
+        //PRINT.print($"TRIGGER MODEL CHANGED");
         foreach (var action in this.ModelChangedActions)
         {
             action(this);
@@ -297,19 +324,19 @@ public class VModel
         }
         var modelLua = this.ToLuaString();
 
-        IOHelpers.SaveTextFile($"{modelName}.txt", modelLua);
+        IOHelpers.SaveModel(modelName, modelLua);
         return null;
     }
 
-    public string LoadModelFromFile(string modelName)
+    public static VModel LoadModelFromFile(string modelName)
     {
         if (!IOHelpers.ModelExists(modelName))
         {
             return null;
         }
 
-        string luaModel = IOHelpers.LoadTextFile($"{modelName}.txt");
-        return luaModel;
+        string luaModel = IOHelpers.LoadModel(modelName);
+        return VModel.FromLuaModel(luaModel);
     }
 
 }
