@@ -77,7 +77,7 @@ public abstract class GeometricChip : StaticChip
         }
         set
         {
-            print($"set virtual model");
+            //print($"set virtual model");
             this._VirtualModel = value;
             this.equivalentVirtualChip = value.Core;
         }

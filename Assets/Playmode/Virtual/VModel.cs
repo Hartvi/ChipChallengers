@@ -24,13 +24,13 @@ public class VModel
         }
         set
         {
-            PRINT.print($"Setting chips to length: {value.Length}");
+            //PRINT.print($"Setting chips to length: {value.Length}");
             this._chips = value;
             for(int i = 0; i < this._chips.Length; ++i)
             {
                 // TODO link children to parents since we have all chips at once so we can quickly build the model
                 VChip chip = this._chips[i];
-                PRINT.print($"Id: {chip.id}");
+                //PRINT.print($"Id: {chip.id}");
                 for (int k = 0; k < this._chips.Length; ++k)
                 {
                     VChip[] children = this._chips.Where(x => x.parentId == chip.id).ToArray();
@@ -176,7 +176,7 @@ public class VModel
             //PRINT.print(variablesTable.Values.Count());
             this.variables = VVar.FromLuaTables(variablesTable.Values.Select(x => x.Table).ToArray());
             // TODO VARIABLES
-            PRINT.print("variables:");
+            PRINT.print("todo: variables:");
             PRINT.print(this.variables);
         }
         else
@@ -186,12 +186,12 @@ public class VModel
 
         this.script = (string)luaTable["script"];
         bool coreFound = false;
-        PRINT.print($"Number of chips: {this.chips.Length}");
-        foreach (var virtualChip in this.chips)
-        {
-            PRINT.print($"Id: {virtualChip.id}");
-            PRINT.print($"parent id: {virtualChip.parentId}");
-        }
+        //PRINT.print($"Number of chips: {this.chips.Length}");
+        //foreach (var virtualChip in this.chips)
+        //{
+        //    PRINT.print($"Id: {virtualChip.id}");
+        //    PRINT.print($"parent id: {virtualChip.parentId}");
+        //}
         foreach(var virtualChip in this.chips)
         {
             var parentChips = this.chips.Where(x => x.id == virtualChip.parentId).ToArray();
@@ -318,10 +318,6 @@ public class VModel
 
     public string SaveThisModelToFile(string modelName)
     {
-        if (IOHelpers.ModelExists(modelName))
-        {
-            return UIStrings.ModelExists(modelName);
-        }
         var modelLua = this.ToLuaString();
 
         IOHelpers.SaveModel(modelName, modelLua);

@@ -16,6 +16,7 @@ public class EditorMenu : BaseMenu
 
     public CreateChipPanel CreateChipPanel;
     private LoadPanel LoadPanel;
+    private SavePanel SavePanel;
 
     protected override void Setup()
     {
@@ -41,7 +42,8 @@ public class EditorMenu : BaseMenu
                 ),
                 new VirtualProp(PropType.Panel, 0.125f, typeof(CreateChipPanel))
             ),
-            new VirtualProp(PropType.Panel, 1f, typeof(LoadPanel))
+            new VirtualProp(PropType.Panel, 1f, typeof(LoadPanel)),
+            new VirtualProp(PropType.Panel, 1f, typeof(SavePanel))
         );
     }
 
@@ -49,7 +51,9 @@ public class EditorMenu : BaseMenu
     {
         EditorMenu.Instance = this;
         this.CreateChipPanel = this.GetComponentInChildren<CreateChipPanel>();
+
         this.LoadPanel = this.GetComponentInChildren<LoadPanel>();
+        this.SavePanel = this.GetComponentInChildren<SavePanel>();
 
         this.AddSelectionCallback(CommonChip.FreezeModel);
 
@@ -178,17 +182,17 @@ public class EditorMenu : BaseMenu
         {
             if (Application.isEditor && Input.GetKeyDown(KeyCode.E))
             {
-                // TODO save model
-                //CommonChip.ClientCore.VirtualModel.SaveThisModelToFile();
+                this.SavePanel.gameObject.SetActive(true);
             }
             else if (Input.GetKeyDown(KeyCode.S))
             {
 
+                this.SavePanel.gameObject.SetActive(true);
             }
 
             if (Input.GetKeyDown(KeyCode.L))
             {
-                LoadPanel.gameObject.SetActive(true);
+                this.LoadPanel.gameObject.SetActive(true);
             }
         }
 
@@ -262,7 +266,8 @@ public class EditorMenu : BaseMenu
 
         if(cc is null)
         {
-            throw new NullReferenceException($"Chip with id {chipId} does not exist.");
+            cc = CommonChip.ClientCore;
+            //throw new NullReferenceException($"Chip with id {chipId} does not exist.");
         }
         //print($"Selected chip type: {cc.equivalentVirtualChip.ChipType}.");
         //print(cc.transform.rotation.eulerAngles);

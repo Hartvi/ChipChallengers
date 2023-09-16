@@ -35,7 +35,7 @@ public abstract class AngleChip : GeometricChip {
         
         if (angleStr is null) return 0f;
 
-        print($"anglestr: {angleStr}");
+        //print($"anglestr: {angleStr}");
         
         float angle;
         

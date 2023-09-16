@@ -48,6 +48,11 @@ public class DisplaySingleton : MonoBehaviour
         txt.fontSize = UIUtils.MediumFontSize;
     }
 
+    public static void BasicOrangeModification(TMP_Text txt)
+    {
+        txt.color = Color.red + 0.5f * Color.green;
+    }
+
     public static void BasicRedModification(TMP_Text txt)
     {
         txt.color = Color.red;
@@ -71,10 +76,17 @@ public class DisplaySingleton : MonoBehaviour
         DisplaySingleton.BasicBottomModification(txt);
         DisplaySingleton.NoOverflowEtc(txt);
     }
+    public static void WarnMsgModification(TMP_Text txt)
+    {
+        DisplaySingleton.BasicOrangeModification(txt);
+        DisplaySingleton.BasicMediumModification(txt);
+        DisplaySingleton.BasicBottomModification(txt);
+        DisplaySingleton.NoOverflowEtc(txt);
+    }
 
     void Update()
     {
-        if(Time.time - this.lastTime > this.interval)
+        if(Input.GetKeyDown(KeyCode.Escape) || (Time.time - this.lastTime > this.interval))
         {
             this.gameObject.SetActive(false);
             this.text.gameObject.SetActive(false);

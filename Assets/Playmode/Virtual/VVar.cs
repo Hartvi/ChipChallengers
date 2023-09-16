@@ -7,24 +7,26 @@ using MoonSharp.Interpreter;
 
 public class VVar
 {
-    private VModel _MyModel;
+    public VModel MyModel;
+    //private VModel _MyModel;
     
-    [SetOnce]
-    public VModel MyModel
-    {
-        get { return this._MyModel; }
-        set
-        {
-            if(this._MyModel is null)
-            {
-                this._MyModel = value;
-            }
-            else
-            {
-                throw new InvalidOperationException("The property can only be set once.");
-            }
-        }
-    }
+    //// set once to recreate the variable every tiem a new model is made/rebuilt
+    //[SetOnce]
+    //public VModel MyModel
+    //{
+    //    get { return this._MyModel; }
+    //    set
+    //    {
+    //        if(this._MyModel is null)
+    //        {
+    //            this._MyModel = value;
+    //        }
+    //        else
+    //        {
+    //            throw new InvalidOperationException("The property can only be set once.");
+    //        }
+    //    }
+    //}
 
     public string name;
     public float defaultValue, maxValue, minValue, backstep;
@@ -94,10 +96,35 @@ public class VVar
             throw new ArgumentException("vals must contain at least 5 elements");
 
         this.name = vals[0];
-        this.defaultValue = float.Parse(vals[1]);
-        this.minValue = float.Parse(vals[2]);
-        this.maxValue = float.Parse(vals[3]);
-        this.backstep = float.Parse(vals[4]);
+        float defaultValue;
+        if (!float.TryParse(vals[1], out defaultValue))
+        {
+            defaultValue = 0f;
+        }
+
+        float minValue;
+        if (!float.TryParse(vals[2], out minValue))
+        {
+            minValue = 0f;
+        }
+
+        float maxValue;
+        if (!float.TryParse(vals[3], out maxValue))
+        {
+            maxValue = 0f;
+        }
+
+        float backstep;
+        if (!float.TryParse(vals[4], out backstep))
+        {
+            backstep = 0f;
+        }
+
+        this.defaultValue = defaultValue;
+        this.minValue = minValue;
+        this.maxValue = maxValue;
+        this.backstep = backstep;
+
     }
     public override string ToString()
     {

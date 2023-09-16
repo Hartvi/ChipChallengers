@@ -11,26 +11,43 @@ public class LoadPanel : BaseScrollMenu
     protected override void Start()
     {
         base.Start();
-        // TODO:
-        // load all models from folder models and display them*
-        // on click 'ok button': load the corresponding file
-        // on click cancel: hide this menu
 
-        this.itemScroll.SetupItemList(LoadModel, Screen.height / 70, IOHelpers.GetAllModels());
+        this.itemScroll.SetupItemList(FillInput, Screen.height / 70, IOHelpers.GetAllModels());
 
-        this.btns[0].text.text = "OK";
-        this.btns[0].btn.onClick.RemoveAllListeners();
         this.btns[0].btn.onClick.AddListener(this.RebuildWithNewModel);
 
-        this.btns[1].text.text = "CANCEL";
-        this.btns[1].btn.onClick.RemoveAllListeners();
         this.btns[1].btn.onClick.AddListener(this.DeactivateLoadPanel);
-        this.gameObject.SetActive(false);
+
+        this.scrollbar = this.itemScroll.Siblings<BaseScrollbar>(false)[0];
+
+        this.scrollbar.scrollbar.onValueChanged.AddListener(this.itemScroll.Scroll);
+        this.itemScroll.Scroll(0f);
+        this.scrollbar.scrollbar.value = 0f;
+
+        this.input.placeholder.SetText("Enter model name");
     }
+
+    public override void OnEnable()
+    {
+        if (this.itemScroll is not null) this.itemScroll.virtualContainer.UpdateLabels(IOHelpers.GetAllModels());
+    }
+
 
     void RebuildWithNewModel()
     {
-        if(this.loadedModel == null)
+        VModel model = null;
+        try
+        {
+            model = VModel.LoadModelFromFile(this.input.input.text);
+        }
+        catch
+        {
+            UnityEngine.Debug.LogWarning($"Model could not be loaded.");
+            DisplaySingleton.Instance.DisplayText(this.ModelDoesNotExist, 3f);
+        }
+
+        this.loadedModel = model;
+        if (this.loadedModel == null)
         {
             // TODO: show error
             DisplaySingleton.Instance.DisplayText(this.ModelIsInvalid, 3f);
@@ -48,22 +65,9 @@ public class LoadPanel : BaseScrollMenu
         this.DeactivateLoadPanel();
     }
 
-    void LoadModel(string modelName)
+    void FillInput(string modelName)
     {
-        //string luaModel = IOHelpers.LoadModel(modelName);
-        //print($"Lua model:\n{luaModel}");
-        VModel model = null;
-        try
-        {
-            model = VModel.LoadModelFromFile(modelName);
-        }
-        catch
-        {
-            UnityEngine.Debug.LogWarning($"Model could not be loaded.");
-            DisplaySingleton.Instance.DisplayText(this.ModelDoesNotExist, 3f);
-        }
-        //print($"Model: {model}");
-        this.loadedModel = model;
+        this.input.input.SetTextWithoutNotify(modelName);
     }
 
     void ModelDoesNotExist(TMP_Text txt)
@@ -77,10 +81,5 @@ public class LoadPanel : BaseScrollMenu
         DisplaySingleton.ErrorMsgModification(txt);
         txt.SetText("Model is invalid.");
     }
-
-    void DeactivateLoadPanel()
-    {
-        this.gameObject.SetActive(false);
-    }
-
 }
+

@@ -110,7 +110,7 @@ public class CommonChip : AngleChip
         var childType = childChip.ChipType;
 
         CommonChip newChild = GeometricChip.InstantiateChip<CommonChip>(childType);
-        print($"new child: {newChild}, id: {childChip.id}");
+        //print($"new child: {newChild}, id: {childChip.id}");
 
         newChild.equivalentVirtualChip = childChip;
         newChild.SetParent(this);
@@ -303,14 +303,14 @@ public class CommonChip : AngleChip
 //        //DynValue c = newScript.Globals.Get("c");
 //        print($"dyn: {dyn}, a: ");
 //        PRINT.print(((Table)a.Table[1]).Keys);
-        var modelLua = this.VirtualModel.ToLuaString();
-        IOHelpers.SaveTextFile("text.txt", modelLua);
-        var modelLua2 = IOHelpers.LoadTextFile("text.txt");
-        //print(modelLua);
-        //var newScript = new Script();
-        //DynValue a = newScript.DoString(modelLua);
-        //print($"dyn: {a}, a: ");
-        VModel fromluadmodel = VModel.FromLuaModel(modelLua2);
+        //var modelLua = this.VirtualModel.ToLuaString();
+        //IOHelpers.SaveTextFile("text.txt", modelLua);
+        //var modelLua2 = IOHelpers.LoadTextFile("text.txt");
+        ////print(modelLua);
+        ////var newScript = new Script();
+        ////DynValue a = newScript.DoString(modelLua);
+        ////print($"dyn: {a}, a: ");
+        //VModel fromluadmodel = VModel.FromLuaModel(modelLua2);
         //print(modelLua2);
 
         //c.transform.position = c.transform.position + Vector3.up;

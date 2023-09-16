@@ -9,7 +9,19 @@ public class IOHelpers
     public const string ModelsDirectoryName = "Models/";
     public const string ModelFileType = "txt";
 
-    public static void SaveModel(string modelName, string modelString) {
+    public static string EnsureFileExtension(string fileName)
+    {
+        string extension = Path.GetExtension(fileName);
+
+        if (string.IsNullOrEmpty(extension))
+        {
+            return fileName + ".txt";
+        }
+
+        return fileName;
+    }
+
+public static void SaveModel(string modelName, string modelString) {
         // leave the checking of the existence of the file to the UI part of the program
         IOHelpers.SaveTextFile(Path.Join(ModelsDirectoryName, modelName), modelString);
     }
@@ -24,7 +36,7 @@ public class IOHelpers
         string ModelsDir = Path.Join(Application.streamingAssetsPath, IOHelpers.ModelsDirectoryName);
 
         DirectoryInfo d = new DirectoryInfo(ModelsDir);
-        FileInfo[] fi = d.GetFiles();
+        FileInfo[] fi = d.GetFiles("*.*").Where(f => !f.Extension.Equals(".meta")).ToArray();
 
         return fi.Select(x => x.Name).ToArray();
     }

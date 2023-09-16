@@ -74,12 +74,12 @@ public class CustomArray<T> : IList<T>
         get { return _vals[index]; }
         set
         {
-            PRINT.print($"setting element {index}");
+            //PRINT.print($"setting element {index}");
             _vals[index] = value;
-            PRINT.print($"index: {index}, new val: {value}");
+            //PRINT.print($"index: {index}, new val: {value}");
             if (this._actions is not null)
             {
-                PRINT.print($"Actions: {this._actions.Length}");
+                //PRINT.print($"Actions: {this._actions.Length}");
                 for (int i = 0; i < this._actions.Length; ++i)
                 {
                     this._actions[i]();
