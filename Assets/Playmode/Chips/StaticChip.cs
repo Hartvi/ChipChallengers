@@ -11,52 +11,96 @@ public abstract class StaticChip : MonoBehaviour
     public static readonly Vector3 ChipSize = new Vector3(ChipSide, 0.02f * ChipSide, ChipSide);
     public const string inverseStr = "inverse";
 
-    public static Vector3 OrientationToLocalOffset(int orientation) { 
-        switch(orientation) {
-            case 0: return Vector3.forward;
-            case 1: return Vector3.left;
-            case 2: return Vector3.back;
-            case 3: return Vector3.right;
+    public static Vector3 OrientationToLocalOffset(int orientation)
+    {
+        switch ((LocalDirection)orientation)
+        {
+            case LocalDirection.North: return Vector3.forward;
+            case LocalDirection.West: return Vector3.left;
+            case LocalDirection.South: return Vector3.back;
+            case LocalDirection.East: return Vector3.right;
             default: throw new ArgumentException($"Orientation cannot be outside [0, 3]; you are attempting {orientation}");
         }
     }
 
-    public static Vector3 OrientationToLocalAxisDirection(int orientation) { 
-        switch(orientation) {
-            case 0: return Vector3.left;
-            case 1: return Vector3.back;
-            case 2: return Vector3.right;
-            case 3: return Vector3.forward;
-            default: throw new ArgumentException($"Orientation cannot be outside [0, 3]; you are attempting {orientation}");
-        }
-    }
-    public static Vector3 OrientationToLocalAxisOrigin(int orientation) {
-        switch (orientation) {
-            case 0: return 0.5f*Vector3.forward;
-            case 1: return 0.5f*Vector3.left;
-            case 2: return 0.5f*Vector3.back;
-            case 3: return 0.5f*Vector3.right;
+    public static Vector3 OrientationToLocalAxisDirectionChip(int orientation)
+    {
+        switch ((LocalDirection)orientation)
+        {
+            case LocalDirection.North: return Vector3.left;
+            case LocalDirection.West: return Vector3.back;
+            case LocalDirection.South: return Vector3.right;
+            case LocalDirection.East: return Vector3.forward;
             default: throw new ArgumentException($"Orientation cannot be outside [0, 3]; you are attempting {orientation}");
         }
     }
 
-    public static Vector3 GetThisGlobalOffsetWrtParent(GeometricChip gc) {
-        var localOffset = OrientationToLocalOffset(gc.equivalentVirtualChip.orientation);
+    public static Vector3 OrientationToLocalAxisDirectionRudder()
+    {
+        return Vector3.down;
+    }
+
+    public static Vector3 OrientationToLocalAxisDirectionAxle(int orientation)
+    {
+        switch ((LocalDirection)orientation)
+        {
+            case LocalDirection.North: return Vector3.back;
+            case LocalDirection.West: return Vector3.right;
+            case LocalDirection.South: return Vector3.forward;
+            case LocalDirection.East: return Vector3.left;
+            default: throw new ArgumentException($"Orientation cannot be outside [0, 3]; you are attempting {orientation}");
+        }
+    }
+
+    public static Vector3 OrientationToLocalAxisOrigin(int orientation)
+    {
+        switch ((LocalDirection)orientation)
+        {
+            case LocalDirection.North: return 0.5f * Vector3.forward;
+            case LocalDirection.West: return 0.5f * Vector3.left;
+            case LocalDirection.South: return 0.5f * Vector3.back;
+            case LocalDirection.East: return 0.5f * Vector3.right;
+            default: throw new ArgumentException($"Orientation cannot be outside [0, 3]; you are attempting {orientation}");
+        }
+    }
+
+    public static Vector3 GetThisGlobalOffsetWrtParent(GeometricChip gc)
+    {
+        var localOffset = StaticChip.OrientationToLocalOffset(gc.equivalentVirtualChip.orientation);
+
         Vector3 newGlobalPosition = gc.parentChip.transform.TransformPoint(localOffset);
+
         return newGlobalPosition;
     }
 
-    public static (Vector3, Vector3) GetThisAxisOfRotationWrtParent(GeometricChip gc) {
-        var localAxisDirection = OrientationToLocalAxisDirection(gc.equivalentVirtualChip.orientation);
-        var localAxisOrigin = OrientationToLocalAxisOrigin(gc.equivalentVirtualChip.orientation);
-        //var localAxisTarget = localAxisOrigin + localAxisDirection;
+    public static (Vector3, Vector3) GetThisAxisOfRotationWrtParent(GeometricChip gc, CTP ctp)
+    {
+        Vector3 localAxisDirection;
+
+        switch (ctp)
+        {
+            case CTP.Axle:
+                localAxisDirection = StaticChip.OrientationToLocalAxisDirectionAxle(gc.equivalentVirtualChip.orientation);
+                break;
+            case CTP.Rudder:
+                localAxisDirection = StaticChip.OrientationToLocalAxisDirectionRudder();
+                break;
+            default:
+                localAxisDirection = StaticChip.OrientationToLocalAxisDirectionChip(gc.equivalentVirtualChip.orientation);
+                break;
+        }
+        var localAxisOrigin = StaticChip.OrientationToLocalAxisOrigin(gc.equivalentVirtualChip.orientation);
+
         Vector3 globalAxisOrigin = gc.parentChip.transform.TransformPoint(localAxisOrigin);
         Vector3 globalAxisDirection = gc.parentChip.transform.TransformDirection(localAxisDirection);
+
         return (globalAxisOrigin, globalAxisDirection);
     }
 
-    public static T InstantiateChip<T>(string type) where T: GeometricChip {
-        if(!VChip.chipTemplates.ContainsKey(type)) {
+    public static T InstantiateChip<T>(string type) where T : GeometricChip
+    {
+        if (!VChip.chipTemplates.ContainsKey(type))
+        {
             throw new ArgumentException($"Chip of type {type} doesn't exist.");
         }
 

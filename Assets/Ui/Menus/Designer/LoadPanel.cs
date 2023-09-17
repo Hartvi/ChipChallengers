@@ -8,6 +8,8 @@ using TMPro;
 public class LoadPanel : BaseScrollMenu
 {
     VModel loadedModel;
+    Action[] OnLoadedCallbacks;
+
     protected override void Start()
     {
         base.Start();
@@ -63,6 +65,11 @@ public class LoadPanel : BaseScrollMenu
         core.VirtualModel.AddModelChangedCallback(x => core.TriggerSpawn(x, true));
         //print($"Chips: {core.VirtualModel.chips.Length}");
         this.DeactivateLoadPanel();
+
+        foreach(Action a in this.OnLoadedCallbacks)
+        {
+            a();
+        }
     }
 
     void FillInput(string modelName)
@@ -80,6 +87,11 @@ public class LoadPanel : BaseScrollMenu
     {
         DisplaySingleton.ErrorMsgModification(txt);
         txt.SetText("Model is invalid.");
+    }
+
+    public void SetOnLoadedCallbacks(Action[] callbacks)
+    {
+        this.OnLoadedCallbacks = callbacks;
     }
 }
 

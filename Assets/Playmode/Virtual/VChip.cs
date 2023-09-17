@@ -35,7 +35,8 @@ public class VChip
 
     public static readonly Dictionary<string, Type> propertyTypes;
     public static readonly string[] allPropertiesStr = new string[] { "Angle", "Value", "Colour", "Spring", "Damper", "Option", "Name", "Type" };
-    public static readonly string[] allPropertiesDefaults = new string[] { "0", "0", "#FFFFFF", "-1", "-1", "0", "chip_name", "Chip" };
+    public static readonly string[] allPropertiesDefaultsStrings = new string[] { "0", "0", "#FFFFFF", "1e9f", "1e6f", "0", "chip_name", "Chip" };
+    public static readonly object[] allPropertiesDefaultsObjects = new object[] { 0f, 0f, "#FFFFFF", 1e9f, 1e6f, 0, "chip_name", "Chip" };
     public static readonly string[] dynamicPropertiesStr = new string[] { "Angle", "Value", "Colour" };
     public static readonly string[] staticPropertiesStr = new string[] { "Spring", "Damper", "Option", "Name", "Type" };
     public static readonly CPR[] staticPropertiesEnum = new CPR[] { CPR.Spring, CPR.Damper, CPR.Option, CPR.Name, CPR.Type };
@@ -52,6 +53,7 @@ public class VChip
     public static readonly ChipData chipData, optionNames;
 
     public static readonly Dictionary<CTP, string> chipEnumToName;
+    public static readonly Dictionary<string, CTP> chipNameToEnum;
 
     private VModel _MyModel;
     
@@ -69,7 +71,7 @@ public class VChip
     }
 
     public bool IsCore { get { return this.ChipType == VChip.coreStr; } }
-    public string ChipType { get { return instanceProperties[typeStr] as string; } }
+    public string ChipType { get { return this.instanceProperties[typeStr] as string; } }
 
     static VChip()
     {
@@ -118,6 +120,7 @@ public class VChip
         VChip.chipTemplates = tmpDict;
 
         VChip.chipEnumToName = ArrayExtensions.ToDictionaryFromArrays(VChip.chipEnums, VChip.chipNames);
+        VChip.chipNameToEnum = ArrayExtensions.ToDictionaryFromArrays(VChip.chipNames, VChip.chipEnums);
 
         // chip_names[], chip_properties[][]
         VChip.chipData = LUALoader.LoadChipSpecification("chips.lua");
@@ -184,7 +187,7 @@ public class VChip
     public VChip[] Children = { };
 
     [NonSerialized]
-    public Dictionary<string, object> instanceProperties;
+    private Dictionary<string, object> instanceProperties;
     [NonSerialized]
     public CommonChip rChip;
 
@@ -232,6 +235,30 @@ public class VChip
         }
     }
 
+    public T GetPropertyOrDefault<T>(string key)
+    {
+        if (this.instanceProperties.ContainsKey(key))
+        {
+            T ret = (T)(this.instanceProperties[key]);
+            if(key == VChip.springStr || key == VChip.damperStr)
+            {
+                if(((float)this.instanceProperties[key]) >= 0f){
+                    return ret;
+                }
+            } else if(key == VChip.optionStr)
+            {
+                if(((int)this.instanceProperties[key]) >= 0){
+                    return ret;
+                }
+            }
+        }
+        //PRINT.print($"Contains key: {key} FALSE");
+        //PRINT.print("this.keys:");
+        //PRINT.print(this.keys);
+        object objVal = ArrayExtensions.AccessLikeDict(key, VChip.allPropertiesStr, VChip.allPropertiesDefaultsObjects);
+        return (T)objVal;
+    }
+
     public bool TryGetProperty<T>(string key, out T val)
     {
         try
@@ -241,36 +268,12 @@ public class VChip
         }
         catch
         {
-            
-            val = default(T);
+
+            object objVal = ArrayExtensions.AccessLikeDict(key, VChip.allPropertiesStr, VChip.allPropertiesDefaultsObjects);
+            val = (T)objVal;
+            //val = default(T);
             return false;
         }
-    }
-
-    public T GetProperty<T>(string key)
-    {
-        string val = ArrayExtensions.AccessLikeDict<string, string>(key, this.keys, this.vals);
-
-        PRINT.print($"type: {typeof(T)}, float: {typeof(float)}, are equal: {typeof(T) == typeof(float)}");
-        if (!this.instanceProperties.ContainsKey(key) && typeof(T) == typeof(float))
-        {
-            this.instanceProperties[key] = float.Parse(val);
-        }
-        if (!this.instanceProperties.ContainsKey(key) && typeof(T) == typeof(int))
-        {
-            this.instanceProperties[key] = int.Parse(val);
-        }
-        if (!this.instanceProperties.ContainsKey(key) && typeof(T) == typeof(string))
-        {
-            this.instanceProperties[key] = val;
-        }
-
-        PRINT.print($"key: {key}");
-        PRINT.print($"val: {this.instanceProperties[key]}");
-        PRINT.print($"type of val: {this.instanceProperties[key].GetType()}");
-        PRINT.print($"requested type: {typeof(T)}");
-        return (T)(this.instanceProperties[key]);
-
     }
 
     public string GetNewChildID(VChip childChip)

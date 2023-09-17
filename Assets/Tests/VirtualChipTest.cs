@@ -20,7 +20,7 @@ public class VirtualChipTest : MonoBehaviour
         string[] keys = new string[] { "Name", "Angle", "Value", "Option", "Type" };
         string[] vals = new string[] { "joe", "20", "5", "1", "Chip" };
         string[] keys2 = new string[] { "Name", "Angle", "Value", "Option", "Type", "Spring", "Damper" };
-        string[] vals2 = new string[] { "joe", "20", "5", "1", "Chip", "10", "10" };
+        string[] vals2 = new string[] { "joe", "20", "5", "1", "Axle", "100000", "10" };
         var vc = new VChip(keys1, vals1, 0, null);
         //PRINT.print("vckeys", vc.keys);
         //PRINT.print("vcvals", vc.vals);
@@ -44,7 +44,8 @@ public class VirtualChipTest : MonoBehaviour
         var vc6 = new VChip(keys2, vals2, 1, vc4);
         var vc7 = new VChip(keys2, vals2, 2, vc4);
         var vc8 = new VChip(keys2, vals2, 3, vc4);
-        var core = coreobject.GetComponent<CommonChip>();
+
+        CommonChip core = coreobject.GetComponent<CommonChip>();
         //print("core name: "+core.name);
 
         var VirtualModel = new VModel();

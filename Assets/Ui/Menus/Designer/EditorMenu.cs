@@ -134,6 +134,9 @@ public class EditorMenu : BaseMenu
         // set core to correct orientation
         CommonChip.ClientCore.transform.rotation = Quaternion.identity;
         this.SelectVChip("a");
+
+        // rebuild the model so it's not flat when entering designer mode
+        CommonChip.ClientCore.TriggerSpawn(CommonChip.ClientCore.VirtualModel, true);
     }
 
     public VChip selectedVChip
@@ -167,11 +170,6 @@ public class EditorMenu : BaseMenu
         }
         
         return default(T);
-    }
-
-    void ShowSavePanel()
-    {
-
     }
 
     void Update()

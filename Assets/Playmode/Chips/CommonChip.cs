@@ -20,13 +20,19 @@ public class CommonChip : AngleChip
         }
     }
 
-    public bool IsOnClient { get { Debug.LogWarning($"TODO check if it's on client in multiplayer."); return true; } }
+    public bool IsOnClient
+    {
+        get
+        {
+            Debug.LogWarning($"TODO check if it's on client in multiplayer."); return true;
+        }
+    }
 
     public bool IsFocusable
     {
         get
         {
-            UnityEngine.Debug.LogWarning("IsFocusable not fully implemented.");
+            UnityEngine.Debug.LogWarning("IsFocusable not fully implemented, TODO: if it's a real chip.");
             return this.equivalentVirtualChip.IsCore;
         }
     }
@@ -123,7 +129,7 @@ public class CommonChip : AngleChip
         float angle = newChild.GetAngle();
         //print($"chip: {childChip.ChipType}, angle: {angle}, child angle: {childChip.keys[0]}");
 
-        (Vector3 origin, Vector3 direction) = StaticChip.GetThisAxisOfRotationWrtParent(newChild);
+        (Vector3 origin, Vector3 direction) = StaticChip.GetThisAxisOfRotationWrtParent(newChild, VChip.chipNameToEnum[childChip.ChipType]);
         newChild.transform.RotateAround(origin, direction, angle);
 
         float YrotationAngle = Vector3.Dot((origin - newChild.transform.position).normalized, -newChild.transform.right);
@@ -144,7 +150,10 @@ public class CommonChip : AngleChip
             ConfigurableJoint cj = JointUtility.AttachWithConfigurableJoint(
                 newChild.gameObject, parentRealChip.gameObject, origin, direction
                 );
+            // TODO: position mode for axle AND velocity mode for axle => spring/damper
+            //cj.targetRotation = Quaternion.Euler(20, 0, 0);
             this.ConfigureJointAxis(cj);
+            newChild.ConfigureJointSpringDamper(cj);
         }
 
         var _newChildren = newChild.AddChildren();
@@ -159,7 +168,9 @@ public class CommonChip : AngleChip
     {
         Color colour = this.GetColour();
         this.GetComponentInChildren<MeshRenderer>().material.color = colour;
+
         List<CommonChip> chips = new List<CommonChip>();
+
         // when there are no Children left then the recursion stops
         //print($"Number of children: {this.equivalentVirtualChip.children.Count}");
         foreach (VChip childChip in this.equivalentVirtualChip.Children)
@@ -169,6 +180,36 @@ public class CommonChip : AngleChip
         return chips.ToArray();
     }
 
+    private void ConfigureJointSpringDamper(ConfigurableJoint cj)
+    {
+        // spring damper
+        float spring = this.equivalentVirtualChip.GetPropertyOrDefault<float>(VChip.springStr);
+        float damper = this.equivalentVirtualChip.GetPropertyOrDefault<float>(VChip.damperStr);
+        //print($"chip: {this.equivalentVirtualChip.ChipType}: spring: {spring} damper: {damper}");
+
+        JointDrive jd = new JointDrive();
+        jd.positionSpring = spring;
+        jd.positionDamper = damper;
+        jd.maximumForce = Mathf.Max(spring, damper);
+
+        if(cj.angularXMotion == ConfigurableJointMotion.Free)
+        {
+            cj.angularXDrive = jd;
+        }
+        if(cj.angularZMotion == ConfigurableJointMotion.Free)
+        {
+            cj.angularYZDrive = jd;
+        }
+
+        float defaultDamper = (float)ArrayExtensions.AccessLikeDict(VChip.damperStr, VChip.allPropertiesStr, VChip.allPropertiesDefaultsObjects);
+        float defaultSpring = (float)ArrayExtensions.AccessLikeDict(VChip.springStr, VChip.allPropertiesStr, VChip.allPropertiesDefaultsObjects);
+
+        if (spring >= defaultSpring && damper >= defaultDamper)
+        {
+            cj.angularXMotion = ConfigurableJointMotion.Locked;
+            cj.angularZMotion = ConfigurableJointMotion.Locked;
+        }
+    }
     private void ConfigureJointAxis(ConfigurableJoint cj)
     {
         this.cj = cj;
@@ -320,7 +361,7 @@ public class CommonChip : AngleChip
         }
         foreach(var a in this._AfterBuildActions)
         {
-            print("after build action");
+            //print("after build action");
             a();
         }
     }

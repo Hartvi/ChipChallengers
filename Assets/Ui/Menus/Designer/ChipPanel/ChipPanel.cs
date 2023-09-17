@@ -104,7 +104,7 @@ public class ChipPanel : BasePanel
     public void DisplayChip(VChip vc)
     {
         //print($"DisplayChip: Chip type: {vc.ChipType}");
-        string[] newKeys = ArrayExtensions.AccessLikeDict(vc.instanceProperties[VChip.typeStr], VChip.chipData.keys, VChip.chipData.values);
+        string[] newKeys = ArrayExtensions.AccessLikeDict(vc.ChipType, VChip.chipData.keys, VChip.chipData.values);
         string[] newValues = new string[newKeys.Length];
 
         for(int i = 0; i < newKeys.Length; ++i)
@@ -119,7 +119,7 @@ public class ChipPanel : BasePanel
             }
             else
             {
-                newValues[i] = ArrayExtensions.AccessLikeDict(currentProperty, VChip.allPropertiesStr, VChip.allPropertiesDefaults);
+                newValues[i] = ArrayExtensions.AccessLikeDict(currentProperty, VChip.allPropertiesStr, VChip.allPropertiesDefaultsStrings);
                 //throw new ArgumentNullException($"Property {propertiesThisChipHas[i]} doesn't exist in chip {vc} of type {vc.ChipType}.");
             }
         }
