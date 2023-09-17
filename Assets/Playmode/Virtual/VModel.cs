@@ -247,6 +247,7 @@ public class VModel
             // TODO TEST THIS
         }
 
+        PRINT.print($"Num add listeners: {this.AddedActions.Length}");
         foreach(var action in this.AddedActions)
         {
             action(v.name);
@@ -332,7 +333,9 @@ public class VModel
         }
 
         string luaModel = IOHelpers.LoadModel(modelName);
-        return VModel.FromLuaModel(luaModel);
+        VModel m = VModel.FromLuaModel(luaModel);
+        PRINT.print(m.variables.Length);
+        return m;
     }
 
 }

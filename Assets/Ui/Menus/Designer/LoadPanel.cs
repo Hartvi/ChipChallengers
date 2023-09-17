@@ -8,7 +8,7 @@ using TMPro;
 public class LoadPanel : BaseScrollMenu
 {
     VModel loadedModel;
-    Action[] OnLoadedCallbacks;
+    Action[] OnLoadedCallbacks = { };
 
     protected override void Start()
     {

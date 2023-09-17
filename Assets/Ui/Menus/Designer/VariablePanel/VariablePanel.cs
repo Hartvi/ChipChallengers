@@ -8,7 +8,10 @@ using TMPro;
 public class VariablePanel : BasePanel
 {
     public const int NUMDISPLAYITEMS = 7;
+    
     BaseItemScroll itemScroll;
+    BaseScrollbar bScrollbar;
+
     VariableFields variableFields;
 
     private string[] myLabels = new string[] { };
@@ -29,27 +32,33 @@ public class VariablePanel : BasePanel
     void Start()
     {
         this.itemScroll = this.GetComponentInChildren<BaseItemScroll>();
-        var baseScroll = this.GetComponentInChildren<BaseItemScroll>();
 
-        baseScroll.SetupItemList(this.SelectVariable, VariablePanel.NUMDISPLAYITEMS, this.myLabels);
+        this.itemScroll.SetupItemList(this.SelectVariable, VariablePanel.NUMDISPLAYITEMS, this.myLabels);
 
-        var scrollbar = baseScroll.Siblings<BaseScrollbar>(false)[0];
+        this.bScrollbar = this.itemScroll.Siblings<BaseScrollbar>(false)[0];
 
-        scrollbar.scrollbar.onValueChanged.AddListener(baseScroll.Scroll);
-        baseScroll.Scroll(0f);
-        scrollbar.scrollbar.value = 0f;
+        this.bScrollbar.scrollbar.onValueChanged.AddListener(this.itemScroll.Scroll);
+        this.itemScroll.Scroll(0f);
+        this.bScrollbar.scrollbar.value = 0f;
 
         this.variableFields = this.GetComponentInChildren<VariableFields>();
 
-        CommonChip.ClientCore.VirtualModel.AddAddedVariableListener(AddVariableLabel);
-        CommonChip.ClientCore.VirtualModel.AddAddedVariableListener(x => baseScroll.Scroll(scrollbar.scrollbar.value));
+        this.AddListenersToModel();
+    }
 
-        CommonChip.ClientCore.VirtualModel.AddDeleteVariableListener(DeleteVariableLabel);
-        CommonChip.ClientCore.VirtualModel.AddDeleteVariableListener(x => baseScroll.Scroll(scrollbar.scrollbar.value));
+    public void AddListenersToModel()
+    {
+        VModel vModel = CommonChip.ClientCore.VirtualModel;
+        BaseScrollbar bscb = this.bScrollbar;
+
+        vModel.AddAddedVariableListener(x => this.ReloadVariables());
+        vModel.AddAddedVariableListener(x => this.itemScroll.Scroll(bscb.scrollbar.value));
+
+        vModel.AddDeleteVariableListener(x => this.ReloadVariables());
+        vModel.AddDeleteVariableListener(x => this.itemScroll.Scroll(bscb.scrollbar.value));
 
         // The button handle selectin of variables, and since we don't have any buttons in this component, it's not possible
-        CommonChip.ClientCore.VirtualModel.AddSetSelectedVariableListener(x => baseScroll.Scroll(scrollbar.scrollbar.value));
-
+        vModel.AddSetSelectedVariableListener(x => this.itemScroll.Scroll(bscb.scrollbar.value));
     }
 
     public void SelectVariable(string variableName)
@@ -60,18 +69,33 @@ public class VariablePanel : BasePanel
 
         this.variableFields.PopulateFields(v);
         this.itemScroll.virtualContainer.UpdateLabels(this.myLabels);
+        this.itemScroll.Scroll(0f);
+        print("My labels:");
+        PRINT.print(this.myLabels);
+        this.ReloadVariables();
     }
 
     public void AddVariableLabel(string n)
     {
         this.myLabels = this.myLabels.AddWithoutDuplicate(n);
         this.itemScroll.virtualContainer.UpdateLabels(this.myLabels);
+        this.itemScroll.Scroll(0f);
     }
 
     public void DeleteVariableLabel(string n)
     {
         this.myLabels = this.myLabels.RemoveElement(n);
         this.itemScroll.virtualContainer.UpdateLabels(this.myLabels);
+        this.itemScroll.Scroll(0f);
+    }
+
+    public void ReloadVariables()
+    {
+        CommonChip clientCore = CommonChip.ClientCore;
+        string[] vs = clientCore.VirtualModel.variables.Select(x => x.name).ToArray();
+        this.myLabels = vs;
+        this.itemScroll.virtualContainer.UpdateLabels(this.myLabels);
+        this.itemScroll.Scroll(0f);
     }
 
 }

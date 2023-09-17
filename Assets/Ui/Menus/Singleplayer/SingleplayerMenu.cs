@@ -34,7 +34,6 @@ public class SingleplayerMenu : BaseMenu
     CameraFollowSettings cameraFollowSettings;
 
     private LoadPanel LoadPanel;
-    private SavePanel SavePanel;
     
     private CommonChip core;
 
@@ -64,8 +63,7 @@ public class SingleplayerMenu : BaseMenu
                 )
             //new VirtualProp(PropType.Text, 0.2f, typeof(MainTitle))
             ),
-            new VirtualProp(PropType.Panel, 1f, typeof(LoadPanel)),
-            new VirtualProp(PropType.Panel, 1f, typeof(SavePanel))
+            new VirtualProp(PropType.Panel, 1f, typeof(LoadPanel))
         //new VirtualProp(PropType.Panel, 1f, Vector2Int.down,
         //    new VirtualProp(PropType.Panel, 0.2f),
         //    new VirtualProp(PropType.Text, 0.2f, typeof(MainTitle))
@@ -82,14 +80,13 @@ public class SingleplayerMenu : BaseMenu
         base.Start();
 
         this.LoadPanel = this.GetComponentInChildren<LoadPanel>();
-        this.SavePanel = this.GetComponentInChildren<SavePanel>();
 
         this.core = CommonChip.ClientCore;
 
         this.LoadPanel.SetOnLoadedCallbacks(new Action[] { () => core.TriggerSpawn(core.VirtualModel, false) });
 
         this.mainCamera = Camera.main;
-        this.cameraFollowSettings = new CameraFollowSettings(distance: 5f, up: 1f, predict: 0.1f, sensitivity: 1f, lowPass: 0f);
+        this.cameraFollowSettings = new CameraFollowSettings(distance: 5f, up: 1f, predict: 1f, sensitivity: 1f, lowPass: 0f);
     }
 
     void Update()
@@ -170,7 +167,7 @@ public class SingleplayerMenu : BaseMenu
             // 
             float moveX = Input.GetAxis("Mouse X");
             float moveY = Input.GetAxis("Mouse Y");
-            Camera cam = Camera.main;
+            Camera cam = this.mainCamera;
 
             cam.transform.Rotate(2f*moveX*Vector3.up, Space.World);
             cam.transform.Rotate(-2f*moveY*Vector3.right, Space.Self);
@@ -207,3 +204,4 @@ public class SingleplayerMenu : BaseMenu
         }
     }
 }
+

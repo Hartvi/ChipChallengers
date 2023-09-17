@@ -18,6 +18,10 @@ public class EditorMenu : BaseMenu
     private LoadPanel LoadPanel;
     private SavePanel SavePanel;
 
+    private VariablePanel VariablePanel;
+    private ScriptPanel ScriptPanel;
+    private ChipPanel ChipPanel;
+
     protected override void Setup()
     {
         base.Setup();
@@ -137,6 +141,12 @@ public class EditorMenu : BaseMenu
 
         // rebuild the model so it's not flat when entering designer mode
         CommonChip.ClientCore.TriggerSpawn(CommonChip.ClientCore.VirtualModel, true);
+
+        this.VariablePanel = this.GetComponentInChildren<VariablePanel>();
+        this.ChipPanel = this.GetComponentInChildren<ChipPanel>();
+        this.ScriptPanel = this.GetComponentInChildren<ScriptPanel>();
+
+        this.LoadPanel.SetOnLoadedCallbacks(new Action[] { this.VariablePanel.ReloadVariables, this.VariablePanel.AddListenersToModel });
     }
 
     public VChip selectedVChip
