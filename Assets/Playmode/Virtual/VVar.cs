@@ -31,6 +31,41 @@ public class VVar
     public string name;
     public float defaultValue, maxValue, minValue, backstep;
 
+    public Action<float>[] valueChangedCallbacks = { };
+    public float _currentValue = 0f;
+    public float currentValue
+    {
+        get { return this._currentValue; }
+        set
+        {
+            this._currentValue = Mathf.Max(Mathf.Min(value, this.maxValue), this.minValue);
+            //PRINT.print($"Setting current value {this._currentValue} of variable {this.name}");
+
+            foreach (Action<float> a in this.valueChangedCallbacks)
+            {
+                //UnityEngine.Debug.LogWarning($"TODO: check if in playmode this is setting the correct angle");
+                // by default, building with default angle resets target vector to be 0 at the default angle,
+                // which means we might have to subtract the default angle when setting the angle;
+                // NOT to be confused with non-angle instances
+                a(this._currentValue);
+            }
+        }
+    }
+
+    public void SetValueChangedCallbacks(Action<float>[] actions)
+    {
+        this.valueChangedCallbacks = actions;
+    }
+
+    public void AddValueChangedCallback(Action<float> action)
+    {
+        this.valueChangedCallbacks = this.valueChangedCallbacks.Append(action).ToArray();
+    }
+
+    public static VVar DefaultValueVariable(string name) {
+        return new VVar(new string[] { name, "0", "-1", "1", "1" });
+    }
+
     public string ToLuaString()
     {
         // Initialize string with beginning of table
@@ -68,9 +103,11 @@ public class VVar
         this.maxValue = 1f;
         this.backstep = 1f;
         this.defaultValue = 0f;
+        this.currentValue = 0f;
     }
     public VVar(Table luaTable)
     {
+        //PRINT.print(luaTable);
         this.name = (string)luaTable["name"];
         //PRINT.print($"{luaTable["minValue"].GetType()}");
         //this.minValue = float.Parse((string)luaTable["minValue"].ToString());
@@ -81,6 +118,7 @@ public class VVar
         this.maxValue = float.Parse(luaTable["maxValue"].ToString());
         this.backstep = float.Parse(luaTable["backstep"].ToString());
         this.defaultValue = float.Parse(luaTable["defaultValue"].ToString());
+        this.currentValue = this.defaultValue;
     }
     public static VVar[] FromLuaTables(Table[] luaTables)
     {
@@ -121,6 +159,7 @@ public class VVar
         }
 
         this.defaultValue = defaultValue;
+        this.currentValue = defaultValue;
         this.minValue = minValue;
         this.maxValue = maxValue;
         this.backstep = backstep;

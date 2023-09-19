@@ -19,11 +19,17 @@ public class ScriptPanel : BasePanel
 
     void Start()
     {
+        CommonChip core = CommonChip.ClientCore;
         this.input = this.GetComponentInChildren<BaseInput>();
         this.btn = this.GetComponentInChildren<DragButton>();
 
         this.btn.text.text = "<";
         this.input.placeholder.text = "Lua code...";
+
+        this.input.input.onEndEdit.RemoveAllListeners();
+        this.input.input.onEndEdit.AddListener(x => core.VirtualModel.script = x);
+        this.input.input.lineType = TMPro.TMP_InputField.LineType.MultiLineNewline;
+
 
         this.btn.AddBtnHoldActions(new Action[] { this.DragBtn });
     }
@@ -42,6 +48,14 @@ public class ScriptPanel : BasePanel
         this.input.transform.position = new Vector2((Screen.width + mousePos.x + btnHalfWidth) * 0.5f, this.input.transform.position.y);
         this.input.RT.sizeDelta = new Vector2(Screen.width - mousePos.x - btnHalfWidth, this.input.RT.sizeDelta.y);
          //+ mousePos.x*0.5f
+    }
+
+    void OnEnable()
+    {
+        if (this.input is null) return;
+        //if (this.input.input is null) return;
+        //if (this.input.input is null) return;
+        this.input.input.SetTextWithoutNotify(CommonChip.ClientCore.VirtualModel.script);
     }
 
 }

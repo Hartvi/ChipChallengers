@@ -6,6 +6,9 @@ using MoonSharp.Interpreter;
 
 public class CommonChip : AngleChip
 {
+    public ScriptInstance scriptInstance;
+
+    private LoopScript loopScript;
     public static CommonChip ClientCore {
         get
         {
@@ -66,7 +69,6 @@ public class CommonChip : AngleChip
         }
     }
 
-    protected ConfigurableJoint cj;
 
     private bool _IsReal = false;
     public bool IsReal
@@ -150,10 +152,15 @@ public class CommonChip : AngleChip
             ConfigurableJoint cj = JointUtility.AttachWithConfigurableJoint(
                 newChild.gameObject, parentRealChip.gameObject, origin, direction
                 );
+            newChild.cj = cj;
+            //print($"Just set joint: {newChild.equivalentVirtualChip.id}");
             // TODO: position mode for axle AND velocity mode for axle => spring/damper
             //cj.targetRotation = Quaternion.Euler(20, 0, 0);
             this.ConfigureJointAxis(cj);
             newChild.ConfigureJointSpringDamper(cj);
+
+            // set target rotation from `GetAngle`
+            //cj.targetRotation = this.targetRotation;
         }
 
         var _newChildren = newChild.AddChildren();
@@ -212,7 +219,6 @@ public class CommonChip : AngleChip
     }
     private void ConfigureJointAxis(ConfigurableJoint cj)
     {
-        this.cj = cj;
         int or = this.equivalentVirtualChip.orientation;
         switch (or)
         {
@@ -305,6 +311,11 @@ public class CommonChip : AngleChip
     {
         print("TRIGGER SPAWN");
         this.VirtualModel = virtualModel;
+        foreach(VVar v in this.VirtualModel.variables)
+        {
+            v.valueChangedCallbacks = new Action<float>[] { };
+        }
+
         this.transform.localScale = StaticChip.ChipSize;
 
         // this should replace the argument
@@ -321,38 +332,20 @@ public class CommonChip : AngleChip
 
         // this performs clean-up as well
         this.AllChildren = this.AddChildren();  // trigger the tsunami
+
+        // handle script
+        this.scriptInstance = new ScriptInstance(virtualModel);
+
+        if(this.loopScript is not null) GameObject.Destroy(this.loopScript);
+
+        this.loopScript = this.gameObject.AddComponent<LoopScript>();
+        this.loopScript.loopFunction = this.scriptInstance.CallLoop;
+
         foreach (var c in this.AllChildren)
         {
             c.VisualizePosition = true;
         }
         this.VisualizePosition = true;
-//        var newScript = new Script();
-//        //        string codeStr = @"a = 1
-//        //c = a + 5";
-//        //        DynValue dyn = newScript.DoString(codeStr);
-//        //        DynValue a = newScript.Globals.Get("a");
-//        //        DynValue c = newScript.Globals.Get("c");
-//        //        print($"dyn: {dyn}, a: {a.Number}, c: {c.Number}");
-//        string codeStr = @"
-//-- this is a comment loll
-//chips = {
-//            { id = 'aa', parentId = 'a', type = 'Core'},
-//        { id = 'ab', parentId = 'a', type = 'Chip'}
-//        }";
-//        DynValue dyn = newScript.DoString(codeStr);
-//        DynValue a = newScript.Globals.Get("chips");
-//        //DynValue c = newScript.Globals.Get("c");
-//        print($"dyn: {dyn}, a: ");
-//        PRINT.print(((Table)a.Table[1]).Keys);
-        //var modelLua = this.VirtualModel.ToLuaString();
-        //IOHelpers.SaveTextFile("text.txt", modelLua);
-        //var modelLua2 = IOHelpers.LoadTextFile("text.txt");
-        ////print(modelLua);
-        ////var newScript = new Script();
-        ////DynValue a = newScript.DoString(modelLua);
-        ////print($"dyn: {a}, a: ");
-        //VModel fromluadmodel = VModel.FromLuaModel(modelLua2);
-        //print(modelLua2);
 
         //c.transform.position = c.transform.position + Vector3.up;
         if (freeze)
@@ -381,6 +374,12 @@ public class CommonChip : AngleChip
         this._AfterBuildActions = actions;
     }
 
-
+    void Update()
+    {
+        //if(this.cj != null)
+        //print($"target rotation: {this.targetRotation}, joint: {this.cj.targetRotation}");
+        //if (this.cj == null)
+        //    print($"Joint is null");
+    }
 }
 

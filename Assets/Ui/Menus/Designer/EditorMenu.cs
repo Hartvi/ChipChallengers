@@ -132,8 +132,8 @@ public class EditorMenu : BaseMenu
             () => this.SelectVChip(this.selectedChip.equivalentVirtualChip.id),
         };
         CommonChip.ClientCore.SetAfterBuildListeners(afterBuildListeners);
-        // TODO: update colour, spring, angle, value, etc in the editor to how it should look like.
-        // atm it's only angle that is visibly changed after rebuilding
+        // TODO: update value, option, etc in the editor to how it should look like.
+        // atm it's only angle and colour that is visibly changed after rebuilding
 
         // set core to correct orientation
         CommonChip.ClientCore.transform.rotation = Quaternion.identity;

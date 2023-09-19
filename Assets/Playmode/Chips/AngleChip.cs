@@ -1,9 +1,13 @@
 using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class AngleChip : GeometricChip {
+public abstract class AngleChip : GeometricChip
+{
+    protected ConfigurableJoint cj;
+    protected Quaternion targetRotation = Quaternion.identity;
 
     protected Color GetColour()
     {
@@ -47,7 +51,34 @@ public abstract class AngleChip : GeometricChip {
         //print($"angle is {angleStr}");
         if (StringHelpers.IsVariableName(angleStr)) {
             // TODO: do variable angles
-            throw new NotImplementedException($"Variable angle compatibility has not been implemented yet.");
+            CommonChip core = CommonChip.ClientCore;
+            VVar existingVar = core.VirtualModel.variables.FirstOrDefault(x => x.name == angleStr);
+
+            if (existingVar == null)
+            {
+                if(StringHelpers.IsVariableName(angleStr))
+                {
+                    core.VirtualModel.AddVariable(VVar.DefaultValueVariable(angleStr));
+                    DisplaySingleton.Instance.DisplayText(x =>
+                    {
+                        DisplaySingleton.WarnMsgModification(x);
+                        x.SetText($"Added new variable '{angleStr}'.");
+                    }, 3f);
+                }
+                else
+                {
+                    DisplaySingleton.Instance.DisplayText(x =>
+                    {
+                        DisplaySingleton.ErrorMsgModification(x);
+                        x.SetText($"Variable name '{angleStr}' is invalid.");
+                    }, 3f);
+                }
+            }
+            else
+            {
+                angle = existingVar.currentValue;
+                existingVar.AddValueChangedCallback(x => this.SetAngle(x - existingVar.defaultValue));
+            }
         } else {
             // exception here says something is wrong
             angle = float.Parse(angleStr);
@@ -55,5 +86,23 @@ public abstract class AngleChip : GeometricChip {
         
         return angle;
     }
+
+    public void SetAngle(float a)
+    {
+        if (this.cj != null)
+        {
+            //print($"setting angle in function to {a}");
+            //print($"wuaternoin: {Quaternion.Euler(a, 0f, 0f)}");
+            // TODO ITS NOT `this.cj` SINCE THIS IS RUNNING ON THE CORE, IT HAS TO REFERENCE THE TARGET JOINTS
+            // maybe, not sure
+            this.cj.targetRotation = Quaternion.Euler(a, 0f, 0f);
+        }
+        else
+        {
+            //print($"Trying to set angle: {Quaternion.Euler(a, 0f, 0f)} but joint is NULL, chip: {this.equivalentVirtualChip.id}");
+            throw new NullReferenceException($"Trying to set angle: {Quaternion.Euler(a, 0f, 0f)} but joint is NULL, chip: {this.equivalentVirtualChip.id}");
+        }
+    }
+
 }
 

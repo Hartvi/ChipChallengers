@@ -38,15 +38,20 @@ public class LoadPanel : BaseScrollMenu
     void RebuildWithNewModel()
     {
         VModel model = null;
+#if UNITY_EDITOR
+        model = VModel.LoadModelFromFile(this.input.input.text);
+#else
         try
         {
             model = VModel.LoadModelFromFile(this.input.input.text);
         }
-        catch
+        catch (Exception e)
         {
             UnityEngine.Debug.LogWarning($"Model could not be loaded.");
-            DisplaySingleton.Instance.DisplayText(this.ModelDoesNotExist, 3f);
+            UnityEngine.Debug.Log(e.Message);
+            //DisplaySingleton.Instance.DisplayText(this.ModelDoesNotExist, 3f);
         }
+#endif
 
         this.loadedModel = model;
         if (this.loadedModel == null)
@@ -93,5 +98,46 @@ public class LoadPanel : BaseScrollMenu
     {
         this.OnLoadedCallbacks = callbacks;
     }
+
+    /*
+    {
+        chips = {
+            {id = 'a', orientation = '0', parentId = '', Colour = '#FFFFFF', Name = 'joe', Type = 'Core', }, 
+            { id = 'aa', orientation = '0', parentId = 'a', Angle = '20', Colour = '#FFFFFF', Spring = '-1', Damper = '-1', Option = '1', Name = 'joe', Type = 'Chip', }, 
+            { id = 'ab', orientation = '1', parentId = 'a', Angle = '20', Colour = '#FFFFFF', Spring = '-1', Damper = '-1', Option = '1', Name = 'joe', Type = 'Chip', },
+            { id = 'aaa', orientation = '0', parentId = 'aa', Angle = '20', Colour = '#FFFFFF', Spring = '1e9f', Damper = '1e6f', Option = '1', Name = 'joe', Type = 'Chip', },
+            { id = 'aaaa', orientation = '0', parentId = 'aaa', Angle = 'asd', Colour = '#FFFFFF', Spring = '10', Damper = '10', Option = '1', Name = 'joe', Type = 'Chip', },
+            { id = 'aaab', orientation = '1', parentId = 'aaa', Angle = '20', Colour = '#FFFFFF', Spring = '10', Damper = '10', Option = '1', Name = 'joe', Type = 'Chip', },
+            { id = 'aaac', orientation = '2', parentId = 'aaa', Angle = '20', Colour = '#FFFFFF', Spring = '10', Damper = '10', Option = '1', Name = 'joe', Type = 'Chip', },
+            { id = 'aaad', orientation = '3', parentId = 'aaa', Angle = '20', Colour = '#FFFFFF', Spring = '10', Damper = '10', Option = '1', Name = 'joe', Type = 'Chip', },
+            { id = 'aab', orientation = '3', parentId = 'aa', Angle = '0', Colour = '#FFFFFF', Spring = '-1', Damper = '-1', Option = '0', Name = 'chip_name', Type = 'Chip', },
+            { id = 'aac', orientation = '1', parentId = 'aa', Angle = '0', Colour = '#FFFFFF', Spring = '-1', Damper = '-1', Option = '0', Name = 'chip_name', Type = 'Chip', },
+        },
+        variables = {
+            { name = '', defaultValue = 0, maxValue = 1, minValue = 0, backstep = 1, },
+            { name = 'asd', defaultValue = 0, maxValue = 20, minValue = 0, backstep = 1, },
+        },
+        script = 'SetVar("asd", 20);'
+    }
+    //*/
+    /*
+    {
+        chips = {
+            {id = 'a', orientation = '0', parentId = '', Colour = '#FFFFFF', Name = 'joe', Type = 'Core', }, 
+            {id = 'aa', orientation = '0', parentId = 'a', Angle = '20', Colour = '#FFFFFF', Spring = '-1', Damper = '-1', Option = '1', Name = 'joe', Type = 'Chip', }, 
+            {id = 'ab', orientation = '1', parentId = 'a', Angle = '20', Colour = '#FFFFFF', Spring = '-1', Damper = '-1', Option = '1', Name = 'joe', Type = 'Chip', }, 
+            {id = 'aaa', orientation = '0', parentId = 'aa', Name = 'joe', Angle = '20', Value = '5', Option = '1', Type = 'Chip', }, 
+            {id = 'aaaa', orientation = '0', parentId = 'aaa', Name = 'joe', Angle = '20', Value = '5', Option = '1', Type = 'Chip', Spring = '10', Damper = '10', }, 
+            {id = 'aaab', orientation = '1', parentId = 'aaa', Name = 'joe', Angle = '20', Value = '5', Option = '1', Type = 'Chip', Spring = '10', Damper = '10', }, 
+            {id = 'aaac', orientation = '2', parentId = 'aaa', Name = 'joe', Angle = '20', Value = '5', Option = '1', Type = 'Chip', Spring = '10', Damper = '10', }, 
+            {id = 'aaad', orientation = '3', parentId = 'aaa', Name = 'joe', Angle = '20', Value = '5', Option = '1', Type = 'Chip', Spring = '10', Damper = '10', }, 
+            {id = 'aab', orientation = '3', parentId = 'aa', Angle = '0', Colour = '#FFFFFF', Spring = '-1', Damper = '-1', Option = '0', Name = 'chip_name', Type = 'Chip', }, 
+            {id = 'aac', orientation = '1', parentId = 'aa', Angle = '0', Colour = '#FFFFFF', Spring = '-1', Damper = '-1', Option = '0', Name = 'chip_name', Type = 'Chip', }, 
+        }, 
+        variables = {
+            {name = '', defaultValue = 0, maxValue = 1, minValue = -1, backstep = 1, }, 
+        }, 
+    }
+     //*/
 }
 

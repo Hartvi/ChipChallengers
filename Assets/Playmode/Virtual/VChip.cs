@@ -35,7 +35,7 @@ public class VChip
 
     public static readonly Dictionary<string, Type> propertyTypes;
     public static readonly string[] allPropertiesStr = new string[] { "Angle", "Value", "Colour", "Spring", "Damper", "Option", "Name", "Type" };
-    public static readonly string[] allPropertiesDefaultsStrings = new string[] { "0", "0", "#FFFFFF", "1e9f", "1e6f", "0", "chip_name", "Chip" };
+    public static readonly string[] allPropertiesDefaultsStrings = new string[] { "0", "0", "#FFFFFF", "1e9", "1e6", "0", "chip_name", "Chip" };
     public static readonly object[] allPropertiesDefaultsObjects = new object[] { 0f, 0f, "#FFFFFF", 1e9f, 1e6f, 0, "chip_name", "Chip" };
     public static readonly string[] dynamicPropertiesStr = new string[] { "Angle", "Value", "Colour" };
     public static readonly string[] staticPropertiesStr = new string[] { "Spring", "Damper", "Option", "Name", "Type" };
@@ -343,7 +343,7 @@ public class VChip
             {
                 if (!float.TryParse(this.vals[i], out float result))
                 {
-                    //PRINT.print($"'{keys[i]}': '{vals[i]}' is a string, perhaps variable");
+                    PRINT.print($"'{keys[i]}': '{vals[i]}' is a string, perhaps variable");
                     throw new ArgumentException($"Value {this.vals[i]} at index {i} cannot be converted to float.");
                 }
                 else

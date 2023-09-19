@@ -63,7 +63,7 @@ public class VModel
         }
     }
 
-    private string _script;
+    private string _script = "a=1;";
     public string script
     {
         get
@@ -133,7 +133,7 @@ public class VModel
 
         if (this.script != null)
         {
-            luaCode += $"script = '{this.script}' ";
+            luaCode += $"script = [[{this.script}]] ";
         }
 
         // Close table and return
@@ -185,6 +185,7 @@ public class VModel
         }
 
         this.script = (string)luaTable["script"];
+        PRINT.print($"LOADED SCRIPT: {this.script}");
         bool coreFound = false;
         //PRINT.print($"Number of chips: {this.chips.Length}");
         //foreach (var virtualChip in this.chips)
