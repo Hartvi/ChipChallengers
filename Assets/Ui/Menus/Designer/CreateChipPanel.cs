@@ -69,7 +69,8 @@ public class CreateChipPanel : BasePanel
 
         CommonChip.ClientCore.TriggerSpawn(vm, true);
 
-        this.editorMenu.SelectVChip(newChip.rChip.equivalentVirtualChip.id);
+        // TODO make this more secure:
+        this.editorMenu.selectedChip = this.editorMenu.highlighter.SelectVChip(newChip.rChip.equivalentVirtualChip.id);
         this.gameObject.SetActive(false);
     }
 }

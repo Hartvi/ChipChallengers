@@ -363,7 +363,7 @@ public class CommonChip : AngleChip
     {
         var c = CommonChip.ClientCore;
 
-        foreach(var chip in c.AllChips)
+        foreach(GeometricChip chip in c.AllChips)
         {
             chip.GetComponent<Rigidbody>().isKinematic = true;
         }

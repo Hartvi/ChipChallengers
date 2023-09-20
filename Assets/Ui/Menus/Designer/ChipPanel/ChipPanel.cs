@@ -22,7 +22,7 @@ public class ChipPanel : BasePanel
 
         // Link highlighting in the editor in general to displaying in this menu
         EditorMenu em = this.GetComponentInParent<EditorMenu>();
-        em.AddHighlightCallback(this.DisplayChip);
+        em.highlighter.SetHighlightCallbacks(new Action<VChip>[] { this.DisplayChip });
         // add default values so it renders fine at the start
         //print("STARTING CHIP PANEL");
         this.DisplayChip(CommonChip.ClientCore.equivalentVirtualChip);

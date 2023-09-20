@@ -9,10 +9,9 @@ public class EditorMenu : BaseMenu
     public static EditorMenu Instance;
 
     private Camera _camera;
-    private CommonChip selectedChip;
+    public CommonChip selectedChip;
 
-    private GameObject HighlightingChip, NorthChip, SouthChip, EastChip, WestChip;
-    private Action<VChip>[] HighlightCallbacks = new Action<VChip>[] { };
+    public HighlighterContainer highlighter;
 
     public CreateChipPanel CreateChipPanel;
     private LoadPanel LoadPanel;
@@ -59,85 +58,31 @@ public class EditorMenu : BaseMenu
         this.LoadPanel = this.GetComponentInChildren<LoadPanel>();
         this.SavePanel = this.GetComponentInChildren<SavePanel>();
 
-        this.AddSelectionCallback(CommonChip.FreezeModel);
+        Action[] selectedChipCallbacks = new Action[] { CommonChip.FreezeModel };
+        this.SetThisMenuSelectedCallbacks(selectedChipCallbacks);
 
-        foreach(var c in this.selectedCallbacks)
-        {
-            c();
-        }
         base.Start();
+
+        this.highlighter = this.gameObject.AddComponent<HighlighterContainer>();
+        this.highlighter.InstantiateHighlighters();
 
         this._camera = Camera.main;
 
-        this.HighlightingChip = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        Renderer renderer = this.HighlightingChip.GetComponent<MeshRenderer>();
-        Material m = renderer.material;
-        m.color = new Color(0.8f, 0.8f, 0.8f, 0.9f);
-        m.SetTransparent();
-
-        this.HighlightingChip.SetActive(false);
-
-        GameObject.Destroy(this.HighlightingChip.GetComponent<Collider>());
-
-        this.NorthChip = GameObject.CreatePrimitive(PrimitiveType.Cube);
-
-        ColourHighlighter ch = this.NorthChip.AddComponent<ColourHighlighter>();
-        ch.localDirection = LocalDirection.North;
-
-        renderer = this.NorthChip.GetComponent<MeshRenderer>();
-        m = renderer.material;
-        m.color = new Color(0.0f, 0.0f, 0.8f, 0.9f);
-        m.SetTransparent();
-
-        this.NorthChip.SetActive(false);
-
-        this.SouthChip = GameObject.CreatePrimitive(PrimitiveType.Cube);
-
-        ch = this.SouthChip.AddComponent<ColourHighlighter>();
-        ch.localDirection = LocalDirection.South;
-
-        renderer = this.SouthChip.GetComponent<MeshRenderer>();
-        m = renderer.material;
-        m.color = new Color(0.8f, 0.0f, 0.0f, 0.9f);
-        m.SetTransparent();
-
-        this.SouthChip.SetActive(false);
-
-        this.EastChip = GameObject.CreatePrimitive(PrimitiveType.Cube);
-
-        ch = this.EastChip.AddComponent<ColourHighlighter>();
-        ch.localDirection = LocalDirection.East;
-
-        renderer = this.EastChip.GetComponent<MeshRenderer>();
-        m = renderer.material;
-        m.color = new Color(0.0f, 0.8f, 0.0f, 0.9f);
-        m.SetTransparent();
-
-        this.EastChip.SetActive(false);
-
-        this.WestChip = GameObject.CreatePrimitive(PrimitiveType.Cube);
-
-        ch = this.WestChip.AddComponent<ColourHighlighter>();
-        ch.localDirection = LocalDirection.West;
-
-        renderer = this.WestChip.GetComponent<MeshRenderer>();
-        m = renderer.material;
-        m.color = new Color(0.8f, 0.8f, 0.0f, 0.9f);
-        m.SetTransparent();
-
-        this.WestChip.SetActive(false);
-
         print($"Setting editormenu callback to model changed");
         Action[] afterBuildListeners = new Action[] { 
-            () => this.SelectVChip(this.selectedChip.equivalentVirtualChip.id),
+            () => {
+                this.selectedChip = this.highlighter.SelectVChip(this.selectedChip.equivalentVirtualChip.id);
+            },
         };
+
         CommonChip.ClientCore.SetAfterBuildListeners(afterBuildListeners);
         // TODO: update value, option, etc in the editor to how it should look like.
         // atm it's only angle and colour that is visibly changed after rebuilding
 
         // set core to correct orientation
         CommonChip.ClientCore.transform.rotation = Quaternion.identity;
-        this.SelectVChip("a");
+
+        this.selectedChip = this.highlighter.SelectVChip("a");
 
         // rebuild the model so it's not flat when entering designer mode
         CommonChip.ClientCore.TriggerSpawn(CommonChip.ClientCore.VirtualModel, true);
@@ -165,10 +110,6 @@ public class EditorMenu : BaseMenu
     }
 
 
-    public void AddHighlightCallback(Action<VChip> vc) {
-        this.HighlightCallbacks = this.HighlightCallbacks.Concat(new Action<VChip>[] { vc }).ToArray();
-    }
-
     public T GetObjectFromScreenClick<T>()
     {
         Ray ray = this._camera.ScreenPointToRay(Input.mousePosition);
@@ -188,20 +129,35 @@ public class EditorMenu : BaseMenu
 
         if (ctrlPressed)
         {
-            if (Application.isEditor && Input.GetKeyDown(KeyCode.E))
+#if UNITY_EDITOR
+            if (Input.GetKeyDown(KeyCode.E))
             {
                 this.SavePanel.gameObject.SetActive(true);
             }
-            else if (Input.GetKeyDown(KeyCode.S))
-            {
-
-                this.SavePanel.gameObject.SetActive(true);
-            }
-
             if (Input.GetKeyDown(KeyCode.L))
             {
                 this.LoadPanel.gameObject.SetActive(true);
             }
+            if (Input.GetKeyDown(KeyCode.M))
+            {
+                GoToSingleplayer.Function();
+            }
+#else
+            if (Input.GetKeyDown(KeyCode.S))
+            {
+
+                this.SavePanel.gameObject.SetActive(true);
+            }
+            if (Input.GetKeyDown(KeyCode.O))
+            {
+                this.LoadPanel.gameObject.SetActive(true);
+            }
+            if (Input.GetKeyDown(KeyCode.P))
+            {
+                GoToSingleplayer.Function();
+            }
+#endif
+
         }
 
         if (Input.GetMouseButtonDown(0) && !TopUI.IsOnUI)  // 0 means left mouse button
@@ -209,7 +165,8 @@ public class EditorMenu : BaseMenu
             // if not adding new chip, then try highlighting chip
             if (!this.DisplayChipMenu())
             {
-                this.HighlightChip();
+                CommonChip clickedObject = this.GetObjectFromScreenClick<CommonChip>();
+                this.selectedChip = this.highlighter.HighlightChip(clickedObject);
             }
         }
         if (Input.GetMouseButton(1))
@@ -249,7 +206,7 @@ public class EditorMenu : BaseMenu
                 deltaPos = cam.transform.up;
             }
 
-            float sensitivity = Input.GetKey(KeyCode.LeftShift) ? 0.03f : 0.01f;
+            float sensitivity = Input.GetKey(KeyCode.LeftShift) ? 0.09f : 0.03f;
             cam.transform.position = cam.transform.position + sensitivity * deltaPos;
         }
     }
@@ -265,78 +222,6 @@ public class EditorMenu : BaseMenu
             return true;   
         }
         this.CreateChipPanel.gameObject.SetActive(false);
-        return false;
-    }
-
-    public void SelectVChip(string chipId)
-    {
-        CommonChip cc = CommonChip.ClientCore.AllChips.FirstOrDefault(x => x.equivalentVirtualChip.id == chipId) as CommonChip;
-
-        if(cc is null)
-        {
-            cc = CommonChip.ClientCore;
-            //throw new NullReferenceException($"Chip with id {chipId} does not exist.");
-        }
-        //print($"Selected chip type: {cc.equivalentVirtualChip.ChipType}.");
-        //print(cc.transform.rotation.eulerAngles);
-        this.selectedChip = cc;
-
-        Vector3 scalingVector = Vector3.one + Vector3.up * 0.1f;
-
-        var hc = this.HighlightingChip;
-        hc.SetActive(true);
-        hc.transform.position = this.selectedChip.transform.position;
-        hc.transform.rotation = this.selectedChip.transform.rotation;
-        hc.transform.localScale = this.selectedChip.transform.localScale.Multiply(scalingVector);
-
-        hc = this.NorthChip;
-        hc.SetActive(true);
-        hc.transform.position = this.selectedChip.transform.position + GeometricChip.ChipSide*this.selectedChip.transform.forward;
-        hc.transform.rotation = this.selectedChip.transform.rotation;
-        hc.transform.localScale = this.selectedChip.transform.localScale.Multiply(scalingVector);
-
-        hc = this.SouthChip;
-        hc.SetActive(true);
-        hc.transform.position = this.selectedChip.transform.position - GeometricChip.ChipSide*this.selectedChip.transform.forward;
-        hc.transform.rotation = this.selectedChip.transform.rotation;
-        hc.transform.localScale = this.selectedChip.transform.localScale.Multiply(scalingVector);
-
-        hc = this.EastChip;
-        hc.SetActive(true);
-        hc.transform.position = this.selectedChip.transform.position + GeometricChip.ChipSide*this.selectedChip.transform.right;
-        hc.transform.rotation = this.selectedChip.transform.rotation;
-        hc.transform.localScale = this.selectedChip.transform.localScale.Multiply(scalingVector);
-
-        hc = this.WestChip;
-        hc.SetActive(true);
-        hc.transform.position = this.selectedChip.transform.position - GeometricChip.ChipSide*this.selectedChip.transform.right;
-        hc.transform.rotation = this.selectedChip.transform.rotation;
-        hc.transform.localScale = this.selectedChip.transform.localScale.Multiply(scalingVector);
-
-        foreach (var c in this.HighlightCallbacks)
-        {
-            c(cc.equivalentVirtualChip);
-        }
-    }
-
-    bool HighlightChip()
-    {
-        CommonChip clickedObject = this.GetObjectFromScreenClick<CommonChip>();
-
-        if (clickedObject is not null)
-        {
-            this.SelectVChip(clickedObject.equivalentVirtualChip.id);
-            return true;
-        }
-        else
-        {
-            this.HighlightingChip.SetActive(false);
-            this.NorthChip.SetActive(false);
-            this.SouthChip.SetActive(false);
-            this.EastChip.SetActive(false);
-            this.WestChip.SetActive(false);
-        }
-
         return false;
     }
 

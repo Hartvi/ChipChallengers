@@ -79,11 +79,19 @@ public class SingleplayerMenu : BaseMenu
     {
         base.Start();
 
+        this.AfterLoaded();
+    }
+
+    // when going from other menus:
+    void AfterLoaded()
+    {
+        this.core = CommonChip.ClientCore;
+        this.core.TriggerSpawn(this.core.VirtualModel, false);
+
         this.LoadPanel = this.GetComponentInChildren<LoadPanel>();
 
         this.core = CommonChip.ClientCore;
-
-        this.LoadPanel.SetOnLoadedCallbacks(new Action[] { () => core.TriggerSpawn(core.VirtualModel, false) });
+        this.LoadPanel.SetOnLoadedCallbacks(new Action[] { () => this.core.TriggerSpawn(this.core.VirtualModel, false) });
 
         this.mainCamera = Camera.main;
         this.cameraFollowSettings = new CameraFollowSettings(distance: 5f, up: 1f, predict: 1f, sensitivity: 1f, lowPass: 0f);
@@ -107,6 +115,14 @@ public class SingleplayerMenu : BaseMenu
             {
                 this.LoadPanel.gameObject.SetActive(true);
             }
+            if (Input.GetKeyDown(KeyCode.E))
+            {
+                GoToEditor.Function();
+            }
+        }
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            GoToMainMenu.Function();
         }
 
         if (Input.GetKeyDown(KeyCode.F1))
@@ -199,7 +215,7 @@ public class SingleplayerMenu : BaseMenu
                 deltaPos = cam.transform.up;
             }
 
-            float sensitivity = Input.GetKey(KeyCode.LeftShift) ? 0.03f : 0.01f;
+            float sensitivity = Input.GetKey(KeyCode.LeftShift) ? 0.09f : 0.03f;
             cam.transform.position = cam.transform.position + sensitivity * deltaPos;
         }
     }
