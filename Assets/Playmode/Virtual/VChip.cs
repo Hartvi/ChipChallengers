@@ -6,7 +6,7 @@ using MoonSharp.Interpreter;
 
 public enum CPR
 {
-    Angle, Value, Colour, Spring, Damper, Option, Name, Type
+    Angle, Value, Brake, Colour, Spring, Damper, Option, Name, Type
 }
 public enum Orientation
 {
@@ -24,6 +24,7 @@ public class VChip
     public const string angleStr = "Angle";
     public const string colourStr = "Colour";
     public const string valueStr = "Value";
+    public const string brakeStr = "Brake";
     public const string springStr = "Spring";
     public const string damperStr = "Damper";
     public const string optionStr = "Option";
@@ -34,10 +35,10 @@ public class VChip
     public const string chipsFolderStr = "Chips/";
 
     public static readonly Dictionary<string, Type> propertyTypes;
-    public static readonly string[] allPropertiesStr = new string[] { "Angle", "Value", "Colour", "Spring", "Damper", "Option", "Name", "Type" };
-    public static readonly string[] allPropertiesDefaultsStrings = new string[] { "0", "0", "#FFFFFF", "1e9", "1e6", "0", "chip_name", "Chip" };
-    public static readonly object[] allPropertiesDefaultsObjects = new object[] { 0f, 0f, "#FFFFFF", 1e9f, 1e6f, 0, "chip_name", "Chip" };
-    public static readonly string[] dynamicPropertiesStr = new string[] { "Angle", "Value", "Colour" };
+    public static readonly string[] allPropertiesStr = new string[] { "Angle", "Value", "Brake", "Colour", "Spring", "Damper", "Option", "Name", "Type" };
+    public static readonly string[] allPropertiesDefaultsStrings = new string[] { "0", "0", "0", "#FFFFFF", "1e9", "1e6", "0", "chip_name", "Chip" };
+    public static readonly object[] allPropertiesDefaultsObjects = new object[] { 0f, 0f, 0f, "#FFFFFF", 1e9f, 1e6f, 0, "chip_name", "Chip" };
+    public static readonly string[] dynamicPropertiesStr = new string[] { "Angle", "Value", "Brake", "Colour" };
     public static readonly string[] staticPropertiesStr = new string[] { "Spring", "Damper", "Option", "Name", "Type" };
     public static readonly CPR[] staticPropertiesEnum = new CPR[] { CPR.Spring, CPR.Damper, CPR.Option, CPR.Name, CPR.Type };
 
@@ -76,25 +77,27 @@ public class VChip
     static VChip()
     {
         propertyTypes = new Dictionary<string, Type>() {
-            {"Angle",  typeof(string)},
-            {"Value",  typeof(string)},
-            {"Colour", typeof(string)},
-            {"Spring", typeof(float)},
-            {"Damper", typeof(float)},
-            {"Option", typeof(uint)},
-            {"Name",   typeof(string)},
-            {"Type",   typeof(string)},
+            {VChip.angleStr,  typeof(string)},
+            {VChip.valueStr,  typeof(string)},
+            {VChip.brakeStr,  typeof(string)},
+            {VChip.colourStr, typeof(string)},
+            {VChip.springStr, typeof(float)},
+            {VChip.damperStr, typeof(float)},
+            {VChip.optionStr, typeof(uint)},
+            {VChip.nameStr,   typeof(string)},
+            {VChip.typeStr,   typeof(string)},
         };
 
         str2ChipProperty = new Dictionary<string, CPR>() {
-            {"Angle",  CPR.Angle},
-            {"Value",  CPR.Value},
-            {"Colour", CPR.Colour},
-            {"Spring", CPR.Spring},
-            {"Damper", CPR.Damper},
-            {"Option", CPR.Option},
-            {"Name",   CPR.Name},
-            {"Type",   CPR.Type},
+            {VChip.angleStr,  CPR.Angle},
+            {VChip.valueStr,  CPR.Value},
+            {VChip.brakeStr,  CPR.Brake},
+            {VChip.colourStr, CPR.Colour},
+            {VChip.springStr, CPR.Spring},
+            {VChip.damperStr, CPR.Damper},
+            {VChip.optionStr, CPR.Option},
+            {VChip.nameStr,   CPR.Name},
+            {VChip.typeStr,   CPR.Type},
         };
 
         var tmpDict = new Dictionary<string, GameObject>();
@@ -432,6 +435,7 @@ public class VChip
                 break;
             case VChip.angleStr:
             case VChip.valueStr:
+            case VChip.brakeStr:
                 if (StringHelpers.IsVariableName(value))
                 {
                     return null;

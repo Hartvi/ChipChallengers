@@ -7,6 +7,8 @@ using TMPro;
 
 public class ChipPanel : BasePanel
 {
+    int inputIndex = 0;
+    TMP_InputField[] currentInputs;
 
     void Start()
     {
@@ -133,6 +135,9 @@ public class ChipPanel : BasePanel
 
         (TMP_Text[] texts, TMP_InputField[] inputs) = this.DisplayChipProperties(newKeys, newValues);
 
+        // for tabbing through the fields
+        this.currentInputs = inputs;
+
         for(int i = 0; i < inputs.Length; ++i)
         {
             int _i = i;
@@ -150,8 +155,8 @@ public class ChipPanel : BasePanel
                     else
                     {
                         //print($"Changing val {vc.vals[_i]} to {inputs[_i].text}");
-                        // TODO CALL BACK FOR CHIP CHANGED TO PROPAGATE TO MODEL CHANGED
-                        Debug.LogWarning($"TODO: make chip changed callback propagate to model changed callback.");
+                        // TODO CALL BACK FOR CHIP CHANGED TO PROPAGATE TO MODEL CHANGED for all properties
+                        Debug.LogWarning($"TODO: make chip changed callback propagate to model changed callback for all properties.");
                         vc.vals[_i] = x;
                     }
                 }
@@ -169,5 +174,67 @@ public class ChipPanel : BasePanel
         return action;
     }
     
+    void Update()
+    {
+        TabSwitch();
+    }
+
+    void TabSwitch()
+    {
+        if (Input.GetKeyDown(KeyCode.Tab)) {
+            bool shiftPressed = Input.GetKey(KeyCode.RightShift) || Input.GetKey(KeyCode.LeftShift);
+            int shiftDirection = shiftPressed ? -1 : 1;
+
+            this.inputIndex = this.inputIndex + shiftDirection;
+
+            if(this.inputIndex < 0)
+            {
+                this.inputIndex = this.currentInputs.Length - 1;
+            }
+            else if(this.inputIndex >= this.currentInputs.Length)
+            {
+                this.inputIndex = 0;
+            }
+
+            this.currentInputs[this.inputIndex].Select();
+        }
+    }
+}
+
+public class ModuloInt
+{
+    int i;
+    int Max;
+
+    public static ModuloInt operator ++(ModuloInt mi)
+    {
+        ++mi.i;
+
+        if(mi.i >= mi.Max)
+        {
+            mi.i = 0;
+        }
+        return mi;
+    }
+
+    public static implicit operator int(ModuloInt d) => d.i;
+    public static explicit operator ModuloInt(int d) => new ModuloInt(d);
+
+    public ModuloInt(int d)
+    {
+        this.Max = d;
+        this.i = d == 0 ? 0 : d % this.Max;
+    }
+
+    public ModuloInt(int d, int m)
+    {
+        this.i = m == 0 ? 0 : d % m;
+        this.Max = m;
+    }
+
+    public override string ToString()
+    {
+        return this.i.ToString();
+    }
 }
 

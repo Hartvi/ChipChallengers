@@ -33,42 +33,42 @@ public static class UIStrings
     public static readonly string[] EditorPanels = { "Chip", "Variables", "Controls", "Script" };
 
     public static string NotAVariableMsg(string value) {
-         return $"{value} is not in variable name format: '_' or [a-zA-Z] at the beginning.";
+         return $"{value} is not in variable name format:\n '_' or [a-zA-Z] at the beginning.";
     }
 
     public static string NotAFloat(string value)
     {
-        return $"{value} is not in float number format: a decimal number, e.g. '1.2'.";
+        return $"'{value}' is not in float number format:\n a decimal number, e.g. '1.2'.";
     }
 
     public static string NotAColour(string value)
     {
-        return $"{value} is not in colour format: #RRGGBB in hexadecimal, e.g. '#FF55BB' or an integer.";
+        return $"'{value}' is not in colour format:\n#RRGGBB in hexadecimal\ne.g. '#FF55BB' or an integer.";
     }
 
     public static string NotAType(string value)
     {
-        return $"{value} is not one of the permitted chip types.";
+        return $"'{value}' is not one of the permitted chip types.";
     }
 
     public static string NotAUInt(string value)
     {
-        return $"{value} is not a non-negative integer.";
+        return $"'{value}' is not a non-negative integer.";
     }
 
     public static string OptionTooHigh(string value)
     {
-        return $"Option {value} is too high of a value.";
+        return $"Option '{value}' is too high of a value.";
     }
 
     public static string ModelExists(string modelName)
     {
-        return $"Model {modelName} already exists.";
+        return $"Model '{modelName}' already exists.";
     }
 
     public static string ModelExistsNot(string modelName)
     {
-        return $"Model {modelName} doesn't exist.";
+        return $"Model '{modelName}' doesn't exist.";
     }
 
 }

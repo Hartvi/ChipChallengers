@@ -42,7 +42,7 @@ public class VariableFields : BaseImage
         for(int i = 1; i < this.inputs.Length; ++i)
         {
             int _i = i;
-            this.inputs[i].input.onValueChanged.AddListener(x => SanitizeInputField(this.inputs[_i].input, x));
+            this.inputs[i].input.onEndEdit.AddListener(x => SanitizeInputField(this.inputs[_i].input, x));
         }
 
         for(int i = 0; i < this.texts.Length; ++i)
@@ -92,12 +92,13 @@ public class VariableFields : BaseImage
 
     private string ValidateFloatInput(string input)
     {
-        if (!IsFloat(input))
+        string tmp = input;
+        while (!IsFloat(tmp) && tmp.Length > 0)
         {
-            return input.Substring(0, Math.Max(0, input.Length - 1));
+            tmp = tmp.Substring(0, Math.Max(0, tmp.Length - 1));
         }
 
-        return input;
+        return tmp;
     }
 
     private bool IsFloat(string value)

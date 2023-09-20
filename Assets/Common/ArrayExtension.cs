@@ -48,13 +48,16 @@ public static class ArrayExtensions
 
     public static Vector3 Multiply(this Vector3 v, Vector3 v2)
     {
-        return new Vector3(v.x * v2.x, v.y*v2.y, v.z*v2.z);
+        return new Vector3(v.x * v2.x, v.y * v2.y, v.z * v2.z);
     }
 
 }
 
 public class CustomArray<T> : IList<T>
 {
+#if UNITY_EDITOR
+    static bool hasWarned = false;
+#endif
     private T[] _vals;
 
     public CustomArray(int size)
@@ -163,7 +166,13 @@ public class CustomArray<T> : IList<T>
     // Implicit conversion from string[] to CustomArray
     public static implicit operator CustomArray<T>(T[] array)
     {
-        UnityEngine.Debug.LogWarning($"Implicit asignment removes callback listeners. Use ReplaceData instead if you want to keep them.");
+#if UNITY_EDITOR
+        if (!CustomArray<T>.hasWarned)
+        {
+            CustomArray<T>.hasWarned = true;
+            UnityEngine.Debug.LogWarning($"Implicit asignment removes callback listeners. Use ReplaceData instead if you want to keep them.");
+        }
+#endif
         return new CustomArray<T>(array);
     }
 

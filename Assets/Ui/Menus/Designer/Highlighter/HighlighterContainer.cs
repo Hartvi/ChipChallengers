@@ -15,7 +15,7 @@ public class HighlighterContainer : MonoBehaviour
         this.HighlightingChip = GameObject.CreatePrimitive(PrimitiveType.Cube);
         Renderer renderer = this.HighlightingChip.GetComponent<MeshRenderer>();
         Material m = renderer.material;
-        m.color = new Color(0.8f, 0.8f, 0.8f, 0.9f);
+        m.color = new Color(0.8f, 0.8f, 0.8f, 0.5f);
         m.SetTransparent();
 
         this.HighlightingChip.SetActive(false);
@@ -29,7 +29,7 @@ public class HighlighterContainer : MonoBehaviour
 
         renderer = this.NorthChip.GetComponent<MeshRenderer>();
         m = renderer.material;
-        m.color = new Color(0.0f, 0.0f, 0.8f, 0.9f);
+        m.color = new Color(0.0f, 0.0f, 0.8f, 0.5f);
         m.SetTransparent();
 
         this.NorthChip.SetActive(false);
@@ -41,7 +41,7 @@ public class HighlighterContainer : MonoBehaviour
 
         renderer = this.SouthChip.GetComponent<MeshRenderer>();
         m = renderer.material;
-        m.color = new Color(0.8f, 0.0f, 0.0f, 0.9f);
+        m.color = new Color(0.8f, 0.0f, 0.0f, 0.5f);
         m.SetTransparent();
 
         this.SouthChip.SetActive(false);
@@ -53,7 +53,7 @@ public class HighlighterContainer : MonoBehaviour
 
         renderer = this.EastChip.GetComponent<MeshRenderer>();
         m = renderer.material;
-        m.color = new Color(0.0f, 0.8f, 0.0f, 0.9f);
+        m.color = new Color(0.0f, 0.8f, 0.0f, 0.5f);
         m.SetTransparent();
 
         this.EastChip.SetActive(false);
@@ -65,7 +65,7 @@ public class HighlighterContainer : MonoBehaviour
 
         renderer = this.WestChip.GetComponent<MeshRenderer>();
         m = renderer.material;
-        m.color = new Color(0.8f, 0.8f, 0.0f, 0.9f);
+        m.color = new Color(0.8f, 0.8f, 0.0f, 0.5f);
         m.SetTransparent();
 
         this.WestChip.SetActive(false);
@@ -77,7 +77,7 @@ public class HighlighterContainer : MonoBehaviour
 
     public CommonChip SelectVChip(string chipId)
     {
-        // TODO make the assignment from this function more secure
+        // TODO make the assignment from this function more secure, maybe `out CommonChip selectedChip`? and `bool` return
 
         CommonChip cc = CommonChip.ClientCore.AllChips.FirstOrDefault(x => x.equivalentVirtualChip.id == chipId) as CommonChip;
 
@@ -129,14 +129,14 @@ public class HighlighterContainer : MonoBehaviour
         return cc;
     }
 
-    public CommonChip HighlightChip(CommonChip clickedObject)
+    public bool HighlightChip(CommonChip clickedObject, out CommonChip selectedChip)
     {
         //CommonChip clickedObject = this.GetObjectFromScreenClick<CommonChip>();
 
         if (clickedObject is not null)
         {
-            return this.SelectVChip(clickedObject.equivalentVirtualChip.id);
-            
+            selectedChip = this.SelectVChip(clickedObject.equivalentVirtualChip.id);
+            return true;
         }
         else
         {
@@ -146,8 +146,8 @@ public class HighlighterContainer : MonoBehaviour
             this.EastChip.SetActive(false);
             this.WestChip.SetActive(false);
         }
-
-        return null;
+        selectedChip = null;
+        return false;
     }
 
 }

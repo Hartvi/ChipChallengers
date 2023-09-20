@@ -31,7 +31,7 @@ public class VVar
     public string name;
     public float defaultValue, maxValue, minValue, backstep;
 
-    public Action<float>[] valueChangedCallbacks = { };
+    public Action<float, VVar>[] valueChangedCallbacks = { };
     public float _currentValue = 0f;
     public float currentValue
     {
@@ -41,23 +41,23 @@ public class VVar
             this._currentValue = Mathf.Max(Mathf.Min(value, this.maxValue), this.minValue);
             //PRINT.print($"Setting current value {this._currentValue} of variable {this.name}");
 
-            foreach (Action<float> a in this.valueChangedCallbacks)
+            foreach (Action<float, VVar> a in this.valueChangedCallbacks)
             {
                 //UnityEngine.Debug.LogWarning($"TODO: check if in playmode this is setting the correct angle");
                 // by default, building with default angle resets target vector to be 0 at the default angle,
                 // which means we might have to subtract the default angle when setting the angle;
                 // NOT to be confused with non-angle instances
-                a(this._currentValue);
+                a(this._currentValue, this);
             }
         }
     }
 
-    public void SetValueChangedCallbacks(Action<float>[] actions)
+    public void SetValueChangedCallbacks(Action<float, VVar>[] actions)
     {
         this.valueChangedCallbacks = actions;
     }
 
-    public void AddValueChangedCallback(Action<float> action)
+    public void AddValueChangedCallback(Action<float, VVar> action)
     {
         this.valueChangedCallbacks = this.valueChangedCallbacks.Append(action).ToArray();
     }

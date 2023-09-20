@@ -6,6 +6,10 @@ using MoonSharp.Interpreter;
 
 public class CommonChip : AngleChip
 {
+#if UNITY_EDITOR
+    static bool hasWarned = false;
+    static bool hasWarned1 = false;
+#endif
     public ScriptInstance scriptInstance;
 
     private LoopScript loopScript;
@@ -27,7 +31,14 @@ public class CommonChip : AngleChip
     {
         get
         {
-            Debug.LogWarning($"TODO check if it's on client in multiplayer."); return true;
+#if UNITY_EDITOR
+            if (!CommonChip.hasWarned1)
+            {
+                CommonChip.hasWarned1 = true;
+                Debug.LogWarning($"TODO check if it's on client in multiplayer.");
+            }
+#endif
+            return true;
         }
     }
 
@@ -92,7 +103,13 @@ public class CommonChip : AngleChip
         get
         {
             // TODO REMOVE AND ADD OBJECT COMBINATION
-            Debug.LogWarning($"TODO real and virtual chips");
+#if UNITY_EDITOR
+            if (!CommonChip.hasWarned)
+            {
+                CommonChip.hasWarned = true;
+                Debug.LogWarning($"TODO real and virtual chips");
+            }
+#endif
             return true;
             return this.DetermineJointElligibility();
         }
@@ -174,7 +191,10 @@ public class CommonChip : AngleChip
     public CommonChip[] AddChildren()
     {
         Color colour = this.GetColour();
-        this.GetComponentInChildren<MeshRenderer>().material.color = colour;
+        this.mr = this.GetComponentInChildren<MeshRenderer>();
+        this.material = this.mr.material;
+        // to set the colour at build time
+        this.material.color = colour;
 
         List<CommonChip> chips = new List<CommonChip>();
 
@@ -313,7 +333,7 @@ public class CommonChip : AngleChip
         this.VirtualModel = virtualModel;
         foreach(VVar v in this.VirtualModel.variables)
         {
-            v.valueChangedCallbacks = new Action<float>[] { };
+            v.valueChangedCallbacks = new Action<float, VVar>[] { };
         }
 
         this.transform.localScale = StaticChip.ChipSize;
@@ -330,9 +350,6 @@ public class CommonChip : AngleChip
 
         this.SetupRigidbody();
 
-        // this performs clean-up as well
-        this.AllChildren = this.AddChildren();  // trigger the tsunami
-
         // handle script
         this.scriptInstance = new ScriptInstance(virtualModel);
 
@@ -340,6 +357,9 @@ public class CommonChip : AngleChip
 
         this.loopScript = this.gameObject.AddComponent<LoopScript>();
         this.loopScript.loopFunction = this.scriptInstance.CallLoop;
+
+        // this performs clean-up as well
+        this.AllChildren = this.AddChildren();  // trigger the tsunami
 
         foreach (var c in this.AllChildren)
         {

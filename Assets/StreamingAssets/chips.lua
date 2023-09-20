@@ -5,8 +5,8 @@ a = {
         { "Angle", "Colour", "Spring", "Damper", "Option", "Name", "Type" },
         { "Angle", "Colour", "Spring", "Damper", "Option", "Name", "Type" },
         { "Angle", "Colour", "Spring", "Damper", "Option", "Name", "Type" },
-        { "Angle", "Value", "Colour", "Spring", "Damper", "Option", "Name", "Type" },
-        { "Angle", "Value", "Colour", "Spring", "Damper", "Option", "Name", "Type" },
+        { "Angle", "Value", "Brake", "Colour", "Spring", "Damper", "Option", "Name", "Type" },
+        { "Angle", "Value", "Brake", "Colour", "Spring", "Damper", "Option", "Name", "Type" },
         { "Angle", "Value", "Colour", "Option", "Name", "Type" },
         { "Angle", "Value", "Colour", "Option", "Name", "Type" },
         { "Colour", "Name", "Type" }

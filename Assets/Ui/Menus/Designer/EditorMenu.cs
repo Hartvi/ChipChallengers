@@ -68,9 +68,10 @@ public class EditorMenu : BaseMenu
 
         this._camera = Camera.main;
 
-        print($"Setting editormenu callback to model changed");
+        //print($"Setting editormenu callback to model changed");
         Action[] afterBuildListeners = new Action[] { 
             () => {
+                //print($"selected chip: {this.selectedChip}");
                 this.selectedChip = this.highlighter.SelectVChip(this.selectedChip.equivalentVirtualChip.id);
             },
         };
@@ -166,7 +167,11 @@ public class EditorMenu : BaseMenu
             if (!this.DisplayChipMenu())
             {
                 CommonChip clickedObject = this.GetObjectFromScreenClick<CommonChip>();
-                this.selectedChip = this.highlighter.HighlightChip(clickedObject);
+
+                if(this.highlighter.HighlightChip(clickedObject, out CommonChip sc))
+                {
+                    this.selectedChip = sc;
+                }
             }
         }
         if (Input.GetMouseButton(1))

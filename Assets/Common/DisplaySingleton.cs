@@ -48,6 +48,11 @@ public class DisplaySingleton : MonoBehaviour
         txt.fontSize = UIUtils.MediumFontSize;
     }
 
+    public static void BasicSmallModification(TMP_Text txt)
+    {
+        txt.fontSize = UIUtils.MediumFontSize;
+    }
+
     public static void BasicOrangeModification(TMP_Text txt)
     {
         txt.color = Color.red + 0.5f * Color.green;
@@ -60,7 +65,7 @@ public class DisplaySingleton : MonoBehaviour
 
     public static void BasicBottomModification(TMP_Text txt)
     {
-        txt.gameObject.RT().position = new Vector3(Screen.width / 2f, Screen.height / 10f, 0f);
+        txt.gameObject.RT().position = new Vector3(Screen.width / 2f, Screen.height / 3f, 0f);
     }
 
     public static void NoOverflowEtc(TMP_Text txt)
@@ -72,14 +77,14 @@ public class DisplaySingleton : MonoBehaviour
     public static void ErrorMsgModification(TMP_Text txt)
     {
         DisplaySingleton.BasicRedModification(txt);
-        DisplaySingleton.BasicMediumModification(txt);
+        DisplaySingleton.BasicSmallModification(txt);
         DisplaySingleton.BasicBottomModification(txt);
         DisplaySingleton.NoOverflowEtc(txt);
     }
     public static void WarnMsgModification(TMP_Text txt)
     {
         DisplaySingleton.BasicOrangeModification(txt);
-        DisplaySingleton.BasicMediumModification(txt);
+        DisplaySingleton.BasicSmallModification(txt);
         DisplaySingleton.BasicBottomModification(txt);
         DisplaySingleton.NoOverflowEtc(txt);
     }

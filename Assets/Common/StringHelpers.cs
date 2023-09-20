@@ -54,7 +54,17 @@ public static class StringHelpers
 
     public static bool IsColourString(this string input)
     {
-        return ColorUtility.TryParseHtmlString(input, out Color _) || uint.TryParse(input, out uint _);
+        return ColorUtility.TryParseHtmlString(input, out Color _) || int.TryParse(input, out int _);
+    }
+    public static bool ParseColorOrInt(string input, out Color color)
+    {
+        if (ColorUtility.TryParseHtmlString(input, out color)) {
+            return true;
+        } else if (int.TryParse(input, out int i)) {
+            color = i.ToColor();
+            return true;
+        }
+        return false;
     }
 
     public static bool IsFloat(this string input)
