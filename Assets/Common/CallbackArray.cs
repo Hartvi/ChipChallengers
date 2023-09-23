@@ -16,18 +16,18 @@ public class CallbackArray
         {
             throw new InvalidOperationException($"Cannot add a single listener to a non-editable CallbackArray.");
         }
-        methods.Add(callback);
+        this.methods.Add(callback);
     }
 
     public void SetCallbacks(IEnumerable<Action> callbacks)
     {
-        methods.Clear();
-        methods.AddRange(callbacks);
+        this.methods.Clear();
+        this.methods.AddRange(callbacks);
     }
 
     public void Invoke()
     {
-        foreach (var action in methods)
+        foreach (var action in this.methods)
         {
             action();
         }
@@ -52,18 +52,18 @@ public class CallbackArray<T>
         {
             throw new InvalidOperationException($"Cannot add a single listener to a non-editable CallbackArray.");
         }
-        methods.Add(callback);
+        this.methods.Add(callback);
     }
 
     public void SetCallbacks(IEnumerable<Action<T>> callbacks)
     {
-        methods.Clear();
-        methods.AddRange(callbacks);
+        this.methods.Clear();
+        this.methods.AddRange(callbacks);
     }
 
     public void Invoke(T arg)
     {
-        foreach (var action in methods)
+        foreach (var action in this.methods)
         {
             action(arg);
         }

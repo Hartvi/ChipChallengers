@@ -52,21 +52,40 @@ public class EditorMenu : BaseMenu
 
     protected override void Start()
     {
-        EditorMenu.Instance = this;
-        this.CreateChipPanel = this.GetComponentInChildren<CreateChipPanel>();
-
-        this.LoadPanel = this.GetComponentInChildren<LoadPanel>();
-        this.SavePanel = this.GetComponentInChildren<SavePanel>();
-
-        Action[] selectedChipCallbacks = new Action[] { CommonChip.FreezeModel };
-        this.SetThisMenuSelectedCallbacks(selectedChipCallbacks);
-
         base.Start();
+
+        // persistent object/variables
+        EditorMenu.Instance = this;
+
+        this._camera = Camera.main;
 
         this.highlighter = this.gameObject.AddComponent<HighlighterContainer>();
         this.highlighter.InstantiateHighlighters();
 
-        this._camera = Camera.main;
+        this.CreateChipPanel = this.GetComponentInChildren<CreateChipPanel>();
+
+        this.VariablePanel = this.GetComponentInChildren<VariablePanel>(includeInactive: true);
+        this.ChipPanel = this.GetComponentInChildren<ChipPanel>();
+        this.ScriptPanel = this.GetComponentInChildren<ScriptPanel>();
+
+        this.SavePanel = this.GetComponentInChildren<SavePanel>();
+        this.LoadPanel = this.GetComponentInChildren<LoadPanel>();
+
+        this.OnEnterMenu();
+
+        Action[] selectedChipCallbacks = new Action[] { CommonChip.FreezeModel, this.OnEnterMenu };
+        this.selectedCallbacks.SetCallbacks(selectedChipCallbacks);
+
+        Action[] deselectedChipCallbacks = new Action[] { this.OnLeaveMenu };
+        this.deselectedCallbacks.SetCallbacks(deselectedChipCallbacks);
+    }
+
+    void OnEnterMenu()
+    {
+        this.highlighter.ParentHighlighter.SetActive(true);
+
+        print($"Varpanel: {VariablePanel}, ");
+        this.LoadPanel.SetOnLoadedCallbacks(new Action[] { this.VariablePanel.ReloadVariables, this.VariablePanel.AddListenersToModel });
 
         //print($"Setting editormenu callback to model changed");
         Action[] afterBuildListeners = new Action[] { 
@@ -76,23 +95,25 @@ public class EditorMenu : BaseMenu
             },
         };
 
-        CommonChip.ClientCore.SetAfterBuildListeners(afterBuildListeners);
+        // core stuff:
+        CommonChip core = CommonChip.ClientCore;
+        core.SetAfterBuildListeners(afterBuildListeners);
         // TODO: update value, option, etc in the editor to how it should look like.
         // atm it's only angle and colour that is visibly changed after rebuilding
 
         // set core to correct orientation
-        CommonChip.ClientCore.transform.rotation = Quaternion.identity;
+        core.transform.rotation = Quaternion.identity;
+        core.transform.position += Vector3.up;
 
         this.selectedChip = this.highlighter.SelectVChip("a");
 
         // rebuild the model so it's not flat when entering designer mode
-        CommonChip.ClientCore.TriggerSpawn(CommonChip.ClientCore.VirtualModel, true);
+        core.TriggerSpawn(core.VirtualModel, true);
+    }
 
-        this.VariablePanel = this.GetComponentInChildren<VariablePanel>();
-        this.ChipPanel = this.GetComponentInChildren<ChipPanel>();
-        this.ScriptPanel = this.GetComponentInChildren<ScriptPanel>();
-
-        this.LoadPanel.SetOnLoadedCallbacks(new Action[] { this.VariablePanel.ReloadVariables, this.VariablePanel.AddListenersToModel });
+    void OnLeaveMenu()
+    {
+        this.highlighter.ParentHighlighter.SetActive(false);
     }
 
     public VChip selectedVChip
@@ -115,8 +136,9 @@ public class EditorMenu : BaseMenu
     {
         Ray ray = this._camera.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
+        int layerMask = (1 << 5) | (1 << 6) | (1 << 7);
 
-        if (Physics.Raycast(ray, out hit))
+        if (Physics.Raycast(ray, out hit, 1e9f, layerMask))
         {
             return hit.collider.gameObject.GetComponent<T>();
         }
@@ -174,6 +196,7 @@ public class EditorMenu : BaseMenu
                 }
             }
         }
+
         if (Input.GetMouseButton(1))
         {
             // 
@@ -213,6 +236,54 @@ public class EditorMenu : BaseMenu
 
             float sensitivity = Input.GetKey(KeyCode.LeftShift) ? 0.09f : 0.03f;
             cam.transform.position = cam.transform.position + sensitivity * deltaPos;
+        }
+
+        if(Input.GetKeyDown(KeyCode.Delete))
+        {
+            VChip vc = this.selectedVChip;
+            CommonChip core = CommonChip.ClientCore;
+            VModel vm = core.VirtualModel;
+
+            if (vc.parentId is not null)
+            {
+                this.selectedChip = this.highlighter.SelectVChip(vc.parentId);
+                vm.DeleteChip(vc.id);
+            }
+        }
+        if (Input.GetKeyDown(KeyCode.C))
+        {
+            VChip vc = this.selectedVChip;
+            CommonChip core = CommonChip.ClientCore;
+            VModel vm = core.VirtualModel;
+
+            if (vc.parentId is not null)
+            {
+                Clipboard.Copy(vc.id);
+            }
+        }
+        if (Input.GetKeyDown(KeyCode.Z))
+        {
+#if UNITY_EDITOR
+            this.LoadPanel.LoadString(HistoryStack.Undo());
+#else
+            try
+            {
+                this.LoadPanel.LoadString(HistoryStack.Undo());
+            }
+            catch {}
+#endif
+        }
+        if (Input.GetKeyDown(KeyCode.Y))
+        {
+#if UNITY_EDITOR
+            this.LoadPanel.LoadString(HistoryStack.Redo());
+#else
+            try
+            {
+                this.LoadPanel.LoadString(HistoryStack.Redo());
+            }
+            catch {}
+#endif
         }
     }
 

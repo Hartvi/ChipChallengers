@@ -45,6 +45,11 @@ public class VModel
         }
     }
 
+    public void SetChipsWithoutNotify(VChip[] vcs)
+    {
+        this._chips = vcs;
+    }
+
     private VVar[] _variables;
     public VVar[] variables
     {
@@ -176,8 +181,8 @@ public class VModel
             //PRINT.print(variablesTable.Values.Count());
             this.variables = VVar.FromLuaTables(variablesTable.Values.Select(x => x.Table).ToArray());
             // TODO VARIABLES
-            PRINT.print("todo: variables:");
-            PRINT.print(this.variables);
+            PRINT.IPrint("todo: variables:");
+            PRINT.IPrint(this.variables);
         }
         else
         {
@@ -185,7 +190,7 @@ public class VModel
         }
 
         this.script = (string)luaTable["script"];
-        PRINT.print($"LOADED SCRIPT: {this.script}");
+        PRINT.IPrint($"LOADED SCRIPT: {this.script}");
         bool coreFound = false;
         //PRINT.print($"Number of chips: {this.chips.Length}");
         //foreach (var virtualChip in this.chips)
@@ -248,7 +253,7 @@ public class VModel
             // TODO TEST THIS
         }
 
-        PRINT.print($"Num add listeners: {this.AddedActions.Length}");
+        PRINT.IPrint($"Num add listeners: {this.AddedActions.Length}");
         foreach(var action in this.AddedActions)
         {
             action(v.name);
@@ -283,7 +288,7 @@ public class VModel
 
     public void SetSelectedVariable(string value)
     {
-        PRINT.print($"Selecting variable {value}");
+        PRINT.IPrint($"Selecting variable {value}");
         var NonNullVar = this.variables.FirstOrDefault(x => x.name == value);
 
         if (NonNullVar is null)
@@ -335,9 +340,40 @@ public class VModel
 
         string luaModel = IOHelpers.LoadModel(modelName);
         VModel m = VModel.FromLuaModel(luaModel);
-        PRINT.print(m.variables.Length);
+        PRINT.IPrint(m.variables.Length);
         return m;
     }
 
-}
+    public VChip[] GetAllVChips() {
+        return GetChipAndChildren("a");
+    }
 
+    VChip[] GetChipAndChildren(string id)
+    {
+        CommonChip core = CommonChip.ClientCore;
+        VModel vm = core.VirtualModel;
+        var allchips = core.AllChips;
+
+        List<VChip> _GetChipAndChildren(string id)
+        {
+            List<VChip> vcs = new List<VChip>();
+            CommonChip cc = allchips.FirstOrDefault(x => x.equivalentVirtualChip.id == id) as CommonChip;
+
+            VChip vc = cc.equivalentVirtualChip;
+            for (int i = 0; i < vc.Children.Length; ++i)
+            {
+                vcs.AddRange(_GetChipAndChildren(vc.Children[i].id));
+            }
+            vcs.Add(vc);
+            return vcs;
+        }
+        return _GetChipAndChildren(id).ToArray();
+    }
+
+    public void DeleteChip(string id) {
+        VChip[] chipsToDelete = this.GetChipAndChildren(id).ToArray();
+        // vcs is the chips we DONT want to delete
+        this.chips = Array.FindAll(this.chips, x => !chipsToDelete.Contains(x));
+    }
+
+}

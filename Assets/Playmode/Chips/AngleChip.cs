@@ -12,13 +12,18 @@ public abstract class AngleChip : GeometricChip
     protected Quaternion targetRotation = Quaternion.identity;
 
     // these will be listened to during FixedUpdate
+    //protected float __value;
     protected float _value;
-    public float value { get; }
+    //{
+    //    get { return this.__value; }
+    //    set { print($"setting value to {value}"); 
+    //        this.__value = value; }
+    //}
+    public float value { get { return this._value; } }
     protected float _brake;
     public float brake { get; }
 
     public delegate bool ParseFuncDelegate<T>(string s, out T result);
-
 
     protected float GetBrake()
     {

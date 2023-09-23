@@ -31,6 +31,8 @@ public class VChip
 
     public const string coreStr = "Core";
     public const string cowlStr = "Cowl";
+    public const string wheelStr = "Wheel";
+    public const string fanStr = "Fan";
 
     public const string chipsFolderStr = "Chips/";
 
@@ -42,7 +44,7 @@ public class VChip
     public static readonly string[] staticPropertiesStr = new string[] { "Spring", "Damper", "Option", "Name", "Type" };
     public static readonly CPR[] staticPropertiesEnum = new CPR[] { CPR.Spring, CPR.Damper, CPR.Option, CPR.Name, CPR.Type };
 
-    public static readonly string[] chipNames = new string[] { "Chip", "Rudder", "Axle", "Telescope", "Wheel", "Fan", "Sensor", "Cowl" };
+    public static readonly string[] chipNames = new string[] { "Chip", "Rudder", "Axle", "Telescope", wheelStr, fanStr, "Sensor", cowlStr };
 
     public static readonly CommonChip baseChip;
     public const string baseChipName = "BaseChip";
@@ -346,7 +348,7 @@ public class VChip
             {
                 if (!float.TryParse(this.vals[i], out float result))
                 {
-                    PRINT.print($"'{keys[i]}': '{vals[i]}' is a string, perhaps variable");
+                    PRINT.IPrint($"'{keys[i]}': '{vals[i]}' is a string, perhaps variable");
                     throw new ArgumentException($"Value {this.vals[i]} at index {i} cannot be converted to float.");
                 }
                 else
@@ -548,5 +550,15 @@ public class VChip
     public string[] GetOptions() {
         return ArrayExtensions.AccessLikeDict(this.ChipType, VChip.optionNames.keys, VChip.optionNames.values);
     }
-}
 
+    public (string[] keys, string[] values, int orientation, VChip parent) GetValueTuple()
+    {
+        string[] keysCopy = new string[this.keys.Length];
+        string[] valsCopy = new string[this.vals.Length];
+
+        Array.Copy((string[])this.keys, keysCopy, this.keys.Length);
+        Array.Copy((string[])this.vals, valsCopy, this.vals.Length);
+
+        return (keysCopy, valsCopy, this.orientation, this.parentChip);
+    }
+}

@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -151,8 +152,17 @@ public class CommonChip : AngleChip
         (Vector3 origin, Vector3 direction) = StaticChip.GetThisAxisOfRotationWrtParent(newChild, VChip.chipNameToEnum[childChip.ChipType]);
         newChild.transform.RotateAround(origin, direction, angle);
 
-        float YrotationAngle = Vector3.Dot((origin - newChild.transform.position).normalized, -newChild.transform.right);
-        newChild.transform.RotateAround(newChild.transform.position, newChild.transform.up, 90f*YrotationAngle);
+        // rotates the objects so they are facing the correct direction
+        //print($"Origin: {origin}, position: {newChild.transform.position}");
+        Vector3 facingDirection = (newChild.transform.position - origin).normalized;
+        //print($"Direction: {facingDirection}");
+        float YrotationAngle = Vector3.Dot(facingDirection, newChild.transform.right);
+        float YrotationAngle2 = Mathf.Max(0f, -Vector3.Dot(facingDirection, newChild.transform.forward));
+        //print($"Forward rotation: {YrotationAngle2}, {90f * YrotationAngle}, right rot: {YrotationAngle}, {180f*YrotationAngle2}");
+
+        // apply transforms after measuring all information
+        newChild.transform.RotateAround(newChild.transform.position, newChild.transform.up, 90f * YrotationAngle);
+        newChild.transform.RotateAround(newChild.transform.position, newChild.transform.up, 180f * YrotationAngle2);
 
         if (!newChild.IsJointElligible)
         {
@@ -196,6 +206,35 @@ public class CommonChip : AngleChip
         // to set the colour at build time
         this.material.color = colour;
 
+        // add runtime aspects
+        if (this.equivalentVirtualChip.ChipType == VChip.wheelStr)
+        {
+            this.gameObject.AddComponent<WheelAspects>().myChip = this;
+        }
+        else
+        {
+            // add aspects, TODO: this wont add it to core!!!
+            this.gameObject.AddComponent<Aerodynamics>().myChip = this;
+            if (this.equivalentVirtualChip.keys.Contains(VChip.valueStr))
+            {
+                //print($"Type: {this.equivalentVirtualChip.ChipType}");
+                //PRINT.IPrint(this.equivalentVirtualChip.keys);
+
+                // TODO cosmetics as in jet spitting fire and wheel turning discs
+                this._value = this.GetValue();
+
+                if(this.equivalentVirtualChip.ChipType == VChip.fanStr)
+                {
+                    this.gameObject.AddComponent<JetAspect>();
+                }
+            }
+            else
+            {
+                //print($"DOESNT HAVE VALUE");
+                //PRINT.IPrint(this.equivalentVirtualChip.keys);
+            }
+        }
+
         List<CommonChip> chips = new List<CommonChip>();
 
         // when there are no Children left then the recursion stops
@@ -231,11 +270,11 @@ public class CommonChip : AngleChip
         float defaultDamper = (float)ArrayExtensions.AccessLikeDict(VChip.damperStr, VChip.allPropertiesStr, VChip.allPropertiesDefaultsObjects);
         float defaultSpring = (float)ArrayExtensions.AccessLikeDict(VChip.springStr, VChip.allPropertiesStr, VChip.allPropertiesDefaultsObjects);
 
-        if (spring >= defaultSpring && damper >= defaultDamper)
-        {
-            cj.angularXMotion = ConfigurableJointMotion.Locked;
-            cj.angularZMotion = ConfigurableJointMotion.Locked;
-        }
+        //if (spring >= defaultSpring && damper >= defaultDamper)
+        //{
+        //    cj.angularXMotion = ConfigurableJointMotion.Locked;
+        //    cj.angularZMotion = ConfigurableJointMotion.Locked;
+        //}
     }
     private void ConfigureJointAxis(ConfigurableJoint cj)
     {
@@ -329,8 +368,9 @@ public class CommonChip : AngleChip
 
     public void TriggerSpawn(VModel virtualModel, bool freeze)
     {
-        print("TRIGGER SPAWN");
+        //print("TRIGGER SPAWN");
         this.VirtualModel = virtualModel;
+        print($"Number of chips: {virtualModel.chips.Length}");
         foreach(VVar v in this.VirtualModel.variables)
         {
             v.valueChangedCallbacks = new Action<float, VVar>[] { };
@@ -360,6 +400,14 @@ public class CommonChip : AngleChip
 
         // this performs clean-up as well
         this.AllChildren = this.AddChildren();  // trigger the tsunami
+        // TODO: remove this and FIX Clipboard
+        if (this.VirtualModel.chips.Length != this.AllChips.Length)
+        {
+            Debug.LogWarning($"Fix clipboard to get rid of this warning");
+            // this is to register chips that haven't been added in
+            this.VirtualModel.SetChipsWithoutNotify(this.AllChips.Select(x => x.equivalentVirtualChip).ToArray());
+        }
+
 
         foreach (var c in this.AllChildren)
         {

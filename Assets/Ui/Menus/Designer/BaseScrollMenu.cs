@@ -70,7 +70,7 @@ public class BaseScrollMenu : BasePanel
         this.gameObject.SetActive(false);
     }
 
-    protected virtual void DeactivateLoadPanel()
+    protected virtual void DeactivatePanel()
     {
         this.gameObject.SetActive(false);
     }
@@ -84,7 +84,7 @@ public class BaseScrollMenu : BasePanel
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            this.DeactivateLoadPanel();
+            this.DeactivatePanel();
         }
         if(Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
         {

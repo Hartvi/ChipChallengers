@@ -270,7 +270,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rParent: {fileID: 0}
   rChildren: []
-  isSelected: 0
 --- !u!114 &729034148
 MonoBehaviour:
   m_ObjectHideFlags: 0

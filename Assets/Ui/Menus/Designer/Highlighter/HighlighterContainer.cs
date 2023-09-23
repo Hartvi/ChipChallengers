@@ -6,13 +6,30 @@ using UnityEngine;
 
 public class HighlighterContainer : MonoBehaviour
 {
+    private GameObject _ParentHighlighter;
+    public GameObject ParentHighlighter { get { return this._ParentHighlighter; } }
     private GameObject HighlightingChip, NorthChip, SouthChip, EastChip, WestChip;
     private Action<VChip>[] HighlightCallbacks = new Action<VChip>[] { };
 
+    //void OnDisable()
+    //{
+    //    this.ParentHighlighter?.SetActive(false);
+    //}
+
+    //void OnEnable()
+    //{
+    //    this.ParentHighlighter?.SetActive(true);
+    //}
 
     public void InstantiateHighlighters()
     {
+        this._ParentHighlighter = new GameObject("Highlighter");
+        this.ParentHighlighter.transform.rotation = Quaternion.identity;
+        this.ParentHighlighter.transform.position = Vector3.zero;
+        this.ParentHighlighter.transform.localScale = Vector3.one;
+
         this.HighlightingChip = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        this.HighlightingChip.layer = 6;
         Renderer renderer = this.HighlightingChip.GetComponent<MeshRenderer>();
         Material m = renderer.material;
         m.color = new Color(0.8f, 0.8f, 0.8f, 0.5f);
@@ -23,6 +40,7 @@ public class HighlighterContainer : MonoBehaviour
         GameObject.Destroy(this.HighlightingChip.GetComponent<Collider>());
 
         this.NorthChip = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        this.NorthChip.layer = 6;
 
         ColourHighlighter ch = this.NorthChip.AddComponent<ColourHighlighter>();
         ch.localDirection = LocalDirection.North;
@@ -35,6 +53,7 @@ public class HighlighterContainer : MonoBehaviour
         this.NorthChip.SetActive(false);
 
         this.SouthChip = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        this.SouthChip.layer = 6;
 
         ch = this.SouthChip.AddComponent<ColourHighlighter>();
         ch.localDirection = LocalDirection.South;
@@ -47,6 +66,7 @@ public class HighlighterContainer : MonoBehaviour
         this.SouthChip.SetActive(false);
 
         this.EastChip = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        this.EastChip.layer = 6;
 
         ch = this.EastChip.AddComponent<ColourHighlighter>();
         ch.localDirection = LocalDirection.East;
@@ -59,6 +79,7 @@ public class HighlighterContainer : MonoBehaviour
         this.EastChip.SetActive(false);
 
         this.WestChip = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        this.WestChip.layer = 6;
 
         ch = this.WestChip.AddComponent<ColourHighlighter>();
         ch.localDirection = LocalDirection.West;
@@ -69,6 +90,12 @@ public class HighlighterContainer : MonoBehaviour
         m.SetTransparent();
 
         this.WestChip.SetActive(false);
+
+        this.HighlightingChip.transform.SetParent(this.ParentHighlighter.transform);
+        this.NorthChip.transform.SetParent(this.ParentHighlighter.transform);
+        this.WestChip.transform.SetParent(this.ParentHighlighter.transform);
+        this.SouthChip.transform.SetParent(this.ParentHighlighter.transform);
+        this.EastChip.transform.SetParent(this.ParentHighlighter.transform);
     }
 
     public void SetHighlightCallbacks(Action<VChip>[] vcs) {
@@ -83,8 +110,14 @@ public class HighlighterContainer : MonoBehaviour
 
         if(cc is null)
         {
-            UnityEngine.Debug.LogError($"Clicked on a null object. ID: {chipId}");
-            cc = CommonChip.ClientCore;
+            //UnityEngine.Debug.LogWarning($"Clicked on a null object. ID: {chipId}, perhaps fix it to the second to last object");
+            string parentId = chipId.Substring(0, chipId.Length - 1);
+            cc = CommonChip.ClientCore.AllChips.FirstOrDefault(x => x.equivalentVirtualChip.id == parentId) as CommonChip;
+            if (cc is null)
+            {
+                UnityEngine.Debug.LogError($"Not even the parent of id {chipId}, {parentId} exists");
+                cc = CommonChip.ClientCore;
+            }
             //throw new NullReferenceException($"Chip with id {chipId} does not exist.");
         }
         //print($"Selected chip type: {cc.equivalentVirtualChip.ChipType}.");

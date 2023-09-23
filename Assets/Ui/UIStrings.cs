@@ -28,6 +28,7 @@ public static class UIStrings
 
     public const string Add = "Add";
     public const string Delete = "Delete";
+    public const string Paste = "Paste";
     public static readonly string[] AddDelete = { Add, Delete };
 
     public static readonly string[] EditorPanels = { "Chip", "Variables", "Controls", "Script" };

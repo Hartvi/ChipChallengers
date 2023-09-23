@@ -14,7 +14,7 @@ public class SavePanel : BaseScrollMenu
 
         this.btns[0].btn.onClick.AddListener(() => SaveModel(this.input.input.text));
 
-        this.btns[1].btn.onClick.AddListener(this.DeactivateLoadPanel);
+        this.btns[1].btn.onClick.AddListener(this.DeactivatePanel);
 
         this.scrollbar = this.itemScroll.Siblings<BaseScrollbar>(false)[0];
 
@@ -49,6 +49,20 @@ public class SavePanel : BaseScrollMenu
         }
     }
 
+    void SaveTmp(string state)
+    {
+        string msg = null;
+        try
+        {
+            msg = CommonChip.ClientCore.VirtualModel.SaveThisModelToFile("tmp");
+        }
+        catch
+        {
+            UnityEngine.Debug.LogWarning($"Model could not be saved.");
+            DisplaySingleton.Instance.DisplayText(this.ModelError, 3f);
+        }
+    }
+
     void SaveModel(string modelName)
     {
         string modelNameWithExtension = IOHelpers.EnsureFileExtension(modelName);
@@ -64,7 +78,7 @@ public class SavePanel : BaseScrollMenu
             UnityEngine.Debug.LogWarning($"Model could not be saved.");
             DisplaySingleton.Instance.DisplayText(this.ModelError, 3f);
         }
-        this.DeactivateLoadPanel();
+        this.DeactivatePanel();
     }
 
     void ModelError(TMP_Text txt)

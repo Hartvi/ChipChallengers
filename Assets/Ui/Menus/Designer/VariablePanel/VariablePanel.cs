@@ -71,7 +71,7 @@ public class VariablePanel : BasePanel
         this.itemScroll.virtualContainer.UpdateLabels(this.myLabels);
         this.itemScroll.Scroll(0f);
         print("My labels:");
-        PRINT.print(this.myLabels);
+        PRINT.IPrint(this.myLabels);
         this.ReloadVariables();
     }
 

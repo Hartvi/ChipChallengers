@@ -29,6 +29,8 @@ public struct CameraFollowSettings
 
 public class SingleplayerMenu : BaseMenu
 {
+    public static SingleplayerMenu Instance;
+
     Camera mainCamera;
     Vector3 oldCorePosition = Vector3.zero;
     CameraFollowSettings cameraFollowSettings;
@@ -79,22 +81,34 @@ public class SingleplayerMenu : BaseMenu
     {
         base.Start();
 
-        this.AfterLoaded();
+        SingleplayerMenu.Instance = this;
+
+        this.mainCamera = Camera.main;
+        this.LoadPanel = this.GetComponentInChildren<LoadPanel>();
+
+        this.cameraFollowSettings = new CameraFollowSettings(distance: 5f, up: 1f, predict: 0f, sensitivity: 1f, lowPass: 0f);
+
+        this.OnEnterMenu();
+        this.selectedCallbacks.SetCallbacks(new Action[] { this.OnEnterMenu });
     }
 
     // when going from other menus:
-    void AfterLoaded()
+    void OnEnterMenu()
     {
+
+        // ignore wheel and default layer collisions
+        Physics.IgnoreLayerCollision(7, 0);
+        // ignore wheel to wheel collisions
+        Physics.IgnoreLayerCollision(7, 7);
+        // ignore player to player collisions
+        Physics.IgnoreLayerCollision(6, 6);
+        // ignore wheel to player collisions
+        Physics.IgnoreLayerCollision(7, 6);
+
         this.core = CommonChip.ClientCore;
         this.core.TriggerSpawn(this.core.VirtualModel, false);
 
-        this.LoadPanel = this.GetComponentInChildren<LoadPanel>();
-
-        this.core = CommonChip.ClientCore;
         this.LoadPanel.SetOnLoadedCallbacks(new Action[] { () => this.core.TriggerSpawn(this.core.VirtualModel, false) });
-
-        this.mainCamera = Camera.main;
-        this.cameraFollowSettings = new CameraFollowSettings(distance: 5f, up: 1f, predict: 1f, sensitivity: 1f, lowPass: 0f);
     }
 
     void Update()
@@ -104,7 +118,7 @@ public class SingleplayerMenu : BaseMenu
         {
             //core.transform.position += 0.1f*Vector3.up;
             Rigidbody r = core.GetComponent<Rigidbody>();
-            r.AddForce(Vector3.up*r.mass, ForceMode.Impulse);
+            r.AddForce(10f*Vector3.up, ForceMode.VelocityChange);
         }
 #endif
         bool ctrlPressed = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);

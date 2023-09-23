@@ -18,7 +18,7 @@ public class LoadPanel : BaseScrollMenu
 
         this.btns[0].btn.onClick.AddListener(this.RebuildWithNewModel);
 
-        this.btns[1].btn.onClick.AddListener(this.DeactivateLoadPanel);
+        this.btns[1].btn.onClick.AddListener(this.DeactivatePanel);
 
         this.scrollbar = this.itemScroll.Siblings<BaseScrollbar>(false)[0];
 
@@ -68,8 +68,63 @@ public class LoadPanel : BaseScrollMenu
         //print($"loaded model core: {this.loadedModel.Core.Children}");
         core.TriggerSpawn(this.loadedModel, true);
         core.VirtualModel.AddModelChangedCallback(x => core.TriggerSpawn(x, true));
+        core.VirtualModel.AddModelChangedCallback(x => HistoryStack.SaveState(core.VirtualModel.ToLuaString()));
         //print($"Chips: {core.VirtualModel.chips.Length}");
-        this.DeactivateLoadPanel();
+        this.DeactivatePanel();
+
+        foreach(Action a in this.OnLoadedCallbacks)
+        {
+            a();
+        }
+    }
+
+    public void LoadString(string state)
+    {
+        VModel model = null;
+        CommonChip core = CommonChip.ClientCore;
+        try
+        {
+            model = VModel.FromLuaModel(state);
+        }
+        catch (Exception e)
+        {
+            UnityEngine.Debug.LogWarning($"`tmp` could not be loaded.");
+            UnityEngine.Debug.Log(e.Message);
+            DisplaySingleton.Instance.DisplayText(this.UndoRedoNotValid, 3f);
+
+            return;
+        }
+
+        core.TriggerSpawn(model, true);
+        core.VirtualModel.AddModelChangedCallback(x => core.TriggerSpawn(x, true));
+        core.VirtualModel.AddModelChangedCallback(x => HistoryStack.SaveState(core.VirtualModel.ToLuaString()));
+
+        foreach(Action a in this.OnLoadedCallbacks)
+        {
+            a();
+        }
+    }
+
+    public void LoadTmp()
+    {
+        VModel model = null;
+        CommonChip core = CommonChip.ClientCore;
+        try
+        {
+            model = VModel.LoadModelFromFile("tmp");
+        }
+        catch (Exception e)
+        {
+            UnityEngine.Debug.LogWarning($"`tmp` could not be loaded.");
+            UnityEngine.Debug.Log(e.Message);
+            DisplaySingleton.Instance.DisplayText(this.UndoRedoNotValid, 3f);
+
+            return;
+        }
+
+        core.TriggerSpawn(model, true);
+        core.VirtualModel.AddModelChangedCallback(x => core.TriggerSpawn(x, true));
+        core.VirtualModel.AddModelChangedCallback(x => HistoryStack.SaveState(core.VirtualModel.ToLuaString()));
 
         foreach(Action a in this.OnLoadedCallbacks)
         {
@@ -92,6 +147,11 @@ public class LoadPanel : BaseScrollMenu
     {
         DisplaySingleton.ErrorMsgModification(txt);
         txt.SetText("Model is invalid.");
+    }
+    void UndoRedoNotValid(TMP_Text txt)
+    {
+        DisplaySingleton.ErrorMsgModification(txt);
+        txt.SetText("Undo/redo is invalid.");
     }
 
     public void SetOnLoadedCallbacks(Action[] callbacks)

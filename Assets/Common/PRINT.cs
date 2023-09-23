@@ -17,7 +17,7 @@ public class PRINT
             return o.ToString();
         }
     }
-    public static void print(object o)
+    public static void IPrint(object o)
     {
         UnityEngine.Debug.Log(PRINT.MakePrintable(o));
     }

@@ -10,8 +10,10 @@ public class BaseMenu : DeclaredProp
     public static HashSet<Type> allMenuTypes = new HashSet<Type>();
     public static Stack<BaseMenu> lastMenu = new Stack<BaseMenu>();
 
-    protected Action[] selectedCallbacks = new Action[] { };
-    protected Action[] deselectedCallbacks = new Action[] { };
+    public CallbackArray selectedCallbacks = new CallbackArray(true);
+    public CallbackArray deselectedCallbacks = new CallbackArray(true);
+    //protected Action[] selectedCallbacks = new Action[] { };
+    //protected Action[] deselectedCallbacks = new Action[] { };
 
     private bool _isSelected = false;
     public bool isSelected 
@@ -23,19 +25,22 @@ public class BaseMenu : DeclaredProp
 
             if (!value)
             {
-                foreach (Action c in this.deselectedCallbacks)
-                {
-                    c();
-                }
+                this.deselectedCallbacks.Invoke();
+                //foreach (Action c in this.deselectedCallbacks)
+                //{
+                //    c();
+                //}
             }
             else
             {
                 print($"{this.GetType()} is being selected");
-                foreach (Action c in this.selectedCallbacks)
-                {
-                    c();
-                }
+                this.selectedCallbacks.Invoke();
+                //foreach (Action c in this.selectedCallbacks)
+                //{
+                //    c();
+                //}
             }
+            this.gameObject.SetActive(value);
 
         }
     }
@@ -52,16 +57,6 @@ public class BaseMenu : DeclaredProp
             }
             BaseMenu.mainMenu = value;
         }
-    }
-
-    public void SetThisMenuSelectedCallbacks(Action[] actions)
-    {
-        this.selectedCallbacks = actions;
-    }
-
-    public void SetThisMenuDeselectedCallbacks(Action[] actions)
-    {
-        this.deselectedCallbacks = actions;
     }
 
     protected override void Setup()
@@ -97,7 +92,7 @@ public class BaseMenu : DeclaredProp
                 //print("last menu: " + menu);
                 BaseMenu.lastMenu.Push(menu);
             }
-            menu.gameObject.SetActive(activation);
+            //menu.gameObject.SetActive(activation);
             menu.isSelected = activation;
         }
     }
