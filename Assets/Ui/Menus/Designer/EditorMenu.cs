@@ -159,6 +159,10 @@ public class EditorMenu : BaseMenu
 
     void InEditorInputs()
     {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            GoToMainMenu.Function();
+        }
         bool ctrlPressed = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
 
         if (ctrlPressed)

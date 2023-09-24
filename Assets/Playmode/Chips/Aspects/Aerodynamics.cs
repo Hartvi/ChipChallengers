@@ -33,7 +33,25 @@ public class Aerodynamics : BaseAspect
 
         // drag
         Vector3 up = t.up;
-        float DragProportion = Vector3.Dot(up, velocity);
-        this.rb.AddForce(-Mathf.Sign(DragProportion)*up*ConstantPartOfDragAndLift*DragProportion*DragProportion);
+        float DragAndLiftProportion = Vector3.Dot(up, velocity);
+        // extra drag is needed because lift is roughly proportional to 1 whereas drag is roughly proportional to 2
+        // direction of extra drag
+        Vector3 ExtraDrag = Vector3.Project(up, velocity) * velocity.sqrMagnitude;
+        float commonConstant = -Mathf.Sign(DragAndLiftProportion) * ConstantPartOfDragAndLift;
+        this.rb.AddForce(commonConstant * (up * DragAndLiftProportion * DragAndLiftProportion + ExtraDrag));
     }
+
+    //void FixedUpdate()
+    //{
+    //    Transform t = this.transform;
+    //    Vector3 velocity = this.rb.velocity;
+
+    //    // drag
+    //    Vector3 up = t.up;
+    //    Vector3 DragDirection = Vector3.Project(up, velocity);
+    //    Vector3 LiftDirection = up - DragDirection;
+    //    // how to find the +- multiplication constant?
+    //    float commonConstant = -Mathf.Sign(DragAndLiftProportion) * ConstantPartOfDragAndLift;
+    //    this.rb.AddForce(commonConstant*(up*DragAndLiftProportion*DragAndLiftProportion + DragDirection));
+    //}
 }

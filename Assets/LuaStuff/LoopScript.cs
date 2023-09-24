@@ -31,7 +31,7 @@ public class LoopScript : MonoBehaviour
                 if (Mathf.Abs(diff) > 1e-4f)
                 {
                     float change = v.backstep * Mathf.Sign(diff);
-                    print($"changing by: {change}");
+                    //print($"changing by: {change}");
                     v.currentValue = cur + change;
                 }
             }

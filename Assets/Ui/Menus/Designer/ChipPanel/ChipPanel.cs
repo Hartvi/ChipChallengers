@@ -142,6 +142,7 @@ public class ChipPanel : BasePanel
         {
             int _i = i;
 
+            // TODO inputs[_i] was null????
             inputs[_i].onEndEdit.RemoveAllListeners();
             inputs[_i].onEndEdit.AddListener(
                 x => {

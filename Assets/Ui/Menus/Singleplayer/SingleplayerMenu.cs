@@ -106,6 +106,10 @@ public class SingleplayerMenu : BaseMenu
         Physics.IgnoreLayerCollision(7, 6);
 
         this.core = CommonChip.ClientCore;
+        Vector3 spawnPosition = this.RaycastFromAbove();
+        this.core.transform.rotation = Quaternion.identity;
+        this.core.rb.velocity = Vector3.zero;
+        this.core.transform.position = spawnPosition;
         this.core.TriggerSpawn(this.core.VirtualModel, false);
 
         this.LoadPanel.SetOnLoadedCallbacks(new Action[] { () => this.core.TriggerSpawn(this.core.VirtualModel, false) });
@@ -120,8 +124,15 @@ public class SingleplayerMenu : BaseMenu
             Rigidbody r = core.GetComponent<Rigidbody>();
             r.AddForce(10f*Vector3.up, ForceMode.VelocityChange);
         }
+        if (Input.GetKey(KeyCode.UpArrow))
+        {
+            //core.transform.position += 0.1f*Vector3.up;
+            Rigidbody r = core.GetComponent<Rigidbody>();
+            r.AddForce(1f*Vector3.forward, ForceMode.VelocityChange);
+        }
 #endif
         bool ctrlPressed = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+        bool shiftPressed = Input.GetKey(KeyCode.RightShift) || Input.GetKey(KeyCode.LeftShift);
 
         if (ctrlPressed)
         {
@@ -133,7 +144,42 @@ public class SingleplayerMenu : BaseMenu
             {
                 GoToEditor.Function();
             }
+            if (Input.GetKeyDown(KeyCode.R))
+            {
+                this.core.rb.velocity = Vector3.zero;
+                if(!shiftPressed)
+                {
+                    this.core.transform.rotation = Quaternion.identity;
+                }
+                this.core.TriggerSpawn(this.core.VirtualModel, false);
+            }
+#if UNITY_EDITOR
+            if (Input.GetKeyDown(KeyCode.T))
+            {
+                Vector3 spawnPosition = this.RaycastFromAbove();
+                this.core.rb.velocity = Vector3.zero;
+                if(!shiftPressed)
+                {
+                    this.core.transform.rotation = Quaternion.identity;
+                }
+                this.core.transform.position = spawnPosition;
+                this.core.TriggerSpawn(this.core.VirtualModel, false);
+            }
+#else
+            if (Input.GetKeyDown(KeyCode.U))
+            {
+                Vector3 spawnPosition = RaycastFromAbove();
+                this.core.rb.velocity = Vector3.zero;
+                if(!shiftPressed)
+                {
+                    this.core.transform.rotation = Quaternion.identity;
+                }
+                this.core.transform.position = spawnPosition;
+                this.core.TriggerSpawn(this.core.VirtualModel, false);
+            }
+#endif
         }
+
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             GoToMainMenu.Function();
@@ -159,6 +205,30 @@ public class SingleplayerMenu : BaseMenu
         }
 
     }
+
+    public Vector3 RaycastFromAbove()
+    {
+        // Starting position of the ray
+        Vector3 startPosition = new Vector3(0, 100000, 0);
+
+        // Direction of the ray (vertically down)
+        Vector3 direction = Vector3.down;
+
+        // Create a LayerMask to ignore layers 6 and 7
+        int layerMask = ~((1 << 6) | (1 << 7));
+
+        // Perform the raycast
+        RaycastHit hit;
+        if (Physics.Raycast(startPosition, direction, out hit, Mathf.Infinity, layerMask))
+        {
+            // If hit, return the position of the hit point
+            return hit.point + Vector3.up*5f;
+        }
+
+        // If nothing hit, return (0,0,0)
+        return Vector3.zero;
+    }
+
 
     void CameraFollowMove()
     {

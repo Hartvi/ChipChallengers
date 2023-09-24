@@ -94,8 +94,8 @@ public class VariablePanel : BasePanel
         CommonChip clientCore = CommonChip.ClientCore;
         string[] vs = clientCore.VirtualModel.variables.Select(x => x.name).Where(x => x.IsVariableName()).ToArray();
         this.myLabels = vs;
-        print($"itemscroll: {this.itemScroll}, ");
-        print($"virtualcontainer: {this.itemScroll.virtualContainer}, ");
+        //print($"itemscroll: {this.itemScroll}, ");
+        //print($"virtualcontainer: {this.itemScroll.virtualContainer}, ");
         this.itemScroll.virtualContainer.UpdateLabels(this.myLabels);
         this.itemScroll.Scroll(0f);
     }
