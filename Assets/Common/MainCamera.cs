@@ -7,9 +7,10 @@ public class MainCamera : MonoBehaviour
     CommonChip core;
     void Awake()
     {
-        core = GameObject.CreatePrimitive(PrimitiveType.Cube).AddComponent<CommonChip>();
+        core = Instantiate(Resources.Load<GameObject>("Chips/Core")).AddComponent<CommonChip>();
         core.gameObject.layer = 6;
         core.gameObject.AddComponent<Rigidbody>();
+        core.gameObject.AddComponent<BoxCollider>();
         core.name = UIStrings.Core;
         //print($"Core: {core}");
     }

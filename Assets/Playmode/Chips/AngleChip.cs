@@ -133,7 +133,7 @@ public abstract class AngleChip : GeometricChip
     {
         if (this.cj != null)
         {
-            print($"setting angle in function to {a}");
+            //print($"setting angle in function to {a}");
             //print($"wuaternoin: {Quaternion.Euler(a, 0f, 0f)}");
             // TODO ITS NOT `this.cj` SINCE THIS IS RUNNING ON THE CORE, IT HAS TO REFERENCE THE TARGET JOINTS
             // maybe, not sure

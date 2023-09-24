@@ -393,9 +393,14 @@ public class CommonChip : AngleChip
         // handle script
         this.scriptInstance = new ScriptInstance(virtualModel);
 
-        if(this.loopScript is not null) GameObject.Destroy(this.loopScript);
+        if (this.loopScript is not null)
+        {
+            Debug.LogWarning($"Loop script is being added twice, deleting old one");
+            GameObject.Destroy(this.loopScript);
+        }
 
         this.loopScript = this.gameObject.AddComponent<LoopScript>();
+        this.loopScript.vModel = this.VirtualModel;
         this.loopScript.loopFunction = this.scriptInstance.CallLoop;
 
         // this performs clean-up as well
@@ -409,11 +414,11 @@ public class CommonChip : AngleChip
         }
 
 
-        foreach (var c in this.AllChildren)
-        {
-            c.VisualizePosition = true;
-        }
-        this.VisualizePosition = true;
+        //foreach (var c in this.AllChildren)
+        //{
+        //    c.VisualizePosition = true;
+        //}
+        //this.VisualizePosition = true;
 
         //c.transform.position = c.transform.position + Vector3.up;
         if (freeze)

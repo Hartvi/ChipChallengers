@@ -39,9 +39,16 @@ public class VariableFields : BaseImage
         this.texts = this.gameObject.GetComponentsInChildren<BaseText>();
         this.buttons = this.gameObject.GetComponentsInChildren<BaseButton>();
 
+        this.inputs[0].input.onEndEdit.RemoveAllListeners();
+        this.inputs[0].input.onEndEdit.AddListener(
+            x => {
+                this.inputs[0].input.SetTextWithoutNotify(PermitOnlyVariables(x));
+            }
+        );
         for(int i = 1; i < this.inputs.Length; ++i)
         {
             int _i = i;
+            this.inputs[i].input.onEndEdit.RemoveAllListeners();
             this.inputs[i].input.onEndEdit.AddListener(x => SanitizeInputField(this.inputs[_i].input, x));
         }
 
@@ -73,6 +80,16 @@ public class VariableFields : BaseImage
 
     public void AddVariable()
     {
+        if (!this.inputs[0].input.text.IsVariableName())
+        {
+            DisplaySingleton.Instance.DisplayText(x =>
+                {
+                    DisplaySingleton.WarnMsgModification(x);
+                    x.SetText($"Variable name {this.inputs[0].input.text} is invalid");
+                }, 
+                3f
+            );
+        }
         string[] vals = this.inputs.Select(x => x.input.text).ToArray();
         VVar v = new VVar(vals);
         CommonChip.ClientCore.VirtualModel.AddAndSelectVariable(v);
@@ -160,5 +177,15 @@ public class VariableFields : BaseImage
         }
     }
 
+    string PermitOnlyVariables(string input)
+    {
+        string tmp = input;
+        while (!StringHelpers.IsVariableName(tmp) && tmp.Length > 0)
+        {
+            tmp = tmp.Substring(0, Math.Max(0, tmp.Length - 1));
+        }
+
+        return tmp;
+    }
 }
 

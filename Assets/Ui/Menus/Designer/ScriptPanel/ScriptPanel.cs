@@ -58,4 +58,6 @@ public class ScriptPanel : BasePanel
         this.input.input.SetTextWithoutNotify(CommonChip.ClientCore.VirtualModel.script);
     }
 
+    public bool IsSelected => this.input.input.isFocused;
+
 }

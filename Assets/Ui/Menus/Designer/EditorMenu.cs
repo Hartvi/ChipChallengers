@@ -88,11 +88,22 @@ public class EditorMenu : BaseMenu
         this.LoadPanel.SetOnLoadedCallbacks(new Action[] { this.VariablePanel.ReloadVariables, this.VariablePanel.AddListenersToModel });
 
         //print($"Setting editormenu callback to model changed");
-        Action[] afterBuildListeners = new Action[] { 
+        Action[] afterBuildListeners = new Action[] {
             () => {
                 //print($"selected chip: {this.selectedChip}");
                 this.selectedChip = this.highlighter.SelectVChip(this.selectedChip.equivalentVirtualChip.id);
             },
+            () => {
+                try
+                {
+                    VariablePanel.ReloadVariables();
+                }
+                catch
+                {
+                    Debug.LogWarning($"THIS warning should only appear at startup");
+                }
+            }
+
         };
 
         // core stuff:
@@ -146,7 +157,7 @@ public class EditorMenu : BaseMenu
         return default(T);
     }
 
-    void Update()
+    void InEditorInputs()
     {
         bool ctrlPressed = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
 
@@ -180,7 +191,65 @@ public class EditorMenu : BaseMenu
                 GoToSingleplayer.Function();
             }
 #endif
+            if (Input.GetKeyDown(KeyCode.Z))
+            {
+#if UNITY_EDITOR
+                this.LoadPanel.LoadString(HistoryStack.Undo());
+#else
+            try
+            {
+                this.LoadPanel.LoadString(HistoryStack.Undo());
+            }
+            catch {}
+#endif
+            }
+            if (Input.GetKeyDown(KeyCode.Y))
+            {
+#if UNITY_EDITOR
+                this.LoadPanel.LoadString(HistoryStack.Redo());
+#else
+            try
+            {
+                this.LoadPanel.LoadString(HistoryStack.Redo());
+            }
+            catch {}
+#endif
+            }
+            if (Input.GetKeyDown(KeyCode.C))
+            {
+                VChip vc = this.selectedVChip;
+                CommonChip core = CommonChip.ClientCore;
+                VModel vm = core.VirtualModel;
 
+                if (vc.parentId is not null)
+                {
+                    Clipboard.Copy(vc.id);
+                }
+            }
+        }
+
+        // outside ctrl + something
+
+        if(Input.GetKeyDown(KeyCode.Delete))
+        {
+            VChip vc = this.selectedVChip;
+            CommonChip core = CommonChip.ClientCore;
+            VModel vm = core.VirtualModel;
+
+            if (vc.parentId is not null)
+            {
+                this.selectedChip = this.highlighter.SelectVChip(vc.parentId);
+                vm.DeleteChip(vc.id);
+            }
+        }
+
+    }
+
+    void Update()
+    {
+        if (!this.ScriptPanel.IsSelected)
+        {
+            this.InEditorInputs();
         }
 
         if (Input.GetMouseButtonDown(0) && !TopUI.IsOnUI)  // 0 means left mouse button
@@ -236,54 +305,6 @@ public class EditorMenu : BaseMenu
 
             float sensitivity = Input.GetKey(KeyCode.LeftShift) ? 0.09f : 0.03f;
             cam.transform.position = cam.transform.position + sensitivity * deltaPos;
-        }
-
-        if(Input.GetKeyDown(KeyCode.Delete))
-        {
-            VChip vc = this.selectedVChip;
-            CommonChip core = CommonChip.ClientCore;
-            VModel vm = core.VirtualModel;
-
-            if (vc.parentId is not null)
-            {
-                this.selectedChip = this.highlighter.SelectVChip(vc.parentId);
-                vm.DeleteChip(vc.id);
-            }
-        }
-        if (Input.GetKeyDown(KeyCode.C))
-        {
-            VChip vc = this.selectedVChip;
-            CommonChip core = CommonChip.ClientCore;
-            VModel vm = core.VirtualModel;
-
-            if (vc.parentId is not null)
-            {
-                Clipboard.Copy(vc.id);
-            }
-        }
-        if (Input.GetKeyDown(KeyCode.Z))
-        {
-#if UNITY_EDITOR
-            this.LoadPanel.LoadString(HistoryStack.Undo());
-#else
-            try
-            {
-                this.LoadPanel.LoadString(HistoryStack.Undo());
-            }
-            catch {}
-#endif
-        }
-        if (Input.GetKeyDown(KeyCode.Y))
-        {
-#if UNITY_EDITOR
-            this.LoadPanel.LoadString(HistoryStack.Redo());
-#else
-            try
-            {
-                this.LoadPanel.LoadString(HistoryStack.Redo());
-            }
-            catch {}
-#endif
         }
     }
 

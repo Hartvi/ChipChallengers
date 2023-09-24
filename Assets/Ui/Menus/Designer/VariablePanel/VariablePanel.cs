@@ -70,8 +70,8 @@ public class VariablePanel : BasePanel
         this.variableFields.PopulateFields(v);
         this.itemScroll.virtualContainer.UpdateLabels(this.myLabels);
         this.itemScroll.Scroll(0f);
-        print("My labels:");
-        PRINT.IPrint(this.myLabels);
+        //print("My labels:");
+        //PRINT.IPrint(this.myLabels);
         this.ReloadVariables();
     }
 
@@ -92,8 +92,10 @@ public class VariablePanel : BasePanel
     public void ReloadVariables()
     {
         CommonChip clientCore = CommonChip.ClientCore;
-        string[] vs = clientCore.VirtualModel.variables.Select(x => x.name).ToArray();
+        string[] vs = clientCore.VirtualModel.variables.Select(x => x.name).Where(x => x.IsVariableName()).ToArray();
         this.myLabels = vs;
+        print($"itemscroll: {this.itemScroll}, ");
+        print($"virtualcontainer: {this.itemScroll.virtualContainer}, ");
         this.itemScroll.virtualContainer.UpdateLabels(this.myLabels);
         this.itemScroll.Scroll(0f);
     }

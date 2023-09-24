@@ -51,6 +51,7 @@ public class VVar
             }
         }
     }
+    public bool hasChanged = false;
 
     public void SetValueChangedCallbacks(Action<float, VVar>[] actions)
     {

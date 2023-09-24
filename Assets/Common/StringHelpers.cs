@@ -47,7 +47,7 @@ public static class StringHelpers
     
     public static bool IsVariableName(this string input)
     {
-        if (string.IsNullOrEmpty(input)) { return false; }
+        if (string.IsNullOrWhiteSpace(input)) { return false; }
         char firstChar = input[0];
         return IsAlphanumericOrContainsUnderscore(input) && (char.IsLetter(firstChar) || firstChar == '_');
     }
