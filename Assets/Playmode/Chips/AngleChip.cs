@@ -29,7 +29,7 @@ public abstract class AngleChip : GeometricChip
     {
         Action<float, VVar> SetBrakeDelegate = (x, v) => this.SetBrake(x);
         
-        return this.GetProperty<float>(VChip.valueStr, float.TryParse, SetBrakeDelegate);
+        return this.GetProperty<float>(VChip.brakeStr, float.TryParse, SetBrakeDelegate);
     }
 
     protected float GetValue()
@@ -164,6 +164,7 @@ public abstract class AngleChip : GeometricChip
     public void SetValue(float a)
     {
         // TODO VALUE FUNCTIONS
+        //print($"Setting value to {a}");
         this._value = a;
         //if ()
         //{

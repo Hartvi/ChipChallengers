@@ -60,6 +60,7 @@ public class VVar
 
     public void AddValueChangedCallback(Action<float, VVar> action)
     {
+        PRINT.IPrint($"Added callback to variable {this.name}");
         this.valueChangedCallbacks = this.valueChangedCallbacks.Append(action).ToArray();
     }
 

@@ -102,17 +102,18 @@ public class ScriptInstance
         // select all variables
         string[] varNames = vModel.variables.Select(x => x.name).ToArray();
         // only choose valid ones
-        varNames = varNames.Where(x=>x.IsVariableName()).ToArray();
-        PRINT.IPrint($"Number of variables: {varNames.Length}");
-        for(int i = 0; i < varNames.Length; ++i)
-        {
-            PRINT.IPrint($"variable: {varNames[i]}, is variable: {varNames[i].IsVariableName()}");
-        }
-        
+        varNames = varNames.Where(x => x.IsVariableName()).ToArray();
+
+        //PRINT.IPrint($"Number of variables: {varNames.Length}");
+        //for(int i = 0; i < varNames.Length; ++i)
+        //{
+        //    PRINT.IPrint($"variable: {varNames[i]}, is variable: {varNames[i].IsVariableName()}");
+        //}
+
         this.scriptString = ScriptInstance.TransformCode(this.scriptString, varNames);
         
-        PRINT.IPrint($"Script string:");
-        PRINT.IPrint(this.scriptString);
+        //PRINT.IPrint($"Script string:");
+        //PRINT.IPrint(this.scriptString);
         
         this.script.DoString(this.scriptString);
     }

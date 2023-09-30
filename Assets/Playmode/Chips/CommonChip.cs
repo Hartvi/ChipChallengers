@@ -116,6 +116,15 @@ public class CommonChip : AngleChip
         }
     }
 
+    bool isAeroElligible
+    {
+        get
+        {
+            VChip vc = this.equivalentVirtualChip;
+            return !(vc.ChipType == VChip.wheelStr || vc.ChipType == VChip.fanStr);
+        }
+    }
+
     private CommonChip _RealParent = null;
     public CommonChip RealParent
     {
@@ -207,32 +216,39 @@ public class CommonChip : AngleChip
         this.material.color = colour;
 
         // add runtime aspects
-        if (this.equivalentVirtualChip.ChipType == VChip.wheelStr)
-        {
-            this.gameObject.AddComponent<WheelAspects>().myChip = this;
-        }
-        else
+        if (this.isAeroElligible)
         {
             // add aspects, TODO: this wont add it to core!!!
             this.gameObject.AddComponent<Aerodynamics>().myChip = this;
-            if (this.equivalentVirtualChip.keys.Contains(VChip.valueStr))
+        }
+
+        if (this.equivalentVirtualChip.keys.Contains(VChip.valueStr))
+        {
+            print($"Type: {this.equivalentVirtualChip.ChipType}");
+            PRINT.IPrint(this.equivalentVirtualChip.keys);
+
+            // TODO cosmetics as in jet spitting fire and wheel turning discs
+            this._value = this.GetValue();
+
+            if (this.equivalentVirtualChip.ChipType == VChip.fanStr)
             {
-                //print($"Type: {this.equivalentVirtualChip.ChipType}");
-                //PRINT.IPrint(this.equivalentVirtualChip.keys);
-
-                // TODO cosmetics as in jet spitting fire and wheel turning discs
+                this.gameObject.AddComponent<JetAspect>();
+            }
+            if (this.equivalentVirtualChip.keys.Contains(VChip.brakeStr))
+            {
                 this._value = this.GetValue();
-
-                if(this.equivalentVirtualChip.ChipType == VChip.fanStr)
+                // GUN - power = gun power, brake to trigger,
+                // WHEEL - power = power, brake = brake
+                if (this.equivalentVirtualChip.ChipType == VChip.wheelStr)
                 {
-                    this.gameObject.AddComponent<JetAspect>();
+                    this.gameObject.AddComponent<WheelAspects>().myChip = this;
                 }
             }
-            else
-            {
-                //print($"DOESNT HAVE VALUE");
-                //PRINT.IPrint(this.equivalentVirtualChip.keys);
-            }
+        }
+        else
+        {
+            //print($"DOESNT HAVE VALUE");
+            //PRINT.IPrint(this.equivalentVirtualChip.keys);
         }
 
         List<CommonChip> chips = new List<CommonChip>();
