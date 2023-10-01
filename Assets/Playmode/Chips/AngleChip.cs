@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class AngleChip : GeometricChip
+public abstract class AngleChip : OptionChip
 {
     protected ConfigurableJoint cj;
     protected MeshRenderer mr;

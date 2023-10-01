@@ -158,7 +158,7 @@ public class ChipPanel : BasePanel
                         //print($"Changing val {vc.vals[_i]} to {inputs[_i].text}");
                         // TODO CALL BACK FOR CHIP CHANGED TO PROPAGATE TO MODEL CHANGED for all properties
                         Debug.LogWarning($"TODO: make chip changed callback propagate to model changed callback for all properties.");
-                        print($"{vc.ChipType}, {vc.id}, {vc.parentId}");
+                        //print($"{vc.ChipType}, {vc.id}, {vc.parentId}");
                         vc.vals[_i] = x;
                     }
                 }

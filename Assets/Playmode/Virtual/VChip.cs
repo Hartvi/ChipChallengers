@@ -31,6 +31,7 @@ public class VChip
 
     public const string coreStr = "Core";
     public const string cowlStr = "Cowl";
+    public const string sensorStr = "Sensor";
     public const string wheelStr = "Wheel";
     public const string fanStr = "Fan";
 
@@ -85,7 +86,7 @@ public class VChip
             {VChip.colourStr, typeof(string)},
             {VChip.springStr, typeof(float)},
             {VChip.damperStr, typeof(float)},
-            {VChip.optionStr, typeof(uint)},
+            {VChip.optionStr, typeof(int)},
             {VChip.nameStr,   typeof(string)},
             {VChip.typeStr,   typeof(string)},
         };
@@ -268,13 +269,29 @@ public class VChip
     {
         try
         {
-            val = (T)(this.instanceProperties[key]);
+            // TODO: rewrite instanceproperties when a field is changed
+            string strVal = ArrayExtensions.AccessLikeDict(key, this.keys, this.vals);
+            if (propertyTypes[key] == typeof(float))
+            {
+                val = (T)(object)float.Parse(strVal);
+            }
+            else if (propertyTypes[key] == typeof(int))
+            {
+                val = (T)(object)int.Parse(strVal);
+            }
+            else
+            {
+                val = (T)(object)strVal;
+            }
+            //val = (T)(this.instanceProperties[key]);
+            //PRINT.IPrint($"val: {val}, chip: {this.ChipType}");
             return true;
         }
         catch
         {
 
             object objVal = ArrayExtensions.AccessLikeDict(key, VChip.allPropertiesStr, VChip.allPropertiesDefaultsObjects);
+            //PRINT.IPrint($"objval: {objVal} type: {objVal.GetType()}");
             val = (T)objVal;
             //val = default(T);
             return false;
@@ -360,11 +377,11 @@ public class VChip
             { // String does not require conversion
                 this.objectVals[i] = this.vals[i];
             }
-            else if (expectedType == typeof(uint))
+            else if (expectedType == typeof(int))
             {
-                if (!uint.TryParse(this.vals[i], out uint result))
+                if (!int.TryParse(this.vals[i], out int result))
                 {
-                    throw new ArgumentException($"Value at index {i} cannot be converted to uint.");
+                    throw new ArgumentException($"Value at index {i} cannot be converted to int.");
                 }
                 this.objectVals[i] = result;
             }
@@ -381,8 +398,8 @@ public class VChip
         if(property == VChip.optionStr)
         {
             string[] options = this.GetOptions();
-            uint option;
-            if (uint.TryParse(value, out option))
+            int option;
+            if (int.TryParse(value, out option))
             {
                 if (option >= options.Length)
                 {
