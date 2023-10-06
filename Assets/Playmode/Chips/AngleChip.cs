@@ -164,7 +164,7 @@ public abstract class AngleChip : OptionChip
     public void SetValue(float a)
     {
         // TODO VALUE FUNCTIONS
-        //print($"Setting value to {a}");
+        print($"Setting value to {a}");
         this._value = a;
         //if ()
         //{

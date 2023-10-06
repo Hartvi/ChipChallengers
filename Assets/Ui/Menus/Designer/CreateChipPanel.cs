@@ -11,6 +11,7 @@ public class CreateChipPanel : BasePanel
     BaseButton[] bbtns;
     EditorMenu editorMenu;
     float totalMenuHeight;
+    public LocalDirection localDir;
 
     protected override void Setup()
     {
@@ -50,6 +51,9 @@ public class CreateChipPanel : BasePanel
 
     public void Display(Vector2 clickPosition, LocalDirection dir, VChip selectedVChip)
     {
+        // set direction so pasting in EditorMenu can work from the ctrl+v shortcut
+        this.localDir = dir;
+
         for(int i = 0; i < VChip.chipNames.Length; ++i)
         {
             int _i = i;
@@ -83,7 +87,7 @@ public class CreateChipPanel : BasePanel
         this.gameObject.SetActive(false);
     }
 
-    void PasteCallback(VChip selectedVChip, LocalDirection dir)
+    public void PasteCallback(VChip selectedVChip, LocalDirection dir)
     {
         VChip pastedParentChip = Clipboard.AttachTo(selectedVChip, (int)dir);
 

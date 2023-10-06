@@ -4,8 +4,23 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 
+
 public class EditorMenu : BaseMenu
 {
+    private CommonChip _core;
+    private CommonChip core
+    {
+        get
+        {
+            if (this._core is null)
+            {
+                this._core = CommonChip.ClientCore;
+            }
+            return this._core;
+        }
+    }
+
+    private CameraMoveMode cameraMoveMode = CameraMoveMode.Follow;
     public static EditorMenu Instance;
 
     private Camera _camera;
@@ -91,7 +106,15 @@ public class EditorMenu : BaseMenu
         Action[] afterBuildListeners = new Action[] {
             () => {
                 //print($"selected chip: {this.selectedChip}");
-                this.selectedChip = this.highlighter.SelectVChip(this.selectedChip.equivalentVirtualChip.id);
+                try{
+
+                    this.selectedChip = this.highlighter.SelectVChip(this.selectedChip.equivalentVirtualChip.id);
+                }
+                catch
+                {
+                    print($"selected chip: {this.selectedChip}");
+                    Debug.LogWarning($"FIX THIS, ");
+                }
             },
             () => {
                 try
@@ -108,6 +131,7 @@ public class EditorMenu : BaseMenu
 
         // core stuff:
         CommonChip core = CommonChip.ClientCore;
+        // TODO: clean up callbacks, etc after leacing this menu
         core.SetAfterBuildListeners(afterBuildListeners);
         // TODO: update value, option, etc in the editor to how it should look like.
         // atm it's only angle and colour that is visibly changed after rebuilding
@@ -158,6 +182,62 @@ public class EditorMenu : BaseMenu
         }
         
         return default(T);
+    }
+
+    void SwitchCameraModes()
+    {
+        if (Input.GetMouseButton(1))
+        {
+            Camera cam = Camera.main;
+            float moveX = Input.GetAxis("Mouse X");
+            float moveY = Input.GetAxis("Mouse Y");
+
+            if (this.cameraMoveMode == CameraMoveMode.Free)
+            {
+
+                cam.transform.Rotate(2f * moveX * Vector3.up, Space.World);
+                cam.transform.Rotate(-2f * moveY * Vector3.right, Space.Self);
+
+            }
+            Vector3 deltaPos = Vector3.zero;
+
+            if (Input.GetKey(KeyCode.W))
+            {
+                deltaPos = cam.transform.forward;
+            }
+            if (Input.GetKey(KeyCode.A))
+            {
+                deltaPos = -cam.transform.right;
+            }
+            if (Input.GetKey(KeyCode.S))
+            {
+                deltaPos = -cam.transform.forward;
+            }
+            if (Input.GetKey(KeyCode.D))
+            {
+                deltaPos = cam.transform.right;
+            }
+            if (Input.GetKey(KeyCode.Q))
+            {
+                deltaPos = -cam.transform.up;
+            }
+            if (Input.GetKey(KeyCode.E))
+            {
+                deltaPos = cam.transform.up;
+            }
+            float sensitivity = Input.GetKey(KeyCode.LeftShift) ? 0.09f : 0.03f;
+
+            cam.transform.position = cam.transform.position + sensitivity * deltaPos;
+
+            if (this.cameraMoveMode == CameraMoveMode.Follow)
+            {
+                float sensitivity2 = 5f;
+                cam.transform.RotateAround(core.transform.position, Vector3.up, moveX * sensitivity2);
+                cam.transform.RotateAround(core.transform.position, cam.transform.right, -moveY * sensitivity2);
+                cam.transform.LookAt(core.transform.position);
+            }
+        }
+
     }
 
     void InEditorInputs()
@@ -233,6 +313,13 @@ public class EditorMenu : BaseMenu
                     Clipboard.Copy(vc.id);
                 }
             }
+            if (Input.GetKeyDown(KeyCode.V))
+            {
+                if (this.selectedVChip != null)
+                {
+                    CreateChipPanel.PasteCallback(this.selectedVChip, CreateChipPanel.localDir);
+                }
+            }
         }
 
         // outside ctrl + something
@@ -257,6 +344,15 @@ public class EditorMenu : BaseMenu
         if (!this.ScriptPanel.IsSelected)
         {
             this.InEditorInputs();
+            this.SwitchCameraModes();
+        }
+        if (Input.GetKeyDown(KeyCode.F1))
+        {
+            this.cameraMoveMode = CameraMoveMode.Follow;
+        }
+        else if (Input.GetKeyDown(KeyCode.F2))
+        {
+            this.cameraMoveMode = CameraMoveMode.Free;
         }
 
         if (Input.GetMouseButtonDown(0) && !TopUI.IsOnUI)  // 0 means left mouse button
@@ -269,50 +365,13 @@ public class EditorMenu : BaseMenu
                 if(this.highlighter.HighlightChip(clickedObject, out CommonChip sc))
                 {
                     this.selectedChip = sc;
+                } else
+                {
+                    this.selectedChip = null;
                 }
             }
         }
 
-        if (Input.GetMouseButton(1))
-        {
-            // 
-            float moveX = Input.GetAxis("Mouse X");
-            float moveY = Input.GetAxis("Mouse Y");
-            Camera cam = Camera.main;
-
-            cam.transform.Rotate(2f*moveX*Vector3.up, Space.World);
-            cam.transform.Rotate(-2f*moveY*Vector3.right, Space.Self);
-            
-            Vector3 deltaPos = Vector3.zero;
-
-            if (Input.GetKey(KeyCode.W))
-            {
-                deltaPos = cam.transform.forward;
-            }
-            if (Input.GetKey(KeyCode.A))
-            {
-                deltaPos = -cam.transform.right;
-            }
-            if (Input.GetKey(KeyCode.S))
-            {
-                deltaPos = -cam.transform.forward;
-            }
-            if (Input.GetKey(KeyCode.D))
-            {
-                deltaPos = cam.transform.right;
-            }
-            if (Input.GetKey(KeyCode.Q))
-            {
-                deltaPos = -cam.transform.up;
-            }
-            if (Input.GetKey(KeyCode.E))
-            {
-                deltaPos = cam.transform.up;
-            }
-
-            float sensitivity = Input.GetKey(KeyCode.LeftShift) ? 0.09f : 0.03f;
-            cam.transform.position = cam.transform.position + sensitivity * deltaPos;
-        }
     }
 
     bool DisplayChipMenu()

@@ -110,6 +110,8 @@ public class SingleplayerMenu : BaseMenu
         this.core.transform.rotation = Quaternion.identity;
         this.core.rb.velocity = Vector3.zero;
         this.core.transform.position = spawnPosition;
+        // delete after build listeners
+        this.core.SetAfterBuildListeners(new Action[]{ });
         this.core.TriggerSpawn(this.core.VirtualModel, false);
 
         this.LoadPanel.SetOnLoadedCallbacks(new Action[] { () => this.core.TriggerSpawn(this.core.VirtualModel, false) });

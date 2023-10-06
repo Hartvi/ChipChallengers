@@ -238,7 +238,7 @@ public class CommonChip : AngleChip
         {
             this.SelectOption(option);
         }
-        print($"Option: {option} type: {this.equivalentVirtualChip.ChipType}");
+        //print($"Option: {option} type: {this.equivalentVirtualChip.ChipType}");
 
         if (this.equivalentVirtualChip.keys.Contains(VChip.valueStr))
         {
