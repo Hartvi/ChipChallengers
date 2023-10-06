@@ -113,6 +113,9 @@ public class SingleplayerMenu : BaseMenu
         this.core.TriggerSpawn(this.core.VirtualModel, false);
 
         this.LoadPanel.SetOnLoadedCallbacks(new Action[] { () => this.core.TriggerSpawn(this.core.VirtualModel, false) });
+
+        // speed up physics for stable physics
+        Time.fixedDeltaTime = 0.001f;
     }
 
     void Update()

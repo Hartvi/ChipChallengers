@@ -10,6 +10,7 @@ public class CreateChipPanel : BasePanel
 {
     BaseButton[] bbtns;
     EditorMenu editorMenu;
+    float totalMenuHeight;
 
     protected override void Setup()
     {
@@ -35,20 +36,14 @@ public class CreateChipPanel : BasePanel
         this.editorMenu = this.GetComponentInParent<EditorMenu>();
         this.bbtns = this.GetComponentsInChildren<BaseButton>();
 
-        //if(this.bbtns.Length != VChip.chipNames.Length)
-        //{
-        //    throw new ArgumentException($"Buttons != chipNames: {bbtns.Length} != {VChip.chipNames}.");
-        //}
-
         for(int i = 0; i < VChip.chipNames.Length; ++i)
         {
             this.bbtns[i].text.SetText(VChip.chipNames[i]);
-            // add virtual chip to selected chip from selected direction
-            // TODO
-            //bbtns[i].btn.onClick.AddListener();
         }
 
-        this.bbtns[this.bbtns.Length - 1].text.SetText(UIStrings.Paste);
+        BaseButton pb = this.bbtns[this.bbtns.Length - 1];
+        pb.text.SetText(UIStrings.Paste);
+        this.totalMenuHeight = pb.RT.sizeDelta.y * this.bbtns.Length;
 
         this.gameObject.SetActive(false);
     }
@@ -61,10 +56,16 @@ public class CreateChipPanel : BasePanel
             this.bbtns[i].btn.onClick.RemoveAllListeners();
             this.bbtns[i].btn.onClick.AddListener(() => BtnCallback(this.bbtns[_i].text.text, dir, selectedVChip));
         }
-        this.bbtns[this.bbtns.Length - 1].btn.onClick.RemoveAllListeners();
-        this.bbtns[this.bbtns.Length - 1].btn.onClick.AddListener(() => PasteCallback(selectedVChip, dir));
+
+        BaseButton pb = this.bbtns[this.bbtns.Length - 1];
+        pb.btn.onClick.RemoveAllListeners();
+        pb.btn.onClick.AddListener(() => PasteCallback(selectedVChip, dir));
         this.gameObject.SetActive(true);
-        this.gameObject.RT().position = clickPosition - this.gameObject.RT().sizeDelta*0.5f;
+
+        // offset the panel so that it never goes out of screen
+        Vector2 size = this.gameObject.RT().sizeDelta;
+        Vector2 shiftVector = new Vector2(Mathf.Max(0f, size.x - clickPosition.x), Mathf.Max(0f, this.totalMenuHeight - clickPosition.y));
+        this.gameObject.RT().position = clickPosition - size*0.5f + shiftVector;
     }
 
     void BtnCallback(string chipName, LocalDirection localDirection, VChip parent)

@@ -156,16 +156,54 @@ public abstract class GeometricChip : StaticChip
             return this._inverse;
         }
     }
+    protected int _option = -1;
+    protected int option
+    {
+        get
+        {
+            if (this._option == -1)
+            {
+                throw new InvalidOperationException($"Mass depends on option. Option has not been set yet.");
+            }
+            return this._option;
+        }
+        set { this._option = value; }
+    }
 
     public float mass
     {
         get
         {
             string chipType = this.equivalentVirtualChip.ChipType;
+            this.equivalentVirtualChip.TryGetProperty<int>(VChip.optionStr, out int option);
+            this.option = option;
+
             switch (chipType)
             {
                 // TODO: masses for each chip
-                default: return 1f;
+                case VChip.wheelStr:
+                case VChip.fanStr:
+                case VChip.rudderStr:
+                case VChip.chipStr:
+                case VChip.axleStr:
+                case VChip.telescopeStr:
+                case VChip.coreStr:
+                case VChip.sensorStr:
+                    if (this.option == 0)
+                    {
+                        return 2f;
+                    } else if(this.option == 1)
+                    {
+                        return 1f;
+                    } else
+                    {
+                        Debug.LogWarning($"Selecting unknown option `{this.option}` for chip `{this.equivalentVirtualChip.ChipType}`");
+                        return 5f;
+                    }
+                case VChip.cowlStr:
+                    return 0.1f;
+                default:
+                    return 1f;
             }
         }
     }

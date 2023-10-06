@@ -121,7 +121,7 @@ public class CommonChip : AngleChip
         get
         {
             VChip vc = this.equivalentVirtualChip;
-            Debug.LogWarning($"TODO: frame option should not be aero-elligible");
+            //Debug.LogWarning($"TODO: frame option should not be aero-elligible");
             
             bool OptionAeroStuff = true;
             if (vc.TryGetProperty<int>(VChip.optionStr, out int option))

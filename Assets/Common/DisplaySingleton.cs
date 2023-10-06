@@ -50,7 +50,7 @@ public class DisplaySingleton : MonoBehaviour
 
     public static void BasicSmallModification(TMP_Text txt)
     {
-        txt.fontSize = UIUtils.MediumFontSize;
+        txt.fontSize = UIUtils.SmallFontSize;
     }
 
     public static void BasicOrangeModification(TMP_Text txt)

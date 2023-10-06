@@ -21,12 +21,13 @@ public class OptionChip : GeometricChip
         }
     }
 
+    /// <summary>Set the appearance of this chip</summary>
     protected void SelectOption(int o)
     {
         char oChar = o.ToString()[0];
         if (!(o < OptionObjects.Length && o > -1))
         {
-            Debug.LogWarning($"Option is invalid: {o} for chip {this.equivalentVirtualChip.ChipType}");
+            Debug.LogWarning($"Option is invalid: `{o}` for chip `{this.equivalentVirtualChip.ChipType}`");
             oChar = '0';
         }
         for (int i = 0; i < this.OptionObjects.Length; ++i)

@@ -111,12 +111,26 @@ public class ScriptInstance
         //}
 
         this.scriptString = ScriptInstance.TransformCode(this.scriptString, varNames);
-        
+
         //PRINT.IPrint($"Script string:");
         //PRINT.IPrint(this.scriptString);
-        
-        this.script.DoString(this.scriptString);
+        try
+        {
+            this.script.DoString(this.scriptString);
+        }
+        catch (Exception e)
+        {
+            DisplaySingleton.Instance.DisplayText(
+                x =>
+                {
+                    DisplaySingleton.ErrorMsgModification(x);
+                    x.SetText(e.Message);
+                }, 
+                3f
+            );
+        }
     }
+
     public static string TransformCode(string code, string[] vars)
     {
         // Check if vars array is empty

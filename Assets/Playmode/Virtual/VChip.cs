@@ -34,6 +34,10 @@ public class VChip
     public const string sensorStr = "Sensor";
     public const string wheelStr = "Wheel";
     public const string fanStr = "Fan";
+    public const string chipStr = "Chip";
+    public const string rudderStr = "Rudder";
+    public const string axleStr = "Axle";
+    public const string telescopeStr = "Telescope";
 
     public const string chipsFolderStr = "Chips/";
 
@@ -45,7 +49,7 @@ public class VChip
     public static readonly string[] staticPropertiesStr = new string[] { "Spring", "Damper", "Option", "Name", "Type" };
     public static readonly CPR[] staticPropertiesEnum = new CPR[] { CPR.Spring, CPR.Damper, CPR.Option, CPR.Name, CPR.Type };
 
-    public static readonly string[] chipNames = new string[] { "Chip", "Rudder", "Axle", "Telescope", wheelStr, fanStr, "Sensor", cowlStr };
+    public static readonly string[] chipNames = new string[] { chipStr, rudderStr, axleStr, telescopeStr, wheelStr, fanStr, sensorStr, cowlStr };
 
     public static readonly CommonChip baseChip;
     public const string baseChipName = "BaseChip";
