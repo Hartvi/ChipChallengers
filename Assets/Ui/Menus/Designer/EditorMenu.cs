@@ -97,6 +97,9 @@ public class EditorMenu : BaseMenu
 
     void OnEnterMenu()
     {
+        // TODO: options: set framerate, sound level
+        Application.targetFrameRate = 30;
+        
         this.highlighter.ParentHighlighter.SetActive(true);
 
         print($"Varpanel: {VariablePanel}, ");
@@ -105,16 +108,7 @@ public class EditorMenu : BaseMenu
         //print($"Setting editormenu callback to model changed");
         Action[] afterBuildListeners = new Action[] {
             () => {
-                //print($"selected chip: {this.selectedChip}");
-                try{
-
-                    this.selectedChip = this.highlighter.SelectVChip(this.selectedChip.equivalentVirtualChip.id);
-                }
-                catch
-                {
-                    print($"selected chip: {this.selectedChip}");
-                    Debug.LogWarning($"FIX THIS, ");
-                }
+                this.selectedChip = this.highlighter.SelectVChip(this.selectedChip.equivalentVirtualChip.id);
             },
             () => {
                 try
@@ -225,7 +219,7 @@ public class EditorMenu : BaseMenu
             {
                 deltaPos = cam.transform.up;
             }
-            float sensitivity = Input.GetKey(KeyCode.LeftShift) ? 0.09f : 0.03f;
+            float sensitivity = Input.GetKey(KeyCode.LeftShift) ? Time.deltaTime*9f : Time.deltaTime*3f;
 
             cam.transform.position = cam.transform.position + sensitivity * deltaPos;
 
@@ -330,7 +324,7 @@ public class EditorMenu : BaseMenu
             CommonChip core = CommonChip.ClientCore;
             VModel vm = core.VirtualModel;
 
-            if (vc.parentId is not null)
+            if (!string.IsNullOrWhiteSpace(vc.parentId))
             {
                 this.selectedChip = this.highlighter.SelectVChip(vc.parentId);
                 vm.DeleteChip(vc.id);

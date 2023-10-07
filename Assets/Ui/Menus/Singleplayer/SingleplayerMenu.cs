@@ -95,6 +95,7 @@ public class SingleplayerMenu : BaseMenu
     // when going from other menus:
     void OnEnterMenu()
     {
+        Application.targetFrameRate = 40;
 
         // ignore wheel and default layer collisions
         Physics.IgnoreLayerCollision(7, 0);
@@ -304,7 +305,7 @@ public class SingleplayerMenu : BaseMenu
                 deltaPos = cam.transform.up;
             }
 
-            float sensitivity = Input.GetKey(KeyCode.LeftShift) ? 0.09f : 0.03f;
+            float sensitivity = Input.GetKey(KeyCode.LeftShift) ? Time.deltaTime*9f : Time.deltaTime*3f;
             cam.transform.position = cam.transform.position + sensitivity * deltaPos;
         }
     }
