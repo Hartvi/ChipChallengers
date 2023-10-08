@@ -98,6 +98,9 @@ public class BaseMenu : DeclaredProp
     }
     public static void SwitchToPreviousMenu()
     {
-        BaseMenu.SwitchToMenu(BaseMenu.lastMenu.Pop().GetType(), true);
+        if (BaseMenu.lastMenu.Count > 0)
+        {
+            BaseMenu.SwitchToMenu(BaseMenu.lastMenu.Pop().GetType(), true);
+        }
     }
 }

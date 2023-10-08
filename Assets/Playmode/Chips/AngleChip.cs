@@ -7,8 +7,8 @@ using UnityEngine;
 public abstract class AngleChip : OptionChip
 {
     protected ConfigurableJoint cj;
-    protected MeshRenderer mr;
-    protected Material material;
+    protected MeshRenderer[] mrs;
+    protected Material[] materials;
     protected Quaternion targetRotation = Quaternion.identity;
 
     // these will be listened to during FixedUpdate
@@ -149,10 +149,13 @@ public abstract class AngleChip : OptionChip
     [RuntimeFunction]
     public void SetColour(float a)
     {
-        if (this.material != null)
+        if (this.materials != null)
         {
             //print($"Setting colour: {a.ToColor()}");
-            this.material.color = a.ToColor();
+            foreach (Material m in this.materials)
+            {
+                m.color = a.ToColor();
+            }
         }
         else
         {

@@ -79,7 +79,14 @@ public class VChip
     }
 
     public bool IsCore { get { return this.ChipType == VChip.coreStr; } }
-    public string ChipType { get { return this.instanceProperties[typeStr] as string; } }
+    public string ChipType
+    {
+        get
+        {
+            this.TryGetProperty<string>(VChip.typeStr, out string typeVal);
+            return typeVal;
+        }
+    }
 
     static VChip()
     {

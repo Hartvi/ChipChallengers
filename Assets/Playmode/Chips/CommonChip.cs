@@ -154,6 +154,7 @@ public class CommonChip : AngleChip
     public CommonChip[] AddChild(VChip childChip)
     {
         var childType = childChip.ChipType;
+        print($"parent: {this.equivalentVirtualChip.ChipType}, child: {childType}");
 
         CommonChip newChild = GeometricChip.InstantiateChip<CommonChip>(childType);
         //print($"new child: {newChild}, id: {childChip.id}");
@@ -221,10 +222,13 @@ public class CommonChip : AngleChip
     public CommonChip[] AddChildren()
     {
         Color colour = this.GetColour();
-        this.mr = this.GetComponentInChildren<MeshRenderer>();
-        this.material = this.mr.material;
+        this.mrs = this.GetComponentsInChildren<MeshRenderer>().Where(x=>x.tag == VChip.colourStr).ToArray();
+        this.materials = this.mrs.Select(x=>x.material).ToArray();
         // to set the colour at build time
-        this.material.color = colour;
+        foreach (Material m in this.materials)
+        {
+            m.color = colour;
+        }
 
         // add runtime aspects
         if (this.isAeroElligible)

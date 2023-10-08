@@ -63,7 +63,7 @@ public class CreateChipPanel : BasePanel
 
         BaseButton pb = this.bbtns[this.bbtns.Length - 1];
         pb.btn.onClick.RemoveAllListeners();
-        pb.btn.onClick.AddListener(() => PasteCallback(selectedVChip, dir));
+        pb.btn.onClick.AddListener(() => this.PasteCallback(selectedVChip, dir, false));
         this.gameObject.SetActive(true);
 
         // offset the panel so that it never goes out of screen
@@ -87,10 +87,11 @@ public class CreateChipPanel : BasePanel
         this.gameObject.SetActive(false);
     }
 
-    public void PasteCallback(VChip selectedVChip, LocalDirection dir)
+    public CommonChip PasteCallback(VChip selectedVChip, LocalDirection dir, bool mirror)
     {
-        VChip pastedParentChip = Clipboard.AttachTo(selectedVChip, (int)dir);
-
-        this.editorMenu.selectedChip = this.editorMenu.highlighter.SelectVChip(pastedParentChip.id);
+        VChip pastedParentChip = Clipboard.AttachTo(selectedVChip, (int)dir, mirror);
+        
+        this.gameObject.SetActive(false);
+        return this.editorMenu.highlighter.SelectVChip(selectedVChip.id);
     }
 }

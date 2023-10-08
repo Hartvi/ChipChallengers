@@ -30,4 +30,11 @@ public class MainMenu : BaseMainMenu
             )
         );
     }
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            SwitchToPreviousMenu();
+        }
+    }
 }

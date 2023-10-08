@@ -43,7 +43,7 @@ public static class Clipboard
         VChip ChipToBeCopied = cc.equivalentVirtualChip;
         var oldChildren = new VChip[] { ChipToBeCopied };
 
-        VChip[] vcs = CopyChildren(Clipboard.newParent, oldChildren);
+        VChip[] vcs = CopyChildren(Clipboard.newParent, oldChildren, false);
 
         //IPrint(GetChipAndChildren(newParent).Select(x => x.id));
 
@@ -51,12 +51,12 @@ public static class Clipboard
         // then graft it onto the original model and reconfigure parents etc
     }
 
-    public static VChip AttachTo(VChip vc, int newOrientation)
+    public static VChip AttachTo(VChip vc, int newOrientation, bool mirror)
     {
         if (Clipboard.newParent is null) return CommonChip.ClientCore.equivalentVirtualChip;
         // chip we wanna attach it to
-        IPrint($"new parent chip: {vc.ChipType} id: {vc.id}");
-        IPrint($"Orientation: {newOrientation}");
+        //IPrint($"new parent chip: {vc.ChipType} id: {vc.id}");
+        //IPrint($"Orientation: {newOrientation}");
 
         
         // Clipboard.newParent is the virtual core that we don't want to copy
@@ -67,7 +67,7 @@ public static class Clipboard
 
         VChip[] oldChildren = new VChip[] { oldOriginalChild };
 
-        VChip[] newChips = Clipboard.CopyChildren(vc, oldChildren);
+        VChip[] newChips = Clipboard.CopyChildren(vc, oldChildren, mirror);
 
         CommonChip core = CommonChip.ClientCore;
 
@@ -83,7 +83,7 @@ public static class Clipboard
         //this.editorMenu.selectedChip = this.editorMenu.highlighter.SelectVChip(newChip.rChip.equivalentVirtualChip.id);
     }
 
-    private static VChip[] CopyChildren(VChip newParent, VChip[] oldChildren)
+    private static VChip[] CopyChildren(VChip newParent, VChip[] oldChildren, bool mirror)
     {
         List<VChip> vclist = new List<VChip>();
 
@@ -94,14 +94,16 @@ public static class Clipboard
             {
                 VChip oldChild = oldChildrenss[i];
                 var valueTuple = oldChild.GetValueTuple();
+                bool orientationIsLeftOrRight = valueTuple.orientation == 1 || valueTuple.orientation == 3;
+                
                 VChip newChild = new VChip(
                     valueTuple.keys,
                     valueTuple.values,
-                    valueTuple.orientation,
+                    mirror && orientationIsLeftOrRight ? (valueTuple.orientation + 2) % 4 : valueTuple.orientation,
                     newParentss
                 );
                 vclist.Add(newChild);
-                IPrint($"pasting new child: {newChild.ChipType}, {newChild.orientation}");
+                //IPrint($"pasting new child: {newChild.ChipType}, {newChild.orientation}");
                 _CopyChildren(newChild, oldChild.Children);
             }
         }

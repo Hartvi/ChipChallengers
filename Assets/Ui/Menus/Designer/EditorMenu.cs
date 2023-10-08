@@ -24,7 +24,24 @@ public class EditorMenu : BaseMenu
     public static EditorMenu Instance;
 
     private Camera _camera;
-    public CommonChip selectedChip;
+    public CommonChip _selectedChip;
+    public CommonChip selectedChip
+    {
+        get
+        {
+            return this._selectedChip;
+        }
+        set
+        {
+            this._selectedChip = value;
+            if (value is not null)
+            {
+                this.lastSelectedPosition = value.transform.position;
+                //this._camera.transform.LookAt(value.transform.position);
+            }
+        }
+    }
+    Vector3 lastSelectedPosition = Vector3.zero;
 
     public HighlighterContainer highlighter;
 
@@ -141,6 +158,7 @@ public class EditorMenu : BaseMenu
 
         // slow down physics to save power
         Time.fixedDeltaTime = 0.1f;
+        this._camera.transform.LookAt(core.transform.position);
     }
 
     void OnLeaveMenu()
@@ -226,9 +244,9 @@ public class EditorMenu : BaseMenu
             if (this.cameraMoveMode == CameraMoveMode.Follow)
             {
                 float sensitivity2 = 5f;
-                cam.transform.RotateAround(core.transform.position, Vector3.up, moveX * sensitivity2);
-                cam.transform.RotateAround(core.transform.position, cam.transform.right, -moveY * sensitivity2);
-                cam.transform.LookAt(core.transform.position);
+                cam.transform.RotateAround(this.lastSelectedPosition, Vector3.up, moveX * sensitivity2);
+                cam.transform.RotateAround(this.lastSelectedPosition, cam.transform.right, -moveY * sensitivity2);
+                cam.transform.LookAt(this.lastSelectedPosition);
             }
         }
 
@@ -241,6 +259,7 @@ public class EditorMenu : BaseMenu
             GoToMainMenu.Function();
         }
         bool ctrlPressed = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+        bool shiftPressed = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 
         if (ctrlPressed)
         {
@@ -311,7 +330,7 @@ public class EditorMenu : BaseMenu
             {
                 if (this.selectedVChip != null)
                 {
-                    CreateChipPanel.PasteCallback(this.selectedVChip, CreateChipPanel.localDir);
+                    CreateChipPanel.PasteCallback(this.selectedVChip, CreateChipPanel.localDir, shiftPressed);
                 }
             }
         }
@@ -361,7 +380,8 @@ public class EditorMenu : BaseMenu
                     this.selectedChip = sc;
                 } else
                 {
-                    this.selectedChip = null;
+                    //Debug.Log($"Setting selected chip to NULL!!!");
+                    //this.selectedChip = null;
                 }
             }
         }
