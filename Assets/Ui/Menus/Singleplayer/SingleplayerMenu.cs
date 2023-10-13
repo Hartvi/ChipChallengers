@@ -41,6 +41,8 @@ public class SingleplayerMenu : BaseMenu
 
     CameraMoveMode cameraMoveMode = CameraMoveMode.Follow;
 
+    HUD Hud;
+
     // HUD, etc
     // km/h m/s variables
     protected override void Setup()
@@ -58,10 +60,10 @@ public class SingleplayerMenu : BaseMenu
             ),
             new VirtualProp(PropType.Panel, 1f, right, typeof(HUD),
                 new VirtualProp(PropType.Panel, 0.1f, up,
-                    new VirtualProp(PropType.Text, 0.05f, typeof(ItemBase))
+                    new VirtualProp(PropType.Text, 0.05f, typeof(ItemBaseLeft))
                 ),
                 new VirtualProp(PropType.Panel, 0.1f, up,
-                    new VirtualProp(PropType.Text, 0.05f, typeof(ItemBase))
+                    new VirtualProp(PropType.Text, 0.05f, typeof(ItemBaseRight))
                 )
             //new VirtualProp(PropType.Text, 0.2f, typeof(MainTitle))
             ),
@@ -82,6 +84,7 @@ public class SingleplayerMenu : BaseMenu
         base.Start();
 
         SingleplayerMenu.Instance = this;
+        this.Hud = this.GetComponentInChildren<HUD>();
 
         this.mainCamera = Camera.main;
         this.LoadPanel = this.GetComponentInChildren<LoadPanel>();
@@ -107,15 +110,28 @@ public class SingleplayerMenu : BaseMenu
         Physics.IgnoreLayerCollision(7, 6);
 
         this.core = CommonChip.ClientCore;
+
         Vector3 spawnPosition = this.RaycastFromAbove();
+
         this.core.transform.rotation = Quaternion.identity;
         this.core.rb.velocity = Vector3.zero;
         this.core.transform.position = spawnPosition;
+
         // delete after build listeners
         this.core.SetAfterBuildListeners(new Action[]{ });
         this.core.TriggerSpawn(this.core.VirtualModel, false);
 
-        this.LoadPanel.SetOnLoadedCallbacks(new Action[] { () => this.core.TriggerSpawn(this.core.VirtualModel, false) });
+        // when model is loaded: add callbacks to rebuild the model, add callbacks to link the variables to the HUD
+        Action[] onLoadedCallbacksTmp = new Action[] { 
+            () => this.core.TriggerSpawn(this.core.VirtualModel, false), 
+            () => this.Hud.LinkVariables(this.core.VirtualModel)
+        };
+        
+        this.LoadPanel.SetOnLoadedCallbacks(onLoadedCallbacksTmp);
+
+        //TODO: load model after entering playmode???
+        print($"Current virtual Model: {this.core.VirtualModel}");
+        this.Hud.LinkVariables(this.core.VirtualModel);
 
         // speed up physics for stable physics
         Time.fixedDeltaTime = 0.001f;

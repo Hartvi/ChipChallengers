@@ -282,8 +282,11 @@ public class CommonChip : AngleChip
     private void ConfigureJointSpringDamper(ConfigurableJoint cj)
     {
         // spring damper
-        float spring = this.equivalentVirtualChip.GetPropertyOrDefault<float>(VChip.springStr);
-        float damper = this.equivalentVirtualChip.GetPropertyOrDefault<float>(VChip.damperStr);
+        // Don't mind default since I don't care
+        float spring;
+        this.equivalentVirtualChip.TryGetProperty<float>(VChip.springStr, out spring);
+        float damper;
+        this.equivalentVirtualChip.TryGetProperty<float>(VChip.damperStr, out damper);
         //print($"chip: {this.equivalentVirtualChip.ChipType}: spring: {spring} damper: {damper}");
 
         JointDrive jd = new JointDrive();

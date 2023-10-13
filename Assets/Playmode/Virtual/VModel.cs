@@ -59,8 +59,10 @@ public class VModel
         }
         set
         {
+            // TODO test this, maybe hide the dummy variable later on
+            //this._variables = value.Where(x => x.name.IsVariableName()).ToArray();
             this._variables = value;
-            foreach(var v in value)
+            foreach (var v in value)
             {
                 v.MyModel = this;
             }

@@ -123,6 +123,7 @@ public class VChip
         {
             // "Chips/" + Chip/Rudder/Wheel/etc
             var resourceChipName = VChip.chipsFolderStr + chipName;
+
             try
             {
                 var resourceObject = Resources.Load<GameObject>(resourceChipName);
@@ -203,8 +204,8 @@ public class VChip
 
     public VChip[] Children = { };
 
-    [NonSerialized]
-    private Dictionary<string, object> instanceProperties;
+    //[NonSerialized]
+    //private Dictionary<string, object> instanceProperties;
     [NonSerialized]
     public CommonChip rChip;
 
@@ -252,29 +253,29 @@ public class VChip
         }
     }
 
-    public T GetPropertyOrDefault<T>(string key)
-    {
-        if (this.instanceProperties.ContainsKey(key))
-        {
-            T ret = (T)(this.instanceProperties[key]);
-            if(key == VChip.springStr || key == VChip.damperStr)
-            {
-                if(((float)this.instanceProperties[key]) >= 0f){
-                    return ret;
-                }
-            } else if(key == VChip.optionStr)
-            {
-                if(((int)this.instanceProperties[key]) >= 0){
-                    return ret;
-                }
-            }
-        }
-        //PRINT.print($"Contains key: {key} FALSE");
-        //PRINT.print("this.keys:");
-        //PRINT.print(this.keys);
-        object objVal = ArrayExtensions.AccessLikeDict(key, VChip.allPropertiesStr, VChip.allPropertiesDefaultsObjects);
-        return (T)objVal;
-    }
+    //public T GetPropertyOrDefault<T>(string key)
+    //{
+    //    if (this.instanceProperties.ContainsKey(key))
+    //    {
+    //        T ret = (T)(this.instanceProperties[key]);
+    //        if(key == VChip.springStr || key == VChip.damperStr)
+    //        {
+    //            if(((float)this.instanceProperties[key]) >= 0f){
+    //                return ret;
+    //            }
+    //        } else if(key == VChip.optionStr)
+    //        {
+    //            if(((int)this.instanceProperties[key]) >= 0){
+    //                return ret;
+    //            }
+    //        }
+    //    }
+    //    //PRINT.print($"Contains key: {key} FALSE");
+    //    //PRINT.print("this.keys:");
+    //    //PRINT.print(this.keys);
+    //    object objVal = ArrayExtensions.AccessLikeDict(key, VChip.allPropertiesStr, VChip.allPropertiesDefaultsObjects);
+    //    return (T)objVal;
+    //}
 
     public bool TryGetProperty<T>(string key, out T val)
     {
@@ -401,7 +402,7 @@ public class VChip
                 throw new NotSupportedException($"Conversion not supported for type: {expectedType}");
             }
         }
-        this.instanceProperties = keys.Zip(this.objectVals, (k, v) => new { k, v }).ToDictionary(x => x.k, x => x.v);
+        //this.instanceProperties = keys.Zip(this.objectVals, (k, v) => new { k, v }).ToDictionary(x => x.k, x => x.v);
     }
 
     public string CheckValidityOfPropertyForThisChip(string property, string value)

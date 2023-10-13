@@ -57,7 +57,6 @@ public abstract class AngleChip : OptionChip
 
     protected T GetProperty<T>(string propertyName, ParseFuncDelegate<T> ParseFunc, Action<float, VVar> VariableCallbackFunction)
     {
-
         string propertyStr = ArrayExtensions.AccessLikeDict(propertyName, this.equivalentVirtualChip.keys, this.equivalentVirtualChip.vals);
 
         if (propertyStr is null)

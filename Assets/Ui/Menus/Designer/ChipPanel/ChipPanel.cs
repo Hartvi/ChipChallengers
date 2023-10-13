@@ -75,8 +75,8 @@ public class ChipPanel : BasePanel
         TMP_InputField[] inputs = new TMP_InputField[rightTexts.Length];
         TMP_Text[] texts = new TMP_Text[rightTexts.Length];
 
-        ItemBase[] nameItems = NameItem.DisplayNItems(leftTexts.Length);
-        ItemBase[] valueItems = ValueItem.DisplayNItems(rightTexts.Length);
+        ItemBase[] nameItems = NameItem.DisplayNItems<ItemBase>(leftTexts.Length);
+        ItemBase[] valueItems = ValueItem.DisplayNItems<ItemBase>(rightTexts.Length);
 
         int offset = nameItems.Length - 1;
         for(int i = 0; i < nameItems.Length; ++i)

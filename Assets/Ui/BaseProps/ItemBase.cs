@@ -60,7 +60,7 @@ public class ItemBase : TopProp
         var siblings = this.Siblings<ItemBase>(takeInactive: false);
         siblings[siblings.Length -1].gameObject.SetActive(false);
     }
-    public ItemBase[] DisplayNItems(int n)
+    public T[] DisplayNItems<T>(int n) where T: ItemBase
     {
         var siblings = this.Siblings<ItemBase>(takeInactive: true);
         if (n > siblings.Length)
@@ -75,6 +75,6 @@ public class ItemBase : TopProp
         {
             siblings[i].gameObject.SetActive(i < n);
         }
-        return this.Siblings<ItemBase>(takeInactive: false);
+        return this.Siblings<T>(takeInactive: false);
     }
 }
