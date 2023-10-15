@@ -2,7 +2,23 @@
 ChipChallengers - physics chips and programming all in one
 
 ### TODO
+- `+` implement wheel brakes
+- `+` implement gun
+- `+++` add OBJ map loading
+  - menu
+  - assimp library
+- `+` add particle effects
+  - jet smoke
+  - wheel dust
+  - gun
+- `+` add sounds
+- `+` options menu
+  - master sound level, sound effect level, music level
+  - particle effects - 0-100 %
+  - physics iteration speed
 - `+` rotate the camera around the currently selected object or add an option for it
+- `+++` implement multiplayer
+- `+` Add option to change units in HUD
 
 ### Done
 - `+++` split HUD into:

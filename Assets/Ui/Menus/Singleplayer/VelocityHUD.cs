@@ -56,19 +56,19 @@ public class VelocityHUD : BasePanel
             txts[i].text.fontSize = UIUtils.SmallFontSize;
         }
         txts[0].text.SetText(UIStrings.Velocity);
-        this.positionText = txts[1].text;
+        this.velocityText = txts[1].text;
         txts[2].text.SetText(UIStrings.Position);
-        this.velocityText = txts[3].text;
+        this.positionText = txts[3].text;
     }
 
     void SetPosition()
     {
-        this.positionText.SetText(this.position.ToString());
+        this.positionText.SetText(this.position.ToString() + " m");
     }
 
     void SetVelocity()
     {
-        this.velocityText.SetText(UIUtils.DisplayFloat(this.velocity));
+        this.velocityText.SetText(UIUtils.DisplayFloat(this.velocity) + " m/s");
     }
 
     public void SetFocus(CommonChip f)
