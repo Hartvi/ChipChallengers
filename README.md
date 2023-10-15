@@ -2,14 +2,14 @@
 ChipChallengers - physics chips and programming all in one
 
 ### TODO
-- `+++` split HUD into:
-  - left side: display currently variable values
-    - TODO: hide the place-holder variable
-  - right side: display velocity and position
-- `++` HUD in playmode displaying current variable values
 - `+` rotate the camera around the currently selected object or add an option for it
 
 ### Done
+- `+++` split HUD into:
+  - left side: display currently variable values
+    - hide the place-holder variable
+  - right side: display velocity and position
+- `++` HUD in playmode displaying current variable values
 - `++` get rid of `instanceProperties` in `VChip`
 - `+` Fixed changing chip type to display right away
 - `+` copy paste in editor - add the option to paste mirror-wise `ctrl+shift+v`

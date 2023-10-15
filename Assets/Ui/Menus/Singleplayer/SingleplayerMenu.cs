@@ -58,24 +58,15 @@ public class SingleplayerMenu : BaseMenu
                     new VirtualProp(PropType.Text, 0.3f)
                     )
             ),
-            new VirtualProp(PropType.Panel, 1f, right, typeof(HUD),
-                new VirtualProp(PropType.Panel, 0.1f, up,
-                    new VirtualProp(PropType.Text, 0.05f, typeof(ItemBaseLeft))
-                ),
-                new VirtualProp(PropType.Panel, 0.1f, up,
-                    new VirtualProp(PropType.Text, 0.05f, typeof(ItemBaseRight))
-                )
-            //new VirtualProp(PropType.Text, 0.2f, typeof(MainTitle))
-            ),
+            new VirtualProp(PropType.Panel, 1f, right, typeof(HUD)),
+            //    new VirtualProp(PropType.Panel, 0.1f, up,
+            //        new VirtualProp(PropType.Text, 0.05f, typeof(ItemBaseLeft))
+            //    ),
+            //    new VirtualProp(PropType.Panel, 0.1f, up,
+            //        new VirtualProp(PropType.Text, 0.05f, typeof(ItemBaseRight))
+            //    )
+            //),
             new VirtualProp(PropType.Panel, 1f, typeof(LoadPanel))
-        //new VirtualProp(PropType.Panel, 1f, Vector2Int.down,
-        //    new VirtualProp(PropType.Panel, 0.2f),
-        //    new VirtualProp(PropType.Text, 0.2f, typeof(MainTitle))
-        //new VirtualProp(PropType.Button, 0.2f, typeof(GoToSingleplayer))
-        //new VirtualProp(PropType.Button, 0.2f, typeof(GoToMultiplayer)),
-        //new VirtualProp(PropType.Button, 0.2f, typeof(GoToEditor)),
-        //new VirtualProp(PropType.Button, 0.2f, typeof(GoToOptions)),
-        //)
         );
     }
 
@@ -124,14 +115,14 @@ public class SingleplayerMenu : BaseMenu
         // when model is loaded: add callbacks to rebuild the model, add callbacks to link the variables to the HUD
         Action[] onLoadedCallbacksTmp = new Action[] { 
             () => this.core.TriggerSpawn(this.core.VirtualModel, false), 
-            () => this.Hud.LinkVariables(this.core.VirtualModel)
+            () => this.Hud.LinkCore(this.core)
         };
         
         this.LoadPanel.SetOnLoadedCallbacks(onLoadedCallbacksTmp);
 
         //TODO: load model after entering playmode???
         print($"Current virtual Model: {this.core.VirtualModel}");
-        this.Hud.LinkVariables(this.core.VirtualModel);
+        this.Hud.LinkCore(this.core);
 
         // speed up physics for stable physics
         Time.fixedDeltaTime = 0.001f;

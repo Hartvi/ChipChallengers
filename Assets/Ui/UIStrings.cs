@@ -33,6 +33,9 @@ public static class UIStrings
 
     public static readonly string[] EditorPanels = { "Chip", "Variables", "Controls", "Script" };
 
+    public const string Velocity = "Velocity";
+    public const string Position = "Position";
+
     public static string NotAVariableMsg(string value) {
          return $"{value} is not in variable name format:\n '_' or [a-zA-Z] at the beginning.";
     }

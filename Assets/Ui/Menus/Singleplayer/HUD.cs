@@ -7,31 +7,23 @@ using TMPro;
 
 public class HUD : TopProp
 {
-    //private CommonChip _Focus;
+    VelocityHUD velocityHUD;
 
-    //public CommonChip Focus
-    //{
-    //    get
-    //    {
-    //        if (this._Focus == null)
-    //        {
-    //            this._Focus = CommonChip.ClientCore;
-    //        }
-    //        return _Focus;
-    //    }
-    //    set
-    //    {
-    //        if(!value.IsFocusable)
-    //        {
-    //            throw new ArgumentException($"Trying to set focus to a non-focusable chip.");
-    //        }
-    //        _Focus = value;
-    //    }
-    //}
-
-    //Vector3 velocity { get { return _Focus.rb.velocity; } }
-    //public bool UpdatedModel;
-    //VVar[] variables { get { return Focus.AllVirtualVariables; } }
+    protected override void Setup()
+    {
+        base.Setup();
+        this.vProp = new VirtualProp(PropType.Panel, 1f, right,
+            new VirtualProp(PropType.Panel, 0.1f, up,
+                new VirtualProp(PropType.Text, 0.05f, typeof(ItemBaseLeft))
+            ),
+            new VirtualProp(PropType.Panel, 0.1f, up,
+                new VirtualProp(PropType.Text, 0.05f, typeof(ItemBaseRight))
+            ),
+            new VirtualProp(PropType.Panel, 0.5f),
+            new VirtualProp(PropType.Panel, -1f, typeof(VelocityHUD)
+            )
+        );
+    }
 
     VModel vModel;
     VVar[] variables => this.vModel.variables;
@@ -80,11 +72,24 @@ public class HUD : TopProp
         }
     }
 
-    public void LinkVariables(VModel vModel)
+    void LinkVariables(VModel vModel)
     {
         this.SetupItems();
         this.vModel = vModel;
         UpdateVariableDisplay();
+    }
+    
+    void LinkFocus(CommonChip f)
+    {
+        this.velocityHUD.SetFocus(f);
+    }
+
+    public void LinkCore(CommonChip core)
+    {
+        this.velocityHUD = this.GetComponentInChildren<VelocityHUD>();
+
+        this.LinkFocus(core);
+        this.LinkVariables(core.VirtualModel);
     }
 
     void SetupItems()
