@@ -14,7 +14,7 @@ public enum Orientation
 }
 public enum CTP
 {
-    Chip, Rudder, Axle, Telescope, Wheel, Fan, Sensor, Cowl
+    Chip, Rudder, Axle, Gun, Wheel, Jet, Sensor, Cowl
 }
 
 public class VChip
@@ -33,11 +33,11 @@ public class VChip
     public const string cowlStr = "Cowl";
     public const string sensorStr = "Sensor";
     public const string wheelStr = "Wheel";
-    public const string fanStr = "Fan";
+    public const string jetStr = "Jet";
     public const string chipStr = "Chip";
     public const string rudderStr = "Rudder";
     public const string axleStr = "Axle";
-    public const string telescopeStr = "Telescope";
+    public const string gunStr = "Gun";
 
     public const string chipsFolderStr = "Chips/";
 
@@ -49,12 +49,12 @@ public class VChip
     public static readonly string[] staticPropertiesStr = new string[] { "Spring", "Damper", "Option", "Name", "Type" };
     public static readonly CPR[] staticPropertiesEnum = new CPR[] { CPR.Spring, CPR.Damper, CPR.Option, CPR.Name, CPR.Type };
 
-    public static readonly string[] chipNames = new string[] { chipStr, rudderStr, axleStr, telescopeStr, wheelStr, fanStr, sensorStr, cowlStr };
+    public static readonly string[] chipNames = new string[] { chipStr, rudderStr, axleStr, gunStr, wheelStr, jetStr, sensorStr, cowlStr };
 
     public static readonly CommonChip baseChip;
     public const string baseChipName = "BaseChip";
     
-    public static readonly CTP[] chipEnums = new CTP[] { CTP.Chip, CTP.Rudder, CTP.Axle, CTP.Telescope, CTP.Wheel, CTP.Fan, CTP.Sensor, CTP.Cowl };
+    public static readonly CTP[] chipEnums = new CTP[] { CTP.Chip, CTP.Rudder, CTP.Axle, CTP.Gun, CTP.Wheel, CTP.Jet, CTP.Sensor, CTP.Cowl };
 
     public static readonly Dictionary<string, CPR> str2ChipProperty;
     public static readonly Dictionary<string, GameObject> chipTemplates;

@@ -59,7 +59,7 @@ public class WheelAspects : BaseAspect
         // L = I * Omega
         // dOmega
         float absOmega = Mathf.Abs(this.Omega);
-        float dOmega = T * WheelAspects.fixedTimeInvInertia - Mathf.Sign(this.Omega) * (k1 * absOmega + k2 * absOmega * absOmega);
+        float dOmega = T * WheelAspects.fixedTimeInvInertia - Mathf.Sign(this.Omega) * (this.brake * WheelAspects.fixedTimeInvInertia + k1 * absOmega + k2 * absOmega * absOmega);
 
         //if (Mathf.Abs(this.value) > 0.01f)
         //{

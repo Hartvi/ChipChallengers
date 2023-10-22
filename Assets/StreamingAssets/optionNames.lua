@@ -1,5 +1,5 @@
 a = {
-    keys={ "Chip", "Rudder", "Axle", "Telescope", "Wheel", "Fan", "Sensor", "Cowl" },
+    keys={ "Chip", "Rudder", "Axle", "Gun", "Wheel", "Jet", "Sensor", "Cowl" },
     values={
         {"Basic", "Frame", "Weight", "Armor"},
         {"Basic", "Frame"},

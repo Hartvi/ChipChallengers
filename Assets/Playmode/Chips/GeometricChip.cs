@@ -182,11 +182,11 @@ public abstract class GeometricChip : StaticChip
             {
                 // TODO: masses for each chip
                 case VChip.wheelStr:
-                case VChip.fanStr:
+                case VChip.jetStr:
                 case VChip.rudderStr:
                 case VChip.chipStr:
                 case VChip.axleStr:
-                case VChip.telescopeStr:
+                case VChip.gunStr:
                 case VChip.coreStr:
                 case VChip.sensorStr:
                     if (this.option == 0)

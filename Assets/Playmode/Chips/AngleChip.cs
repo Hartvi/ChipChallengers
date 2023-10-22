@@ -12,16 +12,11 @@ public abstract class AngleChip : OptionChip
     protected Quaternion targetRotation = Quaternion.identity;
 
     // these will be listened to during FixedUpdate
-    //protected float __value;
     protected float _value;
-    //{
-    //    get { return this.__value; }
-    //    set { print($"setting value to {value}"); 
-    //        this.__value = value; }
-    //}
     public float value { get { return this._value; } }
+
     protected float _brake;
-    public float brake { get; }
+    public float brake { get { return this._brake; } }
 
     public delegate bool ParseFuncDelegate<T>(string s, out T result);
 
@@ -140,8 +135,8 @@ public abstract class AngleChip : OptionChip
         }
         else
         {
-            //print($"Trying to set angle: {Quaternion.Euler(a, 0f, 0f)} but joint is NULL, chip: {this.equivalentVirtualChip.id}");
-            throw new NullReferenceException($"Trying to set angle: {Quaternion.Euler(a, 0f, 0f)} but joint is NULL, chip: {this.equivalentVirtualChip.id}");
+            print($"Trying to set angle: {Quaternion.Euler(a, 0f, 0f)}: {a} but joint is NULL, chip: {this.equivalentVirtualChip.id}");
+            //throw new NullReferenceException($"Trying to set angle: {Quaternion.Euler(a, 0f, 0f)} but joint is NULL, chip: {this.equivalentVirtualChip.id}");
         }
     }
 
@@ -166,7 +161,7 @@ public abstract class AngleChip : OptionChip
     public void SetValue(float a)
     {
         // TODO VALUE FUNCTIONS
-        print($"Setting value to {a}");
+        //print($"Setting value to {a}");
         this._value = a;
         //if ()
         //{
@@ -182,7 +177,8 @@ public abstract class AngleChip : OptionChip
     public void SetBrake(float a)
     {
         // TODO BRAKE FUNCTIONS
-        this._brake = a;
+        print($"Setting brake {a}");
+        this._brake = Mathf.Abs(a);
         //if ()
         //{
         //    // wheel, jet: setvalue => wheel.value = a

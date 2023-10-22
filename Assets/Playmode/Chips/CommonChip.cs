@@ -129,7 +129,7 @@ public class CommonChip : AngleChip
                 OptionAeroStuff = option < 1;
             }
 
-            bool nonAeroType = new string[]{ VChip.wheelStr, VChip.fanStr, VChip.cowlStr, VChip.sensorStr }.Contains(vc.ChipType);
+            bool nonAeroType = new string[]{ VChip.wheelStr, VChip.jetStr, VChip.cowlStr, VChip.sensorStr }.Contains(vc.ChipType);
             // option = 1 => false
             // option = 0 && cowl => false
             return !nonAeroType && OptionAeroStuff;
@@ -252,18 +252,22 @@ public class CommonChip : AngleChip
             // TODO cosmetics as in jet spitting fire and wheel turning discs
             this._value = this.GetValue();
 
-            if (this.equivalentVirtualChip.ChipType == VChip.fanStr)
+            if (this.equivalentVirtualChip.ChipType == VChip.jetStr)
             {
                 this.gameObject.AddComponent<JetAspect>();
             }
             if (this.equivalentVirtualChip.keys.Contains(VChip.brakeStr))
             {
-                this._value = this.GetBrake();
+                this._brake = this.GetBrake();
                 // GUN - power = gun power, brake to trigger,
                 // WHEEL - power = power, brake = brake
                 if (this.equivalentVirtualChip.ChipType == VChip.wheelStr)
                 {
                     this.gameObject.AddComponent<WheelAspects>().myChip = this;
+                }
+                if (this.equivalentVirtualChip.ChipType == VChip.gunStr)
+                {
+                    this.gameObject.AddComponent<GunAspect>().myChip = this;
                 }
             }
         }

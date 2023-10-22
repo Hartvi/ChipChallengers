@@ -1506,7 +1506,7 @@ GameObject:
   - component: {fileID: 7171681204197454543}
   - component: {fileID: 5988667311061107723}
   m_Layer: 0
-  m_Name: Fan
+  m_Name: Jet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

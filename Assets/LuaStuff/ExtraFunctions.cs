@@ -158,7 +158,22 @@ public class ScriptInstance
 
     public void CallLoop()
     {
-        DynValue res = script.Call(script.Globals["Loop"]);
+        //PRINT.IPrint($"globals: ");
+        //PRINT.IPrint(script.Globals.Keys);
+        try
+        {
+            DynValue res = script.Call(script.Globals["Loop"]);
+        } catch (Exception e)
+        {
+            DisplaySingleton.Instance.DisplayText(
+                x =>
+                {
+                    //PRINT.IPrint($"Setting compile error");
+                    DisplaySingleton.ErrorMsgModification(x);
+                    x.SetText(e.Message);
+                }, 5f
+            );
+        }
     }
 
     public void SetVariable(string var, float val)

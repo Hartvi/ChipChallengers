@@ -2,7 +2,6 @@
 ChipChallengers - physics chips and programming all in one
 
 ### TODO
-- `+` implement wheel brakes
 - `+` implement gun
 - `+++` add OBJ map loading
   - menu
@@ -21,6 +20,7 @@ ChipChallengers - physics chips and programming all in one
 - `+` Add option to change units in HUD
 
 ### Done
+- `+` implement wheel brakes
 - `+++` split HUD into:
   - left side: display currently variable values
     - hide the place-holder variable
