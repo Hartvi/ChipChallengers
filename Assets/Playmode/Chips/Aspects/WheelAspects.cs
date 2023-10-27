@@ -61,13 +61,6 @@ public class WheelAspects : BaseAspect
         float absOmega = Mathf.Abs(this.Omega);
         float dOmega = T * WheelAspects.fixedTimeInvInertia - Mathf.Sign(this.Omega) * (this.brake * WheelAspects.fixedTimeInvInertia + k1 * absOmega + k2 * absOmega * absOmega);
 
-        //if (Mathf.Abs(this.value) > 0.01f)
-        //{
-        //    print($"Torque: {T} Omega: {this.Omega}, dOmega: {dOmega}");
-        //}
-        //print($"Torque: {T} Omega: {this.Omega}, dOmega: {dOmega}");
-
-
         // T * dt / I = dOmega
         // T = dOmega * I / dt
         Vector3 up = this.transform.up;
@@ -78,11 +71,6 @@ public class WheelAspects : BaseAspect
         this.oldUp = newUp;
         this.Omega = this.Omega + dOmega;
     }
-
-    //void Update()
-    //{
-    //    print($"Torque: {this.value} Omega: {this.Omega}, xForce: {this.xForce}");
-    //}
 
     void ApplyForce()
     {
@@ -105,16 +93,6 @@ public class WheelAspects : BaseAspect
         // impulse = S (F) dt => no need to multiply xImpulse * dt to get dOmega since dOmega = k * Force * dt
         float dOmega = -radius * xImpulse * InvPlanarMomentOfInertia;
 
-        //Debug.DrawLine(this.transform.position, this.transform.position + 10f*xForce, Color.red);
-        //Debug.DrawLine(this.transform.position, this.transform.position + 10f*yForce, Color.green);
-        
-        //print($"xForce: {xForce} yForce: {yForce}");
-        //print($"adding force: omega: {Omega}, dOmega: {dOmega}");
-        //if (Mathf.Abs(this.value) > 0.1f)
-        //{
-        //    print($"xForce: {xForce} yForce: {yForce}");
-        //    print($"adding force: omega: {Omega}, dOmega: {dOmega}");
-        //}
         this.Omega += dOmega;
     }
 
@@ -152,8 +130,6 @@ public class WheelAspects : BaseAspect
         float xSlip = (VTX - VX) * invVX;
         float xImpulse = impulseStrength * Pacejka(xSlip);
 
-        //float ySlip = -yVelocity;
-        //float ySlip = -Mathf.Sign(yVelocity);
         float ySlip = arctan(-yVelocity * invVX);
         float yImpulse = impulseStrength * Pacejka(ySlip);
 
@@ -190,13 +166,10 @@ public class WheelAspects : BaseAspect
             // project incoming velocity on normalized vector perpendicular to ground
             Vector3 n1 = Vector3.Dot(v1, n) * n;
             // project incoming velocity on normalized vector perpendicular to wheel to stop lateral sliding
-            //Vector3 nUp = Vector3.Dot(v1, up) * up;
 
-            //Vector3 targetVelocity = -0.5f * (n1 + nUp);
             Vector3 targetVelocity = -0.5f * n1;
 
             Vector3 NaiveImpulse = m * (WheelAspects.stiffness * err);
-            //Vector3 p1 = m * v1;
             Vector3 J = m * (n * WheelAspects.DepenetrationVelocity);
 
             float ImpulseDifference = (J - NaiveImpulse).sqrMagnitude;
@@ -217,7 +190,6 @@ public class WheelAspects : BaseAspect
         Vector3 basePosition = t.position - forwardShift;
         forwardPosition = t.position + forwardShift;
 
-        //Debug.DrawLine(basePosition, forwardPosition, Color.red, 0.1f);
         if(Physics.Raycast(basePosition, t.forward, out RaycastHit h, GeometricChip.ChipSide, this.layerMask))
         {
             point = h.point;

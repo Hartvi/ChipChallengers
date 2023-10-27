@@ -28,11 +28,14 @@ public class LoopScript : MonoBehaviour
 
             if (!v.hasChanged)
             {
-                if (Mathf.Abs(diff) > 1e-4f)
+                if (Mathf.Abs(diff) > v.backstep)
                 {
                     float change = v.backstep * Mathf.Sign(diff);
                     //print($"changing by: {change}");
                     v.currentValue = cur + change;
+                } else
+                {
+                    v.currentValue = v.defaultValue;
                 }
             }
             else

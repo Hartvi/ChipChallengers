@@ -2,6 +2,7 @@
 ChipChallengers - physics chips and programming all in one
 
 ### TODO
+- `++` reduce physics frequency when number of objects increases
 - `+` implement gun
 - `+++` add OBJ map loading
   - menu

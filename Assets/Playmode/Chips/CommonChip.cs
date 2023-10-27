@@ -494,5 +494,11 @@ public class CommonChip : AngleChip
         //if (this.cj == null)
         //    print($"Joint is null");
     }
+
+    public void Die()
+    {
+        // TODO: turn off all script callbacks for this chip
+        Debug.LogWarning($"TODO: Die(): turn off all script callbacks for this chip.");
+    }
 }
 

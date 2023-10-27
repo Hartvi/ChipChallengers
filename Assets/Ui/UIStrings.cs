@@ -36,6 +36,8 @@ public static class UIStrings
     public const string Velocity = "Velocity";
     public const string Position = "Position";
 
+    public const string GunRelated = "GunRelated";
+    public const string Bullet = "Bullet";
 
     public static string NotAVariableMsg(string value) {
          return $"{value} is not in variable name format:\n '_' or [a-zA-Z] at the beginning.";

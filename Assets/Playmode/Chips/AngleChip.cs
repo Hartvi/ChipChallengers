@@ -163,30 +163,14 @@ public abstract class AngleChip : OptionChip
         // TODO VALUE FUNCTIONS
         //print($"Setting value to {a}");
         this._value = a;
-        //if ()
-        //{
-        //    // wheel, jet: setvalue => wheel.value = a
-        //}
-        //else
-        //{
-        //    throw new NullReferenceException($"Trying to set value: {null} but material is NULL, chip: {this.equivalentVirtualChip.id}");
-        //}
     }
 
     [RuntimeFunction]
     public void SetBrake(float a)
     {
         // TODO BRAKE FUNCTIONS
-        print($"Setting brake {a}");
+        //print($"Setting brake {a}");
         this._brake = Mathf.Abs(a);
-        //if ()
-        //{
-        //    // wheel, jet: setvalue => wheel.value = a
-        //}
-        //else
-        //{
-        //    throw new NullReferenceException($"Trying to set value: {null} but material is NULL, chip: {this.equivalentVirtualChip.id}");
-        //}
     }
 
 }
