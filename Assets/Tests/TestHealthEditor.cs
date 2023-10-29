@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -18,6 +19,7 @@ public class TestHealthEditor : Editor
             GameObject o = GameObject.CreatePrimitive(PrimitiveType.Cube);
             HealthAspect h = o.AddComponent<HealthAspect>();
             o.AddComponent<Rigidbody>();
+            h.SetDeathCallbacks(new Action[] { h.DEBUGDEATH });
             h.SetHealth(100f);
         }
     }

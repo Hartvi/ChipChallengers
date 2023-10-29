@@ -17,10 +17,10 @@ public class MainMenu : BaseMainMenu
                     new VirtualProp(PropType.Panel, 0.2f),
                     new VirtualProp(PropType.Panel, 0.6f, Vector2Int.down,
                         new VirtualProp(PropType.Button, btnHeight, typeof(GoToSingleplayer)),
-                        new VirtualProp(PropType.Button, btnHeight, typeof(GoToEditor)),
-                        new VirtualProp(PropType.Button, btnHeight, typeof(GoToSingleplayer)),
-                        new VirtualProp(PropType.Button, btnHeight, typeof(GoToSingleplayer)),
-                        new VirtualProp(PropType.Button, btnHeight, typeof(GoToSingleplayer))
+                        new VirtualProp(PropType.Button, btnHeight, typeof(GoToEditor))
+                        //new VirtualProp(PropType.Button, btnHeight, typeof(GoToSingleplayer)),
+                        //new VirtualProp(PropType.Button, btnHeight, typeof(GoToSingleplayer)),
+                        //new VirtualProp(PropType.Button, btnHeight, typeof(GoToSingleplayer))
                     )
                 )
                 //new VirtualProp(PropType.Button, 0.2f, typeof(GoToMultiplayer)),

@@ -154,7 +154,7 @@ public class CommonChip : AngleChip
     public CommonChip[] AddChild(VChip childChip)
     {
         var childType = childChip.ChipType;
-        print($"parent: {this.equivalentVirtualChip.ChipType}, child: {childType}");
+        //print($"parent: {this.equivalentVirtualChip.ChipType}, child: {childType}");
 
         CommonChip newChild = GeometricChip.InstantiateChip<CommonChip>(childType);
         //print($"new child: {newChild}, id: {childChip.id}");
@@ -241,6 +241,15 @@ public class CommonChip : AngleChip
         if(this.equivalentVirtualChip.TryGetProperty<int>(VChip.optionStr, out option))
         {
             this.SelectOption(option);
+        }
+
+        if (this.equivalentVirtualChip.HasHealth())
+        {
+            HealthAspect h = this.gameObject.AddComponent<HealthAspect>();
+            h.SetDeathCallbacks(new Action[] { this.Die });
+            h.SetHealth(this.equivalentVirtualChip.DefaultHealth());
+            
+            //print($"Adding health to chip: {this.equivalentVirtualChip.ChipType}");
         }
         //print($"Option: {option} type: {this.equivalentVirtualChip.ChipType}");
 
@@ -498,7 +507,45 @@ public class CommonChip : AngleChip
     public void Die()
     {
         // TODO: turn off all script callbacks for this chip
-        Debug.LogWarning($"TODO: Die(): turn off all script callbacks for this chip.");
+        //print($"Chip: {this.equivalentVirtualChip.ChipType}: Dying");
+
+        GameObject.Destroy(this.cj);
+
+        CommonChip[] myDescendants = this.GetMyDescendants();
+
+        foreach(CommonChip descendant in myDescendants)
+        {
+            descendant.SleepyTime();
+        }
+    }
+    private void SleepyTime()
+    {
+        //Debug.LogWarning($"TODO: SleepyTime(): turn off all script callbacks for this chip.");
+        // remove from callbacks to LUA
+        this.RemoveMeFromVariableCallbacks.Invoke();
+    }
+
+    CommonChip[] GetMyDescendants()
+    {
+        List<CommonChip> myDescendants = new List<CommonChip>();
+        myDescendants.Add(this);
+        /*
+         a-(b,c-(d,e,f))
+        add b
+        add descendants of b => nothing
+        add c
+        add descendants of c =>
+         add d
+         add e
+         add f
+         */
+        for (int i = 0; i < this.childChips.Count; ++i)
+        {
+            CommonChip myChild = this.childChips[i] as CommonChip;
+            myDescendants.Add(myChild);
+            myDescendants.AddRange(myChild.GetMyDescendants());
+        }
+        return myDescendants.ToArray();
     }
 }
 

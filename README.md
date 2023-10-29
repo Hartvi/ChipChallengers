@@ -3,7 +3,6 @@ ChipChallengers - physics chips and programming all in one
 
 ### TODO
 - `++` reduce physics frequency when number of objects increases
-- `+` implement gun
 - `+++` add OBJ map loading
   - menu
   - assimp library
@@ -18,9 +17,14 @@ ChipChallengers - physics chips and programming all in one
   - physics iteration speed
 - `+` rotate the camera around the currently selected object or add an option for it
 - `+++` implement multiplayer
+- `+` game modes: pool, snake
 - `+` Add option to change units in HUD
 
 ### Done
+- `+` test whether gun actually removes variable value changed callbacks
+- `+` implement gun
+  - add callback in SleepyTime/Die to remove dead chips from variableChangedCallbacks
+- `+++` fix guns not triggering 'ApplyDamage' on chips
 - `+` implement wheel brakes
 - `+++` split HUD into:
   - left side: display currently variable values

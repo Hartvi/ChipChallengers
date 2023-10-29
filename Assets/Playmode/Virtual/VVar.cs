@@ -64,6 +64,11 @@ public class VVar
         this.valueChangedCallbacks = this.valueChangedCallbacks.Append(action).ToArray();
     }
 
+    public void RemoveValueChangedCallback(Action<float, VVar> action)
+    {
+        this.valueChangedCallbacks = this.valueChangedCallbacks.RemoveElement(action);
+    }
+
     public static VVar DefaultValueVariable(string name) {
         return new VVar(new string[] { name, "0", "-1", "1", "1" });
     }

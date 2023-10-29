@@ -8,6 +8,8 @@ public class HealthAspect : BaseAspect
     float myHealth;
     bool hasHealthSet = false;
 
+    CallbackArray deathCallbacks = new CallbackArray(false);
+
     public void SetHealth(float health)
     {
         if (this.hasHealthSet)
@@ -24,14 +26,26 @@ public class HealthAspect : BaseAspect
         {
             throw new InvalidOperationException($"Cannot deal damage to chip whose health has not been set: {this.myChip.equivalentVirtualChip.ChipType}");
         }
-        print($"Health: {this.myHealth}, damage: {power}");
+        //print($"Health: {this.myHealth}, damage: {power}");
         this.myHealth = this.myHealth - power;
         if (this.myHealth <= 0f)
         {
-            if (this.myChip is not null)
-            {
-                this.myChip.Die();
-            }
+            this.deathCallbacks.Invoke();
+            //if (this.myChip is not null)
+            //{
+            //    this.myChip.Die();
+            //}
         }
     }
+
+    public void SetDeathCallbacks(Action[] callbacks)
+    {
+        this.deathCallbacks.SetCallbacks(callbacks);
+    }
+
+    public void DEBUGDEATH()
+    {
+        print($"Test: HealthAspect: Dying");
+    }
+
 }

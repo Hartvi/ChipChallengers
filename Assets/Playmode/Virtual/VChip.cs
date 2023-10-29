@@ -590,4 +590,15 @@ public class VChip
 
         return (keysCopy, valsCopy, this.orientation, this.parentChip);
     }
+
+    public bool HasHealth()
+    {
+        return this.ChipType != VChip.cowlStr;
+    }
+
+    public float DefaultHealth()
+    {
+        Debug.LogWarning($"TODO: set reasonable default health values");
+        return 1f;
+    }
 }

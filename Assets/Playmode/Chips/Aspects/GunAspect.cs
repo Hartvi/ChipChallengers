@@ -19,7 +19,7 @@ public class GunAspect : BaseAspect
     {
         base.Awake();
         this.power = this.value;
-        print($"gun power: {this.power}");
+        //print($"gun power: {this.power}");
 
         this.projectileWeight = 1e-6f * this.power;
         this.projectileVelocity = 33f;
@@ -37,7 +37,7 @@ public class GunAspect : BaseAspect
         // lifetime = 5 seconds
         // number of bullets = rate * lifetime
         int numberOfBullets = Mathf.CeilToInt(Time.deltaTime / this.dPowerPerFrame * Bullet.LifeTime);
-        print($"Number of bullets: {numberOfBullets}");
+        //print($"Number of bullets: {numberOfBullets}");
         this.bulletPool = new ObjectPool<Bullet>(numberOfBullets, GenerateBullet);
     }
 
@@ -57,9 +57,13 @@ public class GunAspect : BaseAspect
     void Fire()
     {
         // charge is full, shoot
-        this.rb.AddForce(-this.transform.forward * this.recoilImpulse, ForceMode.Impulse);
+        Vector3 forward = this.transform.forward;
+        this.rb.AddForce(-forward * this.recoilImpulse, ForceMode.Impulse);
         this.charge = 0f;
-        this.bulletPool.Next().Fire(this.transform.position, this.transform.forward * this.projectileVelocity);
+
+        Vector3 initialBulletPosition = this.transform.position + forward * GeometricChip.ChipSide;
+
+        this.bulletPool.Next().Fire(initialBulletPosition, forward * this.projectileVelocity);
         //Debug.DrawLine(this.transform.position, this.transform.position + this.transform.forward*2f);
     }
 

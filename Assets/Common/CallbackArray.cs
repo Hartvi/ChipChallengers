@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class CallbackArray
 {
-    bool isEditable;
+    bool isEditable = false;
 
     private List<Action> methods = new List<Action>();
 
@@ -42,7 +42,7 @@ public class CallbackArray
 
 public class CallbackArray<T>
 {
-    bool isEditable;
+    bool isEditable = false;
 
     private List<Action<T>> methods = new List<Action<T>>();
 

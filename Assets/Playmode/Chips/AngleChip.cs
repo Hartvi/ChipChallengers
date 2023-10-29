@@ -11,6 +11,8 @@ public abstract class AngleChip : OptionChip
     protected Material[] materials;
     protected Quaternion targetRotation = Quaternion.identity;
 
+    protected CallbackArray RemoveMeFromVariableCallbacks = new CallbackArray(true);
+
     // these will be listened to during FixedUpdate
     protected float _value;
     public float value { get { return this._value; } }
@@ -19,6 +21,7 @@ public abstract class AngleChip : OptionChip
     public float brake { get { return this._brake; } }
 
     public delegate bool ParseFuncDelegate<T>(string s, out T result);
+
 
     protected float GetBrake()
     {
@@ -104,11 +107,14 @@ public abstract class AngleChip : OptionChip
                 property = existingVar.currentValue.FromVariableFloat<T>();
                 //print($"Property {propertyName}: exists: {property}");
                 existingVar.AddValueChangedCallback(VariableCallbackFunction);
+
+                // add also the option to remove the callback in case the chip dies
+                this.RemoveMeFromVariableCallbacks.AddCallback(() => existingVar.RemoveValueChangedCallback(VariableCallbackFunction));
             }
         }
         else
         {
-            // exception here says something is wrong in the whole implementation, SHOULDN't HAPPEN
+            // exception here says something is wrong with the whole implementation, SHOULDN't HAPPEN
             if (ParseFunc(propertyStr, out property))
             {
                 return property;

@@ -33,19 +33,29 @@ public class Bullet : MonoBehaviour
         this.myLifeTime = Bullet.LifeTime;
 
         this.gameObject.SetActive(true);
+        this.Raycast();
     }
 
     void Update()
     {
         this.myLifeTime = this.myLifeTime - Time.deltaTime;
 
+        this.Raycast();
+        if(this.myLifeTime <= 0f)
+        {
+            this.gameObject.SetActive(false);
+        }
+    }
+
+    void Raycast()
+    {
         var vel = this.rb.velocity;
         var pos = this.transform.position;
 
         this.myRay.direction = vel;
         this.myRay.origin = pos;
 
-        Debug.DrawLine(pos, pos + vel.normalized * this.myRayMagnitude, Color.red, 0.000005f);
+        Debug.DrawLine(pos, pos + vel.normalized * this.myRayMagnitude, Color.red, 0.1f);
         if (Physics.Raycast(this.myRay, out RaycastHit hitInfo, this.myRayMagnitude))
         {
             // apply force to rigidbody that was hit
@@ -62,9 +72,5 @@ public class Bullet : MonoBehaviour
             }
         }
 
-        if(this.myLifeTime <= 0f)
-        {
-            this.gameObject.SetActive(false);
-        }
     }
 }

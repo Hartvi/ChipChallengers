@@ -6,6 +6,6 @@ public class TestHealth : MonoBehaviour
 {
     public void MyFunction()
     {
-        Debug.Log("Button clicked from the inspector!");
+        Debug.Log("TestHealth: dying!");
     }
 }
