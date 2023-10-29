@@ -2,7 +2,6 @@
 ChipChallengers - physics chips and programming all in one
 
 ### TODO
-- `++` reduce physics frequency when number of objects increases
 - `+++` add OBJ map loading
   - menu
   - assimp library
@@ -21,6 +20,7 @@ ChipChallengers - physics chips and programming all in one
 - `+` Add option to change units in HUD
 
 ### Done
+- `++` reduce physics frequency when number of objects increases
 - `+` test whether gun actually removes variable value changed callbacks
 - `+` implement gun
   - add callback in SleepyTime/Die to remove dead chips from variableChangedCallbacks
