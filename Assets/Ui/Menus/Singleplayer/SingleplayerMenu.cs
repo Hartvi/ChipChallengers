@@ -36,6 +36,7 @@ public class SingleplayerMenu : BaseMenu
     CameraFollowSettings cameraFollowSettings;
 
     private LoadPanel LoadPanel;
+    private MapPanel MapPanel;
     
     private CommonChip core;
 
@@ -66,7 +67,8 @@ public class SingleplayerMenu : BaseMenu
             //        new VirtualProp(PropType.Text, 0.05f, typeof(ItemBaseRight))
             //    )
             //),
-            new VirtualProp(PropType.Panel, 1f, typeof(LoadPanel))
+            new VirtualProp(PropType.Panel, 1f, typeof(LoadPanel)),
+            new VirtualProp(PropType.Panel, 1f, typeof(MapPanel))
         );
     }
 
@@ -79,6 +81,7 @@ public class SingleplayerMenu : BaseMenu
 
         this.mainCamera = Camera.main;
         this.LoadPanel = this.GetComponentInChildren<LoadPanel>();
+        this.MapPanel = this.GetComponentInChildren<MapPanel>();
 
         this.cameraFollowSettings = new CameraFollowSettings(distance: 5f, up: 1f, predict: 0f, sensitivity: 1f, lowPass: 0f);
 
@@ -102,7 +105,7 @@ public class SingleplayerMenu : BaseMenu
 
         this.core = CommonChip.ClientCore;
 
-        Vector3 spawnPosition = this.RaycastFromAbove();
+        Vector3 spawnPosition = StaticChip.RaycastFromAbove();
 
         this.core.transform.rotation = Quaternion.identity;
         this.core.rb.velocity = Vector3.zero;
@@ -153,6 +156,10 @@ public class SingleplayerMenu : BaseMenu
             {
                 this.LoadPanel.gameObject.SetActive(true);
             }
+            if (Input.GetKeyDown(KeyCode.M))
+            {
+                this.MapPanel.gameObject.SetActive(true);
+            }
             if (Input.GetKeyDown(KeyCode.E))
             {
                 GoToEditor.Function();
@@ -169,33 +176,35 @@ public class SingleplayerMenu : BaseMenu
 #if UNITY_EDITOR
             if (Input.GetKeyDown(KeyCode.T))
             {
-                Vector3 spawnPosition = this.RaycastFromAbove();
-                this.core.rb.velocity = Vector3.zero;
-                if(!shiftPressed)
-                {
-                    this.core.transform.rotation = Quaternion.identity;
-                }
-                this.core.transform.position = spawnPosition;
-                this.core.TriggerSpawn(this.core.VirtualModel, false);
+                this.core.ResetToDefaultLocation();
+                //Vector3 spawnPosition = this.RaycastFromAbove();
+                //this.core.rb.velocity = Vector3.zero;
+                //if(!shiftPressed)
+                //{
+                //    this.core.transform.rotation = Quaternion.identity;
+                //}
+                //this.core.transform.position = spawnPosition;
+                //this.core.TriggerSpawn(this.core.VirtualModel, false);
             }
 #else
             if (Input.GetKeyDown(KeyCode.U))
             {
-                Vector3 spawnPosition = RaycastFromAbove();
-                this.core.rb.velocity = Vector3.zero;
-                if(!shiftPressed)
-                {
-                    this.core.transform.rotation = Quaternion.identity;
-                }
-                this.core.transform.position = spawnPosition;
-                this.core.TriggerSpawn(this.core.VirtualModel, false);
+                this.core.ResetToDefaultLocation();
+                //Vector3 spawnPosition = RaycastFromAbove();
+                //this.core.rb.velocity = Vector3.zero;
+                //if(!shiftPressed)
+                //{
+                //    this.core.transform.rotation = Quaternion.identity;
+                //}
+                //this.core.transform.position = spawnPosition;
+                //this.core.TriggerSpawn(this.core.VirtualModel, false);
             }
 #endif
         }
 
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            GoToMainMenu.Function();
+            GoToMainMenu.Function(true);
         }
 
         if (Input.GetKeyDown(KeyCode.F1))
@@ -219,28 +228,28 @@ public class SingleplayerMenu : BaseMenu
 
     }
 
-    public Vector3 RaycastFromAbove()
-    {
-        // Starting position of the ray
-        Vector3 startPosition = new Vector3(0, 100000, 0);
+    //public Vector3 RaycastFromAbove()
+    //{
+    //    // Starting position of the ray
+    //    Vector3 startPosition = new Vector3(0, 100000, 0);
 
-        // Direction of the ray (vertically down)
-        Vector3 direction = Vector3.down;
+    //    // Direction of the ray (vertically down)
+    //    Vector3 direction = Vector3.down;
 
-        // Create a LayerMask to ignore layers 6 and 7
-        int layerMask = ~((1 << 6) | (1 << 7));
+    //    // Create a LayerMask to ignore layers 6 and 7
+    //    int layerMask = ~((1 << 6) | (1 << 7));
 
-        // Perform the raycast
-        RaycastHit hit;
-        if (Physics.Raycast(startPosition, direction, out hit, Mathf.Infinity, layerMask))
-        {
-            // If hit, return the position of the hit point
-            return hit.point + Vector3.up*5f;
-        }
+    //    // Perform the raycast
+    //    RaycastHit hit;
+    //    if (Physics.Raycast(startPosition, direction, out hit, Mathf.Infinity, layerMask))
+    //    {
+    //        // If hit, return the position of the hit point
+    //        return hit.point + Vector3.up*5f;
+    //    }
 
-        // If nothing hit, return (0,0,0)
-        return Vector3.zero;
-    }
+    //    // If nothing hit, return (0,0,0)
+    //    return Vector3.zero;
+    //}
 
 
     void CameraFollowMove()

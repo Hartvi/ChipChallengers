@@ -7,19 +7,19 @@ public class GoToMainMenu : BaseTransition
     protected override void Setup()
     {
         base.Setup();
-        this.text.text = UIStrings.Editor;
+        this.text.text = UIStrings.MainMenu;
         this.text.fontSize = UIUtils.MediumFontSize;
     }
 
     protected override void Execute()
     {
         //BaseMenu.SwitchToPreviousMenu();
-        GoToMainMenu.Function();
+        GoToMainMenu.Function(false);
     }
 
-    new public static void Function()
+    new public static void Function(bool switchBack)
     {
-        BaseMenu.SwitchToMenu(typeof(MainMenu));
+        BaseMenu.SwitchToMenu(typeof(MainMenu), switchBack);
 
         BaseTransition.InvokeAfterClickedCallbacks(typeof(GoToMainMenu));
     }

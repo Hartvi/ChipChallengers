@@ -7,6 +7,7 @@ using System.Linq;
 public class IOHelpers
 {
     public const string ModelsDirectoryName = "Models/";
+    public const string MapsDirectoryName = "Maps/";
     public const string ModelFileType = "txt";
 
     public static string EnsureFileExtension(string fileName)
@@ -31,9 +32,40 @@ public static void SaveModel(string modelName, string modelString) {
         return IOHelpers.LoadTextFile(Path.Join(ModelsDirectoryName, modelName));
     }
 
+    public static string GetMapsDirectory()
+    {
+        string MapsDir = Path.Join(Application.streamingAssetsPath, IOHelpers.MapsDirectoryName);
+
+        if (!Directory.Exists(MapsDir))
+        {
+            Directory.CreateDirectory(MapsDir);
+        }
+        return MapsDir;
+    }
+    public static string[] GetAllMaps()
+    {
+        string MapsDir = Path.Join(Application.streamingAssetsPath, IOHelpers.MapsDirectoryName);
+
+        if (!Directory.Exists(MapsDir))
+        {
+            Directory.CreateDirectory(MapsDir);
+        }
+
+        DirectoryInfo d = new DirectoryInfo(MapsDir);
+        FileInfo[] fi = d.GetFiles("*.*").Where(f => !f.Extension.Equals(".meta")).ToArray();
+
+        return fi.Select(x => x.Name).ToArray();
+    }
+
     public static string[] GetAllModels()
     {
         string ModelsDir = Path.Join(Application.streamingAssetsPath, IOHelpers.ModelsDirectoryName);
+
+        if (!Directory.Exists(ModelsDir))
+        {
+            Directory.CreateDirectory(ModelsDir);
+        }
+
 
         DirectoryInfo d = new DirectoryInfo(ModelsDir);
         FileInfo[] fi = d.GetFiles("*.*").Where(f => !f.Extension.Equals(".meta")).ToArray();

@@ -114,4 +114,26 @@ public abstract class StaticChip : MonoBehaviour
         return baseChip.gameObject.GetComponent<T>();
     }
 
+    public static Vector3 RaycastFromAbove()
+    {
+        // Starting position of the ray
+        Vector3 startPosition = new Vector3(0, 100000, 0);
+
+        // Direction of the ray (vertically down)
+        Vector3 direction = Vector3.down;
+
+        // Create a LayerMask to ignore layers 6 and 7
+        int layerMask = ~((1 << 6) | (1 << 7));
+
+        // Perform the raycast
+        RaycastHit hit;
+        if (Physics.Raycast(startPosition, direction, out hit, Mathf.Infinity, layerMask))
+        {
+            // If hit, return the position of the hit point
+            return hit.point + Vector3.up*5f;
+        }
+
+        // If nothing hit, return (0,0,0)
+        return Vector3.zero;
+    }
 }

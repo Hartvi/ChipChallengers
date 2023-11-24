@@ -14,12 +14,13 @@ public class CommonChip : AngleChip
     public ScriptInstance scriptInstance;
 
     private LoopScript loopScript;
-    public static CommonChip ClientCore {
+    public static CommonChip ClientCore
+    {
         get
         {
-            foreach(var o in GameObject.FindObjectsOfType<CommonChip>())
+            foreach (var o in GameObject.FindObjectsOfType<CommonChip>())
             {
-                if(o.IsOnClient && o.equivalentVirtualChip.IsCore)
+                if (o.IsOnClient && o.equivalentVirtualChip.IsCore)
                 {
                     return o;
                 }
@@ -62,7 +63,7 @@ public class CommonChip : AngleChip
                 if (this.IsReal)
                 {
                     this._rb = this.gameObject.GetComponent<Rigidbody>();
-                    if(this._rb == null)
+                    if (this._rb == null)
                     {
                         this._rb = this.gameObject.AddComponent<Rigidbody>();
                     }
@@ -122,14 +123,14 @@ public class CommonChip : AngleChip
         {
             VChip vc = this.equivalentVirtualChip;
             //Debug.LogWarning($"TODO: frame option should not be aero-elligible");
-            
+
             bool OptionAeroStuff = true;
             if (vc.TryGetProperty<int>(VChip.optionStr, out int option))
             {
                 OptionAeroStuff = option < 1;
             }
 
-            bool nonAeroType = new string[]{ VChip.wheelStr, VChip.jetStr, VChip.cowlStr, VChip.sensorStr }.Contains(vc.ChipType);
+            bool nonAeroType = new string[] { VChip.wheelStr, VChip.jetStr, VChip.cowlStr, VChip.sensorStr }.Contains(vc.ChipType);
             // option = 1 => false
             // option = 0 && cowl => false
             return !nonAeroType && OptionAeroStuff;
@@ -222,8 +223,8 @@ public class CommonChip : AngleChip
     public CommonChip[] AddChildren()
     {
         Color colour = this.GetColour();
-        this.mrs = this.GetComponentsInChildren<MeshRenderer>().Where(x=>x.tag == VChip.colourStr).ToArray();
-        this.materials = this.mrs.Select(x=>x.material).ToArray();
+        this.mrs = this.GetComponentsInChildren<MeshRenderer>().Where(x => x.tag == VChip.colourStr).ToArray();
+        this.materials = this.mrs.Select(x => x.material).ToArray();
         // to set the colour at build time
         foreach (Material m in this.materials)
         {
@@ -238,7 +239,7 @@ public class CommonChip : AngleChip
         }
         //print($"this.OptionObjects: {this.OptionObjects}, {this.OptionObjects.Length}");
         int option;
-        if(this.equivalentVirtualChip.TryGetProperty<int>(VChip.optionStr, out option))
+        if (this.equivalentVirtualChip.TryGetProperty<int>(VChip.optionStr, out option))
         {
             this.SelectOption(option);
         }
@@ -248,7 +249,7 @@ public class CommonChip : AngleChip
             HealthAspect h = this.gameObject.AddComponent<HealthAspect>();
             h.SetDeathCallbacks(new Action[] { this.Die });
             h.SetHealth(this.equivalentVirtualChip.DefaultHealth());
-            
+
             //print($"Adding health to chip: {this.equivalentVirtualChip.ChipType}");
         }
         //print($"Option: {option} type: {this.equivalentVirtualChip.ChipType}");
@@ -307,11 +308,11 @@ public class CommonChip : AngleChip
         jd.positionDamper = damper;
         jd.maximumForce = Mathf.Max(spring, damper);
 
-        if(cj.angularXMotion == ConfigurableJointMotion.Free)
+        if (cj.angularXMotion == ConfigurableJointMotion.Free)
         {
             cj.angularXDrive = jd;
         }
-        if(cj.angularZMotion == ConfigurableJointMotion.Free)
+        if (cj.angularZMotion == ConfigurableJointMotion.Free)
         {
             cj.angularYZDrive = jd;
         }
@@ -420,7 +421,7 @@ public class CommonChip : AngleChip
         //print("TRIGGER SPAWN");
         this.VirtualModel = virtualModel;
         print($"Number of chips: {virtualModel.chips.Length}");
-        foreach(VVar v in this.VirtualModel.variables)
+        foreach (VVar v in this.VirtualModel.variables)
         {
             v.valueChangedCallbacks = new Action<float, VVar>[] { };
         }
@@ -474,7 +475,7 @@ public class CommonChip : AngleChip
         {
             CommonChip.FreezeModel();
         }
-        foreach(var a in this._AfterBuildActions)
+        foreach (var a in this._AfterBuildActions)
         {
             //print("after build action");
             a();
@@ -485,7 +486,7 @@ public class CommonChip : AngleChip
     {
         var c = CommonChip.ClientCore;
 
-        foreach(GeometricChip chip in c.AllChips)
+        foreach (GeometricChip chip in c.AllChips)
         {
             chip.GetComponent<Rigidbody>().isKinematic = true;
         }
@@ -513,7 +514,7 @@ public class CommonChip : AngleChip
 
         CommonChip[] myDescendants = this.GetMyDescendants();
 
-        foreach(CommonChip descendant in myDescendants)
+        foreach (CommonChip descendant in myDescendants)
         {
             descendant.SleepyTime();
         }
@@ -546,6 +547,18 @@ public class CommonChip : AngleChip
             myDescendants.AddRange(myChild.GetMyDescendants());
         }
         return myDescendants.ToArray();
+    }
+
+    public void ResetToDefaultLocation()
+    {
+        Vector3 spawnPosition = StaticChip.RaycastFromAbove();
+
+        this.rb.velocity = Vector3.zero;
+
+        this.transform.rotation = Quaternion.identity;
+        this.transform.position = spawnPosition;
+
+        this.TriggerSpawn(this.VirtualModel, false);
     }
 }
 

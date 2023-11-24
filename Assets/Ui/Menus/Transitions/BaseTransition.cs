@@ -43,9 +43,10 @@ public abstract class BaseTransition: BaseButton
         }
     }
 
-    public static void Function()
+    public static void Function(bool switchBack)
     {
         throw new NotImplementedException();
     }
+
 }
 

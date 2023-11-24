@@ -256,7 +256,7 @@ public class EditorMenu : BaseMenu
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            GoToMainMenu.Function();
+            GoToMainMenu.Function(true);
         }
         bool ctrlPressed = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
         bool shiftPressed = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);

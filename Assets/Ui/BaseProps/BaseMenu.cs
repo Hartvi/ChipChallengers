@@ -87,7 +87,7 @@ public class BaseMenu : DeclaredProp
         foreach(BaseMenu menu in BaseMenu.allMenus)
         {
             bool activation = menu.GetType() == menuType;
-            if (menu.gameObject.activeSelf && !switchingBack)
+            if (menu.gameObject.activeSelf && switchingBack)
             {
                 //print("last menu: " + menu);
                 BaseMenu.lastMenu.Push(menu);

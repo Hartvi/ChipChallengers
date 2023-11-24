@@ -2,9 +2,11 @@
 ChipChallengers - physics chips and programming all in one
 
 ### TODO
-- `+++` add OBJ map loading
-  - menu
-  - assimp library
+- `+` LoadPanel - make the scrolling not disappear the items wtffffff
+- `+` settings menu
+  - volume, number of particles
+  - maybe do sliders
+- `+` make resetting to default location a function and implement in CommonChip as well
 - `+` add particle effects
   - jet smoke
   - wheel dust
@@ -20,6 +22,10 @@ ChipChallengers - physics chips and programming all in one
 - `+` Add option to change units in HUD
 
 ### Done
+- `+++` add OBJ map loading
+  - **menu**
+  - assimp library
+- `+` Clean up bullet objects after gun is destroyed
 - `++` reduce physics frequency when number of objects increases
 - `+` test whether gun actually removes variable value changed callbacks
 - `+` implement gun

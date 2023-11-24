@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,10 +8,20 @@ public static class UIStrings
     public const string Core = "Core";
 
     public const string GameTitle = "Chip Challengers";
+    public const string MainMenu = "Main menu";
     public const string Editor = "Editor";
     public const string Singleplayer = "Singleplayer";
     public const string Multiplayer = "Multiplayer";
-    public const string Options = "Options";
+    public const string Settings = "Settings";
+
+    public const string Framerate = "Frame rate";
+    public const string PhysicsRate = "Physics rate";
+    public const string Volume = "Volume";
+    public const string PhysicsParticles = "Physics particles";
+    public const string EnterANumber = "Enter a number";
+    public static readonly string[] SettingsIntProperties = new string[] { Framerate, PhysicsRate, Volume, PhysicsParticles };
+    public static readonly string[] AllSettingsProperties = new string[] { }.Concat(SettingsIntProperties).ToArray();
+
     public const string Controls = "Controls";
     public const string Back = "Back";
 
@@ -38,6 +49,9 @@ public static class UIStrings
 
     public const string GunRelated = "GunRelated";
     public const string Bullet = "Bullet";
+
+    // MAP RELATED
+    public const string EnterMapName = "Enter map name";
 
     public static string NotAVariableMsg(string value) {
          return $"{value} is not in variable name format:\n '_' or [a-zA-Z] at the beginning.";

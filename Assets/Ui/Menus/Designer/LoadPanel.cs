@@ -63,13 +63,10 @@ public class LoadPanel : BaseScrollMenu
 
         CommonChip core = CommonChip.ClientCore;
 
-        //print($"Chips: {core.VirtualModel.chips.Length}");
-
-        //print($"loaded model core: {this.loadedModel.Core.Children}");
         core.TriggerSpawn(this.loadedModel, true);
         core.VirtualModel.AddModelChangedCallback(x => core.TriggerSpawn(x, true));
         core.VirtualModel.AddModelChangedCallback(x => HistoryStack.SaveState(core.VirtualModel.ToLuaString()));
-        //print($"Chips: {core.VirtualModel.chips.Length}");
+
         this.DeactivatePanel();
 
         foreach(Action a in this.OnLoadedCallbacks)

@@ -10,7 +10,7 @@ public class MainCamera : MonoBehaviour
 
     float ObjectFactor = 2f;
     float TimeStepReductionFactor = 0.8f;
-    int MinNumberOfObjects = 50;
+    int MinNumberOfObjects;
     int OldObjectCount;
 
     CommonChip core;
@@ -27,7 +27,7 @@ public class MainCamera : MonoBehaviour
     void Start()
     {
         this.OccasionPeriod = (int)(this.OccasianPeriodSeconds * 1f / Time.deltaTime);
-        this.OldObjectCount = this.MinNumberOfObjects;
+        this.OldObjectCount = (int)(42f * Time.fixedDeltaTime);
     }
 
     // Update is called once per frame
