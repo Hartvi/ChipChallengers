@@ -6,7 +6,8 @@ using Dummiesman;
 
 public class VMap
 {
-    string fileName;
+    public const string DefaultFileName = "default.obj";
+    string fileName = "default.obj";
     GameObject loadedObject;
 
     public void LoadNewMap(string name)
@@ -36,6 +37,12 @@ public class VMap
             if (this.loadedObject != null)
                 GameObject.Destroy(this.loadedObject);
             this.loadedObject = new OBJLoader().Load(objPath);
+
+            MeshRenderer[] meshRenderers = this.loadedObject.GetComponentsInChildren<MeshRenderer>();
+            foreach(MeshRenderer m in meshRenderers)
+            {
+                m.gameObject.AddComponent<MeshCollider>();
+            }
             error = string.Empty;
         }
     }

@@ -6,7 +6,6 @@ using Assimp;
 
 public class MapPanel : BaseScrollMenu
 {
-    VMap myVMap = new VMap();
 
     Action[] OnLoadedCallbacks = { };
 
@@ -31,7 +30,7 @@ public class MapPanel : BaseScrollMenu
 
     void LoadMap()
     {
-        this.myVMap.LoadNewMap(this.input.input.text);
+        SingleplayerMenu.Instance.myVMap.LoadNewMap(this.input.input.text);
 
         this.DeactivatePanel();
 

@@ -30,6 +30,7 @@ public struct CameraFollowSettings
 public class SingleplayerMenu : BaseMenu
 {
     public static SingleplayerMenu Instance;
+    public VMap myVMap = new VMap();
 
     Camera mainCamera;
     Vector3 oldCorePosition = Vector3.zero;
@@ -77,6 +78,9 @@ public class SingleplayerMenu : BaseMenu
         base.Start();
 
         SingleplayerMenu.Instance = this;
+
+        this.myVMap.LoadNewMap(VMap.DefaultFileName);
+
         this.Hud = this.GetComponentInChildren<HUD>();
 
         this.mainCamera = Camera.main;
