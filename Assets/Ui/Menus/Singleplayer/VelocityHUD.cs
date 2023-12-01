@@ -68,7 +68,7 @@ public class VelocityHUD : BasePanel
 
     void SetVelocity()
     {
-        this.velocityText.SetText(UIUtils.DisplayFloat(this.velocity) + " m/s");
+        this.velocityText.SetText(UIUtils.DisplayFloat(this.velocity*3.6f) + " km/h");
     }
 
     public void SetFocus(CommonChip f)

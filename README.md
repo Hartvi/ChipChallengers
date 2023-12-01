@@ -2,6 +2,10 @@
 ChipChallengers - physics chips and programming all in one
 
 ### TODO
+- `+` when loading a new model, place the camera close to the model
+- `+` when loading a new map, place the model at the default location
+- `+` remove position from HUD
+- `++` implement token passing to register `esc` presses in load menus, so it closes them and doesn't go to the main menu
 - `+` LoadPanel - make the scrolling not disappear the items wtffffff
 - `+` settings menu
   - volume, number of particles
