@@ -5,7 +5,7 @@ using UnityEngine;
 using System.Linq;
 using TMPro;
 
-public class BaseScrollMenu : BasePanel
+public class BaseScrollMenu : BasePanel, InputReceiver
 {
     //public const int NUMDISPLAYITEMS = 7;
     //protected string[] myLabels = new string[] { };
@@ -44,6 +44,7 @@ public class BaseScrollMenu : BasePanel
             t.fontSize = UIUtils.MediumFontSize;
         }
         this.itemScroll = this.GetComponentInChildren<BaseItemScroll>();
+        this.scrollbar = this.itemScroll.Siblings<BaseScrollbar>(false)[0];
 
         // example of how to setup the scroller
         //this.itemScroll.SetupItemList(x => UnityEngine.Debug.Log(x), VariablePanel.NUMDISPLAYITEMS, this.myLabels);
@@ -73,19 +74,34 @@ public class BaseScrollMenu : BasePanel
     protected virtual void DeactivatePanel()
     {
         this.gameObject.SetActive(false);
+        UIManager.instance.TurnMeOff(this);
+    }
+
+    public void ActivatePanel()
+    {
+        UIManager.instance.SwitchToMe(this);
+        this.gameObject.SetActive(true);
     }
 
     public virtual void OnEnable()
     {
         //this.itemScroll.virtualContainer.UpdateLabels(this.myLabels);
+        //UIManager.instance.SwitchToMe(this);
     }
 
-    void Update()
+    public void HandleInputs()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             this.DeactivatePanel();
         }
+
+        if(this.btns is null || this.scrollbar is null)
+        {
+            PRINT.IPrint($"waiting for loading: scrollbar: {this.scrollbar == null}, btns: {this.btns == null}");
+            return;
+        }
+
         if(Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
         {
             this.btns[0].btn.onClick.Invoke();
@@ -95,5 +111,6 @@ public class BaseScrollMenu : BasePanel
 
         this.scrollbar.scrollbar.value = Mathf.Clamp01(this.scrollbar.scrollbar.value + 0.1f * scrollData);
     }
+
 }
 

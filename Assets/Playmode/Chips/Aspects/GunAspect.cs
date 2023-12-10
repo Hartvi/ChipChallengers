@@ -38,7 +38,14 @@ public class GunAspect : BaseAspect
         // number of bullets = rate * lifetime
         int numberOfBullets = Mathf.CeilToInt(Time.deltaTime / this.dPowerPerFrame * Bullet.LifeTime);
         //print($"Number of bullets: {numberOfBullets}");
-        this.bulletPool = new ObjectPool<Bullet>(numberOfBullets, GenerateBullet, x => Destroy(x.gameObject));
+        this.bulletPool = new ObjectPool<Bullet>(numberOfBullets, GenerateBullet, x =>
+        {
+            if (x)
+            {
+                Destroy(x.gameObject);
+            }
+        }
+        );
     }
 
     void Update()

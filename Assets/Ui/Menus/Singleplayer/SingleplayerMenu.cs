@@ -84,13 +84,19 @@ public class SingleplayerMenu : BaseMenu
         this.Hud = this.GetComponentInChildren<HUD>();
 
         this.mainCamera = Camera.main;
+       
         this.LoadPanel = this.GetComponentInChildren<LoadPanel>();
         this.MapPanel = this.GetComponentInChildren<MapPanel>();
 
         this.cameraFollowSettings = new CameraFollowSettings(distance: 5f, up: 1f, predict: 0f, sensitivity: 1f, lowPass: 0f);
 
-        this.OnEnterMenu();
-        this.selectedCallbacks.SetCallbacks(new Action[] { this.OnEnterMenu });
+
+        Action[] deselectedChipCallbacks = new Action[] { () => UIManager.instance.TurnMeOff(this) };
+        this.deselectedCallbacks.SetCallbacks(deselectedChipCallbacks);
+
+        //this.OnEnterMenu();
+        this.selectedCallbacks.SetCallbacks(new Action[] { this.OnEnterMenu, () => UIManager.instance.SwitchToMe(this) });
+        this.selectedCallbacks.Invoke();
     }
 
     // when going from other menus:
@@ -137,98 +143,6 @@ public class SingleplayerMenu : BaseMenu
 
     void Update()
     {
-#if UNITY_EDITOR
-        if (Input.GetKey(KeyCode.Space))
-        {
-            //core.transform.position += 0.1f*Vector3.up;
-            Rigidbody r = core.GetComponent<Rigidbody>();
-            r.AddForce(10f*Vector3.up, ForceMode.VelocityChange);
-        }
-        if (Input.GetKey(KeyCode.UpArrow))
-        {
-            //core.transform.position += 0.1f*Vector3.up;
-            Rigidbody r = core.GetComponent<Rigidbody>();
-            r.AddForce(1f*Vector3.forward, ForceMode.VelocityChange);
-        }
-#endif
-        bool ctrlPressed = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
-        bool shiftPressed = Input.GetKey(KeyCode.RightShift) || Input.GetKey(KeyCode.LeftShift);
-
-        if (ctrlPressed)
-        {
-            if (Input.GetKeyDown(KeyCode.L))
-            {
-                this.LoadPanel.gameObject.SetActive(true);
-            }
-            if (Input.GetKeyDown(KeyCode.M))
-            {
-                this.MapPanel.gameObject.SetActive(true);
-            }
-            if (Input.GetKeyDown(KeyCode.E))
-            {
-                GoToEditor.Function();
-            }
-            if (Input.GetKeyDown(KeyCode.R))
-            {
-                this.core.rb.velocity = Vector3.zero;
-                if(!shiftPressed)
-                {
-                    this.core.transform.rotation = Quaternion.identity;
-                }
-                this.core.TriggerSpawn(this.core.VirtualModel, false);
-            }
-#if UNITY_EDITOR
-            if (Input.GetKeyDown(KeyCode.T))
-            {
-                this.core.ResetToDefaultLocation();
-                //Vector3 spawnPosition = this.RaycastFromAbove();
-                //this.core.rb.velocity = Vector3.zero;
-                //if(!shiftPressed)
-                //{
-                //    this.core.transform.rotation = Quaternion.identity;
-                //}
-                //this.core.transform.position = spawnPosition;
-                //this.core.TriggerSpawn(this.core.VirtualModel, false);
-            }
-#else
-            if (Input.GetKeyDown(KeyCode.U))
-            {
-                this.core.ResetToDefaultLocation();
-                //Vector3 spawnPosition = RaycastFromAbove();
-                //this.core.rb.velocity = Vector3.zero;
-                //if(!shiftPressed)
-                //{
-                //    this.core.transform.rotation = Quaternion.identity;
-                //}
-                //this.core.transform.position = spawnPosition;
-                //this.core.TriggerSpawn(this.core.VirtualModel, false);
-            }
-#endif
-        }
-
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            GoToMainMenu.Function(true);
-        }
-
-        if (Input.GetKeyDown(KeyCode.F1))
-        {
-            this.cameraMoveMode = CameraMoveMode.Follow;
-        }
-        if (Input.GetKeyDown(KeyCode.F2))
-        {
-            this.cameraMoveMode = CameraMoveMode.Free;
-        }
-
-        switch (this.cameraMoveMode)
-        {
-            case CameraMoveMode.Follow:
-                this.CameraFollowMove();
-                break;
-            case CameraMoveMode.Free:
-                this.CameraFreeMove();
-                break;
-        }
 
     }
 
@@ -329,5 +243,105 @@ public class SingleplayerMenu : BaseMenu
             cam.transform.position = cam.transform.position + sensitivity * deltaPos;
         }
     }
+
+    override public void HandleInputs()
+    {
+#if UNITY_EDITOR
+        if (Input.GetKey(KeyCode.Space))
+        {
+            //core.transform.position += 0.1f*Vector3.up;
+            Rigidbody r = core.GetComponent<Rigidbody>();
+            r.AddForce(10f*Vector3.up, ForceMode.VelocityChange);
+        }
+        if (Input.GetKey(KeyCode.UpArrow))
+        {
+            //core.transform.position += 0.1f*Vector3.up;
+            Rigidbody r = core.GetComponent<Rigidbody>();
+            r.AddForce(1f*Vector3.forward, ForceMode.VelocityChange);
+        }
+#endif
+        bool ctrlPressed = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+        bool shiftPressed = Input.GetKey(KeyCode.RightShift) || Input.GetKey(KeyCode.LeftShift);
+
+        if (ctrlPressed)
+        {
+            if (Input.GetKeyDown(KeyCode.L))
+            {
+                this.LoadPanel.ActivatePanel();
+                //this.LoadPanel.gameObject.SetActive(true);
+            }
+            if (Input.GetKeyDown(KeyCode.M))
+            {
+                this.MapPanel.ActivatePanel();
+                //this.MapPanel.gameObject.SetActive(true);
+            }
+            if (Input.GetKeyDown(KeyCode.E))
+            {
+                GoToEditor.Function();
+            }
+            if (Input.GetKeyDown(KeyCode.R))
+            {
+                this.core.rb.velocity = Vector3.zero;
+                if(!shiftPressed)
+                {
+                    this.core.transform.rotation = Quaternion.identity;
+                }
+                this.core.TriggerSpawn(this.core.VirtualModel, false);
+            }
+#if UNITY_EDITOR
+            if (Input.GetKeyDown(KeyCode.T))
+            {
+                this.core.ResetToDefaultLocation();
+                //Vector3 spawnPosition = this.RaycastFromAbove();
+                //this.core.rb.velocity = Vector3.zero;
+                //if(!shiftPressed)
+                //{
+                //    this.core.transform.rotation = Quaternion.identity;
+                //}
+                //this.core.transform.position = spawnPosition;
+                //this.core.TriggerSpawn(this.core.VirtualModel, false);
+            }
+#else
+            if (Input.GetKeyDown(KeyCode.U))
+            {
+                this.core.ResetToDefaultLocation();
+                //Vector3 spawnPosition = RaycastFromAbove();
+                //this.core.rb.velocity = Vector3.zero;
+                //if(!shiftPressed)
+                //{
+                //    this.core.transform.rotation = Quaternion.identity;
+                //}
+                //this.core.transform.position = spawnPosition;
+                //this.core.TriggerSpawn(this.core.VirtualModel, false);
+            }
+#endif
+        }
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            GoToMainMenu.Function(true);
+        }
+
+        if (Input.GetKeyDown(KeyCode.F1))
+        {
+            this.cameraMoveMode = CameraMoveMode.Follow;
+        }
+        if (Input.GetKeyDown(KeyCode.F2))
+        {
+            this.cameraMoveMode = CameraMoveMode.Free;
+        }
+
+        switch (this.cameraMoveMode)
+        {
+            case CameraMoveMode.Follow:
+                this.CameraFollowMove();
+                break;
+            case CameraMoveMode.Free:
+                this.CameraFreeMove();
+                break;
+        }
+
+    }
+
 }
 

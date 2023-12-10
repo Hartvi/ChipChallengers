@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BaseMenu : DeclaredProp
+public class BaseMenu : DeclaredProp, InputReceiver
 {
     public static HashSet<BaseMenu> allMenus = new HashSet<BaseMenu>();
     public static HashSet<Type> allMenuTypes = new HashSet<Type>();
@@ -12,6 +12,7 @@ public class BaseMenu : DeclaredProp
 
     public CallbackArray selectedCallbacks = new CallbackArray(true);
     public CallbackArray deselectedCallbacks = new CallbackArray(true);
+
     //protected Action[] selectedCallbacks = new Action[] { };
     //protected Action[] deselectedCallbacks = new Action[] { };
 
@@ -96,11 +97,17 @@ public class BaseMenu : DeclaredProp
             menu.isSelected = activation;
         }
     }
+
     public static void SwitchToPreviousMenu()
     {
         if (BaseMenu.lastMenu.Count > 0)
         {
             BaseMenu.SwitchToMenu(BaseMenu.lastMenu.Pop().GetType(), true);
         }
+    }
+
+    public virtual void HandleInputs()
+    {
+        throw new NotImplementedException();
     }
 }

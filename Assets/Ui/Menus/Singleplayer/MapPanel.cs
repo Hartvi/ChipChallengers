@@ -7,7 +7,7 @@ using Assimp;
 public class MapPanel : BaseScrollMenu
 {
 
-    Action[] OnLoadedCallbacks = { };
+    CallbackArray OnLoadedCallbacks = new CallbackArray(false);
 
     protected override void Start()
     {
@@ -34,14 +34,12 @@ public class MapPanel : BaseScrollMenu
 
         this.DeactivatePanel();
 
-        foreach(Action a in this.OnLoadedCallbacks)
-        {
-            a();
-        }
+        this.OnLoadedCallbacks.Invoke();
     }
 
     public override void OnEnable()
     {
+        base.OnEnable();
         if (this.itemScroll is not null) this.itemScroll.virtualContainer.UpdateLabels(IOHelpers.GetAllMaps());
     }
 
@@ -52,7 +50,7 @@ public class MapPanel : BaseScrollMenu
 
     public void SetOnLoadedCallbacks(Action[] callbacks)
     {
-        this.OnLoadedCallbacks = callbacks;
+        this.OnLoadedCallbacks.SetCallbacks(callbacks);
     }
 
 }

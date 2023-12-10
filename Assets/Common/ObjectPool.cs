@@ -33,7 +33,7 @@ public class ObjectPool<T>
     {
         for(int i = 0; i < this.objects.Length; ++i)
         {
-            PRINT.IPrint($"Deleting object {i}: {this.objects[i]}");
+            //PRINT.IPrint($"Deleting object {i}: {this.objects[i]}");
             this.deleteObject(this.objects[i]);
         }
     }

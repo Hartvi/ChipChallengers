@@ -28,6 +28,7 @@ public class SavePanel : BaseScrollMenu
 
     public override void OnEnable()
     {
+        base.OnEnable();
         if(this.itemScroll is not null) this.itemScroll.virtualContainer.UpdateLabels(IOHelpers.GetAllModels());
     }
 

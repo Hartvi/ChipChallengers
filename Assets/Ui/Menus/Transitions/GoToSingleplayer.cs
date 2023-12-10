@@ -19,7 +19,7 @@ public class GoToSingleplayer : BaseTransition
         GoToSingleplayer.Function();
     }
 
-    new public static void Function()
+    public static void Function()
     {
         BaseMenu.SwitchToMenu(typeof(SingleplayerMenu));
 

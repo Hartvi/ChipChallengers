@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MainMenu : BaseMainMenu
+public class MainMenu : BaseMainMenu, InputReceiver
 {
     float numberOfButtons = 5f;
     protected override void Setup()
@@ -30,7 +30,16 @@ public class MainMenu : BaseMainMenu
             )
         );
     }
-    void Update()
+
+    override protected void Start()
+    {
+        base.Start();
+
+        UIManager uiManager = Camera.main.GetComponent<UIManager>();
+        uiManager.SwitchToMe(this);
+    }
+
+    new public void HandleInputs()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {

@@ -35,5 +35,10 @@ public class SettingsMenu : BaseMenu
         // set it to center and not to break text into a new line
         DisplaySingleton.NoOverflowEtc(bt.text);
     }
+
+    new public void HandleInputs()
+    {
+
+    }
     
 }

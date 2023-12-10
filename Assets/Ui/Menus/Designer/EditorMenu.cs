@@ -103,12 +103,13 @@ public class EditorMenu : BaseMenu
         this.SavePanel = this.GetComponentInChildren<SavePanel>();
         this.LoadPanel = this.GetComponentInChildren<LoadPanel>();
 
-        this.OnEnterMenu();
+        //this.OnEnterMenu();
 
-        Action[] selectedChipCallbacks = new Action[] { CommonChip.FreezeModel, this.OnEnterMenu };
+        Action[] selectedChipCallbacks = new Action[] { CommonChip.FreezeModel, this.OnEnterMenu, () => UIManager.instance.SwitchToMe(this) };
         this.selectedCallbacks.SetCallbacks(selectedChipCallbacks);
+        this.selectedCallbacks.Invoke();
 
-        Action[] deselectedChipCallbacks = new Action[] { this.OnLeaveMenu };
+        Action[] deselectedChipCallbacks = new Action[] { this.OnLeaveMenu, () => UIManager.instance.TurnMeOff(this) };
         this.deselectedCallbacks.SetCallbacks(deselectedChipCallbacks);
     }
 
@@ -352,7 +353,7 @@ public class EditorMenu : BaseMenu
 
     }
 
-    void Update()
+    override public void HandleInputs()
     {
         if (!this.ScriptPanel.IsSelected)
         {
