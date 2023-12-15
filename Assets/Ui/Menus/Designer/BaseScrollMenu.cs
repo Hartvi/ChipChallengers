@@ -91,6 +91,11 @@ public class BaseScrollMenu : BasePanel, InputReceiver
 
     public void HandleInputs()
     {
+        if (!this.gameObject.activeSelf)
+        {
+            Debug.LogWarning($"Handling inputs on inactive objects.. SHOULD HANDLE IF SEEN MORE THAN A FEW TIMES");
+        }
+
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             this.DeactivatePanel();

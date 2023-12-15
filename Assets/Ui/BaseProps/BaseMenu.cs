@@ -108,6 +108,13 @@ public class BaseMenu : DeclaredProp, InputReceiver
 
     public virtual void HandleInputs()
     {
-        throw new NotImplementedException();
+        if (!this.gameObject.activeSelf)
+        {
+            Debug.LogError($"Handling inputs on inactive object {this.GetType()} SHOULD HANDLE IF SEEN MORE THAN A FEW TIMES");
+            //throw new InvalidOperationException($"Cannot handle inputs on inactive UI object!!!");
+        }
+        //print($"HANDLING ON {this.GetType()}");
+        //Debug.LogError($"MY TYPE: {this.GetType()} USE OVERRIDE INSTEAD OF NEW");
+        //throw new NotImplementedException();
     }
 }

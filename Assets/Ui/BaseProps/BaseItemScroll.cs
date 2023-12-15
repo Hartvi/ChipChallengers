@@ -183,7 +183,7 @@ public class VirtualContainer
 
     int NumberToDisplay, NumberOfSpawned;
     VirtualItem[] virtualItems;
-    int NumberOfItems { get { return virtualItems.Length; } }
+    int NumberOfItems { get { return this.virtualItems.Length; } }
     float MaxMoveDelta;
 
     float DefaultInterval, DefaultOffset;
@@ -232,7 +232,7 @@ public class VirtualContainer
         for(int i = 0; i < this.virtualItems.Length; ++i)
         {
             var vItem = this.virtualItems[i];
-            vItem.relativePosition = vItem.defaultPosition - this.MaxMoveDelta * x * (int)(this.virtualItems.Length / this.NumberToDisplay);
+            vItem.relativePosition = vItem.defaultPosition - this.MaxMoveDelta * x;
             // offset = 0.5*item height
             // top item: offset, bottom item: number of display items - offset
             // visible items: +-1 the edges

@@ -420,7 +420,7 @@ public class CommonChip : AngleChip
     {
         //print("TRIGGER SPAWN");
         this.VirtualModel = virtualModel;
-        print($"Number of chips: {virtualModel.chips.Length}");
+        //print($"Number of chips: {virtualModel.chips.Length}");
         foreach (VVar v in this.VirtualModel.variables)
         {
             v.valueChangedCallbacks = new Action<float, VVar>[] { };

@@ -26,18 +26,18 @@ public class UIManager : MonoBehaviour
 
     public void SwitchToMe(InputReceiver me)
     {
-        print($"Switching to {me.GetType()}");
+        //print($"Switching to {me.GetType()}");
         while (keyboardReceivers.Remove(me)) { }
         keyboardReceivers.Add(me);
     }
 
     public void TurnMeOff(InputReceiver me)
     {
-        print($"Turning off {me.GetType()}");
-        print($"Before removing: {me.GetType()}: {keyboardReceivers.Count}");
+        //print($"Turning off {me.GetType()}");
+        //print($"Before removing: {me.GetType()}: {keyboardReceivers.Count}");
         //keyboardReceivers.Remove(me);
         while (keyboardReceivers.Remove(me)) { }
-        print($"After removing: {me.GetType()}: {keyboardReceivers.Count}");
+        //print($"After removing: {me.GetType()}: {keyboardReceivers.Count}");
     }
 
 }

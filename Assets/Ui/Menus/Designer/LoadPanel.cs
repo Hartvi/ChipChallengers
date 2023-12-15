@@ -26,7 +26,7 @@ public class LoadPanel : BaseScrollMenu
         this.itemScroll.Scroll(0f);
         this.scrollbar.scrollbar.value = 0f;
 
-        this.input.placeholder.SetText("Enter model name");
+        this.input.placeholder.SetText(UIStrings.EnterModelName);
     }
 
     public override void OnEnable()
@@ -50,7 +50,7 @@ public class LoadPanel : BaseScrollMenu
         {
             UnityEngine.Debug.LogWarning($"Model could not be loaded.");
             UnityEngine.Debug.Log(e.Message);
-            //DisplaySingleton.Instance.DisplayText(this.ModelDoesNotExist, 3f);
+            DisplaySingleton.Instance.DisplayText(this.ModelDoesNotExist, 3f);
         }
 #endif
 

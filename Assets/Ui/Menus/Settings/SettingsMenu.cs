@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -34,11 +35,19 @@ public class SettingsMenu : BaseMenu
         bt.text.SetText(UIStrings.Settings);
         // set it to center and not to break text into a new line
         DisplaySingleton.NoOverflowEtc(bt.text);
+
+        this.selectedCallbacks.SetCallbacks(new Action[] { () => UIManager.instance.SwitchToMe(this) });
+        this.selectedCallbacks.Invoke();
     }
 
-    new public void HandleInputs()
+    public override void HandleInputs()
     {
-
+        base.HandleInputs();
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            print($"GOING TO MAIN MENU FROM SETTINGS");
+            GoToMainMenu.Function(false);
+        }
     }
     
 }

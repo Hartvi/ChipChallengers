@@ -109,7 +109,8 @@ public class EditorMenu : BaseMenu
         this.selectedCallbacks.SetCallbacks(selectedChipCallbacks);
         this.selectedCallbacks.Invoke();
 
-        Action[] deselectedChipCallbacks = new Action[] { this.OnLeaveMenu, () => UIManager.instance.TurnMeOff(this) };
+        Action[] deselectedChipCallbacks = new Action[] { this.OnLeaveMenu };
+        //Action[] deselectedChipCallbacks = new Action[] { this.OnLeaveMenu, () => UIManager.instance.TurnMeOff(this) };
         this.deselectedCallbacks.SetCallbacks(deselectedChipCallbacks);
     }
 
@@ -355,6 +356,7 @@ public class EditorMenu : BaseMenu
 
     override public void HandleInputs()
     {
+        base.HandleInputs();
         if (!this.ScriptPanel.IsSelected)
         {
             this.InEditorInputs();

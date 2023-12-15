@@ -57,8 +57,13 @@ public class VelocityHUD : BasePanel
         }
         txts[0].text.SetText(UIStrings.Velocity);
         this.velocityText = txts[1].text;
-        txts[2].text.SetText(UIStrings.Position);
+
+        txts[2].text.SetText("");
         this.positionText = txts[3].text;
+        this.positionText.SetText("");
+
+        //txts[2].text.SetText(UIStrings.Position);
+        //this.positionText = txts[3].text;
     }
 
     void SetPosition()
@@ -79,6 +84,6 @@ public class VelocityHUD : BasePanel
     void Update()
     {
         SetVelocity();
-        SetPosition();
+        //SetPosition();
     }
 }

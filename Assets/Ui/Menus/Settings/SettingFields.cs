@@ -66,14 +66,6 @@ public class SettingFields : BasePanel
         }
     }
 
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            GoToMainMenu.Function(false);
-        }
-    }
-
     void OnEndInput(TMP_InputField inputField, string txt, string settingName)
     {
         string tmp = txt;

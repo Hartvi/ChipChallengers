@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -37,12 +38,16 @@ public class MainMenu : BaseMainMenu, InputReceiver
 
         UIManager uiManager = Camera.main.GetComponent<UIManager>();
         uiManager.SwitchToMe(this);
+        this.selectedCallbacks.SetCallbacks(new Action[] { () => UIManager.instance.SwitchToMe(this) });
+        this.selectedCallbacks.Invoke();
     }
 
     new public void HandleInputs()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
+            // TODO: somehow this is being triggered along with the settings menu KeyDown(KeyCode.Escape)
+            //print($"MainMenu KEYCODE ESCAPE DOWN: Switching to previous menu");
             SwitchToPreviousMenu();
         }
     }

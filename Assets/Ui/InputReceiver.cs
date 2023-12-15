@@ -4,5 +4,8 @@ using UnityEngine;
 
 public interface InputReceiver
 {
-    public virtual void HandleInputs() { }
+    public virtual void HandleInputs()
+    {
+        PRINT.IPrint($"InputReceiver: running");
+    }
 }

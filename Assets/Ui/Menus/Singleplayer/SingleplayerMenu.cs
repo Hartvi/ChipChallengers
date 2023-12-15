@@ -91,8 +91,8 @@ public class SingleplayerMenu : BaseMenu
         this.cameraFollowSettings = new CameraFollowSettings(distance: 5f, up: 1f, predict: 0f, sensitivity: 1f, lowPass: 0f);
 
 
-        Action[] deselectedChipCallbacks = new Action[] { () => UIManager.instance.TurnMeOff(this) };
-        this.deselectedCallbacks.SetCallbacks(deselectedChipCallbacks);
+        //Action[] deselectedChipCallbacks = new Action[] { () => UIManager.instance.TurnMeOff(this) };
+        //this.deselectedCallbacks.SetCallbacks(deselectedChipCallbacks);
 
         //this.OnEnterMenu();
         this.selectedCallbacks.SetCallbacks(new Action[] { this.OnEnterMenu, () => UIManager.instance.SwitchToMe(this) });
@@ -127,14 +127,22 @@ public class SingleplayerMenu : BaseMenu
 
         // when model is loaded: add callbacks to rebuild the model, add callbacks to link the variables to the HUD
         Action[] onLoadedCallbacksTmp = new Action[] { 
-            () => this.core.TriggerSpawn(this.core.VirtualModel, false), 
-            () => this.Hud.LinkCore(this.core)
+            () => {
+                this.core.TriggerSpawn(this.core.VirtualModel, false);
+                this.core.transform.position += Vector3.up;
+                }, 
+            () => this.Hud.LinkCore(this.core),
+            () => {
+                Camera.main.transform.position = this.core.transform.position + Vector3.up * 10f;
+            }
         };
         
         this.LoadPanel.SetOnLoadedCallbacks(onLoadedCallbacksTmp);
 
+        this.MapPanel.SetOnLoadedCallbacks(onLoadedCallbacksTmp);
+
         //TODO: load model after entering playmode???
-        print($"Current virtual Model: {this.core.VirtualModel}");
+        //print($"Current virtual Model: {this.core.VirtualModel}");
         this.Hud.LinkCore(this.core);
 
         // speed up physics for stable physics
@@ -246,7 +254,8 @@ public class SingleplayerMenu : BaseMenu
 
     override public void HandleInputs()
     {
-#if UNITY_EDITOR
+        base.HandleInputs();
+//#if UNITY_EDITOR
         if (Input.GetKey(KeyCode.Space))
         {
             //core.transform.position += 0.1f*Vector3.up;
@@ -259,7 +268,7 @@ public class SingleplayerMenu : BaseMenu
             Rigidbody r = core.GetComponent<Rigidbody>();
             r.AddForce(1f*Vector3.forward, ForceMode.VelocityChange);
         }
-#endif
+//#endif
         bool ctrlPressed = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
         bool shiftPressed = Input.GetKey(KeyCode.RightShift) || Input.GetKey(KeyCode.LeftShift);
 
@@ -292,6 +301,9 @@ public class SingleplayerMenu : BaseMenu
             if (Input.GetKeyDown(KeyCode.T))
             {
                 this.core.ResetToDefaultLocation();
+                // set the camera position, since it might not catch up fast enough
+                Camera.main.transform.position = this.core.transform.position + Vector3.up*10f;
+
                 //Vector3 spawnPosition = this.RaycastFromAbove();
                 //this.core.rb.velocity = Vector3.zero;
                 //if(!shiftPressed)
@@ -305,6 +317,9 @@ public class SingleplayerMenu : BaseMenu
             if (Input.GetKeyDown(KeyCode.U))
             {
                 this.core.ResetToDefaultLocation();
+                // set the camera position, since it might not catch up fast enough
+                Camera.main.transform.position = this.core.transform.position + Vector3.up*10f;
+
                 //Vector3 spawnPosition = RaycastFromAbove();
                 //this.core.rb.velocity = Vector3.zero;
                 //if(!shiftPressed)

@@ -19,6 +19,7 @@ public class GoToMainMenu : BaseTransition
 
     new public static void Function(bool switchBack)
     {
+        print($"Switching to main menu");
         BaseMenu.SwitchToMenu(typeof(MainMenu), switchBack);
 
         BaseTransition.InvokeAfterClickedCallbacks(typeof(GoToMainMenu));

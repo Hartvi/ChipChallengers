@@ -17,10 +17,12 @@ public class GoToSettings : BaseTransition
         GoToSettings.Function();
     }
 
-    new public static void Function()
+    public static void Function()
     {
         BaseMenu.SwitchToMenu(typeof(SettingsMenu));
 
         BaseTransition.InvokeAfterClickedCallbacks(typeof(GoToSettings));
     }
+
 }
+

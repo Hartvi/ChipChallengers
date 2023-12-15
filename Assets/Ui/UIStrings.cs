@@ -52,6 +52,7 @@ public static class UIStrings
 
     // MAP RELATED
     public const string EnterMapName = "Enter map name";
+    public const string EnterModelName = "Enter model name";
 
     public static string NotAVariableMsg(string value) {
          return $"{value} is not in variable name format:\n '_' or [a-zA-Z] at the beginning.";

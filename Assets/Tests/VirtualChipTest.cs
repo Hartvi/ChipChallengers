@@ -46,7 +46,7 @@ public class VirtualChipTest : MonoBehaviour
         //var vc8 = new VChip(keys2, vals2, 3, vc4);
 
         CommonChip core = coreobject.GetComponent<CommonChip>();
-        print($"Core equivalent chip is NULL: {core.equivalentVirtualChip is null}");
+        //print($"Core equivalent chip is NULL: {core.equivalentVirtualChip is null}");
         //core.equivalentVirtualChip = vc;
         //print("core name: "+core.name);
 
