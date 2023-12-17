@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BaseMenu : DeclaredProp, InputReceiver
+public abstract class BaseMenu : DeclaredProp
 {
     public static HashSet<BaseMenu> allMenus = new HashSet<BaseMenu>();
     public static HashSet<Type> allMenuTypes = new HashSet<Type>();
@@ -17,7 +17,7 @@ public class BaseMenu : DeclaredProp, InputReceiver
     //protected Action[] deselectedCallbacks = new Action[] { };
 
     private bool _isSelected = false;
-    public bool isSelected 
+    public bool isSelected
     {
         get { return this._isSelected; }
         set
@@ -74,7 +74,8 @@ public class BaseMenu : DeclaredProp, InputReceiver
         this.gameObject.SetActive(this.isSelected);
     }
 
-    public static void SwitchToMenu(Type menuType, bool switchingBack=false) {
+    public static void SwitchToMenu(Type menuType, bool switchingBack = false)
+    {
         bool menuExists = BaseMenu.allMenuTypes.Contains(menuType);
         if (!menuExists && menuType != null)
         {
@@ -85,7 +86,7 @@ public class BaseMenu : DeclaredProp, InputReceiver
             newMenu.gameObject.SetActive(false);
         }
         // switchingBack => true: remember this menu when switching back to last menu, or false: skip remembering this menu
-        foreach(BaseMenu menu in BaseMenu.allMenus)
+        foreach (BaseMenu menu in BaseMenu.allMenus)
         {
             bool activation = menu.GetType() == menuType;
             if (menu.gameObject.activeSelf && switchingBack)
@@ -106,15 +107,24 @@ public class BaseMenu : DeclaredProp, InputReceiver
         }
     }
 
-    public virtual void HandleInputs()
-    {
-        if (!this.gameObject.activeSelf)
-        {
-            Debug.LogError($"Handling inputs on inactive object {this.GetType()} SHOULD HANDLE IF SEEN MORE THAN A FEW TIMES");
-            //throw new InvalidOperationException($"Cannot handle inputs on inactive UI object!!!");
-        }
-        //print($"HANDLING ON {this.GetType()}");
-        //Debug.LogError($"MY TYPE: {this.GetType()} USE OVERRIDE INSTEAD OF NEW");
-        //throw new NotImplementedException();
-    }
+    // InputReceiver methods:
+    //bool InputReceiver.IsActive()
+    //{
+    //    return this.gameObject.activeSelf;
+    //}
+
+    //void InputReceiver.HandleInputs() { }
+    //void InputReceiver.HandleInputs()
+    //{
+
+    //    if (!this.gameObject.activeSelf)
+    //    {
+    //        Debug.LogError($"Handling inputs on inactive object {this.GetType()} SHOULD HANDLE IF SEEN MORE THAN A FEW TIMES");
+    //        //throw new InvalidOperationException($"Cannot handle inputs on inactive UI object!!!");
+    //    }
+    //    //print($"HANDLING ON {this.GetType()}");
+    //    //Debug.LogError($"MY TYPE: {this.GetType()} USE OVERRIDE INSTEAD OF NEW");
+    //    //throw new NotImplementedException();
+    //}
+
 }

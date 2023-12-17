@@ -5,7 +5,7 @@ using UnityEngine;
 using System.Linq;
 
 
-public class EditorMenu : BaseMenu
+public class EditorMenu : BaseMenu, InputReceiver
 {
     private CommonChip _core;
     private CommonChip core
@@ -354,9 +354,11 @@ public class EditorMenu : BaseMenu
 
     }
 
-    override public void HandleInputs()
+    bool InputReceiver.IsActive() => this.gameObject.activeSelf;
+
+    void InputReceiver.HandleInputs()
     {
-        base.HandleInputs();
+        //base.HandleInputs();
         if (!this.ScriptPanel.IsSelected)
         {
             this.InEditorInputs();

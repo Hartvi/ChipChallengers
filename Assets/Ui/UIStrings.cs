@@ -19,8 +19,9 @@ public static class UIStrings
     public const string Volume = "Volume";
     public const string PhysicsParticles = "Physics particles";
     public const string EnterANumber = "Enter a number";
+
     public static readonly string[] SettingsIntProperties = new string[] { Framerate, PhysicsRate, Volume, PhysicsParticles };
-    public static readonly string[] AllSettingsProperties = new string[] { }.Concat(SettingsIntProperties).ToArray();
+    public static readonly string[] SettingsAllProperties = new string[] { }.Concat(SettingsIntProperties).ToArray();
 
     public const string Controls = "Controls";
     public const string Back = "Back";

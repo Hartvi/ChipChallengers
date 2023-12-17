@@ -89,7 +89,9 @@ public class BaseScrollMenu : BasePanel, InputReceiver
         //UIManager.instance.SwitchToMe(this);
     }
 
-    public void HandleInputs()
+    bool InputReceiver.IsActive() => this.gameObject.activeSelf;
+
+    void InputReceiver.HandleInputs()
     {
         if (!this.gameObject.activeSelf)
         {

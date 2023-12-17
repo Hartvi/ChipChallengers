@@ -20,14 +20,14 @@ public class MainMenu : BaseMainMenu, InputReceiver
                         new VirtualProp(PropType.Button, btnHeight, typeof(GoToSingleplayer)),
                         new VirtualProp(PropType.Button, btnHeight, typeof(GoToEditor)),
                         new VirtualProp(PropType.Button, btnHeight, typeof(GoToSettings))
-                        //new VirtualProp(PropType.Button, btnHeight, typeof(GoToSingleplayer)),
-                        //new VirtualProp(PropType.Button, btnHeight, typeof(GoToSingleplayer))
+                    //new VirtualProp(PropType.Button, btnHeight, typeof(GoToSingleplayer)),
+                    //new VirtualProp(PropType.Button, btnHeight, typeof(GoToSingleplayer))
                     )
                 )
-                //new VirtualProp(PropType.Button, 0.2f, typeof(GoToMultiplayer)),
-                //new VirtualProp(PropType.Button, 0.2f, typeof(GoToEditor)),
-                //new VirtualProp(PropType.Button, 0.2f, typeof(GoToOptions)),
-                //new VirtualProp(PropType.Button, 0.2f, typeof(Quit)),
+            //new VirtualProp(PropType.Button, 0.2f, typeof(GoToMultiplayer)),
+            //new VirtualProp(PropType.Button, 0.2f, typeof(GoToEditor)),
+            //new VirtualProp(PropType.Button, 0.2f, typeof(GoToOptions)),
+            //new VirtualProp(PropType.Button, 0.2f, typeof(Quit)),
             )
         );
     }
@@ -38,11 +38,14 @@ public class MainMenu : BaseMainMenu, InputReceiver
 
         UIManager uiManager = Camera.main.GetComponent<UIManager>();
         uiManager.SwitchToMe(this);
-        this.selectedCallbacks.SetCallbacks(new Action[] { () => UIManager.instance.SwitchToMe(this) });
+        Action[] onSelectedCallbacks = new Action[] { () => UIManager.instance.SwitchToMe(this), () => GameManager.Instance.UpdateSettings() };
+        this.selectedCallbacks.SetCallbacks(onSelectedCallbacks);
         this.selectedCallbacks.Invoke();
     }
 
-    new public void HandleInputs()
+    bool InputReceiver.IsActive() => this.gameObject.activeSelf;
+
+    void InputReceiver.HandleInputs()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {

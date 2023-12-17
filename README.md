@@ -2,6 +2,7 @@
 ChipChallengers - physics chips and programming all in one
 
 ### TODO
+- `+` find out why the physics timing makes wheels speed up cars differently 
 - `+` settings menu
   - volume, number of particles
   - maybe do sliders
@@ -20,6 +21,7 @@ ChipChallengers - physics chips and programming all in one
 - `+` Add option to change units in HUD
 
 ### Done
+- `+` Basic linking and setting of setting values
 - `+` make resetting to default location a function and implement in CommonChip as well
 - `+` LoadPanel - make the scrolling not disappear the items wtffffff
 - `++` implement token passing to register `esc` presses in load menus, so it closes them and doesn't go to the main menu

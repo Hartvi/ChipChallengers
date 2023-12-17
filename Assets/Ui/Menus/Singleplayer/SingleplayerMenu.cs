@@ -27,7 +27,7 @@ public struct CameraFollowSettings
     }
 }
 
-public class SingleplayerMenu : BaseMenu
+public class SingleplayerMenu : BaseMenu, InputReceiver
 {
     public static SingleplayerMenu Instance;
     public VMap myVMap = new VMap();
@@ -102,7 +102,7 @@ public class SingleplayerMenu : BaseMenu
     // when going from other menus:
     void OnEnterMenu()
     {
-        Application.targetFrameRate = 40;
+        //Application.targetFrameRate = 40;
 
         // ignore wheel and default layer collisions
         Physics.IgnoreLayerCollision(7, 0);
@@ -146,7 +146,7 @@ public class SingleplayerMenu : BaseMenu
         this.Hud.LinkCore(this.core);
 
         // speed up physics for stable physics
-        Time.fixedDeltaTime = 0.001f;
+        //Time.fixedDeltaTime = 0.001f;
     }
 
     void Update()
@@ -252,9 +252,10 @@ public class SingleplayerMenu : BaseMenu
         }
     }
 
-    override public void HandleInputs()
+    bool InputReceiver.IsActive() => this.gameObject.activeSelf;
+
+    void InputReceiver.HandleInputs()
     {
-        base.HandleInputs();
 //#if UNITY_EDITOR
         if (Input.GetKey(KeyCode.Space))
         {

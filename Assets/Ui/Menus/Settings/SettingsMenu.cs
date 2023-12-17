@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SettingsMenu : BaseMenu
+public class SettingsMenu : BaseMenu, InputReceiver
 {
 
     /*
@@ -40,12 +40,13 @@ public class SettingsMenu : BaseMenu
         this.selectedCallbacks.Invoke();
     }
 
-    public override void HandleInputs()
+    bool InputReceiver.IsActive() => this.gameObject.activeSelf;
+
+    void InputReceiver.HandleInputs()
     {
-        base.HandleInputs();
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            print($"GOING TO MAIN MENU FROM SETTINGS");
+            //print($"GOING TO MAIN MENU FROM SETTINGS");
             GoToMainMenu.Function(false);
         }
     }

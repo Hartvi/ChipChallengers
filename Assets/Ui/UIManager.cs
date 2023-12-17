@@ -21,7 +21,7 @@ public class UIManager : MonoBehaviour
 
     void Update()
     {
-        keyboardReceivers[keyboardReceivers.Count - 1].HandleInputs();
+        keyboardReceivers[keyboardReceivers.Count - 1].CoreHandleInputs();
     }
 
     public void SwitchToMe(InputReceiver me)

@@ -53,7 +53,7 @@ public class SettingFields : BasePanel
         for (int i = 0; i < baseTexts.Length; ++i)
         {
             int _i = i;// temporary _i for callbacks so they actually point to the current base inputs and setting name
-            string currentSettingName = UIStrings.AllSettingsProperties[_i];
+            string currentSettingName = UIStrings.SettingsAllProperties[_i];
 
 
             baseTexts[i].text.SetText(currentSettingName);
@@ -69,7 +69,7 @@ public class SettingFields : BasePanel
     void OnEndInput(TMP_InputField inputField, string txt, string settingName)
     {
         string tmp = txt;
-        int a = 0;
+        int a;
 
         while(!int.TryParse(tmp, out a)) {
             tmp = tmp.Substring(0, tmp.Length - 1);
@@ -108,12 +108,13 @@ public class SettingFields : BasePanel
         {
             PlayerPrefs.SetInt(settingName, settingValue);
             PlayerPrefs.Save();
+            GameManager.Instance.UpdateSettings();
         }
     }
 
     int SaturateIntSetting(string settingName, int val)
     {
-        Tuple<int, int> minMax = minMaxIntSettings[settingName];
+        Tuple<int, int> minMax = this.minMaxIntSettings[settingName];
         return Math.Min(minMax.Item2, Math.Max(minMax.Item1, val));
     }
     
