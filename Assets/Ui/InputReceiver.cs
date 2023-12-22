@@ -19,5 +19,8 @@ public interface InputReceiver
     }
 
     protected void HandleInputs();
+
+    public void OnStopReceiving();
+    public void OnStartReceiving();
 }
 

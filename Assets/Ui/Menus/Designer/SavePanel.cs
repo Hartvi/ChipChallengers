@@ -12,7 +12,7 @@ public class SavePanel : BaseScrollMenu
 
         this.itemScroll.SetupItemList(FillInput, Screen.height / 70, IOHelpers.GetAllModels());
 
-        this.btns[0].btn.onClick.AddListener(() => SaveModel(this.input.input.text));
+        this.btns[0].btn.onClick.AddListener(() => SaveModel(this.input.input.text + UIStrings.ModelExtension));
 
         this.btns[1].btn.onClick.AddListener(this.DeactivatePanel);
 

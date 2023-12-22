@@ -2,6 +2,9 @@
 ChipChallengers - physics chips and programming all in one
 
 ### TODO
+- `+` hide empty variable in singleplayer and editor
+- `+` freeze the model when not in singleplayer mode
+- `+` stop listening to LUA controls when not in singleplayer mode
 - `+` find out why the physics timing makes wheels speed up cars differently 
 - `+` settings menu
   - volume, number of particles
@@ -21,6 +24,8 @@ ChipChallengers - physics chips and programming all in one
 - `+` Add option to change units in HUD
 
 ### Done
+- `+` hide extensions in all panel loaders
+- `+` hide `.mtl` files in map loader
 - `+` Basic linking and setting of setting values
 - `+` make resetting to default location a function and implement in CommonChip as well
 - `+` LoadPanel - make the scrolling not disappear the items wtffffff

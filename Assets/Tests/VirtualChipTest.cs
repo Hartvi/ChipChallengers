@@ -61,7 +61,7 @@ public class VirtualChipTest : MonoBehaviour
         print($"Core model: {core.VirtualModel}");
         VirtualModel.AddModelChangedCallback(x => HistoryStack.SaveState(VirtualModel.ToLuaString()));
 
-        core.TriggerSpawn(VirtualModel, false);
+        //core.TriggerSpawn(VirtualModel, false);
 
         //string vc8_str = "a=" + vc8.ToLuaString();
         //print("lua string: " + vc8_str);

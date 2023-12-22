@@ -13,6 +13,8 @@ public class UIManager : MonoBehaviour
     public static UIManager instance;
 
     private List<InputReceiver> keyboardReceivers = new List<InputReceiver>();
+    private int previousReceiverLength = 0;
+    private InputReceiver previousReceiver;
 
     void Awake()
     {
@@ -21,7 +23,12 @@ public class UIManager : MonoBehaviour
 
     void Update()
     {
-        keyboardReceivers[keyboardReceivers.Count - 1].CoreHandleInputs();
+        this.keyboardReceivers[this.keyboardReceivers.Count - 1].CoreHandleInputs();
+
+        if (this.keyboardReceivers.Count != this.previousReceiverLength) {
+            this.previousReceiver = keyboardReceivers[keyboardReceivers.Count - 1];
+            this.previousReceiverLength = this.keyboardReceivers.Count;
+        }
     }
 
     public void SwitchToMe(InputReceiver me)

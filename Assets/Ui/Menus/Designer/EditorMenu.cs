@@ -105,7 +105,11 @@ public class EditorMenu : BaseMenu, InputReceiver
 
         //this.OnEnterMenu();
 
-        Action[] selectedChipCallbacks = new Action[] { CommonChip.FreezeModel, this.OnEnterMenu, () => UIManager.instance.SwitchToMe(this) };
+        Action[] selectedChipCallbacks = new Action[] { 
+            CommonChip.FreezeClientModel, 
+            this.OnEnterMenu, 
+            () => UIManager.instance.SwitchToMe(this) 
+        };
         this.selectedCallbacks.SetCallbacks(selectedChipCallbacks);
         this.selectedCallbacks.Invoke();
 
@@ -122,7 +126,11 @@ public class EditorMenu : BaseMenu, InputReceiver
         this.highlighter.ParentHighlighter.SetActive(true);
 
         print($"Varpanel: {VariablePanel}, ");
-        this.LoadPanel.SetOnLoadedCallbacks(new Action[] { this.VariablePanel.ReloadVariables, this.VariablePanel.AddListenersToModel });
+        Action[] onLoadedCallbacks = new Action[] { 
+            this.VariablePanel.ReloadVariables, 
+            this.VariablePanel.AddListenersToModel 
+        };
+        this.LoadPanel.SetOnLoadedCallbacks(onLoadedCallbacks);
 
         //print($"Setting editormenu callback to model changed");
         Action[] afterBuildListeners = new Action[] {
@@ -296,7 +304,7 @@ public class EditorMenu : BaseMenu, InputReceiver
             if (Input.GetKeyDown(KeyCode.Z))
             {
 #if UNITY_EDITOR
-                this.LoadPanel.LoadString(HistoryStack.Undo());
+                LoadPanel.LoadString(HistoryStack.Undo());
 #else
             try
             {
@@ -308,7 +316,7 @@ public class EditorMenu : BaseMenu, InputReceiver
             if (Input.GetKeyDown(KeyCode.Y))
             {
 #if UNITY_EDITOR
-                this.LoadPanel.LoadString(HistoryStack.Redo());
+                LoadPanel.LoadString(HistoryStack.Redo());
 #else
             try
             {
@@ -354,6 +362,8 @@ public class EditorMenu : BaseMenu, InputReceiver
 
     }
 
+    void InputReceiver.OnStartReceiving() { }
+    void InputReceiver.OnStopReceiving() { }
     bool InputReceiver.IsActive() => this.gameObject.activeSelf;
 
     void InputReceiver.HandleInputs()

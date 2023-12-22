@@ -16,18 +16,20 @@ public class IOHelpers
 
         if (string.IsNullOrEmpty(extension))
         {
-            return fileName + ".txt";
+            return fileName + UIStrings.ModelExtension;
         }
 
         return fileName;
     }
 
-public static void SaveModel(string modelName, string modelString) {
+    public static void SaveModel(string modelName, string modelString)
+    {
         // leave the checking of the existence of the file to the UI part of the program
         IOHelpers.SaveTextFile(Path.Join(ModelsDirectoryName, modelName), modelString);
     }
 
-    public static string LoadModel(string modelName) {
+    public static string LoadModel(string modelName)
+    {
         // leave the checking of the existence of the file to the UI part of the program
         return IOHelpers.LoadTextFile(Path.Join(ModelsDirectoryName, modelName));
     }
@@ -52,9 +54,9 @@ public static void SaveModel(string modelName, string modelString) {
         }
 
         DirectoryInfo d = new DirectoryInfo(MapsDir);
-        FileInfo[] fi = d.GetFiles("*.*").Where(f => !f.Extension.Equals(".meta")).ToArray();
+        FileInfo[] fi = d.GetFiles("*.*").Where(f => f.Extension.Equals(UIStrings.MapExtension)).ToArray();
 
-        return fi.Select(x => x.Name).ToArray();
+        return fi.Select(x => x.Name.Substring(0, x.Name.Length - UIStrings.MapExtension.Length)).ToArray();
     }
 
     public static string[] GetAllModels()
@@ -68,9 +70,10 @@ public static void SaveModel(string modelName, string modelString) {
 
 
         DirectoryInfo d = new DirectoryInfo(ModelsDir);
-        FileInfo[] fi = d.GetFiles("*.*").Where(f => !f.Extension.Equals(".meta")).ToArray();
 
-        return fi.Select(x => x.Name).ToArray();
+        FileInfo[] fi = d.GetFiles("*.*").Where(f => f.Extension.Equals(UIStrings.ModelExtension)).ToArray();
+
+        return fi.Select(x => x.Name.Substring(0, x.Name.Length - UIStrings.ModelExtension.Length)).ToArray();
     }
 
     public static bool ModelExists(string modelName)

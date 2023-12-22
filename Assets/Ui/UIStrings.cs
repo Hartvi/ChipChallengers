@@ -5,6 +5,9 @@ using UnityEngine;
 
 public static class UIStrings
 {
+    public const string ModelExtension = ".txt";
+    public const string MapExtension = ".obj";
+
     public const string Core = "Core";
 
     public const string GameTitle = "Chip Challengers";

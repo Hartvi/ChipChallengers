@@ -29,8 +29,8 @@ public struct CameraFollowSettings
 
 public class SingleplayerMenu : BaseMenu, InputReceiver
 {
-    public static SingleplayerMenu Instance;
-    public VMap myVMap = new VMap();
+    //public static SingleplayerMenu Instance;
+    public static VMap myVMap = new VMap();
 
     Camera mainCamera;
     Vector3 oldCorePosition = Vector3.zero;
@@ -38,7 +38,7 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
 
     private LoadPanel LoadPanel;
     private MapPanel MapPanel;
-    
+
     private CommonChip core;
 
     CameraMoveMode cameraMoveMode = CameraMoveMode.Follow;
@@ -77,19 +77,15 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
     {
         base.Start();
 
-        SingleplayerMenu.Instance = this;
-
-        this.myVMap.LoadNewMap(VMap.DefaultFileName);
-
+        //SingleplayerMenu.Instance = this;
         this.Hud = this.GetComponentInChildren<HUD>();
 
         this.mainCamera = Camera.main;
-       
+
         this.LoadPanel = this.GetComponentInChildren<LoadPanel>();
         this.MapPanel = this.GetComponentInChildren<MapPanel>();
 
         this.cameraFollowSettings = new CameraFollowSettings(distance: 5f, up: 1f, predict: 0f, sensitivity: 1f, lowPass: 0f);
-
 
         //Action[] deselectedChipCallbacks = new Action[] { () => UIManager.instance.TurnMeOff(this) };
         //this.deselectedCallbacks.SetCallbacks(deselectedChipCallbacks);
@@ -122,21 +118,21 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
         this.core.transform.position = spawnPosition;
 
         // delete after build listeners
-        this.core.SetAfterBuildListeners(new Action[]{ });
+        this.core.SetAfterBuildListeners(new Action[] { });
         this.core.TriggerSpawn(this.core.VirtualModel, false);
 
         // when model is loaded: add callbacks to rebuild the model, add callbacks to link the variables to the HUD
-        Action[] onLoadedCallbacksTmp = new Action[] { 
+        Action[] onLoadedCallbacksTmp = new Action[] {
             () => {
                 this.core.TriggerSpawn(this.core.VirtualModel, false);
                 this.core.transform.position += Vector3.up;
-                }, 
+                },
             () => this.Hud.LinkCore(this.core),
             () => {
                 Camera.main.transform.position = this.core.transform.position + Vector3.up * 10f;
             }
         };
-        
+
         this.LoadPanel.SetOnLoadedCallbacks(onLoadedCallbacksTmp);
 
         this.MapPanel.SetOnLoadedCallbacks(onLoadedCallbacksTmp);
@@ -144,9 +140,11 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
         //TODO: load model after entering playmode???
         //print($"Current virtual Model: {this.core.VirtualModel}");
         this.Hud.LinkCore(this.core);
+        Camera.main.transform.position = this.core.transform.position + Vector3.up * 10f;
 
         // speed up physics for stable physics
         //Time.fixedDeltaTime = 0.001f;
+        GameManager.Instance.UpdateSettings();
     }
 
     void Update()
@@ -190,7 +188,7 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
         // 20,10,0 - 18,10,0
         Vector3 deltaCorePos = corePos - this.oldCorePosition;
         // 0,0,0
-        Vector3 predictVector = predict*deltaCorePos;
+        Vector3 predictVector = predict * deltaCorePos;
         // 20,10,0 + 0,0,0
         Vector3 lookAtPos = corePos + predictVector;
 
@@ -217,9 +215,9 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
             float moveY = Input.GetAxis("Mouse Y");
             Camera cam = this.mainCamera;
 
-            cam.transform.Rotate(2f*moveX*Vector3.up, Space.World);
-            cam.transform.Rotate(-2f*moveY*Vector3.right, Space.Self);
-            
+            cam.transform.Rotate(2f * moveX * Vector3.up, Space.World);
+            cam.transform.Rotate(-2f * moveY * Vector3.right, Space.Self);
+
             Vector3 deltaPos = Vector3.zero;
 
             if (Input.GetKey(KeyCode.W))
@@ -247,29 +245,39 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
                 deltaPos = cam.transform.up;
             }
 
-            float sensitivity = Input.GetKey(KeyCode.LeftShift) ? Time.deltaTime*9f : Time.deltaTime*3f;
+            float sensitivity = Input.GetKey(KeyCode.LeftShift) ? Time.deltaTime * 9f : Time.deltaTime * 3f;
             cam.transform.position = cam.transform.position + sensitivity * deltaPos;
         }
+    }
+
+    void InputReceiver.OnStartReceiving()
+    {
+        CommonChip.UnfreezeClientModel();
+    }
+
+    void InputReceiver.OnStopReceiving()
+    {
+        CommonChip.FreezeClientModel();
     }
 
     bool InputReceiver.IsActive() => this.gameObject.activeSelf;
 
     void InputReceiver.HandleInputs()
     {
-//#if UNITY_EDITOR
+        //#if UNITY_EDITOR
         if (Input.GetKey(KeyCode.Space))
         {
             //core.transform.position += 0.1f*Vector3.up;
             Rigidbody r = core.GetComponent<Rigidbody>();
-            r.AddForce(10f*Vector3.up, ForceMode.VelocityChange);
+            r.AddForce(10f * Vector3.up, ForceMode.VelocityChange);
         }
         if (Input.GetKey(KeyCode.UpArrow))
         {
             //core.transform.position += 0.1f*Vector3.up;
             Rigidbody r = core.GetComponent<Rigidbody>();
-            r.AddForce(1f*Vector3.forward, ForceMode.VelocityChange);
+            r.AddForce(1f * Vector3.forward, ForceMode.VelocityChange);
         }
-//#endif
+        //#endif
         bool ctrlPressed = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
         bool shiftPressed = Input.GetKey(KeyCode.RightShift) || Input.GetKey(KeyCode.LeftShift);
 
@@ -292,7 +300,7 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
             if (Input.GetKeyDown(KeyCode.R))
             {
                 this.core.rb.velocity = Vector3.zero;
-                if(!shiftPressed)
+                if (!shiftPressed)
                 {
                     this.core.transform.rotation = Quaternion.identity;
                 }
@@ -303,7 +311,7 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
             {
                 this.core.ResetToDefaultLocation();
                 // set the camera position, since it might not catch up fast enough
-                Camera.main.transform.position = this.core.transform.position + Vector3.up*10f;
+                Camera.main.transform.position = this.core.transform.position + Vector3.up * 10f;
 
                 //Vector3 spawnPosition = this.RaycastFromAbove();
                 //this.core.rb.velocity = Vector3.zero;

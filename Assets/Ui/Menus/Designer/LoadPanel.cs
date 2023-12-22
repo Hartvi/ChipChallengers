@@ -8,7 +8,7 @@ using TMPro;
 public class LoadPanel : BaseScrollMenu
 {
     VModel loadedModel;
-    Action[] OnLoadedCallbacks = { };
+    static Action[] OnLoadedCallbacks = { };
 
     protected override void Start()
     {
@@ -40,11 +40,11 @@ public class LoadPanel : BaseScrollMenu
     {
         VModel model = null;
 #if UNITY_EDITOR
-        model = VModel.LoadModelFromFile(this.input.input.text);
+        model = VModel.LoadModelFromFile(this.input.input.text + UIStrings.ModelExtension);
 #else
         try
         {
-            model = VModel.LoadModelFromFile(this.input.input.text);
+            model = VModel.LoadModelFromFile(this.input.input.text + UIStrings.ModelExtension);
         }
         catch (Exception e)
         {
@@ -58,7 +58,7 @@ public class LoadPanel : BaseScrollMenu
         if (this.loadedModel == null)
         {
             // TODO: show error
-            DisplaySingleton.Instance.DisplayText(this.ModelIsInvalid, 3f);
+            DisplaySingleton.Instance.DisplayText(LoadPanel.ModelIsInvalid, 3f);
             return;
         }
 
@@ -70,13 +70,13 @@ public class LoadPanel : BaseScrollMenu
 
         this.DeactivatePanel();
 
-        foreach(Action a in this.OnLoadedCallbacks)
+        foreach(Action a in LoadPanel.OnLoadedCallbacks)
         {
             a();
         }
     }
 
-    public void LoadString(string state)
+    public static void LoadString(string state)
     {
         VModel model = null;
         CommonChip core = CommonChip.ClientCore;
@@ -86,9 +86,9 @@ public class LoadPanel : BaseScrollMenu
         }
         catch (Exception e)
         {
-            UnityEngine.Debug.LogWarning($"`tmp` could not be loaded.");
+            UnityEngine.Debug.LogWarning($"string model could not be loaded.");
             UnityEngine.Debug.Log(e.Message);
-            DisplaySingleton.Instance.DisplayText(this.UndoRedoNotValid, 3f);
+            DisplaySingleton.Instance.DisplayText(LoadPanel.UndoRedoNotValid, 3f);
 
             return;
         }
@@ -97,13 +97,13 @@ public class LoadPanel : BaseScrollMenu
         core.VirtualModel.AddModelChangedCallback(x => core.TriggerSpawn(x, true));
         core.VirtualModel.AddModelChangedCallback(x => HistoryStack.SaveState(core.VirtualModel.ToLuaString()));
 
-        foreach(Action a in this.OnLoadedCallbacks)
+        foreach(Action a in LoadPanel.OnLoadedCallbacks)
         {
             a();
         }
     }
 
-    public void LoadTmp()
+    public static void LoadTmp()
     {
         VModel model = null;
         CommonChip core = CommonChip.ClientCore;
@@ -115,7 +115,7 @@ public class LoadPanel : BaseScrollMenu
         {
             UnityEngine.Debug.LogWarning($"`tmp` could not be loaded.");
             UnityEngine.Debug.Log(e.Message);
-            DisplaySingleton.Instance.DisplayText(this.UndoRedoNotValid, 3f);
+            DisplaySingleton.Instance.DisplayText(LoadPanel.UndoRedoNotValid, 3f);
 
             return;
         }
@@ -124,7 +124,7 @@ public class LoadPanel : BaseScrollMenu
         core.VirtualModel.AddModelChangedCallback(x => core.TriggerSpawn(x, true));
         core.VirtualModel.AddModelChangedCallback(x => HistoryStack.SaveState(core.VirtualModel.ToLuaString()));
 
-        foreach(Action a in this.OnLoadedCallbacks)
+        foreach(Action a in LoadPanel.OnLoadedCallbacks)
         {
             a();
         }
@@ -135,18 +135,18 @@ public class LoadPanel : BaseScrollMenu
         this.input.input.SetTextWithoutNotify(modelName);
     }
 
-    void ModelDoesNotExist(TMP_Text txt)
+    static void ModelDoesNotExist(TMP_Text txt)
     {
         DisplaySingleton.ErrorMsgModification(txt);
         txt.SetText("Model could not be loaded.");
     }
 
-    void ModelIsInvalid(TMP_Text txt)
+    static void ModelIsInvalid(TMP_Text txt)
     {
         DisplaySingleton.ErrorMsgModification(txt);
         txt.SetText("Model is invalid.");
     }
-    void UndoRedoNotValid(TMP_Text txt)
+    static void UndoRedoNotValid(TMP_Text txt)
     {
         DisplaySingleton.ErrorMsgModification(txt);
         txt.SetText("Undo/redo is invalid.");
@@ -154,7 +154,7 @@ public class LoadPanel : BaseScrollMenu
 
     public void SetOnLoadedCallbacks(Action[] callbacks)
     {
-        this.OnLoadedCallbacks = callbacks;
+        LoadPanel.OnLoadedCallbacks = callbacks;
     }
 
     /*

@@ -30,7 +30,7 @@ public class MapPanel : BaseScrollMenu
 
     void LoadMap()
     {
-        SingleplayerMenu.Instance.myVMap.LoadNewMap(this.input.input.text);
+        SingleplayerMenu.myVMap.LoadNewMap(this.input.input.text + UIStrings.MapExtension);
 
         this.DeactivatePanel();
 

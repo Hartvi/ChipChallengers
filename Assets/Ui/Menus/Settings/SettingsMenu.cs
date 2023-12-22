@@ -40,6 +40,8 @@ public class SettingsMenu : BaseMenu, InputReceiver
         this.selectedCallbacks.Invoke();
     }
 
+    void InputReceiver.OnStartReceiving() { }
+    void InputReceiver.OnStopReceiving() { }
     bool InputReceiver.IsActive() => this.gameObject.activeSelf;
 
     void InputReceiver.HandleInputs()

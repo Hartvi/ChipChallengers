@@ -22,7 +22,7 @@ public class GunAspect : BaseAspect
         //print($"gun power: {this.power}");
 
         this.projectileWeight = 1e-6f * this.power;
-        this.projectileVelocity = 33f;
+        this.projectileVelocity = 333f;
         this.bulletWeightPerTime = this.projectileWeight / Time.fixedDeltaTime;
         this.recoilImpulse = this.bulletWeightPerTime * this.projectileVelocity;
         // dp/dt = (dm*dv)/dt = m*dv/dt 

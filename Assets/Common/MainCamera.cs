@@ -13,10 +13,10 @@ public class MainCamera : MonoBehaviour
     int MinNumberOfObjects;
     int OldObjectCount;
 
-    CommonChip core;
+    CoreChip core;
     void Awake()
     {
-        core = Instantiate(Resources.Load<GameObject>("Chips/Core")).AddComponent<CommonChip>();
+        core = Instantiate(Resources.Load<GameObject>("Chips/Core")).AddComponent<CoreChip>();
         core.gameObject.layer = 6;
         core.gameObject.AddComponent<Rigidbody>();
         core.gameObject.AddComponent<BoxCollider>();

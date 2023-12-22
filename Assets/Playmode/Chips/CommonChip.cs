@@ -473,7 +473,7 @@ public class CommonChip : AngleChip
         //c.transform.position = c.transform.position + Vector3.up;
         if (freeze)
         {
-            CommonChip.FreezeModel();
+            CommonChip.FreezeClientModel();
         }
         foreach (var a in this._AfterBuildActions)
         {
@@ -482,7 +482,17 @@ public class CommonChip : AngleChip
         }
     }
 
-    public static void FreezeModel()
+    public static void UnfreezeClientModel()
+    {
+        var c = CommonChip.ClientCore;
+
+        foreach (GeometricChip chip in c.AllChips)
+        {
+            chip.GetComponent<Rigidbody>().isKinematic = false;
+        }
+    }
+
+    public static void FreezeClientModel()
     {
         var c = CommonChip.ClientCore;
 
