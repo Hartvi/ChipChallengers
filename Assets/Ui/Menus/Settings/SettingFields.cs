@@ -10,7 +10,7 @@ public class SettingFields : BasePanel
     Dictionary<string, Tuple<int, int>> minMaxIntSettings = new Dictionary<string, Tuple<int, int>>() 
     {
         { UIStrings.Framerate, new Tuple<int, int>(5, 1000) },
-        { UIStrings.PhysicsRate, new Tuple<int, int>(50, 1000) },
+        { UIStrings.PhysicsRate, new Tuple<int, int>(50, 2000) },
         { UIStrings.Volume, new Tuple<int, int>(0, 100) },
         { UIStrings.PhysicsParticles, new Tuple<int, int>(0, 100) }
     };
@@ -60,6 +60,11 @@ public class SettingFields : BasePanel
             baseTexts[i].text.fontSize = UIUtils.MediumFontSize;
 
             baseInputs[_i].input.onEndEdit.AddListener(x => OnEndInput(baseInputs[_i].input, x, currentSettingName));
+
+            var smf = UIUtils.SmallFontSize;
+            baseInputs[_i].placeholder.fontSize = smf;
+            baseInputs[_i].input.textComponent.fontSize = smf;
+
             baseInputs[_i].placeholder.SetText(UIStrings.EnterANumber);
 
             baseInputs[i].input.SetTextWithoutNotify(this.GetPrefStringValue(currentSettingName));

@@ -28,6 +28,8 @@ public class HUD : TopProp
     VModel vModel;
     VVar[] variables => this.vModel.variables;
 
+    VVar[] displayVariables;
+
     ItemBase NameItem;
     ItemBase ValueItem;
 
@@ -44,20 +46,30 @@ public class HUD : TopProp
         {
             return;
         }
+        List<VVar> tmpDisplayVariables = new List<VVar>();
+        for(int i = 0; i < vars.Length; ++i)
+        {
+            if (!string.IsNullOrWhiteSpace(vars[i].name))
+            {
+                tmpDisplayVariables.Add(vars[i]);
+            }
+        }
 
-        this.CurrentNames = NameItem.DisplayNItems<ItemBaseLeft>(vars.Length);
-        this.CurrentValues = ValueItem.DisplayNItems<ItemBaseRight>(vars.Length);
+        this.displayVariables = tmpDisplayVariables.ToArray();
+
+        this.CurrentNames = NameItem.DisplayNItems<ItemBaseLeft>(this.displayVariables.Length);
+        this.CurrentValues = ValueItem.DisplayNItems<ItemBaseRight>(this.displayVariables.Length);
         this.CurrentNameTxts = this.CurrentNames.Select(x => x.GetComponent<TMP_Text>()).ToArray();
         this.CurrentValueTxts = this.CurrentValues.Select(x => x.GetComponent<TMP_Text>()).ToArray();
 
         for(int i = 0; i < this.CurrentNames.Length; ++i)
         {
             TMP_Text nameTxt = this.CurrentNames[i].GetComponent<TMP_Text>();
-            nameTxt.SetText(vars[i].name);
+            nameTxt.SetText(this.displayVariables[i].name);
             nameTxt.fontSize = UIUtils.SmallFontSize;
 
             TMP_Text valueTxt = this.CurrentValues[i].GetComponent<TMP_Text>();
-            valueTxt.SetText(UIUtils.DisplayFloat(vars[i].defaultValue));
+            valueTxt.SetText(UIUtils.DisplayFloat(this.displayVariables[i].defaultValue));
             valueTxt.fontSize = UIUtils.SmallFontSize;
         }
         StackFrom(NameItem.Siblings<ItemBaseLeft>(takeInactive: false));
@@ -66,9 +78,9 @@ public class HUD : TopProp
 
     void Update()
     {
-        for(int i = 0; i < this.variables.Length; ++i)
+        for(int i = 0; i < this.displayVariables.Length; ++i)
         {
-            this.CurrentValueTxts[i].SetText(this.variables[i].currentValue.ToString());
+            this.CurrentValueTxts[i].SetText(this.displayVariables[i].currentValue.ToString());
         }
     }
 

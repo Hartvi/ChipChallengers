@@ -22,7 +22,7 @@ public class WheelAspects : BaseAspect
     public const float stiffness = 5;  // =20 means that a deformation of 0.05 yields a depenetration velocity of 1
     public const float B = 10f;
     public const float C = 1.9f;
-    public const float D = 1f;
+    public const float D = 0.7f;
     public const float E = 0.97f;
     public const float k1 = 1e-4f;
     public const float k2 = 1e-8f;

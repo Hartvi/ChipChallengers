@@ -280,7 +280,7 @@ public class EditorMenu : BaseMenu, InputReceiver
             }
             if (Input.GetKeyDown(KeyCode.L))
             {
-                this.LoadPanel.gameObject.SetActive(true);
+                this.LoadPanel.ActivatePanel(CommonChip.ClientCore.VirtualModel.ModelName);
             }
             if (Input.GetKeyDown(KeyCode.M))
             {
@@ -308,7 +308,7 @@ public class EditorMenu : BaseMenu, InputReceiver
 #else
             try
             {
-                this.LoadPanel.LoadString(HistoryStack.Undo());
+                LoadPanel.LoadString(HistoryStack.Undo());
             }
             catch {}
 #endif
@@ -320,7 +320,7 @@ public class EditorMenu : BaseMenu, InputReceiver
 #else
             try
             {
-                this.LoadPanel.LoadString(HistoryStack.Redo());
+                LoadPanel.LoadString(HistoryStack.Redo());
             }
             catch {}
 #endif

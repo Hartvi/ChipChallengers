@@ -41,6 +41,15 @@ public class MainMenu : BaseMainMenu, InputReceiver
         Action[] onSelectedCallbacks = new Action[] { () => UIManager.instance.SwitchToMe(this), () => GameManager.Instance.UpdateSettings() };
         this.selectedCallbacks.SetCallbacks(onSelectedCallbacks);
         this.selectedCallbacks.Invoke();
+
+        //string error = "MAIN MENU STARTING.";
+        //DisplaySingleton.Instance.DisplayText(x =>
+        //{
+        //    DisplaySingleton.ErrorMsgModification(x);
+        //    x.SetText(error);
+        //},
+        //3f);
+
         // load default map so it show in singleplayer, settings, editor and all the other menus!!!
         SingleplayerMenu.myVMap.LoadNewMap(VMap.DefaultFileName);
     }

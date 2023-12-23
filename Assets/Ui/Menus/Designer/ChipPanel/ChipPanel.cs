@@ -79,7 +79,7 @@ public class ChipPanel : BasePanel
         ItemBase[] valueItems = ValueItem.DisplayNItems<ItemBase>(rightTexts.Length);
 
         int offset = nameItems.Length - 1;
-        for(int i = 0; i < nameItems.Length; ++i)
+        for(int i = 0; i < leftTexts.Length; ++i)
         {
             int reverseIndex = offset - i;
             var nameTxt = nameItems[i].GetComponent<TMP_Text>();
@@ -143,6 +143,14 @@ public class ChipPanel : BasePanel
             int _i = i;
 
             // TODO inputs[_i] was null????
+            if (inputs[_i] is null)
+            {
+                Debug.LogWarning($"input {_i} IS NULL; text: {texts[_i]}");
+                if(texts[_i] is not null)
+                {
+                    Debug.LogWarning($"text val: {texts[_i].text}");
+                }
+            }
             inputs[_i].onEndEdit.RemoveAllListeners();
             inputs[_i].onEndEdit.AddListener(
                 x => {

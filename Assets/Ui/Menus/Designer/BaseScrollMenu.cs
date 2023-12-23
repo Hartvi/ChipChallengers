@@ -77,8 +77,10 @@ public class BaseScrollMenu : BasePanel, InputReceiver
         UIManager.instance.TurnMeOff(this);
     }
 
-    public void ActivatePanel()
+    public void ActivatePanel(string inputFieldText="")
     {
+        this.input.input.SetTextWithoutNotify(inputFieldText);
+
         UIManager.instance.SwitchToMe(this);
         this.gameObject.SetActive(true);
     }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
+#if UNITY_EDITOR
 [CustomEditor(typeof(TestHealth))]
 public class TestHealthEditor : Editor
 {
@@ -24,3 +25,4 @@ public class TestHealthEditor : Editor
         }
     }
 }
+#endif

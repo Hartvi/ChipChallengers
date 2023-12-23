@@ -7,6 +7,9 @@ using System.Linq;
 
 public class VModel
 {
+    protected string modelName = "";
+    public string ModelName { get { return this.modelName; } }
+
     public static VVar EmptyVariable
     {
         get
@@ -342,6 +345,7 @@ public class VModel
 
         string luaModel = IOHelpers.LoadModel(modelName);
         VModel m = VModel.FromLuaModel(luaModel);
+        m.modelName = modelName.Substring(0, modelName.Length - UIStrings.ModelExtension.Length);
         PRINT.IPrint(m.variables.Length);
         return m;
     }

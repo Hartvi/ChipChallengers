@@ -2,7 +2,7 @@
 ChipChallengers - physics chips and programming all in one
 
 ### TODO
-- `+` hide empty variable in singleplayer and editor
+- `+` fix the gun having different recoil values at different times in the game
 - `+` freeze the model when not in singleplayer mode
 - `+` stop listening to LUA controls when not in singleplayer mode
 - `+` find out why the physics timing makes wheels speed up cars differently 
@@ -24,6 +24,7 @@ ChipChallengers - physics chips and programming all in one
 - `+` Add option to change units in HUD
 
 ### Done
+- `+` hide empty variable in singleplayer and editor
 - `+` hide extensions in all panel loaders
 - `+` hide `.mtl` files in map loader
 - `+` Basic linking and setting of setting values

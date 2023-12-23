@@ -17,8 +17,12 @@ public static class HistoryStack
 
     public static string Undo()
     {
-        if (pastEdits.Count <= 1)
-            throw new InvalidOperationException("No more states to undo.");
+        if (pastEdits.Count == 1)
+            return pastEdits.Peek();
+        //throw new InvalidOperationException("No more states to undo.");
+
+        if (pastEdits.Count == 0)
+            return CommonChip.ClientCore.VirtualModel.ToLuaString();
 
         futureEdits.Push(pastEdits.Pop());
         return pastEdits.Peek();
@@ -27,7 +31,14 @@ public static class HistoryStack
     public static string Redo()
     {
         if (futureEdits.Count == 0)
-            throw new InvalidOperationException("No more states to redo.");
+        {
+            if (pastEdits.Count == 0)
+            {
+                return CommonChip.ClientCore.VirtualModel.ToLuaString();
+            }
+            return pastEdits.Peek();
+        }
+        //throw new InvalidOperationException("No more states to redo.");
 
         var state = futureEdits.Pop();
         pastEdits.Push(state);

@@ -50,7 +50,7 @@ public class LoadPanel : BaseScrollMenu
         {
             UnityEngine.Debug.LogWarning($"Model could not be loaded.");
             UnityEngine.Debug.Log(e.Message);
-            DisplaySingleton.Instance.DisplayText(this.ModelDoesNotExist, 3f);
+            DisplaySingleton.Instance.DisplayText(LoadPanel.ModelDoesNotExist, 3f);
         }
 #endif
 
@@ -67,7 +67,7 @@ public class LoadPanel : BaseScrollMenu
         core.TriggerSpawn(this.loadedModel, true);
         core.VirtualModel.AddModelChangedCallback(x => core.TriggerSpawn(x, true));
         core.VirtualModel.AddModelChangedCallback(x => HistoryStack.SaveState(core.VirtualModel.ToLuaString()));
-
+        HistoryStack.SaveState(core.VirtualModel.ToLuaString());
         this.DeactivatePanel();
 
         foreach(Action a in LoadPanel.OnLoadedCallbacks)
@@ -96,6 +96,7 @@ public class LoadPanel : BaseScrollMenu
         core.TriggerSpawn(model, true);
         core.VirtualModel.AddModelChangedCallback(x => core.TriggerSpawn(x, true));
         core.VirtualModel.AddModelChangedCallback(x => HistoryStack.SaveState(core.VirtualModel.ToLuaString()));
+        HistoryStack.SaveState(core.VirtualModel.ToLuaString());
 
         foreach(Action a in LoadPanel.OnLoadedCallbacks)
         {
@@ -123,6 +124,7 @@ public class LoadPanel : BaseScrollMenu
         core.TriggerSpawn(model, true);
         core.VirtualModel.AddModelChangedCallback(x => core.TriggerSpawn(x, true));
         core.VirtualModel.AddModelChangedCallback(x => HistoryStack.SaveState(core.VirtualModel.ToLuaString()));
+        HistoryStack.SaveState(core.VirtualModel.ToLuaString());
 
         foreach(Action a in LoadPanel.OnLoadedCallbacks)
         {

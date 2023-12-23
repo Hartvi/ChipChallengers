@@ -33,6 +33,7 @@ public class SettingsMenu : BaseMenu, InputReceiver
         // set first text to the title
         BaseText bt = this.GetComponentInChildren<BaseText>();
         bt.text.SetText(UIStrings.Settings);
+        bt.text.fontSize = UIUtils.LargeFontSize;
         // set it to center and not to break text into a new line
         DisplaySingleton.NoOverflowEtc(bt.text);
 

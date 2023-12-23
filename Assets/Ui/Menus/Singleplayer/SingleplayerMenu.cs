@@ -285,12 +285,13 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
         {
             if (Input.GetKeyDown(KeyCode.L))
             {
-                this.LoadPanel.ActivatePanel();
+
+                this.LoadPanel.ActivatePanel(CommonChip.ClientCore.VirtualModel.ModelName);
                 //this.LoadPanel.gameObject.SetActive(true);
             }
             if (Input.GetKeyDown(KeyCode.M))
             {
-                this.MapPanel.ActivatePanel();
+                this.MapPanel.ActivatePanel(SingleplayerMenu.myVMap.FileName);
                 //this.MapPanel.gameObject.SetActive(true);
             }
             if (Input.GetKeyDown(KeyCode.E))
@@ -302,8 +303,11 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
                 this.core.rb.velocity = Vector3.zero;
                 if (!shiftPressed)
                 {
-                    this.core.transform.rotation = Quaternion.identity;
+                    Quaternion newRot = Quaternion.Euler(0f, this.core.transform.rotation.eulerAngles.y, 0f);
+                    this.core.transform.rotation = newRot;
+                    //this.core.transform.rotation = Quaternion.identity;
                 }
+                this.core.transform.position += Vector3.up * 2f;
                 this.core.TriggerSpawn(this.core.VirtualModel, false);
             }
 #if UNITY_EDITOR
