@@ -14,10 +14,10 @@ public abstract class AngleChip : OptionChip
     protected CallbackArray RemoveMeFromVariableCallbacks = new CallbackArray(true);
 
     // these will be listened to during FixedUpdate
-    protected float _value;
+    protected float _value = 0f;
     public float value { get { return this._value; } }
 
-    protected float _brake;
+    protected float _brake = 0f;
     public float brake { get { return this._brake; } }
 
     public delegate bool ParseFuncDelegate<T>(string s, out T result);

@@ -10,12 +10,17 @@ public class ChipPanel : BasePanel
     int inputIndex = 0;
     TMP_InputField[] currentInputs;
 
+    ItemBase NameItem;
+    ItemBase ValueItem;
+
     void Start()
     {
         var items = GetComponentsInChildren<ItemBase>();
 
-        NameItem = items[0];
-        ValueItem = items[1];
+        this.NameItem = items[0];
+        this.ValueItem = items[1];
+        ItemBase[] nameItems = this.NameItem.DisplayNItems<ItemBase>(10);
+        ItemBase[] valueItems = this.ValueItem.DisplayNItems<ItemBase>(10);
 
         // TEST
         //DisplayChipProperties(VChip.allPropertiesStr, VChip.allPropertiesDefaults);
@@ -62,9 +67,6 @@ public class ChipPanel : BasePanel
         );
     }
 
-    ItemBase NameItem;
-    ItemBase ValueItem;
-
     (TMP_Text[], TMP_InputField[]) DisplayChipProperties(string[] leftTexts, string[] rightTexts)
     {
         if(leftTexts.Length != rightTexts.Length)
@@ -75,8 +77,8 @@ public class ChipPanel : BasePanel
         TMP_InputField[] inputs = new TMP_InputField[rightTexts.Length];
         TMP_Text[] texts = new TMP_Text[rightTexts.Length];
 
-        ItemBase[] nameItems = NameItem.DisplayNItems<ItemBase>(leftTexts.Length);
-        ItemBase[] valueItems = ValueItem.DisplayNItems<ItemBase>(rightTexts.Length);
+        ItemBase[] nameItems = this.NameItem.DisplayNItems<ItemBase>(leftTexts.Length);
+        ItemBase[] valueItems = this.ValueItem.DisplayNItems<ItemBase>(rightTexts.Length);
 
         int offset = nameItems.Length - 1;
         for(int i = 0; i < leftTexts.Length; ++i)
@@ -97,8 +99,8 @@ public class ChipPanel : BasePanel
             //Debug.LogWarning($"Todo: add callback to update chip values.");
         }
 
-        TopProp.StackFrom(NameItem.Siblings<ItemBase>(takeInactive: false));
-        TopProp.StackFrom(ValueItem.Siblings<ItemBase>(takeInactive: false));
+        TopProp.StackFrom(this.NameItem.Siblings<ItemBase>(takeInactive: false));
+        TopProp.StackFrom(this.ValueItem.Siblings<ItemBase>(takeInactive: false));
 
         return (texts, inputs);
     }

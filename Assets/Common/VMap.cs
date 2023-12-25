@@ -17,7 +17,7 @@ public class VMap
     {
         if (string.IsNullOrWhiteSpace(name))
         {
-            string msg = "File is null/white space";
+            string msg = "File is null/empty";
             DisplaySingleton.Instance.DisplayText(x =>
             {
                 DisplaySingleton.ErrorMsgModification(x);
@@ -56,13 +56,13 @@ public class VMap
         //3f);
 
             this.loadedObject = new OBJLoader().Load(objPath);
-            error = $"Path: \n{objPath}";
-            DisplaySingleton.Instance.DisplayText(x =>
-            {
-                DisplaySingleton.ErrorMsgModification(x);
-                x.SetText(error);
-            },
-            3f);
+            //error = $"Path: \n{objPath}";
+            //DisplaySingleton.Instance.DisplayText(x =>
+            //{
+            //    DisplaySingleton.ErrorMsgModification(x);
+            //    x.SetText(error);
+            //},
+            //3f);
 
             MeshRenderer[] meshRenderers = this.loadedObject.GetComponentsInChildren<MeshRenderer>();
             foreach(MeshRenderer m in meshRenderers)

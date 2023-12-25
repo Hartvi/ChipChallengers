@@ -24,25 +24,25 @@ public class GameManager : MonoBehaviour
 
     void SetFrameRate(int f)
     {
-        Debug.Log($"Setting frame rate to {f}");
+        //Debug.Log($"Setting frame rate to {f}");
         Application.targetFrameRate = f;
     }
 
     void SetPhysicsRate(int f)
     {
-        Debug.Log($"Setting physics rate to {f}");
+        //Debug.Log($"Setting physics rate to {f}");
         Time.fixedDeltaTime = 1f / (float)f;
     }
 
     void SetVolume(int v)
     {
-        Debug.Log($"TODO: set global volume to {v}");
+        Debug.LogWarning($"TODO: set global volume to {v}");
         //AudioManager.Instance.
     }
 
     void SetPhysicsParticles(int f)
     {
-        Debug.Log($"TODO: set physics particles to {f}");
+        Debug.LogWarning($"TODO: set physics particles to {f}");
     }
 
     public void UpdateSettings()

@@ -53,7 +53,7 @@ public class VChip
 
     public static readonly CommonChip baseChip;
     public const string baseChipName = "BaseChip";
-    
+
     public static readonly CTP[] chipEnums = new CTP[] { CTP.Chip, CTP.Rudder, CTP.Axle, CTP.Gun, CTP.Wheel, CTP.Jet, CTP.Sensor, CTP.Cowl };
 
     public static readonly Dictionary<string, CPR> str2ChipProperty;
@@ -64,7 +64,7 @@ public class VChip
     public static readonly Dictionary<string, CTP> chipNameToEnum;
 
     private VModel _MyModel;
-    
+
     public VModel MyModel
     {
         get { return this._MyModel; }
@@ -160,7 +160,7 @@ public class VChip
         }
         set
         {
-            if(this._keys is null)
+            if (this._keys is null)
             {
                 this._keys = value;
             }
@@ -182,7 +182,7 @@ public class VChip
         }
         set
         {
-            if(this._vals is null)
+            if (this._vals is null)
             {
                 this._vals = value;
             }
@@ -283,12 +283,21 @@ public class VChip
         {
             // TODO: rewrite instanceproperties when a field is changed
             string strVal = ArrayExtensions.AccessLikeDict(key, this.keys, this.vals);
+            
+            if (string.IsNullOrWhiteSpace(strVal))
+            {
+                object objVal = ArrayExtensions.AccessLikeDict(key, VChip.allPropertiesStr, VChip.allPropertiesDefaultsObjects);
+                val = (T)objVal;
+                return false;
+            }
+
             if (propertyTypes[key] == typeof(float))
             {
                 val = (T)(object)float.Parse(strVal);
             }
             else if (propertyTypes[key] == typeof(int))
             {
+                PRINT.IPrint($"strVal: {strVal} ");
                 val = (T)(object)int.Parse(strVal);
             }
             else
@@ -305,7 +314,6 @@ public class VChip
             object objVal = ArrayExtensions.AccessLikeDict(key, VChip.allPropertiesStr, VChip.allPropertiesDefaultsObjects);
             //PRINT.IPrint($"objval: {objVal} type: {objVal.GetType()}");
             val = (T)objVal;
-            //val = default(T);
             return false;
         }
     }
@@ -325,7 +333,7 @@ public class VChip
         else
         {
             int indexOfLargestSibling = StringHelpers.GetIndexOfLargest(this.Children.Select(x => x.id).ToArray());
-            
+
             VChip lastSibling = this.Children[indexOfLargestSibling];
 
             this.Children = this.Children.Append(childChip).ToArray();
@@ -407,7 +415,7 @@ public class VChip
 
     public string CheckValidityOfPropertyForThisChip(string property, string value)
     {
-        if(property == VChip.optionStr)
+        if (property == VChip.optionStr)
         {
             string[] options = this.GetOptions();
             int option;
@@ -576,7 +584,8 @@ public class VChip
         return ArrayExtensions.AccessLikeDict(this.ChipType, VChip.chipData.keys, VChip.chipData.values).Contains(property);
     }
 
-    public string[] GetOptions() {
+    public string[] GetOptions()
+    {
         return ArrayExtensions.AccessLikeDict(this.ChipType, VChip.optionNames.keys, VChip.optionNames.values);
     }
 

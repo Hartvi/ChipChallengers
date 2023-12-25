@@ -5,8 +5,8 @@ using UnityEngine;
 
 public class PanelSwitcher : BasePanel
 {
-    BaseButton[] btns = new BaseButton[4];
-    Type[] panels = new Type[] { typeof(ChipPanel), typeof(VariablePanel), typeof(ControlsPanel), typeof(ScriptPanel) };
+    BaseButton[] btns = new BaseButton[3];
+    Type[] panels = new Type[] { typeof(ChipPanel), typeof(VariablePanel), typeof(ScriptPanel) };
     Type DefaultPanel = typeof(ChipPanel);
     GameObject[] panelObjects;
 

@@ -5,6 +5,13 @@ using UnityEngine;
 
 public static class UIStrings
 {
+    public static readonly string[] ControlsKeys = {
+        "F1", "1-9", "up/down/+/-", "Ctrl+O", "Ctrl+M", "Ctrl+U", "Ctrl+R", "Ctrl+S", "Ctrl+P"
+    };
+    public static readonly string[] ControlsActions = new string[] {
+        "Display this panel", "Adjust camera", "Switch cameras", "Open model", "Open map", "Go to start", "Reset position", "Go to playmode (from editor)", "Save model (in editor)"
+    };
+
     public const string ModelExtension = ".txt";
     public const string MapExtension = ".obj";
 
@@ -46,7 +53,7 @@ public static class UIStrings
     public const string Paste = "Paste";
     public static readonly string[] AddDelete = { Add, Delete };
 
-    public static readonly string[] EditorPanels = { "Chip", "Variables", "Controls", "Script" };
+    public static readonly string[] EditorPanels = { "Chip", "Variables", "Script" };
 
     public const string Velocity = "Velocity";
     public const string Position = "Position";
@@ -58,8 +65,9 @@ public static class UIStrings
     public const string EnterMapName = "Enter map name";
     public const string EnterModelName = "Enter model name";
 
-    public static string NotAVariableMsg(string value) {
-         return $"{value} is not in variable name format:\n '_' or [a-zA-Z] at the beginning.";
+    public static string NotAVariableMsg(string value)
+    {
+        return $"{value} is not in variable name format:\n '_' or [a-zA-Z] at the beginning.";
     }
 
     public static string NotAFloat(string value)

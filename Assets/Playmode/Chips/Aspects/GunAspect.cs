@@ -5,8 +5,8 @@ using UnityEngine;
 public class GunAspect : BaseAspect
 {
     float charge = 0f;
-    float power;
-    float dPowerPerFrame;
+    float power = 1f;
+    float dPowerPerFrame = 1f;
 
     float projectileWeight;
     float projectileVelocity;
@@ -23,20 +23,23 @@ public class GunAspect : BaseAspect
 
         this.projectileWeight = 1e-6f * this.power;
         this.projectileVelocity = 333f;
+        Debug.LogWarning($"TODO: update bullet strengths when physics rate is changed");
+
         this.bulletWeightPerTime = this.projectileWeight / Time.fixedDeltaTime;
         this.recoilImpulse = this.bulletWeightPerTime * this.projectileVelocity;
         // dp/dt = (dm*dv)/dt = m*dv/dt 
         // dv = vel, dt = fixeddeltatime, m = projectileweight
 
         float dpowerdt = 1e3f / this.power;
-        this.dPowerPerFrame = dpowerdt * Time.deltaTime;
+        this.dPowerPerFrame = dpowerdt;
 
         // rate = ???
         // rate = 1/dpowerdt
         // rate = 5 bullets/second
         // lifetime = 5 seconds
         // number of bullets = rate * lifetime
-        int numberOfBullets = Mathf.CeilToInt(Time.deltaTime / this.dPowerPerFrame * Bullet.LifeTime);
+        //print($"Time.deltaTime {Time.deltaTime} this.dPowerPerFrame {this.dPowerPerFrame} Bullet.LifeTime {Bullet.LifeTime}");
+        int numberOfBullets = Mathf.CeilToInt(1f / this.dPowerPerFrame * Bullet.LifeTime);
         //print($"Number of bullets: {numberOfBullets}");
         this.bulletPool = new ObjectPool<Bullet>(numberOfBullets, GenerateBullet, x =>
         {
@@ -52,7 +55,7 @@ public class GunAspect : BaseAspect
     {
         if (this.charge < 1f)
         {
-            this.charge += this.dPowerPerFrame;
+            this.charge += this.dPowerPerFrame * Time.deltaTime;
             //print($"Charge: {this.charge}");
         } // if charge is full then check if shooting
         else if (this.brake > 1e-9f)

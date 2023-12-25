@@ -51,7 +51,7 @@ public class ItemBase : TopProp
                 return siblings[i];
             }
         }
-        var newSibling = Instantiate<ItemBase>(this);
+        var newSibling = GameObject.Instantiate<ItemBase>(this);
         newSibling.transform.SetParent(this.transform.parent);
         return newSibling;
     }

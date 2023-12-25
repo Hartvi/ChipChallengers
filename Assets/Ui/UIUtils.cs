@@ -11,7 +11,7 @@ public static class UIUtils
     {
         get
         {
-            return (Screen.width + Screen.height) / 1e2f;
+            return (Screen.width + Screen.height) / 10e1f;
         }
     }
     public static float MediumFontSize

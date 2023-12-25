@@ -52,6 +52,7 @@ public class EditorMenu : BaseMenu, InputReceiver
     private VariablePanel VariablePanel;
     private ScriptPanel ScriptPanel;
     private ChipPanel ChipPanel;
+    private ControlsPanel ControlsPanel;
 
     protected override void Setup()
     {
@@ -64,21 +65,20 @@ public class EditorMenu : BaseMenu, InputReceiver
                         new VirtualProp(PropType.Panel, -1f, zero,
                             new VirtualProp(PropType.Panel, 1f, typeof(ChipPanel)),
                             new VirtualProp(PropType.Panel, 1f, typeof(VariablePanel)),
-                            new VirtualProp(PropType.Panel, 1f, typeof(ControlsPanel)),
                             new VirtualProp(PropType.Panel, 1f, typeof(ScriptPanel))
                         )
                     ),
                     new VirtualProp(PropType.Panel, -1f, right, typeof(PanelSwitcher),
-                        new VirtualProp(PropType.Button, 1/4f),
-                        new VirtualProp(PropType.Button, 1/4f),
-                        new VirtualProp(PropType.Button, 1/4f),
-                        new VirtualProp(PropType.Button, -1f)
+                        new VirtualProp(PropType.Button, 1/3f),
+                        new VirtualProp(PropType.Button, 1/3f),
+                        new VirtualProp(PropType.Button, 1/3f)
                     )
                 ),
                 new VirtualProp(PropType.Panel, 0.125f, typeof(CreateChipPanel))
             ),
             new VirtualProp(PropType.Panel, 1f, typeof(LoadPanel)),
-            new VirtualProp(PropType.Panel, 1f, typeof(SavePanel))
+            new VirtualProp(PropType.Panel, 1f, typeof(SavePanel)),
+            new VirtualProp(PropType.Panel, 1f, right, typeof(ControlsPanel))
         );
     }
 
@@ -116,6 +116,8 @@ public class EditorMenu : BaseMenu, InputReceiver
         Action[] deselectedChipCallbacks = new Action[] { this.OnLeaveMenu };
         //Action[] deselectedChipCallbacks = new Action[] { this.OnLeaveMenu, () => UIManager.instance.TurnMeOff(this) };
         this.deselectedCallbacks.SetCallbacks(deselectedChipCallbacks);
+
+        this.ControlsPanel = this.gameObject.GetComponentInChildren<ControlsPanel>(true);
     }
 
     void OnEnterMenu()
@@ -374,11 +376,17 @@ public class EditorMenu : BaseMenu, InputReceiver
             this.InEditorInputs();
             this.SwitchCameraModes();
         }
+
         if (Input.GetKeyDown(KeyCode.F1))
+        {
+            this.GetComponentInChildren<ControlsPanel>(true).gameObject.SetActive(true);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1))
         {
             this.cameraMoveMode = CameraMoveMode.Follow;
         }
-        else if (Input.GetKeyDown(KeyCode.F2))
+        if (Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Keypad2))
         {
             this.cameraMoveMode = CameraMoveMode.Free;
         }
