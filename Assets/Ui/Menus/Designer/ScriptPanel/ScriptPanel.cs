@@ -25,9 +25,11 @@ public class ScriptPanel : BasePanel
 
         this.btn.text.text = "<";
         this.input.placeholder.text = "Lua code...";
+        this.input.placeholder.fontSize = UIUtils.SmallFontSize;
 
         this.input.input.onEndEdit.RemoveAllListeners();
         this.input.input.onEndEdit.AddListener(x => core.VirtualModel.script = x);
+        this.input.input.textComponent.fontSize = UIUtils.SmallFontSize;
         this.input.input.lineType = TMPro.TMP_InputField.LineType.MultiLineNewline;
 
 

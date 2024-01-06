@@ -20,7 +20,6 @@ public class EditorMenu : BaseMenu, InputReceiver
         }
     }
 
-    private CameraMoveMode cameraMoveMode = CameraMoveMode.Follow;
     public static EditorMenu Instance;
 
     private Camera _camera;
@@ -69,9 +68,9 @@ public class EditorMenu : BaseMenu, InputReceiver
                         )
                     ),
                     new VirtualProp(PropType.Panel, -1f, right, typeof(PanelSwitcher),
-                        new VirtualProp(PropType.Button, 1/3f),
-                        new VirtualProp(PropType.Button, 1/3f),
-                        new VirtualProp(PropType.Button, 1/3f)
+                        new VirtualProp(PropType.Button, 1 / 3f),
+                        new VirtualProp(PropType.Button, 1 / 3f),
+                        new VirtualProp(PropType.Button, 1 / 3f)
                     )
                 ),
                 new VirtualProp(PropType.Panel, 0.125f, typeof(CreateChipPanel))
@@ -105,10 +104,10 @@ public class EditorMenu : BaseMenu, InputReceiver
 
         //this.OnEnterMenu();
 
-        Action[] selectedChipCallbacks = new Action[] { 
-            CommonChip.FreezeClientModel, 
-            this.OnEnterMenu, 
-            () => UIManager.instance.SwitchToMe(this) 
+        Action[] selectedChipCallbacks = new Action[] {
+            CommonChip.FreezeClientModel,
+            this.OnEnterMenu,
+            () => UIManager.instance.SwitchToMe(this)
         };
         this.selectedCallbacks.SetCallbacks(selectedChipCallbacks);
         this.selectedCallbacks.Invoke();
@@ -124,13 +123,13 @@ public class EditorMenu : BaseMenu, InputReceiver
     {
         // TODO: options: set framerate, sound level
         Application.targetFrameRate = 30;
-        
+
         this.highlighter.ParentHighlighter.SetActive(true);
 
         print($"Varpanel: {VariablePanel}, ");
-        Action[] onLoadedCallbacks = new Action[] { 
-            this.VariablePanel.ReloadVariables, 
-            this.VariablePanel.AddListenersToModel 
+        Action[] onLoadedCallbacks = new Action[] {
+            this.VariablePanel.ReloadVariables,
+            this.VariablePanel.AddListenersToModel
         };
         this.LoadPanel.SetOnLoadedCallbacks(onLoadedCallbacks);
 
@@ -170,6 +169,8 @@ public class EditorMenu : BaseMenu, InputReceiver
 
         // slow down physics to save power
         Time.fixedDeltaTime = 0.1f;
+        // move the camera closer to be 5 meters away
+        this._camera.transform.position = (this._camera.transform.position - core.transform.position).normalized * 5f + core.transform.position;
         this._camera.transform.LookAt(core.transform.position);
     }
 
@@ -204,7 +205,7 @@ public class EditorMenu : BaseMenu, InputReceiver
         {
             return hit.collider.gameObject.GetComponent<T>();
         }
-        
+
         return default(T);
     }
 
@@ -216,7 +217,7 @@ public class EditorMenu : BaseMenu, InputReceiver
             float moveX = Input.GetAxis("Mouse X");
             float moveY = Input.GetAxis("Mouse Y");
 
-            if (this.cameraMoveMode == CameraMoveMode.Free)
+            if (GameManager.cameraMoveMode == CameraMoveMode.Free)
             {
 
                 cam.transform.Rotate(2f * moveX * Vector3.up, Space.World);
@@ -249,11 +250,11 @@ public class EditorMenu : BaseMenu, InputReceiver
             {
                 deltaPos = cam.transform.up;
             }
-            float sensitivity = Input.GetKey(KeyCode.LeftShift) ? Time.deltaTime*9f : Time.deltaTime*3f;
+            float sensitivity = Input.GetKey(KeyCode.LeftShift) ? Time.deltaTime * 9f : Time.deltaTime * 3f;
 
             cam.transform.position = cam.transform.position + sensitivity * deltaPos;
 
-            if (this.cameraMoveMode == CameraMoveMode.Follow)
+            if (GameManager.cameraMoveMode == CameraMoveMode.Follow)
             {
                 float sensitivity2 = 5f;
                 cam.transform.RotateAround(this.lastSelectedPosition, Vector3.up, moveX * sensitivity2);
@@ -349,7 +350,7 @@ public class EditorMenu : BaseMenu, InputReceiver
 
         // outside ctrl + something
 
-        if(Input.GetKeyDown(KeyCode.Delete))
+        if (Input.GetKeyDown(KeyCode.Delete))
         {
             VChip vc = this.selectedVChip;
             CommonChip core = CommonChip.ClientCore;
@@ -384,11 +385,11 @@ public class EditorMenu : BaseMenu, InputReceiver
 
         if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1))
         {
-            this.cameraMoveMode = CameraMoveMode.Follow;
+            GameManager.cameraMoveMode = CameraMoveMode.Follow;
         }
         if (Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Keypad2))
         {
-            this.cameraMoveMode = CameraMoveMode.Free;
+            GameManager.cameraMoveMode = CameraMoveMode.Free;
         }
 
         if (Input.GetMouseButtonDown(0) && !TopUI.IsOnUI)  // 0 means left mouse button
@@ -398,10 +399,11 @@ public class EditorMenu : BaseMenu, InputReceiver
             {
                 CommonChip clickedObject = this.GetObjectFromScreenClick<CommonChip>();
 
-                if(this.highlighter.HighlightChip(clickedObject, out CommonChip sc))
+                if (this.highlighter.HighlightChip(clickedObject, out CommonChip sc))
                 {
                     this.selectedChip = sc;
-                } else
+                }
+                else
                 {
                     //Debug.Log($"Setting selected chip to NULL!!!");
                     //this.selectedChip = null;
@@ -419,7 +421,7 @@ public class EditorMenu : BaseMenu, InputReceiver
         {
             this.CreateChipPanel.Display(Input.mousePosition, clickedObject.localDirection, this.selectedVChip);
             //print($"clicked direction: {clickedObject.localDirection}");
-            return true;   
+            return true;
         }
         this.CreateChipPanel.gameObject.SetActive(false);
         return false;

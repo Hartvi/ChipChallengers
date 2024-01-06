@@ -73,7 +73,22 @@ public class VModel
         }
     }
 
-    private string _script = "a=1;";
+    private string _script = @"
+-- comment
+-- Available functions:
+-- Key(""k"") => true/false
+-- KeyDown(""k"") => true/false
+-- KeyUp(""k"") => true/false
+-- Sin(x) => float
+-- Cos(x) => float
+-- You can directly set variables that you created 
+function Loop()
+ if Key(""w"") then
+  a = 1
+ end
+end
+";
+
     public string script
     {
         get

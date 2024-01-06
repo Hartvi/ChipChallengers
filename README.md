@@ -2,7 +2,10 @@
 ChipChallengers - physics chips and programming all in one
 
 ### TODO
-- `+` Create nice example models
+- `+` add water
+- `+` remove cowl collider
+- `+` disable adding other chips to cowls
+- `+` add sensors
 - `+` Create 3 example maps
 - `+` fix the gun having different recoil values at different times in the game
 - `+` freeze the model when not in singleplayer mode
@@ -26,7 +29,8 @@ ChipChallengers - physics chips and programming all in one
 - `+` Add option to change units in HUD
 
 ### Done
-- `+` fix build bugs in how it doesn't show runtime variables and switching between editor and playmode doesn't work
+- `+` Create nice example models
+- `+++` fix build bugs in how it doesn't show runtime variables and switching between editor and playmode doesn't work
 - `+` fix camera
 - `+` add F1 controls
 - `+` hide empty variable in singleplayer and editor

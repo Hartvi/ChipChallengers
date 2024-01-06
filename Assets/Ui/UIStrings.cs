@@ -9,7 +9,7 @@ public static class UIStrings
         "F1", "1-9", "up/down/+/-", "Ctrl+O", "Ctrl+M", "Ctrl+U", "Ctrl+R", "Ctrl+S", "Ctrl+P"
     };
     public static readonly string[] ControlsActions = new string[] {
-        "Display this panel", "Adjust camera", "Switch cameras", "Open model", "Open map", "Go to start", "Reset position", "Go to playmode (from editor)", "Save model (in editor)"
+        "Display this panel", "Switch cameras", "Adjust camera", "Open model", "Open map", "Go to start", "Reset model", "Save model (in editor)", "Go to playmode (from editor)"
     };
 
     public const string ModelExtension = ".txt";

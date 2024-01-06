@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+    public static CameraMoveMode cameraMoveMode = CameraMoveMode.Follow;
+
     Dictionary<string, Action<int>> SettingUpdateFunctions = new Dictionary<string, Action<int>>();
 
     void Awake()

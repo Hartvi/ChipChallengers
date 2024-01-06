@@ -155,10 +155,8 @@ public class CommonChip : AngleChip
     public CommonChip[] AddChild(VChip childChip)
     {
         var childType = childChip.ChipType;
-        //print($"parent: {this.equivalentVirtualChip.ChipType}, child: {childType}");
 
         CommonChip newChild = GeometricChip.InstantiateChip<CommonChip>(childType);
-        //print($"new child: {newChild}, id: {childChip.id}");
 
         newChild.equivalentVirtualChip = childChip;
         newChild.SetParent(this);
@@ -169,18 +167,15 @@ public class CommonChip : AngleChip
 
         // TODO fix get angle to take from `keys` and `values`
         float angle = newChild.GetAngle();
-        //print($"chip: {childChip.ChipType}, angle: {angle}, child angle: {childChip.keys[0]}");
 
         (Vector3 origin, Vector3 direction) = StaticChip.GetThisAxisOfRotationWrtParent(newChild, VChip.chipNameToEnum[childChip.ChipType]);
         newChild.transform.RotateAround(origin, direction, angle);
 
         // rotates the objects so they are facing the correct direction
-        //print($"Origin: {origin}, position: {newChild.transform.position}");
         Vector3 facingDirection = (newChild.transform.position - origin).normalized;
-        //print($"Direction: {facingDirection}");
+        `
         float YrotationAngle = Vector3.Dot(facingDirection, newChild.transform.right);
         float YrotationAngle2 = Mathf.Max(0f, -Vector3.Dot(facingDirection, newChild.transform.forward));
-        //print($"Forward rotation: {YrotationAngle2}, {90f * YrotationAngle}, right rot: {YrotationAngle}, {180f*YrotationAngle2}");
 
         // apply transforms after measuring all information
         newChild.transform.RotateAround(newChild.transform.position, newChild.transform.up, 90f * YrotationAngle);
@@ -188,28 +183,23 @@ public class CommonChip : AngleChip
 
         if (!newChild.IsJointElligible)
         {
-            //print($"object {this} is not elligible for joint");
             newChild.transform.SetParent(this.inverse);
         }
         else
         {
             // TODO: create joint
             var parentRealChip = this.RealParent;
-            //print($"Parent object {parentRealChip}, current object: {this}");
+
             newChild.SetupGeometry();
             newChild.SetupRigidbody();
             ConfigurableJoint cj = JointUtility.AttachWithConfigurableJoint(
                 newChild.gameObject, parentRealChip.gameObject, origin, direction
                 );
             newChild.cj = cj;
-            //print($"Just set joint: {newChild.equivalentVirtualChip.id}");
+
             // TODO: position mode for axle AND velocity mode for axle => spring/damper
-            //cj.targetRotation = Quaternion.Euler(20, 0, 0);
             this.ConfigureJointAxis(cj);
             newChild.ConfigureJointSpringDamper(cj);
-
-            // set target rotation from `GetAngle`
-            //cj.targetRotation = this.targetRotation;
         }
 
         var _newChildren = newChild.AddChildren();
@@ -237,8 +227,8 @@ public class CommonChip : AngleChip
             // add aspects, TODO: this wont add it to core!!!
             this.gameObject.AddComponent<Aerodynamics>().myChip = this;
         }
-        //print($"this.OptionObjects: {this.OptionObjects}, {this.OptionObjects.Length}");
-        int option;
+
+        int option = -1;
         if (this.equivalentVirtualChip.TryGetProperty<int>(VChip.optionStr, out option))
         {
             this.SelectOption(option);
@@ -249,15 +239,10 @@ public class CommonChip : AngleChip
             HealthAspect h = this.gameObject.AddComponent<HealthAspect>();
             h.SetDeathCallbacks(new Action[] { this.Die });
             h.SetHealth(this.equivalentVirtualChip.DefaultHealth());
-
-            //print($"Adding health to chip: {this.equivalentVirtualChip.ChipType}");
         }
-        //print($"Option: {option} type: {this.equivalentVirtualChip.ChipType}");
 
         if (this.equivalentVirtualChip.keys.Contains(VChip.valueStr))
         {
-            //print($"Type: {this.equivalentVirtualChip.ChipType}");
-            //PRINT.IPrint(this.equivalentVirtualChip.keys);
 
             // TODO cosmetics as in jet spitting fire and wheel turning discs
             this._value = this.GetValue();
@@ -285,7 +270,6 @@ public class CommonChip : AngleChip
         List<CommonChip> chips = new List<CommonChip>();
 
         // when there are no Children left then the recursion stops
-        //print($"Number of children: {this.equivalentVirtualChip.children.Count}");
         foreach (VChip childChip in this.equivalentVirtualChip.Children)
         {
             chips.AddRange(this.AddChild(childChip));
@@ -301,7 +285,6 @@ public class CommonChip : AngleChip
         this.equivalentVirtualChip.TryGetProperty<float>(VChip.springStr, out spring);
         float damper;
         this.equivalentVirtualChip.TryGetProperty<float>(VChip.damperStr, out damper);
-        //print($"chip: {this.equivalentVirtualChip.ChipType}: spring: {spring} damper: {damper}");
 
         JointDrive jd = new JointDrive();
         jd.positionSpring = spring;
@@ -363,7 +346,6 @@ public class CommonChip : AngleChip
 
         while (safeTrue.Safe())
         {
-            //print($"current chip: {currentChip}");
             // constant part
             if (currentChip.IsReal)
             {
@@ -418,12 +400,12 @@ public class CommonChip : AngleChip
 
     public void TriggerSpawn(VModel virtualModel, bool freeze)
     {
-        //print("TRIGGER SPAWN");
         this.VirtualModel = virtualModel;
-        //print($"Number of chips: {virtualModel.chips.Length}");
+
         foreach (VVar v in this.VirtualModel.variables)
         {
             v.valueChangedCallbacks = new Action<float, VVar>[] { };
+            v.currentValue = v.defaultValue;
         }
 
         this.transform.localScale = StaticChip.ChipSize;
@@ -470,14 +452,12 @@ public class CommonChip : AngleChip
         //}
         //this.VisualizePosition = true;
 
-        //c.transform.position = c.transform.position + Vector3.up;
         if (freeze)
         {
             CommonChip.FreezeClientModel();
         }
         foreach (var a in this._AfterBuildActions)
         {
-            //print("after build action");
             a();
         }
     }
@@ -507,19 +487,8 @@ public class CommonChip : AngleChip
         this._AfterBuildActions = actions;
     }
 
-    void Update()
-    {
-        //if(this.cj != null)
-        //print($"target rotation: {this.targetRotation}, joint: {this.cj.targetRotation}");
-        //if (this.cj == null)
-        //    print($"Joint is null");
-    }
-
     public void Die()
     {
-        // TODO: turn off all script callbacks for this chip
-        //print($"Chip: {this.equivalentVirtualChip.ChipType}: Dying");
-
         GameObject.Destroy(this.cj);
 
         CommonChip[] myDescendants = this.GetMyDescendants();
@@ -529,9 +498,9 @@ public class CommonChip : AngleChip
             descendant.SleepyTime();
         }
     }
+
     private void SleepyTime()
     {
-        //Debug.LogWarning($"TODO: SleepyTime(): turn off all script callbacks for this chip.");
         // remove from callbacks to LUA
         this.RemoveMeFromVariableCallbacks.Invoke();
     }

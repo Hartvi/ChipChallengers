@@ -36,9 +36,16 @@ public class Aerodynamics : BaseAspect
         float DragAndLiftProportion = Vector3.Dot(up, velocity);
         // extra drag is needed because lift is roughly proportional to 1 whereas drag is roughly proportional to 2
         // direction of extra drag
-        Vector3 ExtraDrag = Vector3.Project(up, velocity) * velocity.sqrMagnitude;
+
+        //Vector3 ExtraDrag = Vector3.Project(up, velocity) * velocity.sqrMagnitude;
+
         float commonConstant = -Mathf.Sign(DragAndLiftProportion) * ConstantPartOfDragAndLift;
-        this.rb.AddForce(commonConstant * (up * DragAndLiftProportion * DragAndLiftProportion + ExtraDrag));
+        
+        // nothing is an airfoil:
+        //this.rb.AddForce(commonConstant * (up * DragAndLiftProportion * DragAndLiftProportion + ExtraDrag));
+        
+        // everything is an aerofoil with infinite stall speed:
+        this.rb.AddForce(6.28f * commonConstant * (up * DragAndLiftProportion * DragAndLiftProportion));
     }
 
     //void FixedUpdate()

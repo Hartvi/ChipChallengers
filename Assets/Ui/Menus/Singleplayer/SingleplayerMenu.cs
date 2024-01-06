@@ -42,8 +42,6 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
 
     private CommonChip core;
 
-    CameraMoveMode cameraMoveMode = CameraMoveMode.Follow;
-
     HUD Hud;
 
     // HUD, etc
@@ -58,7 +56,7 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
                 new VirtualProp(PropType.Panel, 0.2f, right,
                     new VirtualProp(PropType.Panel, 0.3f),
                     new VirtualProp(PropType.Text, 0.1f),
-                    new VirtualProp(PropType.Text, 0.3f)
+                    new VirtualProp(PropType.Text, -1f)
                     )
             ),
             new VirtualProp(PropType.Panel, 1f, right, typeof(ControlsPanel)),
@@ -146,6 +144,9 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
         //TODO: load model after entering playmode???
         //print($"Current virtual Model: {this.core.VirtualModel}");
         this.Hud.LinkCore(this.core);
+
+        Camera.main.transform.position = (Camera.main.transform.position - core.transform.position).normalized * 5f + core.transform.position;
+        Camera.main.transform.LookAt(core.transform.position);
         //Camera.main.transform.position = this.core.transform.position + Vector3.up * 10f;
 
         // speed up physics for stable physics
@@ -288,12 +289,6 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
 
         if (ctrlPressed)
         {
-            if (Input.GetKeyDown(KeyCode.L))
-            {
-
-                this.LoadPanel.ActivatePanel(CommonChip.ClientCore.VirtualModel.ModelName);
-                //this.LoadPanel.gameObject.SetActive(true);
-            }
             if (Input.GetKeyDown(KeyCode.M))
             {
                 this.MapPanel.ActivatePanel(SingleplayerMenu.myVMap.FileName);
@@ -331,7 +326,17 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
                 //this.core.transform.position = spawnPosition;
                 //this.core.TriggerSpawn(this.core.VirtualModel, false);
             }
+            if (Input.GetKeyDown(KeyCode.L))
+            {
+                this.LoadPanel.ActivatePanel(CommonChip.ClientCore.VirtualModel.ModelName);
+                //this.LoadPanel.gameObject.SetActive(true);
+            }
 #else
+            if (Input.GetKeyDown(KeyCode.O))
+            {
+                this.LoadPanel.ActivatePanel(CommonChip.ClientCore.VirtualModel.ModelName);
+                //this.LoadPanel.gameObject.SetActive(true);
+            }
             if (Input.GetKeyDown(KeyCode.U))
             {
                 this.core.ResetToDefaultLocation();
@@ -361,14 +366,14 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
         }
         if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1))
         {
-            this.cameraMoveMode = CameraMoveMode.Follow;
+            GameManager.cameraMoveMode = CameraMoveMode.Follow;
         }
         if (Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Keypad2))
         {
-            this.cameraMoveMode = CameraMoveMode.Free;
+            GameManager.cameraMoveMode = CameraMoveMode.Free;
         }
 
-        switch (this.cameraMoveMode)
+        switch (GameManager.cameraMoveMode)
         {
             case CameraMoveMode.Follow:
                 {

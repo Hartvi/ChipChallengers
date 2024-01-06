@@ -279,16 +279,17 @@ public class VChip
 
     public bool TryGetProperty<T>(string key, out T val)
     {
+        // TODO: check if a chip has the given key
+        // E.G. a chip does not have the 'brake' property => return false
         try
         {
-            // TODO: rewrite instanceproperties when a field is changed
             string strVal = ArrayExtensions.AccessLikeDict(key, this.keys, this.vals);
             
             if (string.IsNullOrWhiteSpace(strVal))
             {
                 object objVal = ArrayExtensions.AccessLikeDict(key, VChip.allPropertiesStr, VChip.allPropertiesDefaultsObjects);
                 val = (T)objVal;
-                return false;
+                return true;
             }
 
             if (propertyTypes[key] == typeof(float))
@@ -297,22 +298,19 @@ public class VChip
             }
             else if (propertyTypes[key] == typeof(int))
             {
-                PRINT.IPrint($"strVal: {strVal} ");
+                //PRINT.IPrint($"strVal: {strVal} ");
                 val = (T)(object)int.Parse(strVal);
             }
             else
             {
                 val = (T)(object)strVal;
             }
-            //val = (T)(this.instanceProperties[key]);
-            //PRINT.IPrint($"val: {val}, chip: {this.ChipType}");
             return true;
         }
         catch
         {
 
             object objVal = ArrayExtensions.AccessLikeDict(key, VChip.allPropertiesStr, VChip.allPropertiesDefaultsObjects);
-            //PRINT.IPrint($"objval: {objVal} type: {objVal.GetType()}");
             val = (T)objVal;
             return false;
         }

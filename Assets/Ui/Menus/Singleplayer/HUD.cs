@@ -106,13 +106,18 @@ public class HUD : TopProp
 
     void SetupItems()
     {
-        var items = this.GetComponentsInChildren<ItemBase>();
+        var items = this.GetComponentsInChildren<ItemBase>(true);
 
         foreach(var it in items)
         {
             it.GetComponent<TMP_Text>().fontSize = UIUtils.SmallFontSize;
         }
-        this.NameItem = this.GetComponentInChildren<ItemBaseLeft>();
-        this.ValueItem = this.GetComponentInChildren<ItemBaseRight>();
+        //if(this.NameItem is not null)
+        //{
+        //    print($"nameitem is active: {this.NameItem.isActiveAndEnabled} or {this.NameItem.gameObject.activeSelf} or {this.NameItem.gameObject.activeInHierarchy}");
+        //}
+        this.NameItem = this.GetComponentInChildren<ItemBaseLeft>(true);
+        this.ValueItem = this.GetComponentInChildren<ItemBaseRight>(true);
     }
+
 }

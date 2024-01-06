@@ -25,7 +25,7 @@ public class ControlsPanel : BasePanel
                 new VirtualProp(PropType.Panel, -1f, right,
                     new VirtualProp(PropType.Panel, 0.5f, right,
                         new VirtualProp(PropType.Panel, 0.3f),
-                        new VirtualProp(PropType.Panel, 0.3f, down,
+                        new VirtualProp(PropType.Panel, 0.4f, down,
                             new VirtualProp(PropType.Text, 0.1f)
                         ),
                         new VirtualProp(PropType.Panel, 0.3f, down,
