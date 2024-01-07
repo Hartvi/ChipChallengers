@@ -15,13 +15,15 @@ public class SettingsMenu : BaseMenu, InputReceiver
     protected override void Setup()
     {
         base.Setup();
-        this.vProp = new VirtualProp(PropType.Image, 1f, down,
-            new VirtualProp(PropType.Panel, 0.1f),
-            new VirtualProp(PropType.Text, 0.1f),
-            new VirtualProp(PropType.Panel, 0.1f),
-            new VirtualProp(PropType.Panel, -1f, right,
-                new VirtualProp(PropType.Panel, 0.2f),
-                new VirtualProp(PropType.Panel, 0.6f, right, typeof(SettingFields))
+        this.vProp = new VirtualProp(PropType.Panel, 1f, down,
+            new VirtualProp(PropType.Image, 1f, down,
+                new VirtualProp(PropType.Panel, 0.1f),
+                new VirtualProp(PropType.Text, 0.1f),
+                new VirtualProp(PropType.Panel, 0.1f),
+                new VirtualProp(PropType.Panel, -1f, right,
+                    new VirtualProp(PropType.Panel, 0.2f),
+                    new VirtualProp(PropType.Panel, 0.6f, right, typeof(SettingFields))
+                )
             )
         );
     }

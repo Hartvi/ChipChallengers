@@ -15,26 +15,33 @@ public class BaseScrollMenu : BasePanel, InputReceiver
     protected BaseButton[] btns;
     protected BaseInput input;
 
+    BaseImage backgroundImage;
+
     protected override void Setup()
     {
         base.Setup();
         this.vProp = new VirtualProp(PropType.Panel, 1f,
-            new VirtualProp(PropType.Panel, 0.8f, right,
-                new VirtualProp(PropType.Panel, 0.9f, typeof(BaseItemScroll),
-                    new VirtualProp(PropType.Button, 1f)
+            new VirtualProp(PropType.Image, 1f,
+                new VirtualProp(PropType.Panel, 0.8f, right,
+                    new VirtualProp(PropType.Panel, 0.9f, typeof(BaseItemScroll),
+                        new VirtualProp(PropType.Button, 1f)
+                    ),
+                    new VirtualProp(PropType.Scrollbar, -1f, right, right)
                 ),
-                new VirtualProp(PropType.Scrollbar, -1f, right, right)
-            ),
-            new VirtualProp(PropType.Image, -1f, right,
-                new VirtualProp(PropType.Input, 0.60f),
-                new VirtualProp(PropType.Button, 0.2f),
-                new VirtualProp(PropType.Button, 0.2f)
+                new VirtualProp(PropType.Image, -1f, right,
+                    new VirtualProp(PropType.Input, 0.60f),
+                    new VirtualProp(PropType.Button, 0.2f),
+                    new VirtualProp(PropType.Button, 0.2f)
+                )
             )
         );
     }
 
     protected virtual void Start()
     {
+        this.backgroundImage = this.GetComponentInChildren<BaseImage>();
+        this.backgroundImage.image.color = new Color(0.0f, 0.0f, 0.0f);
+
         // TODO:
         // load all models from folder models and display them*
         // on click 'ok button': load the corresponding file

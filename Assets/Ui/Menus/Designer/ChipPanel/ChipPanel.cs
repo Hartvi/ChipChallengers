@@ -13,8 +13,13 @@ public class ChipPanel : BasePanel
     ItemBase NameItem;
     ItemBase ValueItem;
 
+    BaseImage backgroundImage;
+
     void Start()
     {
+        this.backgroundImage = this.GetComponentInChildren<BaseImage>();
+        this.backgroundImage.image.color = new Color(0.7f, 0.7f, 0.7f);
+
         var items = GetComponentsInChildren<ItemBase>();
 
         this.NameItem = items[0];
@@ -30,38 +35,40 @@ public class ChipPanel : BasePanel
         // Link highlighting in the editor in general to displaying in this menu
         EditorMenu em = this.GetComponentInParent<EditorMenu>();
         em.highlighter.SetHighlightCallbacks(new Action<VChip>[] { this.DisplayChip });
+
         // add default values so it renders fine at the start
-        //print("STARTING CHIP PANEL");
         this.DisplayChip(CommonChip.ClientCore.equivalentVirtualChip);
     }
 
     protected override void Setup()
     {
         base.Setup();
-        this.vProp = new VirtualProp(PropType.Panel, 1f,
-            new VirtualProp(PropType.Panel, 0.5f, down,
-                new VirtualProp(PropType.Panel, 1/3f, right,
-                    new VirtualProp(PropType.Panel, 1/3f),
-                    new VirtualProp(PropType.Panel, 1/3f), 
-                    new VirtualProp(PropType.Panel, 1/3f)
-                ),
-                new VirtualProp(PropType.Panel, 1/3f, right,
-                    new VirtualProp(PropType.Panel, 1/3f),
-                    new VirtualProp(PropType.Panel, 1/3f), 
-                    new VirtualProp(PropType.Panel, 1/3f)
-                ),
-                new VirtualProp(PropType.Panel, 1/3f, right,
-                    new VirtualProp(PropType.Panel, 1/3f),
-                    new VirtualProp(PropType.Panel, 1/3f), 
-                    new VirtualProp(PropType.Panel, 1/3f)
-                )
-            ),
-            new VirtualProp(PropType.Panel, -1f, right,
-                new VirtualProp(PropType.Panel, 0.5f, up,
-                    new VirtualProp(PropType.Text, 1f/(float)VChip.allPropertiesStr.Length, typeof(ItemBase))
-                ),
-                new VirtualProp(PropType.Panel, 0.5f, up,
-                    new VirtualProp(PropType.Input, 1f/(float)VChip.allPropertiesStr.Length, typeof(ItemBase))
+        this.vProp = new VirtualProp(PropType.Panel, 1f, 
+                new VirtualProp(PropType.Image, 1f, 
+                //new VirtualProp(PropType.Panel, 0.5f, down,
+                //    new VirtualProp(PropType.Panel, 1/3f, right,
+                //        new VirtualProp(PropType.Panel, 1/3f),
+                //        new VirtualProp(PropType.Panel, 1/3f), 
+                //        new VirtualProp(PropType.Panel, 1/3f)
+                //    ),
+                //    new VirtualProp(PropType.Panel, 1/3f, right,
+                //        new VirtualProp(PropType.Panel, 1/3f),
+                //        new VirtualProp(PropType.Panel, 1/3f), 
+                //        new VirtualProp(PropType.Panel, 1/3f)
+                //    ),
+                //    new VirtualProp(PropType.Panel, 1/3f, right,
+                //        new VirtualProp(PropType.Panel, 1/3f),
+                //        new VirtualProp(PropType.Panel, 1/3f), 
+                //        new VirtualProp(PropType.Panel, 1/3f)
+                //    )
+                //),
+                new VirtualProp(PropType.Panel, -1f, right,
+                    new VirtualProp(PropType.Panel, 0.5f, down,
+                        new VirtualProp(PropType.Text, 1f/(float)VChip.allPropertiesStr.Length, typeof(ItemBase))
+                    ),
+                    new VirtualProp(PropType.Panel, 0.5f, down,
+                        new VirtualProp(PropType.Input, 1f/(float)VChip.allPropertiesStr.Length, typeof(ItemBase))
+                    )
                 )
             )
         );
@@ -80,13 +87,15 @@ public class ChipPanel : BasePanel
         ItemBase[] nameItems = this.NameItem.DisplayNItems<ItemBase>(leftTexts.Length);
         ItemBase[] valueItems = this.ValueItem.DisplayNItems<ItemBase>(rightTexts.Length);
 
-        int offset = nameItems.Length - 1;
         for(int i = 0; i < leftTexts.Length; ++i)
         {
-            int reverseIndex = offset - i;
             var nameTxt = nameItems[i].GetComponent<TMP_Text>();
+
             nameTxt.SetText(leftTexts[i]);
-            nameTxt.fontSize = UIUtils.SmallFontSize;
+            nameTxt.fontSize = (UIUtils.MediumFontSize  + UIUtils.SmallFontSize)*0.5f;
+
+            nameTxt.horizontalAlignment = HorizontalAlignmentOptions.Center;
+            nameTxt.verticalAlignment = VerticalAlignmentOptions.Middle;
 
             texts[i] = nameTxt;
 

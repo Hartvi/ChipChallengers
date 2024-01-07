@@ -52,7 +52,9 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
         this.vProp = new VirtualProp(PropType.Panel, 1f, zero,
             new VirtualProp(PropType.Panel, 1f, down, typeof(IntroScreen),
                 new VirtualProp(PropType.Panel, 0.2f),
-                new VirtualProp(PropType.Text, 0.2f, typeof(MainTitle)),
+                new VirtualProp(PropType.Panel, 0.2f, down,
+                    new VirtualProp(PropType.Text, 1f, typeof(MainTitle))
+                ),
                 new VirtualProp(PropType.Panel, 0.2f, right,
                     new VirtualProp(PropType.Panel, 0.3f),
                     new VirtualProp(PropType.Text, 0.1f),

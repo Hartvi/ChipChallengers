@@ -173,7 +173,7 @@ public class CommonChip : AngleChip
 
         // rotates the objects so they are facing the correct direction
         Vector3 facingDirection = (newChild.transform.position - origin).normalized;
-        `
+        
         float YrotationAngle = Vector3.Dot(facingDirection, newChild.transform.right);
         float YrotationAngle2 = Mathf.Max(0f, -Vector3.Dot(facingDirection, newChild.transform.forward));
 

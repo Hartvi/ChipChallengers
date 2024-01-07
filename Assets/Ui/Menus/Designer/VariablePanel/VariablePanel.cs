@@ -16,21 +16,29 @@ public class VariablePanel : BasePanel
 
     private string[] myLabels = new string[] { };
 
+    BaseImage backgroundImage;
+
     protected override void Setup()
     {
         base.Setup();
         this.vProp = new VirtualProp(PropType.Panel, 1f,
-            new VirtualProp(PropType.Panel, 0.5f, right,
-                new VirtualProp(PropType.Panel, 0.9f, typeof(BaseItemScroll),
-                    new VirtualProp(PropType.Button, 1f)
+            new VirtualProp(PropType.Image, 1f,
+                new VirtualProp(PropType.Panel, 0.5f, right,
+                    new VirtualProp(PropType.Panel, 0.9f, typeof(BaseItemScroll),
+                        new VirtualProp(PropType.Button, 1f)
+                    ),
+                    new VirtualProp(PropType.Scrollbar, -1f, right, right)
                 ),
-                new VirtualProp(PropType.Scrollbar, -1f, right, right)
-            ),
-            new VirtualProp(PropType.Image, -1f, typeof(VariableFields))
+                new VirtualProp(PropType.Image, -1f, typeof(VariableFields))
+            )
         );
     }
+
     void Start()
     {
+        this.backgroundImage = this.GetComponentInChildren<BaseImage>();
+        this.backgroundImage.image.color = new Color(0.0f, 0.0f, 0.0f);
+
         this.itemScroll = this.GetComponentInChildren<BaseItemScroll>();
 
         this.itemScroll.SetupItemList(this.SelectVariable, VariablePanel.NUMDISPLAYITEMS, this.myLabels);

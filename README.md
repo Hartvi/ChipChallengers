@@ -2,15 +2,17 @@
 ChipChallengers - physics chips and programming all in one
 
 ### TODO
-- `+` add water
-- `+` remove cowl collider
+- `+` move the LUA listener to the singleplayer InputHandler
+- `+` add backgrounds to all menus:
+  - settings menu, load panel, map panel, save panel
+- `+` intro tutorial
+ - create a nice controls menu
+ - show introductory screenshots(?) that depict how to find out the controls for a given model
 - `+` disable adding other chips to cowls
+- `+` remove cowl collider
 - `+` add sensors
+- `+` add water
 - `+` Create 3 example maps
-- `+` fix the gun having different recoil values at different times in the game
-- `+` freeze the model when not in singleplayer mode
-- `+` stop listening to LUA controls when not in singleplayer mode
-- `+` find out why the physics timing makes wheels speed up cars differently 
 - `+` settings menu
   - volume, number of particles
   - maybe do sliders
@@ -24,6 +26,10 @@ ChipChallengers - physics chips and programming all in one
   - particle effects - 0-100 %
   - physics iteration speed
 - `+` rotate the camera around the currently selected object or add an option for it
+- `+` fix the gun having different recoil values at different times in the game
+- `+` freeze the model when not in singleplayer mode
+- `+` stop listening to LUA controls when not in singleplayer mode
+- `+` find out why the physics timing makes wheels speed up cars differently 
 - `+++` implement multiplayer
 - `+` game modes: pool, snake
 - `+` Add option to change units in HUD

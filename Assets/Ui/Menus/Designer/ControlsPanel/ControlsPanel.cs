@@ -20,7 +20,7 @@ public class ControlsPanel : BasePanel
     {
         base.Setup();
         this.vProp = new VirtualProp(PropType.Panel, 1f, right,
-            new VirtualProp(PropType.Panel, 1f, down,
+            new VirtualProp(PropType.Image, 1f, down,
                 new VirtualProp(PropType.Panel, 0.1f),
                 new VirtualProp(PropType.Panel, -1f, right,
                     new VirtualProp(PropType.Panel, 0.5f, right,
