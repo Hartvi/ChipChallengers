@@ -150,15 +150,12 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
         Camera.main.transform.position = (Camera.main.transform.position - core.transform.position).normalized * 5f + core.transform.position;
         Camera.main.transform.LookAt(core.transform.position);
         //Camera.main.transform.position = this.core.transform.position + Vector3.up * 10f;
-
-        // speed up physics for stable physics
-        //Time.fixedDeltaTime = 0.001f;
     }
 
-    void Update()
-    {
+    //void Update()
+    //{
 
-    }
+    //}
 
     //public Vector3 RaycastFromAbove()
     //{
@@ -265,6 +262,7 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
 
     void InputReceiver.OnStopReceiving()
     {
+        print($"Singleplayer menu stopping receiving");
         CommonChip.FreezeClientModel();
     }
 
@@ -272,6 +270,8 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
 
     void InputReceiver.HandleInputs()
     {
+        this.core.HandleInputs();
+
         //#if UNITY_EDITOR
         if (Input.GetKey(KeyCode.Space))
         {

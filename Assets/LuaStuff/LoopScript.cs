@@ -14,10 +14,16 @@ public class LoopScript : MonoBehaviour
     {
         UnityEngine.Debug.LogWarning($"NOTE: Loopscript only using Update()");
     }
-    void Update()
+
+    public void HandleInputs()
     {
         this.loopFunction();
+        this.BackstepVariables();
         // TODO: run this only if variable has been changed this loop
+    }
+
+    void BackstepVariables()
+    {
         for (int i = 0; i < this.variables.Length; ++i)
         {
             VVar v = this.variables[i];

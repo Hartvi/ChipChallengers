@@ -37,7 +37,7 @@ public class VariablePanel : BasePanel
     void Start()
     {
         this.backgroundImage = this.GetComponentInChildren<BaseImage>();
-        this.backgroundImage.image.color = new Color(0.0f, 0.0f, 0.0f);
+        this.backgroundImage.image.color = new Color(0.9f, 0.9f, 0.9f);
 
         this.itemScroll = this.GetComponentInChildren<BaseItemScroll>();
 

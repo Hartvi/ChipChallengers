@@ -33,8 +33,19 @@ public class UIManager : MonoBehaviour
 
     public void SwitchToMe(InputReceiver me)
     {
+        if (keyboardReceivers.Count > 0)
+        {
+            var lastReceiver = keyboardReceivers[keyboardReceivers.Count - 1];
+            if (lastReceiver != me)
+            {
+                lastReceiver.OnStopReceiving();
+                me.OnStartReceiving();
+            }
+        }
+
         //print($"Switching to {me.GetType()}");
         while (keyboardReceivers.Remove(me)) { }
+
         keyboardReceivers.Add(me);
     }
 
@@ -43,7 +54,22 @@ public class UIManager : MonoBehaviour
         //print($"Turning off {me.GetType()}");
         //print($"Before removing: {me.GetType()}: {keyboardReceivers.Count}");
         //keyboardReceivers.Remove(me);
-        while (keyboardReceivers.Remove(me)) { }
+        if (keyboardReceivers.Count > 0)
+        {
+            bool iWasReceivingAlready = keyboardReceivers[keyboardReceivers.Count - 1] == me;
+            if (iWasReceivingAlready)
+            {
+                me.OnStopReceiving();
+            }
+
+            while (keyboardReceivers.Remove(me)) { }
+
+            // if I was receiving, that means I'm not last anymore and a new guy is last now
+            if (iWasReceivingAlready)
+            {
+                keyboardReceivers[keyboardReceivers.Count - 1].OnStartReceiving();
+            }
+        }
         //print($"After removing: {me.GetType()}: {keyboardReceivers.Count}");
     }
 

@@ -92,7 +92,8 @@ public class ChipPanel : BasePanel
             var nameTxt = nameItems[i].GetComponent<TMP_Text>();
 
             nameTxt.SetText(leftTexts[i]);
-            nameTxt.fontSize = (UIUtils.MediumFontSize  + UIUtils.SmallFontSize)*0.5f;
+            //nameTxt.fontSize = (UIUtils.MediumFontSize  + UIUtils.SmallFontSize)*0.5f;
+            nameTxt.fontSize = UIUtils.SmallFontSize;
 
             nameTxt.horizontalAlignment = HorizontalAlignmentOptions.Center;
             nameTxt.verticalAlignment = VerticalAlignmentOptions.Middle;

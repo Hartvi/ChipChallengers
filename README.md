@@ -2,7 +2,7 @@
 ChipChallengers - physics chips and programming all in one
 
 ### TODO
-- `+` move the LUA listener to the singleplayer InputHandler
+- `+` stop the camera shaking - e.g. when flying the plane the camera shakes back and forth every frame
 - `+` add backgrounds to all menus:
   - settings menu, load panel, map panel, save panel
 - `+` intro tutorial
@@ -35,6 +35,7 @@ ChipChallengers - physics chips and programming all in one
 - `+` Add option to change units in HUD
 
 ### Done
+- `+` move the LUA listener to the singleplayer InputHandler
 - `+` Create nice example models
 - `+++` fix build bugs in how it doesn't show runtime variables and switching between editor and playmode doesn't work
 - `+` fix camera

@@ -151,6 +151,11 @@ public class CommonChip : AngleChip
     }
     Action[] _AfterBuildActions = new Action[] { };
 
+    public void HandleInputs()
+    {
+        this.loopScript.HandleInputs();
+    }
+
     // FUNCTIONS:
     public CommonChip[] AddChild(VChip childChip)
     {
@@ -434,6 +439,7 @@ public class CommonChip : AngleChip
         this.loopScript = this.gameObject.AddComponent<LoopScript>();
         this.loopScript.vModel = this.VirtualModel;
         this.loopScript.loopFunction = this.scriptInstance.CallLoop;
+
 
         // this performs clean-up as well
         this.AllChildren = this.AddChildren();  // trigger the tsunami

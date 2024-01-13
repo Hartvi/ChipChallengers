@@ -54,7 +54,11 @@ public class VariableFields : BaseImage
 
         for(int i = 0; i < this.texts.Length; ++i)
         {
-            this.texts[i].text.SetText(UIStrings.VariableArray[i]);
+            var t = this.texts[i];
+            t.text.SetText(UIStrings.VariableArray[i]);
+            t.text.horizontalAlignment = HorizontalAlignmentOptions.Center;
+            t.text.verticalAlignment = VerticalAlignmentOptions.Middle;
+
         }
 
         for(int i = 0; i < this.buttons.Length; ++i)

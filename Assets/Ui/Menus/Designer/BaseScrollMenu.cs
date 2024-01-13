@@ -40,7 +40,7 @@ public class BaseScrollMenu : BasePanel, InputReceiver
     protected virtual void Start()
     {
         this.backgroundImage = this.GetComponentInChildren<BaseImage>();
-        this.backgroundImage.image.color = new Color(0.0f, 0.0f, 0.0f);
+        this.backgroundImage.image.color = new Color(0.9f, 0.9f, 0.9f);
 
         // TODO:
         // load all models from folder models and display them*
