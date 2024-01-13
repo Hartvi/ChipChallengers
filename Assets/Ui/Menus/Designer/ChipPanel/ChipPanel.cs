@@ -18,7 +18,7 @@ public class ChipPanel : BasePanel
     void Start()
     {
         this.backgroundImage = this.GetComponentInChildren<BaseImage>();
-        this.backgroundImage.image.color = new Color(0.7f, 0.7f, 0.7f);
+        //this.backgroundImage.image.color = new Color(0.9f, 0.9f, 0.9f);
 
         var items = GetComponentsInChildren<ItemBase>();
 

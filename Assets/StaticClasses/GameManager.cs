@@ -5,9 +5,27 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+    public static readonly Dictionary<string, Tuple<int, int>> minMaxIntSettings = new Dictionary<string, Tuple<int, int>>()
+    {
+        { UIStrings.Framerate, new Tuple<int, int>(5, 1000) },
+        { UIStrings.PhysicsRate, new Tuple<int, int>(50, 2000) },
+        { UIStrings.Volume, new Tuple<int, int>(0, 100) },
+        { UIStrings.PhysicsParticles, new Tuple<int, int>(0, 100) }
+    };
+
+    public static readonly Dictionary<string, int> defaultIntSettings = new Dictionary<string, int>()
+    {
+
+        { UIStrings.Framerate, 50 },
+        { UIStrings.PhysicsRate, 1000 },
+        { UIStrings.Volume, 100 },
+        { UIStrings.PhysicsParticles, 100 }
+    };
+
     public static CameraMoveMode cameraMoveMode = CameraMoveMode.Follow;
 
-    Dictionary<string, Action<int>> SettingUpdateFunctions = new Dictionary<string, Action<int>>();
+    Dictionary<string, Func<int, int>> SettingUpdateFunctions = new Dictionary<string, Func<int, int>>();
+    public Dictionary<string, Func<int>> GettingUpdateFunctions = new Dictionary<string, Func<int>>();
 
     void Awake()
     {
@@ -15,6 +33,11 @@ public class GameManager : MonoBehaviour
         SettingUpdateFunctions[UIStrings.PhysicsRate] = this.SetPhysicsRate;
         SettingUpdateFunctions[UIStrings.PhysicsParticles] = this.SetPhysicsParticles;
         SettingUpdateFunctions[UIStrings.Volume] = this.SetVolume;
+
+        GettingUpdateFunctions[UIStrings.Framerate] = this.GetFrameRate;
+        GettingUpdateFunctions[UIStrings.PhysicsRate] = this.GetPhysicsRate;
+        GettingUpdateFunctions[UIStrings.PhysicsParticles] = this.GetPhysicsParticles;
+        GettingUpdateFunctions[UIStrings.Volume] = this.GetVolume;
     }
 
     public static GameManager Instance
@@ -24,37 +47,119 @@ public class GameManager : MonoBehaviour
 
     private static GameManager instance;
 
-    void SetFrameRate(int f)
+    int GetFrameRate()
     {
-        //Debug.Log($"Setting frame rate to {f}");
-        Application.targetFrameRate = f;
+        string s = UIStrings.Framerate;
+        int i = PlayerPrefs.GetInt(s);
+
+        if (i < minMaxIntSettings[s].Item1 || i > minMaxIntSettings[s].Item2)
+        {
+            i = defaultIntSettings[s];
+        }
+        return i;
     }
 
-    void SetPhysicsRate(int f)
+    int GetPhysicsRate()
     {
+        string s = UIStrings.PhysicsRate;
+        int i = PlayerPrefs.GetInt(s);
+
+        if (i < minMaxIntSettings[s].Item1 || i > minMaxIntSettings[s].Item2)
+        {
+            i = defaultIntSettings[s];
+        }
+        return i;
+    }
+
+    int GetPhysicsParticles()
+    {
+        string s = UIStrings.PhysicsParticles;
+        int i = PlayerPrefs.GetInt(s);
+
+        if (i < minMaxIntSettings[s].Item1 || i > minMaxIntSettings[s].Item2)
+        {
+            i = defaultIntSettings[s];
+        }
+        return i;
+    }
+
+    int GetVolume()
+    {
+        string s = UIStrings.Volume;
+        int i = PlayerPrefs.GetInt(s);
+
+        if (i < minMaxIntSettings[s].Item1 || i > minMaxIntSettings[s].Item2)
+        {
+            i = defaultIntSettings[s];
+        }
+        return i;
+    }
+
+    int SetFrameRate(int i)
+    {
+        string s = UIStrings.Framerate;
+        int newf = SaturateIntSetting(s, i);
+
+        // if it has been set as too large somehow
+
+        Application.targetFrameRate = newf;
+
+        PlayerPrefs.SetInt(s, newf);
+        PlayerPrefs.Save();
+        return newf;
+    }
+
+    int SetPhysicsRate(int i)
+    {
+        string s = UIStrings.PhysicsRate;
+        int newf = SaturateIntSetting(s, i);
         //Debug.Log($"Setting physics rate to {f}");
-        Time.fixedDeltaTime = 1f / (float)f;
+
+        Time.fixedDeltaTime = 1f / (float)newf;
+
+        PlayerPrefs.SetInt(s, newf);
+        PlayerPrefs.Save();
+        return newf;
     }
 
-    void SetVolume(int v)
+    int SetVolume(int i)
     {
-        Debug.LogWarning($"TODO: set global volume to {v}");
+        string s = UIStrings.Volume;
+        int newf = SaturateIntSetting(s, i);
+
+        Debug.LogWarning($"TODO: set global volume to {i}");
+
         //AudioManager.Instance.
+        PlayerPrefs.SetInt(s, newf);
+        PlayerPrefs.Save();
+        return newf;
     }
 
-    void SetPhysicsParticles(int f)
+    int SetPhysicsParticles(int i)
     {
-        Debug.LogWarning($"TODO: set physics particles to {f}");
+        string s = UIStrings.PhysicsParticles;
+        int newf = SaturateIntSetting(s, i);
+
+        Debug.LogWarning($"TODO: set physics particles to {i}");
+
+        PlayerPrefs.SetInt(s, newf);
+        PlayerPrefs.Save();
+        return newf;
     }
 
     public void UpdateSettings()
     {
-        foreach(string intSetting in UIStrings.SettingsIntProperties)
+        foreach (string intSetting in UIStrings.SettingsIntProperties)
         {
-            int i = PlayerPrefs.GetInt(intSetting);
+            int i = this.GettingUpdateFunctions[intSetting].Invoke();
             this.SettingUpdateFunctions[intSetting].Invoke(i);
         }
     }
 
+    public int SaturateIntSetting(string settingName, int val)
+    {
+        Tuple<int, int> minMax = GameManager.minMaxIntSettings[settingName];
+        return Math.Min(minMax.Item2, Math.Max(minMax.Item1, val));
+    }
 }
 

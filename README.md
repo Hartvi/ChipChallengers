@@ -2,6 +2,8 @@
 ChipChallengers - physics chips and programming all in one
 
 ### TODO
+- `+` TODO fix crash when I change Core type to something other
+  - Core type MUST NOT BE CHANGEABLE
 - `+` stop the camera shaking - e.g. when flying the plane the camera shakes back and forth every frame
 - `+` add backgrounds to all menus:
   - settings menu, load panel, map panel, save panel
@@ -35,6 +37,7 @@ ChipChallengers - physics chips and programming all in one
 - `+` Add option to change units in HUD
 
 ### Done
+- `+` when freshly downloading the game, then check if the settings are at default values, otherwise set them to default
 - `+` move the LUA listener to the singleplayer InputHandler
 - `+` Create nice example models
 - `+++` fix build bugs in how it doesn't show runtime variables and switching between editor and playmode doesn't work

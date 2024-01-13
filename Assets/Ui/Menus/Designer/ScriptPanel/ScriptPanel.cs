@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ScriptPanel : BasePanel
 {
@@ -24,6 +25,10 @@ public class ScriptPanel : BasePanel
         this.btn = this.GetComponentInChildren<DragButton>();
 
         this.btn.text.text = "<";
+        this.btn.image.sprite = Resources.Load<Sprite>("UI/art/tall_button");
+
+        this.input.input.image.sprite = Resources.Load<Sprite>("UI/Art/white_square");
+
         this.input.placeholder.text = "Lua code...";
         this.input.placeholder.fontSize = UIUtils.SmallFontSize;
 

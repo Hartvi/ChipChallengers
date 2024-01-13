@@ -7,20 +7,6 @@ using TMPro;
 
 public class SettingFields : BasePanel
 {
-    Dictionary<string, Tuple<int, int>> minMaxIntSettings = new Dictionary<string, Tuple<int, int>>() 
-    {
-        { UIStrings.Framerate, new Tuple<int, int>(5, 1000) },
-        { UIStrings.PhysicsRate, new Tuple<int, int>(50, 2000) },
-        { UIStrings.Volume, new Tuple<int, int>(0, 100) },
-        { UIStrings.PhysicsParticles, new Tuple<int, int>(0, 100) }
-    };
-
-    /*
-    frame-rate
-    physics-rate
-    volume
-    particle amount
-     */
 
     protected override void Setup()
     {
@@ -57,7 +43,7 @@ public class SettingFields : BasePanel
 
 
             baseTexts[i].text.SetText(currentSettingName);
-            baseTexts[i].text.fontSize = UIUtils.MediumFontSize;
+            baseTexts[i].text.fontSize = UIUtils.SmallFontSize;
 
             baseInputs[_i].input.onEndEdit.AddListener(x => OnEndInput(baseInputs[_i].input, x, currentSettingName));
 
@@ -80,19 +66,20 @@ public class SettingFields : BasePanel
             tmp = tmp.Substring(0, tmp.Length - 1);
         }
 
-        a = SaturateIntSetting(settingName, a);
+        //a = GameManager.Instance.SaturateIntSetting(settingName, a);
         
-        inputField.SetTextWithoutNotify(a.ToString());
 
         if (UIStrings.SettingsIntProperties.Contains(settingName))
         {
-            print($"setting {settingName} to {a}");
+            //print($"setting {settingName} to {a}");
             this.SetIntSetting(settingName, a);
         }
         else
         {
             throw new InvalidOperationException($"Non-int settings have not been implemented.");
         }
+        
+        inputField.SetTextWithoutNotify(this.GetIntSetting(settingName).ToString());
     }
 
     string GetPrefStringValue(string settingName)
@@ -107,6 +94,10 @@ public class SettingFields : BasePanel
         }
     }
 
+    int GetIntSetting(string settingName) {
+        return GameManager.Instance.GettingUpdateFunctions[settingName]();
+    }
+
     void SetIntSetting(string settingName, int settingValue)
     {
         if (settingValue != PlayerPrefs.GetInt(settingName))
@@ -116,12 +107,5 @@ public class SettingFields : BasePanel
             GameManager.Instance.UpdateSettings();
         }
     }
-
-    int SaturateIntSetting(string settingName, int val)
-    {
-        Tuple<int, int> minMax = this.minMaxIntSettings[settingName];
-        return Math.Min(minMax.Item2, Math.Max(minMax.Item1, val));
-    }
-    
 }
 

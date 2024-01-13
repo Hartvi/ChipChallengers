@@ -262,7 +262,7 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
 
     void InputReceiver.OnStopReceiving()
     {
-        print($"Singleplayer menu stopping receiving");
+        //print($"Singleplayer menu stopping receiving");
         CommonChip.FreezeClientModel();
     }
 

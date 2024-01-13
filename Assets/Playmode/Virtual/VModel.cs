@@ -201,8 +201,8 @@ end
             //PRINT.print(variablesTable.Values.Count());
             this.variables = VVar.FromLuaTables(variablesTable.Values.Select(x => x.Table).ToArray());
             // TODO VARIABLES
-            PRINT.IPrint("todo: variables:");
-            PRINT.IPrint(this.variables);
+            //PRINT.IPrint("todo: variables:");
+            //PRINT.IPrint(this.variables);
         }
         else
         {
@@ -210,7 +210,7 @@ end
         }
 
         this.script = (string)luaTable["script"];
-        PRINT.IPrint($"LOADED SCRIPT: {this.script}");
+        //PRINT.IPrint($"LOADED SCRIPT: {this.script}");
         bool coreFound = false;
         //PRINT.print($"Number of chips: {this.chips.Length}");
         //foreach (var virtualChip in this.chips)

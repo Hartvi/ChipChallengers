@@ -10,7 +10,7 @@ public static class HistoryStack
 
     public static void SaveState(string state)
     {
-        PRINT.IPrint($"Pushing new state");
+        //PRINT.IPrint($"Pushing new state");
         pastEdits.Push(state);
         futureEdits.Clear();  // clear future edits once a new state is saved
     }
