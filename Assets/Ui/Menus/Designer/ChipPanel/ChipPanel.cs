@@ -118,7 +118,8 @@ public class ChipPanel : BasePanel
     public void DisplayChip(VChip vc)
     {
         //print($"DisplayChip: Chip type: {vc.ChipType}");
-        string[] newKeys = ArrayExtensions.AccessLikeDict(vc.ChipType, VChip.chipData.keys, VChip.chipData.values);
+        string chipType = vc.ChipType;
+        string[] newKeys = ArrayExtensions.AccessLikeDict(chipType, VChip.chipData.keys, VChip.chipData.values);
         string[] newValues = new string[newKeys.Length];
 
         for(int i = 0; i < newKeys.Length; ++i)
@@ -145,7 +146,37 @@ public class ChipPanel : BasePanel
         //PRINT.print(newKeys);
         //PRINT.print(newValues);
 
-        (TMP_Text[] texts, TMP_InputField[] inputs) = this.DisplayChipProperties(newKeys, newValues);
+        string[] displayKeys, displayValues;
+        // if showing core, then hide its `type` field so as not to crash if it's changed
+        bool isCore = (chipType == VChip.coreStr);
+        int deltaLength = isCore ? -1 : 0;
+
+        displayKeys = new string[newKeys.Length + deltaLength];
+        displayValues = new string[newValues.Length + deltaLength];
+
+        int k = 0;
+        for(int i = 0; i < newKeys.Length; ++i)
+        {
+            string currentProperty = newKeys[i];
+            if(currentProperty == VChip.typeStr && isCore) { continue; }
+
+            displayKeys[k] = currentProperty;
+            //print($"current property: {currentProperty}");
+            string val = ArrayExtensions.AccessLikeDict(currentProperty, vc.keys, vc.vals);
+
+            if(val is not null)
+            {
+                displayValues[k] = val.ToString();
+            }
+            else
+            {
+                displayValues[k] = ArrayExtensions.AccessLikeDict(currentProperty, VChip.allPropertiesStr, VChip.allPropertiesDefaultsStrings);
+                //throw new ArgumentNullException($"Property {propertiesThisChipHas[i]} doesn't exist in chip {vc} of type {vc.ChipType}.");
+            }
+            ++k;
+        }
+        
+        (TMP_Text[] texts, TMP_InputField[] inputs) = this.DisplayChipProperties(displayKeys, displayValues);
 
         // for tabbing through the fields
         this.currentInputs = inputs;

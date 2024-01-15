@@ -136,7 +136,7 @@ public class BaseItemScroll : BasePanel
             // set label of visible item
             var btn = (this.items[i] as BaseButton);
             btn.text.text = visibleItems[i].label;
-            btn.text.fontSize = UIUtils.SmallFontSize;
+            btn.text.fontSize = UIUtils.MediumFontSize;
 
             btn.btn.onClick.RemoveAllListeners();
             btn.btn.onClick.AddListener(() => action(btn.text.text));

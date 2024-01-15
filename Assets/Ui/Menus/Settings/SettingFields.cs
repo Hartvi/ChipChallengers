@@ -31,14 +31,12 @@ public class SettingFields : BasePanel
 
     void Start()
     {
-        //var bbbb = new Tuple<int, int>(5, 1000);
-        //bbbb.
         BaseText[] baseTexts = this.GetComponentsInChildren<BaseText>();
         BaseInput[] baseInputs = this.GetComponentsInChildren<BaseInput>(); ;
 
         for (int i = 0; i < baseTexts.Length; ++i)
         {
-            int _i = i;// temporary _i for callbacks so they actually point to the current base inputs and setting name
+            int _i = i;  // temporary _i for callbacks so they actually point to the current base inputs and setting name
             string currentSettingName = UIStrings.SettingsAllProperties[_i];
 
 

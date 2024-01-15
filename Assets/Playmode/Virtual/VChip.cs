@@ -60,6 +60,8 @@ public class VChip
     public static readonly Dictionary<string, GameObject> chipTemplates;
     public static readonly ChipData chipData, optionNames;
 
+    public static readonly string[] hiddenPropertyValues = new string[] { VChip.coreStr };
+
     public static readonly Dictionary<CTP, string> chipEnumToName;
     public static readonly Dictionary<string, CTP> chipNameToEnum;
 
