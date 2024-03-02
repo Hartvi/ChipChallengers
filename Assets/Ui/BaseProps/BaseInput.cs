@@ -9,7 +9,7 @@ public class BaseInput : TopProp
     public TMP_InputField input;
     public TMP_Text placeholder;
     public Image image;
-    protected override void Setup()
+public override void Setup()
     {
         this.input = GetComponent<TMP_InputField>();
         this.image = GetComponent<Image>();

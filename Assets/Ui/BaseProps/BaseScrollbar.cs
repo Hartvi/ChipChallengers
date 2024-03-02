@@ -7,7 +7,7 @@ using UnityEngine.UI;
 public class BaseScrollbar : TopProp
 {
     public Scrollbar scrollbar;
-    protected override void Setup()
+    public override void Setup()
     {
         scrollbar = GetComponent<Scrollbar>();
         scrollbar.onValueChanged.AddListener(x => Execute(x));

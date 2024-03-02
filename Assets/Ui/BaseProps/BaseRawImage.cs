@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class BaseRawImage : TopProp
 {
     public RawImage rawImage;
-    protected override void Setup()
+    public override void Setup()
     {
         rawImage = GetComponent<RawImage>();
     }

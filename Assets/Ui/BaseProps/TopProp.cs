@@ -28,7 +28,7 @@ public class TopProp : TopUI
     public List<VirtualProp> vChildren = new List<VirtualProp>();
     public List<TopProp> rChildren = new List<TopProp>();
 
-    protected virtual void Setup() {}
+    public virtual void Setup() {}
 
     public void Link(VirtualProp vProp)
     {

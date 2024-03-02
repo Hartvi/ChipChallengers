@@ -6,7 +6,7 @@ using UnityEngine;
 public class GoToEditor : BaseTransition
 {
 
-    protected override void Setup()
+    public override void Setup()
     {
         base.Setup();
         this.text.text = UIStrings.Editor;

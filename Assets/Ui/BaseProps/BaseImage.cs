@@ -7,7 +7,7 @@ using UnityEngine.UI;
 public class BaseImage : TopProp
 {
     public Image image;
-    protected override void Setup()
+public override void Setup()
     {
         this.image = GetComponent<Image>();
     }

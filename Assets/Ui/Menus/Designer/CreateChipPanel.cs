@@ -13,7 +13,7 @@ public class CreateChipPanel : BasePanel
     float totalMenuHeight;
     public LocalDirection localDir;
 
-    protected override void Setup()
+    public override void Setup()
     {
         base.Setup();
         this.vProp =

@@ -6,8 +6,8 @@ using TMPro;
 public class BaseText : TopProp
 {
     public TMP_Text text;
-    protected override void Setup()
+    public override void Setup()
     {
-        text = GetComponent<TMP_Text>();
+        text = this.GetComponent<TMP_Text>();
     }
 }

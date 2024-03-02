@@ -17,7 +17,7 @@ public class BaseScrollMenu : BasePanel, InputReceiver
 
     BaseImage backgroundImage;
 
-    protected override void Setup()
+    public override void Setup()
     {
         base.Setup();
         this.vProp = new VirtualProp(PropType.Panel, 1f,
@@ -98,7 +98,12 @@ public class BaseScrollMenu : BasePanel, InputReceiver
         //UIManager.instance.SwitchToMe(this);
     }
 
-    void InputReceiver.OnStartReceiving() { }
+    void InputReceiver.OnStartReceiving()
+    {
+        this.SpecificOnStartReceiving();
+    }
+    protected virtual void SpecificOnStartReceiving() { }
+
     void InputReceiver.OnStopReceiving() { }
     bool InputReceiver.IsActive() => this.gameObject.activeSelf;
 

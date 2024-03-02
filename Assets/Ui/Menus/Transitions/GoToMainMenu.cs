@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class GoToMainMenu : BaseTransition
 {
-    protected override void Setup()
+    public override void Setup()
     {
         base.Setup();
         this.text.text = UIStrings.MainMenu;

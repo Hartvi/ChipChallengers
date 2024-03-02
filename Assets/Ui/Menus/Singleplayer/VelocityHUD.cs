@@ -32,7 +32,7 @@ public class VelocityHUD : BasePanel
     TMP_Text velocityText;
     TMP_Text positionText;
 
-    protected override void Setup()
+    public override void Setup()
     {
         base.Setup();
 

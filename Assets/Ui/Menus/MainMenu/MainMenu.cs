@@ -6,7 +6,7 @@ using UnityEngine;
 public class MainMenu : BaseMainMenu, InputReceiver
 {
     float numberOfButtons = 5f;
-    protected override void Setup()
+    public override void Setup()
     {
         base.Setup();
         float btnHeight = 1 / (this.numberOfButtons + 1);

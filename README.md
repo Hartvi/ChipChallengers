@@ -3,7 +3,8 @@ ChipChallengers - physics chips and programming all in one
 
 ### TODO
 - `+` make the camera follow the player also in direction of looking, so when player goes down, camera also looks down
-- `+` add dropdowns for `Option`, `Type` and other fields as necessary
+  - `+` make it changeable in the settings
+- `++` add dropdowns for `Option`, `Type` and other fields as necessary
 - `+` stop the camera shaking - e.g. when flying the plane the camera shakes back and forth every frame
 - `+` add backgrounds to all menus:
   - settings menu, load panel, map panel, save panel
@@ -37,6 +38,7 @@ ChipChallengers - physics chips and programming all in one
 - `+` Add option to change units in HUD
 
 ### Done
+- `+` singleplayer - text at the top to show F1 and ESC
 - `+` TODO fix crash when I change Core type to something other
   - Core type MUST NOT BE CHANGEABLE
 - `+` when freshly downloading the game, then check if the settings are at default values, otherwise set them to default

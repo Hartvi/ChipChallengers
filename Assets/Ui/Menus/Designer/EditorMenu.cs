@@ -53,7 +53,7 @@ public class EditorMenu : BaseMenu, InputReceiver
     private ChipPanel ChipPanel;
     private ControlsPanel ControlsPanel;
 
-    protected override void Setup()
+    public override void Setup()
     {
         base.Setup();
         //this.vProp = new VirtualProp(PropType.Panel, 1f, left,
@@ -280,10 +280,11 @@ public class EditorMenu : BaseMenu, InputReceiver
             if (Input.GetKeyDown(KeyCode.E))
             {
                 this.SavePanel.gameObject.SetActive(true);
+                this.SavePanel.ActivatePanel(GameManager.Instance.GetModel());
             }
             if (Input.GetKeyDown(KeyCode.L))
             {
-                this.LoadPanel.ActivatePanel(CommonChip.ClientCore.VirtualModel.ModelName);
+                this.LoadPanel.ActivatePanel(GameManager.Instance.GetModel());
             }
             if (Input.GetKeyDown(KeyCode.M))
             {
@@ -293,11 +294,11 @@ public class EditorMenu : BaseMenu, InputReceiver
             if (Input.GetKeyDown(KeyCode.S))
             {
 
-                this.SavePanel.gameObject.SetActive(true);
+                this.SavePanel.ActivatePanel(GameManager.Instance.selectedModel);
             }
             if (Input.GetKeyDown(KeyCode.O))
             {
-                this.LoadPanel.gameObject.SetActive(true);
+                this.LoadPanel.ActivatePanel(GameManager.Instance.selectedModel);
             }
             if (Input.GetKeyDown(KeyCode.P))
             {

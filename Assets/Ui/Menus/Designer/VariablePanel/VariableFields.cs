@@ -11,7 +11,7 @@ public class VariableFields : BaseImage
     BaseInput[] inputs = new BaseInput[5];
     BaseButton[] buttons = new BaseButton[2];
 
-    protected override void Setup()
+    public override void Setup()
     {
         base.Setup();
         this.vProp = new VirtualProp(PropType.Image, 1f, right,

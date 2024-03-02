@@ -12,7 +12,7 @@ public class SettingsMenu : BaseMenu, InputReceiver
     volume
     particle amount
      */
-    protected override void Setup()
+    public override void Setup()
     {
         base.Setup();
         this.vProp = new VirtualProp(PropType.Panel, 1f, down,

@@ -9,7 +9,7 @@ public class BaseMainMenu : BaseMenu
     {
         get { return instance; }
     }
-    protected override void Setup()
+    public override void Setup()
     {
         base.Setup();
         BaseMenu.MainMenu = this;

@@ -5,7 +5,7 @@ using TMPro;
 
 public class MainTitle : BaseText
 {
-    protected override void Setup()
+    public override void Setup()
     {
         base.Setup();
         this.text.fontSize = UIUtils.LargeFontSize;

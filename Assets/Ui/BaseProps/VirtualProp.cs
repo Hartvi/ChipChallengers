@@ -172,7 +172,7 @@ public class VirtualProp
         this.SetParent(this.Children);
         this.SetPropBehaviourType(this.MyType);
     }
-    void SetParent(List<VirtualProp> children)
+    public void SetParent(List<VirtualProp> children)
     {
         foreach (var child in children)
         {
@@ -180,7 +180,7 @@ public class VirtualProp
             child.Parent = this;
         }
     }
-    void SetPropBehaviourType(PropType propType)
+    public void SetPropBehaviourType(PropType propType)
     {
         switch (propType)
         {

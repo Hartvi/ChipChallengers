@@ -7,7 +7,7 @@ using TMPro;
 public class BaseSlider : TopProp
 {
     public Slider slider;
-    protected override void Setup()
+    public override void Setup()
     {
         slider = GetComponent<Slider>();
         slider.onValueChanged.AddListener(x => Execute(x));

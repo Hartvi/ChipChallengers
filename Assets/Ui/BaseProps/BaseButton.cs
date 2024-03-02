@@ -10,7 +10,7 @@ public class BaseButton : TopProp
     public TMP_Text text;
     public Image image;
     
-    protected override void Setup()
+    public override void Setup()
     {
         this.btn = this.GetComponent<Button>();
         this.text = this.GetComponentInChildren<TMP_Text>();

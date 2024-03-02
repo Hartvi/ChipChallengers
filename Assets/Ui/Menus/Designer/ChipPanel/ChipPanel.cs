@@ -18,7 +18,6 @@ public class ChipPanel : BasePanel
     void Start()
     {
         this.backgroundImage = this.GetComponentInChildren<BaseImage>();
-        //this.backgroundImage.image.color = new Color(0.9f, 0.9f, 0.9f);
 
         var items = GetComponentsInChildren<ItemBase>();
 
@@ -40,7 +39,7 @@ public class ChipPanel : BasePanel
         this.DisplayChip(CommonChip.ClientCore.equivalentVirtualChip);
     }
 
-    protected override void Setup()
+    public override void Setup()
     {
         base.Setup();
         this.vProp = new VirtualProp(PropType.Panel, 1f, 
@@ -92,7 +91,6 @@ public class ChipPanel : BasePanel
             var nameTxt = nameItems[i].GetComponent<TMP_Text>();
 
             nameTxt.SetText(leftTexts[i]);
-            //nameTxt.fontSize = (UIUtils.MediumFontSize  + UIUtils.SmallFontSize)*0.5f;
             nameTxt.fontSize = UIUtils.SmallFontSize;
 
             nameTxt.horizontalAlignment = HorizontalAlignmentOptions.Center;
@@ -105,8 +103,6 @@ public class ChipPanel : BasePanel
             valueTxt.textComponent.fontSize = UIUtils.SmallFontSize;
 
             inputs[i] = valueTxt;
-
-            //Debug.LogWarning($"Todo: add callback to update chip values.");
         }
 
         TopProp.StackFrom(this.NameItem.Siblings<ItemBase>(takeInactive: false));
@@ -117,7 +113,6 @@ public class ChipPanel : BasePanel
 
     public void DisplayChip(VChip vc)
     {
-        //print($"DisplayChip: Chip type: {vc.ChipType}");
         string chipType = vc.ChipType;
         string[] newKeys = ArrayExtensions.AccessLikeDict(chipType, VChip.chipData.keys, VChip.chipData.values);
         string[] newValues = new string[newKeys.Length];
@@ -125,7 +120,6 @@ public class ChipPanel : BasePanel
         for(int i = 0; i < newKeys.Length; ++i)
         {
             string currentProperty = newKeys[i];
-            //print($"current property: {currentProperty}");
             string val = ArrayExtensions.AccessLikeDict(currentProperty, vc.keys, vc.vals);
 
             if(val is not null)
@@ -135,16 +129,12 @@ public class ChipPanel : BasePanel
             else
             {
                 newValues[i] = ArrayExtensions.AccessLikeDict(currentProperty, VChip.allPropertiesStr, VChip.allPropertiesDefaultsStrings);
-                //throw new ArgumentNullException($"Property {propertiesThisChipHas[i]} doesn't exist in chip {vc} of type {vc.ChipType}.");
             }
         }
 
         // This is so we can set it below using callbacks that index assuming the full length of properties
         vc.vals = newValues;
         vc.keys = newKeys;
-
-        //PRINT.print(newKeys);
-        //PRINT.print(newValues);
 
         string[] displayKeys, displayValues;
         // if showing core, then hide its `type` field so as not to crash if it's changed
@@ -161,7 +151,6 @@ public class ChipPanel : BasePanel
             if(currentProperty == VChip.typeStr && isCore) { continue; }
 
             displayKeys[k] = currentProperty;
-            //print($"current property: {currentProperty}");
             string val = ArrayExtensions.AccessLikeDict(currentProperty, vc.keys, vc.vals);
 
             if(val is not null)
@@ -171,7 +160,6 @@ public class ChipPanel : BasePanel
             else
             {
                 displayValues[k] = ArrayExtensions.AccessLikeDict(currentProperty, VChip.allPropertiesStr, VChip.allPropertiesDefaultsStrings);
-                //throw new ArgumentNullException($"Property {propertiesThisChipHas[i]} doesn't exist in chip {vc} of type {vc.ChipType}.");
             }
             ++k;
         }
@@ -185,6 +173,40 @@ public class ChipPanel : BasePanel
         {
             int _i = i;
 
+
+            // IF OPTION OR CHIP TYPE
+            //if (texts[_i].text == VChip.typeStr)
+            //{
+            //    TMP_Text t = texts[_i];
+            //    var dropdowns = t.Siblings<DropdownItemScroll>(true);
+            //    // if has dropdown, display it
+            //    // position the drop down to be below/above the input field
+            //    if(dropdowns.Length == 0)
+            //    {
+            //        //var d = Instantiate(Resources.Load<GameObject>("UI/Panel")).AddComponent<DropdownItemScroll>();
+            //        //d.Setup();
+            //        //d.AddChildren();
+            //        //print($"dropdown: {d}");
+            //        //d.transform.SetParent(t.transform.parent);
+
+            //        ItemBase ib = inputs[_i].GetComponent<ItemBase>();
+            //        VirtualProp ddvp = new VirtualProp(PropType.Panel, 1.0f, typeof(DropdownItemScroll));
+            //        ib.vProp.Children.Add(ddvp);
+            //        ddvp.Parent = ib.vProp;
+            //        ib.AddChildren();
+
+            //        dropdowns = t.Siblings<DropdownItemScroll>(true);
+            //    }
+            //    if (dropdowns.Length == 1)
+            //    {
+            //        DropdownItemScroll d = dropdowns[0];
+            //        d.itemScroll.SetupItemList(x => { t.SetText(x); }, 3, VChip.chipNames);
+            //        d.itemScroll.Scroll(0f);
+            //        d.bScrollbar.scrollbar.value = 0f;
+            //    } 
+            //    //.transform.parent
+            //}
+
             // TODO inputs[_i] was null????
             if (inputs[_i] is null)
             {
@@ -197,7 +219,6 @@ public class ChipPanel : BasePanel
             inputs[_i].onEndEdit.RemoveAllListeners();
             inputs[_i].onEndEdit.AddListener(
                 x => {
-                    //print($"chip type in callback: {vc.ChipType}, text: {texts[_i].text}, val: {x}");
                     string validityMsg = vc.CheckValidityOfPropertyForThisChip(texts[_i].text, x);
                     if(validityMsg is not null)
                     {
@@ -206,11 +227,9 @@ public class ChipPanel : BasePanel
                     }
                     else
                     {
-                        //print($"Changing val {vc.vals[_i]} to {inputs[_i].text}");
                         // TODO CALL BACK FOR CHIP CHANGED TO PROPAGATE TO MODEL CHANGED for all properties
-                        Debug.LogWarning($"TODO: make chip changed callback propagate to model changed callback for all properties.");
-                        //print($"{vc.ChipType}, {vc.id}, {vc.parentId}");
-                        print($"Setting value {x} for key {vc.keys[_i]} in chip {vc.ChipType}");
+                        //Debug.LogWarning($"TODO: make chip changed callback propagate to model changed callback for all properties.");
+                        //print($"Setting value {x} for key {vc.keys[_i]} in chip {vc.ChipType}");
                         vc.vals[_i] = x;
                     }
                 }

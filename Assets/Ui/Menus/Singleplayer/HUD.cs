@@ -9,7 +9,7 @@ public class HUD : TopProp
 {
     VelocityHUD velocityHUD;
 
-    protected override void Setup()
+    public override void Setup()
     {
         base.Setup();
         this.vProp = new VirtualProp(PropType.Panel, 1f, right,

@@ -12,7 +12,7 @@ public class SavePanel : BaseScrollMenu
 
         this.itemScroll.SetupItemList(FillInput, Screen.height / 70, IOHelpers.GetAllModels());
 
-        this.btns[0].btn.onClick.AddListener(() => SaveModel(this.input.input.text + UIStrings.ModelExtension));
+        this.btns[0].btn.onClick.AddListener(() => SaveModel(this.input.input.text));
 
         this.btns[1].btn.onClick.AddListener(this.DeactivatePanel);
 
@@ -22,7 +22,7 @@ public class SavePanel : BaseScrollMenu
         this.itemScroll.Scroll(0f);
         this.scrollbar.scrollbar.value = 0f;
 
-        this.input.placeholder.SetText("Enter model name");
+        this.input.placeholder.SetText(UIStrings.EnterModelName);
 
     }
 
@@ -46,33 +46,37 @@ public class SavePanel : BaseScrollMenu
                 },
                 3f
             );
-            UIStrings.ModelExists(modelName);
+            //UIStrings.ModelExists(modelName);
+        }
+        else
+        {
         }
     }
 
-    void SaveTmp(string state)
-    {
-        string msg = null;
-        try
-        {
-            msg = CommonChip.ClientCore.VirtualModel.SaveThisModelToFile("tmp");
-        }
-        catch
-        {
-            UnityEngine.Debug.LogWarning($"Model could not be saved.");
-            DisplaySingleton.Instance.DisplayText(this.ModelError, 3f);
-        }
-    }
+    //void SaveTmp(string state)
+    //{
+    //    string msg = null;
+    //    try
+    //    {
+    //        msg = CommonChip.ClientCore.VirtualModel.SaveThisModelToFile("tmp");
+    //    }
+    //    catch
+    //    {
+    //        UnityEngine.Debug.LogWarning($"Model could not be saved.");
+    //        DisplaySingleton.Instance.DisplayText(this.ModelError, 3f);
+    //    }
+    //}
 
     void SaveModel(string modelName)
     {
         string modelNameWithExtension = IOHelpers.EnsureFileExtension(modelName);
-        print($"Saving model: {modelName}, length: {modelName.Length} => {modelNameWithExtension}");
+        //print($"Saving model: {modelName}, length: {modelName.Length} => {modelNameWithExtension}");
 
         string msg = null;
         try
         {
             msg = CommonChip.ClientCore.VirtualModel.SaveThisModelToFile(modelNameWithExtension);
+            GameManager.Instance.SetModel(modelName);
         }
         catch
         {
@@ -96,4 +100,10 @@ public class SavePanel : BaseScrollMenu
             x.SetText(txtStr);
         };
     }
+
+    protected override void SpecificOnStartReceiving()
+    {
+        this.input.input.SetTextWithoutNotify(GameManager.Instance.GetModel());
+    }
+
 }

@@ -68,9 +68,7 @@ public class BaseItemScroll : BasePanel
 
     public void SetupItemList(Action<string> action, int numberOfDisplayItems, string[] labels)
     {
-        //print(this.transform.childCount);
         TopProp child = this.GetComponentsInChildren<TopProp>()[1];
-        //UnityEngine.Debug.Log($"{this}: Just set {child} as displayItem.");
 
         this.displayItem = child;
         this.action = action;
@@ -79,50 +77,39 @@ public class BaseItemScroll : BasePanel
 
         // rotation points up if it's normal and down if it's upside down
         // for stack direction up or down then it follows that the abs(dot product) of these two shall be greater than 0.5
-        //print($"size: {this.RT.sizeDelta} stack direction: {StackDirection} number of display items: {this.NumberOfDisplayItems}");
         this.realSize = Mathf.Max(Mathf.Abs(this.RT.sizeDelta.x * StackDirection.x), Mathf.Abs(this.RT.sizeDelta.y * StackDirection.y));
         this.realItemSize = this.realSize / NumberOfDisplayItems;
         this.realEdge = -0.5f * this.realSize * StackDirection;
-        //print($"realsize: {this.realSize}, real edge: {this.realEdge}, real item size: {this.realItemSize}");
 
         for(int i = 0; i < this.items.Length; ++i)
         {
-            //print($"Item: {i}: {this.items[i]}");
             if(this.items[i] == null)
             {
                 throw new NullReferenceException($"TopProp items[{i}] out of {this._NumberOfSpawnedItems} is null.");
             }
         }
         Scroll(0f);
-        //var positions = realPositions.Zip(this.items, (x, y) => y.transform.position = x);
-        //print($"positions: {positions.Count()}");
-        //PRINT.print(positions);
     }
 
     protected Vector2 RealPosition(float relativePosition)
     {
         // real position (wrt this panel): (panel position - 0.5*panelsize) + realsize * relative position
-        //print($"relative position: {relativePosition} edge: {this.realEdge} shift: {relativePosition * StackDirection * this.realSize}");
         return this.realEdge + relativePosition * StackDirection * this.realSize;
     }
 
-    protected override void Setup()
+   public override void Setup()
     {
         base.Setup();
-        //this._DisplayItem
     }
     
     public void Scroll(float x)
     {
-        //print($"SCROLLING TO {x}");
         // contains names and relative positions
         VirtualItem[] visibleItems = this.virtualContainer.MoveItems(x);
-        //print($"visible items: {visibleItems.Length}");
         
         // real position: real position * realSize
         // real position (wrt this panel): (panel position - 0.5*panelsize*stackDirection) + realsize * relative position
         Vector2[] realPositions = visibleItems.Select(x => this.RealPosition(x.relativePosition)).ToArray();
-        //print($"realpositions: {realPositions.Length}");
         if(realPositions.Length > this.items.Length)
         {
             throw new ArgumentException($"Number of positions: {realPositions.Length} does not match number of UI elements: {this.items.Length}.");
@@ -142,7 +129,6 @@ public class BaseItemScroll : BasePanel
             btn.btn.onClick.AddListener(() => action(btn.text.text));
 
             this.items[i].gameObject.SetActive(true);
-            //print($"i: {i} pos: {realPositions[i]}");
             this.items[i].RT.anchoredPosition = realPositions[i];
         }
     }
@@ -238,7 +224,6 @@ public class VirtualContainer
             // offset = 0.5*item height
             // top item: offset, bottom item: number of display items - offset
             // visible items: +-1 the edges
-            //bool itemViyysible = vItem.relativePosition < -this.DefaultOffset || vItem.relativePosition > 1f - this.DefaultOffset;
             
         }
         float maxOffset = 1f + this.DefaultOffset;

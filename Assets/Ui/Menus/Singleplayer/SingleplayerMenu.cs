@@ -33,7 +33,7 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
     public static VMap myVMap = new VMap();
 
     Camera mainCamera;
-    Vector3 oldCorePosition = Vector3.zero;
+    //Vector3 oldLookAtPos = Vector3.zero;
     CameraFollowSettings cameraFollowSettings;
 
     private LoadPanel LoadPanel;
@@ -46,10 +46,15 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
 
     // HUD, etc
     // km/h m/s variables
-    protected override void Setup()
+    public override void Setup()
     {
         base.Setup();
         this.vProp = new VirtualProp(PropType.Panel, 1f, zero,
+            new VirtualProp(PropType.Panel, 1f, down, 
+                new VirtualProp(PropType.Image, 0.04f, down, 
+                    new VirtualProp(PropType.Text, 1f, down, typeof(MiniControls))
+                )
+            ),
             new VirtualProp(PropType.Panel, 1f, down, typeof(IntroScreen),
                 new VirtualProp(PropType.Panel, 0.2f),
                 new VirtualProp(PropType.Panel, 0.2f, down,
@@ -61,8 +66,8 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
                     new VirtualProp(PropType.Text, -1f)
                     )
             ),
-            new VirtualProp(PropType.Panel, 1f, right, typeof(ControlsPanel)),
             new VirtualProp(PropType.Panel, 1f, right, typeof(HUD)),
+            new VirtualProp(PropType.Panel, 1f, right, typeof(ControlsPanel)),
             //    new VirtualProp(PropType.Panel, 0.1f, up,
             //        new VirtualProp(PropType.Text, 0.05f, typeof(ItemBaseLeft))
             //    ),
@@ -87,7 +92,7 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
         this.LoadPanel = this.GetComponentInChildren<LoadPanel>();
         this.MapPanel = this.GetComponentInChildren<MapPanel>();
 
-        this.cameraFollowSettings = new CameraFollowSettings(distance: 5f, up: 1f, predict: 0f, sensitivity: 1f, lowPass: 0f);
+        this.cameraFollowSettings = new CameraFollowSettings(distance: 5f, up: 1f, predict: 0.05f, sensitivity: 1f, lowPass: 0f);
 
         //Action[] deselectedChipCallbacks = new Action[] { () => UIManager.instance.TurnMeOff(this) };
         //this.deselectedCallbacks.SetCallbacks(deselectedChipCallbacks);
@@ -191,11 +196,13 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
         // 0
         float predict = cs.predict;
         // 20,10,0 - 18,10,0
-        Vector3 deltaCorePos = corePos - this.oldCorePosition;
+        Vector3 lookAtPos = corePos + predict * this.core.rb.velocity;
+
+        //Vector3 deltaCorePos = (corePos - this.oldCorePosition) / Time.deltaTime;
         // 0,0,0
-        Vector3 predictVector = predict * deltaCorePos;
+        //Vector3 predictVector = predict * deltaCorePos;
         // 20,10,0 + 0,0,0
-        Vector3 lookAtPos = corePos + predictVector;
+        //Vector3 lookAtPos = corePos + predictVector;
 
         //campos: 16,10,0
         // ((16,10,0 - 20,10,0).mag = 4) - 2 = 2 * 1,0,0 = 2,0,0
@@ -208,7 +215,7 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
 
         camTransform.LookAt(lookAtPos);
 
-        this.oldCorePosition = corePos;
+        //this.oldLookAtPos = lookAtPos;
     }
 
     void CameraFreeMove()
@@ -330,7 +337,8 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
             }
             if (Input.GetKeyDown(KeyCode.L))
             {
-                this.LoadPanel.ActivatePanel(CommonChip.ClientCore.VirtualModel.ModelName);
+                print($"setting active load panel with selected model: {GameManager.Instance.GetModel()}");
+                this.LoadPanel.ActivatePanel(GameManager.Instance.GetModel());
                 //this.LoadPanel.gameObject.SetActive(true);
             }
 #else
@@ -364,7 +372,8 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
 
         if (Input.GetKeyDown(KeyCode.F1))
         {
-            this.ControlsPanel.gameObject.SetActive(true);
+            UIManager.instance.SwitchToMe(this.ControlsPanel);
+            //this.ControlsPanel.gameObject.SetActive(true);
         }
         if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1))
         {

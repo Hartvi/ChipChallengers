@@ -60,7 +60,7 @@ public abstract class BaseMenu : DeclaredProp
         }
     }
 
-    protected override void Setup()
+    public override void Setup()
     {
         //Type MyType = GetType();
         //Debug.Assert(MyType != typeof(MenuBase));

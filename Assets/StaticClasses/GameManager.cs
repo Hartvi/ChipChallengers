@@ -5,6 +5,15 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+    public void SetModel(string m) {
+        print($"setting model to {m}");
+        this.selectedModel = m;
+    }
+    public string GetModel()  {
+        print($"getting model {this.selectedModel}"); return this.selectedModel;
+        }
+    protected string selectedModel = "";
+
     public static readonly Dictionary<string, Tuple<int, int>> minMaxIntSettings = new Dictionary<string, Tuple<int, int>>()
     {
         { UIStrings.Framerate, new Tuple<int, int>(5, 1000) },
@@ -17,7 +26,7 @@ public class GameManager : MonoBehaviour
     {
 
         { UIStrings.Framerate, 50 },
-        { UIStrings.PhysicsRate, 1000 },
+        { UIStrings.PhysicsRate, 500 },
         { UIStrings.Volume, 100 },
         { UIStrings.PhysicsParticles, 100 }
     };
@@ -42,7 +51,7 @@ public class GameManager : MonoBehaviour
 
     public static GameManager Instance
     {
-        get { return GameManager.instance ?? new GameObject("GameManager").AddComponent<GameManager>(); }
+        get { return GameManager.instance ?? (GameManager.instance = new GameObject("GameManager").AddComponent<GameManager>()); }
     }
 
     private static GameManager instance;

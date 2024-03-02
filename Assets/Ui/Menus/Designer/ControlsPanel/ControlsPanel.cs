@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ControlsPanel : BasePanel
+public class ControlsPanel : BasePanel, InputReceiver
 {
     BaseText Key1;
     BaseText[] Keys1;
@@ -16,7 +16,7 @@ public class ControlsPanel : BasePanel
     BaseText Action2;
     BaseText[] Actions2;
 
-    protected override void Setup()
+    public override void Setup()
     {
         base.Setup();
         this.vProp = new VirtualProp(PropType.Panel, 1f, right,
@@ -32,13 +32,13 @@ public class ControlsPanel : BasePanel
                             new VirtualProp(PropType.Text, 0.1f)
                         )
                     )
-                    //new VirtualProp(PropType.Panel, -1f, down,
-                    //    new VirtualProp(PropType.Panel, 0.2f, right,
-                    //        new VirtualProp(PropType.Panel, 0.1f),
-                    //        new VirtualProp(PropType.Text, 0.4f),
-                    //        new VirtualProp(PropType.Text, 0.4f)
-                    //    )
-                    //)
+                //new VirtualProp(PropType.Panel, -1f, down,
+                //    new VirtualProp(PropType.Panel, 0.2f, right,
+                //        new VirtualProp(PropType.Panel, 0.1f),
+                //        new VirtualProp(PropType.Text, 0.4f),
+                //        new VirtualProp(PropType.Text, 0.4f)
+                //    )
+                //)
                 )
             )
         );
@@ -60,9 +60,9 @@ public class ControlsPanel : BasePanel
 
         this.Actions1 = new BaseText[numTxts];
         this.Actions1[0] = this.Action1;
-        
 
-        for(int i = 1; i < numTxts; ++i)
+
+        for (int i = 1; i < numTxts; ++i)
         {
             var k = GameObject.Instantiate<BaseText>(this.Key1);
             this.Keys1[i] = k;
@@ -73,7 +73,7 @@ public class ControlsPanel : BasePanel
             a.transform.SetParent(this.Action1.transform.parent);
         }
 
-        for(int i = 0; i < numTxts; ++i)
+        for (int i = 0; i < numTxts; ++i)
         {
             var k = this.Keys1[i].text;
             k.SetText(UIStrings.ControlsKeys[i]);
@@ -90,12 +90,23 @@ public class ControlsPanel : BasePanel
         this.gameObject.SetActive(false);
     }
 
-    // Update is called once per frame
-    void Update()
+    void InputReceiver.OnStartReceiving()
+    {
+        this.gameObject.SetActive(true);
+    }
+
+    void InputReceiver.OnStopReceiving()
+    {
+        this.gameObject.SetActive(false);
+    }
+
+    bool InputReceiver.IsActive() => this.gameObject.activeSelf;
+
+    void InputReceiver.HandleInputs()
     {
         if (Input.anyKeyDown)
         {
-            this.gameObject.SetActive(false);
+            UIManager.instance.TurnMeOff(this);
         }
     }
 }

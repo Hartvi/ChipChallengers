@@ -5,7 +5,7 @@ using UnityEngine;
 public class GoToSettings : BaseTransition
 {
 
-    protected override void Setup()
+    public override void Setup()
     {
         base.Setup();
         this.text.text = UIStrings.Settings;
