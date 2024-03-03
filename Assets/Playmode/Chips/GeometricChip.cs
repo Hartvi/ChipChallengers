@@ -191,19 +191,19 @@ public abstract class GeometricChip : StaticChip
                 case VChip.sensorStr:
                     if (this.option == 0)
                     {
-                        return 2f;
+                        return PhysicsData.mediumMass;
                     } else if(this.option == 1)
                     {
-                        return 1f;
+                        return PhysicsData.smallMass;
                     } else
                     {
                         Debug.LogWarning($"Selecting unknown option `{this.option}` for chip `{this.equivalentVirtualChip.ChipType}`");
-                        return 5f;
+                        return PhysicsData.mediumMass;
                     }
                 case VChip.cowlStr:
                     return 0.1f;
                 default:
-                    return 1f;
+                    return PhysicsData.mediumMass;
             }
         }
     }

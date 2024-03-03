@@ -246,6 +246,11 @@ public class CommonChip : AngleChip
             h.SetHealth(this.equivalentVirtualChip.DefaultHealth());
         }
 
+        if (this.equivalentVirtualChip.ChipType == VChip.cowlStr)
+        {
+            this.gameObject.AddComponent<CowlAspect>().myChip = this;
+        }
+
         if (this.equivalentVirtualChip.keys.Contains(VChip.valueStr))
         {
 

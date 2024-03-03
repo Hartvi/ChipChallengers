@@ -26,7 +26,7 @@ public class Aerodynamics : BaseAspect
         }
     }
 
-    void FixedUpdate()
+    void Update()
     {
         Transform t = this.transform;
         Vector3 velocity = this.rb.velocity;
@@ -45,7 +45,7 @@ public class Aerodynamics : BaseAspect
         //this.rb.AddForce(commonConstant * (up * DragAndLiftProportion * DragAndLiftProportion + ExtraDrag));
         
         // everything is an aerofoil with infinite stall speed:
-        this.rb.AddForce(6.28f * commonConstant * (up * DragAndLiftProportion * DragAndLiftProportion));
+        this.rb.AddForce(1f / Time.deltaTime * commonConstant * (up * DragAndLiftProportion * DragAndLiftProportion));
     }
 
     //void FixedUpdate()

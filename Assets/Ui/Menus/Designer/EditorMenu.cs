@@ -126,7 +126,7 @@ public class EditorMenu : BaseMenu, InputReceiver
 
         this.highlighter.ParentHighlighter.SetActive(true);
 
-        print($"Varpanel: {VariablePanel}, ");
+        //print($"Varpanel: {VariablePanel}, ");
         Action[] onLoadedCallbacks = new Action[] {
             this.VariablePanel.ReloadVariables,
             this.VariablePanel.AddListenersToModel

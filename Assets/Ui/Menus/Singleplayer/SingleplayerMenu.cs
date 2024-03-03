@@ -12,15 +12,15 @@ public enum CameraMoveMode
 public struct CameraFollowSettings
 {
     public float distance;  // meters
-    public float up;  // meters
+    public Vector2 posShift;  // meters
     public float predict;  // [0,1)
     public float sensitivity;  // (0,1]
     public float lowPass; // (0,1)
 
-    public CameraFollowSettings(float distance, float up, float predict, float sensitivity, float lowPass)
+    public CameraFollowSettings(float distance, Vector2 posShift, float predict, float sensitivity, float lowPass)
     {
         this.distance = distance;
-        this.up = up;
+        this.posShift = posShift;
         this.predict = predict;
         this.sensitivity = sensitivity;
         this.lowPass = lowPass;
@@ -92,7 +92,7 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
         this.LoadPanel = this.GetComponentInChildren<LoadPanel>();
         this.MapPanel = this.GetComponentInChildren<MapPanel>();
 
-        this.cameraFollowSettings = new CameraFollowSettings(distance: 5f, up: 1f, predict: 0.05f, sensitivity: 1f, lowPass: 0f);
+        this.cameraFollowSettings = new CameraFollowSettings(distance: 5f, posShift: Vector2.up, predict: 0.05f, sensitivity: 1f, lowPass: 0f);
 
         //Action[] deselectedChipCallbacks = new Action[] { () => UIManager.instance.TurnMeOff(this) };
         //this.deselectedCallbacks.SetCallbacks(deselectedChipCallbacks);
@@ -208,7 +208,9 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
         // ((16,10,0 - 20,10,0).mag = 4) - 2 = 2 * 1,0,0 = 2,0,0
         Vector3 deltaPos = Mathf.Max(0f, (camTransform.position - corePos).magnitude - cs.distance) * camTransform.forward;
 
-        float deltaAltitude = (corePos.y + cs.up) - camTransform.position.y;
+        float deltaAltitude = (corePos.y + cs.posShift.y) - camTransform.position.y;
+        // deltaRight is in the local frame of the core
+        //float deltaRight = (corePos.x + cs.posShift.x) - camTransform.position.x;
 
         // 16,10,0 + 2,0,0
         camTransform.position = camTransform.position + deltaPos + deltaAltitude * Vector3.up;
@@ -399,11 +401,19 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
                     }
                     if (Input.GetKeyDown(KeyCode.UpArrow))
                     {
-                        this.cameraFollowSettings.up += 1f;
+                        this.cameraFollowSettings.posShift += Vector2.up;
                     }
                     if (Input.GetKeyDown(KeyCode.DownArrow))
                     {
-                        this.cameraFollowSettings.up -= 1f;
+                        this.cameraFollowSettings.posShift -= Vector2.up;
+                    }
+                    if (Input.GetKeyDown(KeyCode.KeypadMultiply) || Input.GetKeyDown(KeyCode.Asterisk))
+                    {
+                        this.cameraFollowSettings.predict *= 2f;
+                    }
+                    if(Input.GetKeyDown(KeyCode.KeypadDivide) || Input.GetKeyDown(KeyCode.Slash))
+                    {
+                        this.cameraFollowSettings.predict *= 0.5f;
                     }
                     break;
                 }

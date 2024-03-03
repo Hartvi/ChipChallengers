@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class WheelAspects : BaseAspect
 {
-    public static readonly Vector3 MomentOfInertia = PhysicsData.smallMass * new Vector3(1 / 4f, 1 / 2f, 1 / 4f) * StaticChip.ChipSide * StaticChip.ChipSide;
+    public static readonly Vector3 MomentOfInertia = PhysicsData.mediumMass * new Vector3(1 / 4f, 1 / 2f, 1 / 4f) * StaticChip.ChipSide * StaticChip.ChipSide;
     public static readonly float radius = StaticChip.ChipSide * 0.5f;
 
     public static readonly float PlanarMomentOfInertia = WheelAspects.MomentOfInertia[1];

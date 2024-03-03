@@ -34,7 +34,7 @@ public abstract class BaseMenu : DeclaredProp
             }
             else
             {
-                print($"{this.GetType()} is being selected");
+                //print($"{this.GetType()} is being selected");
                 this.selectedCallbacks.Invoke();
                 //foreach (Action c in this.selectedCallbacks)
                 //{

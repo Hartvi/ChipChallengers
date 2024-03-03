@@ -8,7 +8,7 @@ public static class UIStrings
     public const string MiniControls = "   Mini controls:   F1 - show controls   Ctrl+U - go to start   Ctrl+R - reset model   Esc - go to main menu";
 
     public static readonly string[] ControlsKeys = {
-        "F1", "1-9", "up/down/+/-", "Ctrl+O", "Ctrl+M", "Ctrl+U", "Ctrl+R", "Ctrl+S", "Ctrl+P"
+        "F1", "1-9", "up/down/+/-/\"/\"/*", "Ctrl+O", "Ctrl+M", "Ctrl+U", "Ctrl+R", "Ctrl+S", "Ctrl+P"
     };
     public static readonly string[] ControlsActions = new string[] {
         "Display this panel", "Switch cameras", "Adjust camera", "Open model", "Open map", "Go to start", "Reset model", "Save model (in editor)", "Go to playmode (from editor)"

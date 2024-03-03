@@ -2,19 +2,8 @@
 ChipChallengers - physics chips and programming all in one
 
 ### TODO
-- `+` make the camera follow the player also in direction of looking, so when player goes down, camera also looks down
-  - `+` make it changeable in the settings
-- `++` add dropdowns for `Option`, `Type` and other fields as necessary
-- `+` stop the camera shaking - e.g. when flying the plane the camera shakes back and forth every frame
-- `+` add backgrounds to all menus:
-  - settings menu, load panel, map panel, save panel
-- `+` intro tutorial
- - create a nice controls menu
- - show introductory screenshots(?) that depict how to find out the controls for a given model
-- `+` disable adding other chips to cowls
-- `+` remove cowl collider
-- `+` add sensors
-- `+` add water
+- `+++` add sensors
+- `++` add water
 - `+` Create 3 example maps
 - `+` settings menu
   - volume, number of particles
@@ -28,17 +17,27 @@ ChipChallengers - physics chips and programming all in one
   - master sound level, sound effect level, music level
   - particle effects - 0-100 %
   - physics iteration speed
-- `+` rotate the camera around the currently selected object or add an option for it
-- `+` fix the gun having different recoil values at different times in the game
-- `+` freeze the model when not in singleplayer mode
-- `+` stop listening to LUA controls when not in singleplayer mode
-- `+` find out why the physics timing makes wheels speed up cars differently 
 - `+++` implement multiplayer
 - `+` game modes: pool, snake
-- `+` Add option to change units in HUD
+
+- `++` add dropdowns for `Option`, `Type` and other fields as necessary
+- `+` add backgrounds to all menus:
+  - settings menu, load panel, map panel, save panel
+- `+` intro tutorial
+ - create a nice controls menu
+ - show introductory screenshots(?) that depict how to find out the controls for a given model
+- `+` rotate the camera around the currently selected object or add an option for it
+- `+` fix the gun having different recoil values at different times in the game
+- `+` find out why the physics timing makes wheels speed up cars differently 
 
 ### Done
+- `+` disable adding other chips to cowls
+- `+` remove cowl collider
+- `+` stop the camera shaking - e.g. when flying the plane the camera shakes back and forth every frame
+- `+` make the camera follow the player also in direction of looking, so when player goes down, camera also looks down
 - `+` singleplayer - text at the top to show F1 and ESC
+- `+` freeze the model when not in singleplayer mode
+- `+` stop listening to LUA controls when not in singleplayer mode
 - `+` TODO fix crash when I change Core type to something other
   - Core type MUST NOT BE CHANGEABLE
 - `+` when freshly downloading the game, then check if the settings are at default values, otherwise set them to default

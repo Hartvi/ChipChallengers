@@ -361,7 +361,7 @@ end
         string luaModel = IOHelpers.LoadModel(modelName);
         VModel m = VModel.FromLuaModel(luaModel);
         m.modelName = modelName.Substring(0, modelName.Length - UIStrings.ModelExtension.Length);
-        PRINT.IPrint(m.variables.Length);
+        //PRINT.IPrint(m.variables.Length);
         return m;
     }
 
