@@ -294,11 +294,11 @@ public class EditorMenu : BaseMenu, InputReceiver
             if (Input.GetKeyDown(KeyCode.S))
             {
 
-                this.SavePanel.ActivatePanel(GameManager.Instance.selectedModel);
+                this.SavePanel.ActivatePanel(GameManager.Instance.GetModel());
             }
             if (Input.GetKeyDown(KeyCode.O))
             {
-                this.LoadPanel.ActivatePanel(GameManager.Instance.selectedModel);
+                this.LoadPanel.ActivatePanel(GameManager.Instance.GetModel());
             }
             if (Input.GetKeyDown(KeyCode.P))
             {

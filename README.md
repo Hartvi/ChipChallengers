@@ -31,6 +31,8 @@ ChipChallengers - physics chips and programming all in one
 - `+` find out why the physics timing makes wheels speed up cars differently 
 
 ### Done
+- `+` when deleting characters in input boxes, ignore all other input listeners
+  - already began in chip panel
 - `+` disable adding other chips to cowls
 - `+` remove cowl collider
 - `+` stop the camera shaking - e.g. when flying the plane the camera shakes back and forth every frame

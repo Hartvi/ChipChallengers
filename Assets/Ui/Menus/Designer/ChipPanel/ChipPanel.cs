@@ -4,8 +4,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using UnityEngine.EventSystems;
 
-public class ChipPanel : BasePanel
+public class ChipPanel : BasePanel, InputReceiver, IPointerEnterHandler, IPointerExitHandler
 {
     int inputIndex = 0;
     TMP_InputField[] currentInputs;
@@ -14,6 +15,7 @@ public class ChipPanel : BasePanel
     ItemBase ValueItem;
 
     BaseImage backgroundImage;
+    bool insideChipPanel = false;
 
     void Start()
     {
@@ -42,31 +44,14 @@ public class ChipPanel : BasePanel
     public override void Setup()
     {
         base.Setup();
-        this.vProp = new VirtualProp(PropType.Panel, 1f, 
-                new VirtualProp(PropType.Image, 1f, 
-                //new VirtualProp(PropType.Panel, 0.5f, down,
-                //    new VirtualProp(PropType.Panel, 1/3f, right,
-                //        new VirtualProp(PropType.Panel, 1/3f),
-                //        new VirtualProp(PropType.Panel, 1/3f), 
-                //        new VirtualProp(PropType.Panel, 1/3f)
-                //    ),
-                //    new VirtualProp(PropType.Panel, 1/3f, right,
-                //        new VirtualProp(PropType.Panel, 1/3f),
-                //        new VirtualProp(PropType.Panel, 1/3f), 
-                //        new VirtualProp(PropType.Panel, 1/3f)
-                //    ),
-                //    new VirtualProp(PropType.Panel, 1/3f, right,
-                //        new VirtualProp(PropType.Panel, 1/3f),
-                //        new VirtualProp(PropType.Panel, 1/3f), 
-                //        new VirtualProp(PropType.Panel, 1/3f)
-                //    )
-                //),
+        this.vProp = new VirtualProp(PropType.Panel, 1f,
+                new VirtualProp(PropType.Image, 1f,
                 new VirtualProp(PropType.Panel, -1f, right,
                     new VirtualProp(PropType.Panel, 0.5f, down,
-                        new VirtualProp(PropType.Text, 1f/(float)VChip.allPropertiesStr.Length, typeof(ItemBase))
+                        new VirtualProp(PropType.Text, 1f / (float)VChip.allPropertiesStr.Length, typeof(ItemBase))
                     ),
                     new VirtualProp(PropType.Panel, 0.5f, down,
-                        new VirtualProp(PropType.Input, 1f/(float)VChip.allPropertiesStr.Length, typeof(ItemBase))
+                        new VirtualProp(PropType.Input, 1f / (float)VChip.allPropertiesStr.Length, typeof(ItemBase))
                     )
                 )
             )
@@ -75,7 +60,7 @@ public class ChipPanel : BasePanel
 
     (TMP_Text[], TMP_InputField[]) DisplayChipProperties(string[] leftTexts, string[] rightTexts)
     {
-        if(leftTexts.Length != rightTexts.Length)
+        if (leftTexts.Length != rightTexts.Length)
         {
             throw new ArgumentException($"Left texts {leftTexts.Length} aren't the same length as right texts {rightTexts.Length}.");
         }
@@ -86,7 +71,7 @@ public class ChipPanel : BasePanel
         ItemBase[] nameItems = this.NameItem.DisplayNItems<ItemBase>(leftTexts.Length);
         ItemBase[] valueItems = this.ValueItem.DisplayNItems<ItemBase>(rightTexts.Length);
 
-        for(int i = 0; i < leftTexts.Length; ++i)
+        for (int i = 0; i < leftTexts.Length; ++i)
         {
             var nameTxt = nameItems[i].GetComponent<TMP_Text>();
 
@@ -117,12 +102,12 @@ public class ChipPanel : BasePanel
         string[] newKeys = ArrayExtensions.AccessLikeDict(chipType, VChip.chipData.keys, VChip.chipData.values);
         string[] newValues = new string[newKeys.Length];
 
-        for(int i = 0; i < newKeys.Length; ++i)
+        for (int i = 0; i < newKeys.Length; ++i)
         {
             string currentProperty = newKeys[i];
             string val = ArrayExtensions.AccessLikeDict(currentProperty, vc.keys, vc.vals);
 
-            if(val is not null)
+            if (val is not null)
             {
                 newValues[i] = val.ToString();
             }
@@ -145,15 +130,15 @@ public class ChipPanel : BasePanel
         displayValues = new string[newValues.Length + deltaLength];
 
         int k = 0;
-        for(int i = 0; i < newKeys.Length; ++i)
+        for (int i = 0; i < newKeys.Length; ++i)
         {
             string currentProperty = newKeys[i];
-            if(currentProperty == VChip.typeStr && isCore) { continue; }
+            if (currentProperty == VChip.typeStr && isCore) { continue; }
 
             displayKeys[k] = currentProperty;
             string val = ArrayExtensions.AccessLikeDict(currentProperty, vc.keys, vc.vals);
 
-            if(val is not null)
+            if (val is not null)
             {
                 displayValues[k] = val.ToString();
             }
@@ -163,13 +148,13 @@ public class ChipPanel : BasePanel
             }
             ++k;
         }
-        
+
         (TMP_Text[] texts, TMP_InputField[] inputs) = this.DisplayChipProperties(displayKeys, displayValues);
 
         // for tabbing through the fields
         this.currentInputs = inputs;
 
-        for(int i = 0; i < inputs.Length; ++i)
+        for (int i = 0; i < inputs.Length; ++i)
         {
             int _i = i;
 
@@ -211,16 +196,17 @@ public class ChipPanel : BasePanel
             if (inputs[_i] is null)
             {
                 Debug.LogWarning($"input {_i} IS NULL; text: {texts[_i]}");
-                if(texts[_i] is not null)
+                if (texts[_i] is not null)
                 {
                     Debug.LogWarning($"text val: {texts[_i].text}");
                 }
             }
             inputs[_i].onEndEdit.RemoveAllListeners();
             inputs[_i].onEndEdit.AddListener(
-                x => {
+                x =>
+                {
                     string validityMsg = vc.CheckValidityOfPropertyForThisChip(texts[_i].text, x);
-                    if(validityMsg is not null)
+                    if (validityMsg is not null)
                     {
                         inputs[_i].SetTextWithoutNotify(vc.vals[_i]);
                         DisplaySingleton.Instance.DisplayText(ChipPanel.SetFormatMsg(validityMsg), 3f);
@@ -239,38 +225,85 @@ public class ChipPanel : BasePanel
 
     static Action<TMP_Text> SetFormatMsg(string msg)
     {
-        Action<TMP_Text> action = x => 
+        Action<TMP_Text> action = x =>
         {
             x.SetText(msg);
             DisplaySingleton.ErrorMsgModification(x);
         };
         return action;
     }
-    
-    void Update()
+
+
+
+    void IPointerExitHandler.OnPointerExit(PointerEventData eventData)
     {
-        TabSwitch();
+        this.insideChipPanel = false;
+        Debug.Log("EXITED CHIP PANEL");
+    }
+
+    void IPointerEnterHandler.OnPointerEnter(PointerEventData eventData)
+    {
+        this.insideChipPanel = true;
+        Debug.Log("POINTER ENTERED");
     }
 
     void TabSwitch()
     {
-        if (Input.GetKeyDown(KeyCode.Tab)) {
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
             bool shiftPressed = Input.GetKey(KeyCode.RightShift) || Input.GetKey(KeyCode.LeftShift);
             int shiftDirection = shiftPressed ? -1 : 1;
 
             this.inputIndex = this.inputIndex + shiftDirection;
 
-            if(this.inputIndex < 0)
+            if (this.inputIndex < 0)
             {
                 this.inputIndex = this.currentInputs.Length - 1;
             }
-            else if(this.inputIndex >= this.currentInputs.Length)
+            else if (this.inputIndex >= this.currentInputs.Length)
             {
                 this.inputIndex = 0;
             }
 
             this.currentInputs[this.inputIndex].Select();
         }
+    }
+
+    bool InputReceiver.IsActive()
+    {
+        return this.gameObject.activeSelf;
+    }
+
+    void Update()
+    {
+
+        if (Input.GetMouseButtonDown(0))
+        {
+            if (this.insideChipPanel)
+            {
+                UIManager.instance.SwitchToMe(this);
+            }
+        }
+    }
+
+    void InputReceiver.HandleInputs()
+    {
+        this.TabSwitch();
+        if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1))
+        {
+            if (!this.insideChipPanel)
+            {
+                UIManager.instance.TurnMeOff(this);
+            }
+        }
+    }
+
+    void InputReceiver.OnStopReceiving()
+    {
+    }
+
+    void InputReceiver.OnStartReceiving()
+    {
     }
 }
 
@@ -283,7 +316,7 @@ public class ModuloInt
     {
         ++mi.i;
 
-        if(mi.i >= mi.Max)
+        if (mi.i >= mi.Max)
         {
             mi.i = 0;
         }

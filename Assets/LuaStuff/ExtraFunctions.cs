@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using MoonSharp.Interpreter;
 
-public class ExtraFunctions: MonoBehaviour
+public class ExtraFunctions : MonoBehaviour
 {
     public static bool Key(char k)
     {
@@ -63,7 +63,7 @@ public class ExtraFunctions: MonoBehaviour
 
         DynValue res = script.Call(script.Globals["loop"]);
     }
-    
+
 
     void Update()
     {
@@ -98,22 +98,20 @@ public class ScriptInstance
         // place holder, user can rewrite it later
         this.script.Globals["Loop"] = (Action)(() => { });
 
-        //PRINT.print($"Script string: is null: {this.scriptString == null}, {this.scriptString}");
+        /*
+         * w1 = chip_name.ReadOmega()
+         * */
+        // FOR EACH CHIP:
+        // register a new function as chip_nameReadOmega that returns sth
+        // replace chip_name.ReadOmega() with chip_nameReadOmega()
+
         // select all variables
         string[] varNames = vModel.variables.Select(x => x.name).ToArray();
         // only choose valid ones
         varNames = varNames.Where(x => x.IsVariableName()).ToArray();
 
-        //PRINT.IPrint($"Number of variables: {varNames.Length}");
-        //for(int i = 0; i < varNames.Length; ++i)
-        //{
-        //    PRINT.IPrint($"variable: {varNames[i]}, is variable: {varNames[i].IsVariableName()}");
-        //}
-
         this.scriptString = ScriptInstance.TransformCode(this.scriptString, varNames);
 
-        //PRINT.IPrint($"Script string:");
-        //PRINT.IPrint(this.scriptString);
         try
         {
             this.script.DoString(this.scriptString);
@@ -125,9 +123,79 @@ public class ScriptInstance
                 {
                     DisplaySingleton.ErrorMsgModification(x);
                     x.SetText(e.Message);
-                }, 
+                },
                 3f
             );
+        }
+    }
+
+    /// <summary>
+    /// Link sensors to real chips. VModel should have real chips assigned
+    /// </summary>
+    /// <param name="vModel"></param>
+    public void LinkSensors(VModel vModel)
+    {
+        if (!vModel.hasRealChips)
+        {
+            throw new ArgumentNullException($"Virtual model does not have real chips initialized!");
+        }
+        PRINT.IPrint($"Linking sensors.");
+
+        for (int i = 0; i < vModel.chips.Length; ++i)
+        {
+            var currentChip = vModel.chips[i];
+            SensorAspect sa = currentChip.rChip.GetComponent<SensorAspect>();
+            if (sa is null) { continue; }
+
+            string sensorStr = "";
+            bool hasName = currentChip.TryGetProperty<string>(VChip.nameStr, out string nameval);
+            switch (sa.sensorType)
+            {
+                case SensorType.Distance:
+                    {
+                        sensorStr = "ReadDistance";
+                        this.script.Globals[nameval + sensorStr] = (Func<float>)sa.ReadDistance;
+                        break;
+                    }
+                case SensorType.Altitude:
+                    {
+                        sensorStr = "ReadAltitude";
+                        this.script.Globals[nameval + sensorStr] = (Func<float>)sa.ReadAltitude;
+                        break;
+                    }
+                case SensorType.AngularVelocity:
+                    {
+                        sensorStr = "ReadAngularVelocity";
+                        this.script.Globals[nameval + sensorStr] = (Func<Script, Table>)sa.ReadAngularVelocity;
+                        break;
+                    }
+                case SensorType.Rotation:
+                    {
+                        sensorStr = "ReadRotation";
+                        this.script.Globals[nameval + sensorStr] = (Func<Script, Table>)sa.ReadRotation;
+                        break;
+                    }
+                case SensorType.Acceleration:
+                    {
+                        sensorStr = "ReadAcceleration";
+                        this.script.Globals[nameval + sensorStr] = (Func<Script, Table>)sa.ReadAcceleration;
+                        break;
+                    }
+                default:
+                    {
+                        break;
+                    }
+            }
+            this.scriptString = this.scriptString.Replace("." + sensorStr, sensorStr);
+            if (hasName)
+            {
+                PRINT.IPrint($"setting function {nameval + sensorStr}");
+            }
+            else
+            {
+                bool hasType = currentChip.TryGetProperty<string>(VChip.typeStr, out string typeval);
+                PRINT.IPrint($"chip {typeval} has no name. default: {nameval}");
+            }
         }
     }
 
@@ -158,12 +226,11 @@ public class ScriptInstance
 
     public void CallLoop()
     {
-        //PRINT.IPrint($"globals: ");
-        //PRINT.IPrint(script.Globals.Keys);
         try
         {
             DynValue res = script.Call(script.Globals["Loop"]);
-        } catch (Exception e)
+        }
+        catch (Exception e)
         {
             DisplaySingleton.Instance.DisplayText(
                 x =>

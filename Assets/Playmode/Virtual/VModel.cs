@@ -10,6 +10,21 @@ public class VModel
     protected string modelName = "";
     public string ModelName { get { return this.modelName; } }
 
+    public bool hasRealChips
+    {
+        get
+        {
+            for (int i = 0; i < this.chips.Length; ++i)
+            {
+                if (this.chips[i].rChip is null)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+
     public static VVar EmptyVariable
     {
         get
@@ -29,7 +44,7 @@ public class VModel
         {
             //PRINT.print($"Setting chips to length: {value.Length}");
             this._chips = value;
-            for(int i = 0; i < this._chips.Length; ++i)
+            for (int i = 0; i < this._chips.Length; ++i)
             {
                 // TODO link children to parents since we have all chips at once so we can quickly build the model
                 VChip chip = this._chips[i];
@@ -40,7 +55,7 @@ public class VModel
                     chip.Children = children;
                 }
             }
-            foreach(var v in value)
+            foreach (var v in value)
             {
                 v.MyModel = this;
             }
@@ -218,7 +233,7 @@ end
         //    PRINT.print($"Id: {virtualChip.id}");
         //    PRINT.print($"parent id: {virtualChip.parentId}");
         //}
-        foreach(var virtualChip in this.chips)
+        foreach (var virtualChip in this.chips)
         {
             var parentChips = this.chips.Where(x => x.id == virtualChip.parentId).ToArray();
             if (parentChips.Length > 1)
@@ -274,7 +289,7 @@ end
         }
 
         PRINT.IPrint($"Num add listeners: {this.AddedActions.Length}");
-        foreach(var action in this.AddedActions)
+        foreach (var action in this.AddedActions)
         {
             action(v.name);
         }
@@ -299,8 +314,8 @@ end
 
         this.variables = this.variables.Where(x => x != selectedVar).ToArray(); //  .Concat(new VirtualVariable[]{ v }).ToArray();
         this.SetSelectedVariable(string.Empty);
-        
-        foreach(var action in this.DeleteActions)
+
+        foreach (var action in this.DeleteActions)
         {
             action(selectedVarName);
         }
@@ -322,7 +337,7 @@ end
         }
 
 
-        foreach(var action in this.SelectedActions)
+        foreach (var action in this.SelectedActions)
         {
             action(value);
         }
@@ -365,7 +380,8 @@ end
         return m;
     }
 
-    public VChip[] GetAllVChips() {
+    public VChip[] GetAllVChips()
+    {
         return GetChipAndChildren("a");
     }
 
@@ -391,7 +407,8 @@ end
         return _GetChipAndChildren(id).ToArray();
     }
 
-    public void DeleteChip(string id) {
+    public void DeleteChip(string id)
+    {
         VChip[] chipsToDelete = this.GetChipAndChildren(id).ToArray();
         // vcs is the chips we DONT want to delete
         this.chips = Array.FindAll(this.chips, x => !chipsToDelete.Contains(x));

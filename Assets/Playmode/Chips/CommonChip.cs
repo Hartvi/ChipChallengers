@@ -455,6 +455,7 @@ public class CommonChip : AngleChip
             // this is to register chips that haven't been added in
             this.VirtualModel.SetChipsWithoutNotify(this.AllChips.Select(x => x.equivalentVirtualChip).ToArray());
         }
+        this.scriptInstance.LinkSensors(this.VirtualModel);
 
 
         //foreach (var c in this.AllChildren)
