@@ -1,11 +1,17 @@
 # ChipChallengers
 ChipChallengers - physics chips and programming all in one
+# Website
+https://lotramus.itch.io/chip-challengers
+
+![alt text](https://img.itch.zone/aW1hZ2UvMjQ0MzQ5My8xNDQ3NTM1MC5wbmc=/347x500/hVpN0B.png "editor") ![alt text](https://img.itch.zone/aW1hZ2UvMjQ0MzQ5My8xNDQ3NTMzNi5wbmc=/347x500/Oo7eQt.png "plane") ![alt text](https://img.itch.zone/aW1hZ2UvMjQ0MzQ5My8xNDQ3NTM5MS5wbmc=/347x500/9v%2Ftpf.png "lua") ![alt text](https://img.itch.zone/aW1hZ2UvMjQ0MzQ5My8xNDQ3NTM3MC5wbmc=/347x500/gybjsd.png "weird_car")
+
 
 ### TODO
 - `+` fix lua throwing an exception when the code is incomplete
   - `+` autofill available functions??
   - `+` provide documentation for available lua functions
 - `++` add water
+- `++` add dropdowns for `Option`, `Type` and other fields as necessary
 - `+` Create 3 example maps
 - `+` settings menu
   - volume, number of particles
