@@ -63,7 +63,7 @@ public abstract class GeometricChip : StaticChip
         get
         {
             if (!this.IsCore) throw new FieldAccessException("Trying to access virtual model from a non-core object.");
-            if(this._VirtualModel == null)
+            if (this._VirtualModel == null)
             {
                 throw new NullReferenceException($"Virtual model of core is null.");
                 //this._VirtualModel = new VirtualModel();
@@ -156,27 +156,15 @@ public abstract class GeometricChip : StaticChip
             return this._inverse;
         }
     }
+
     protected int _option = -1;
-    protected int option
-    {
-        get
-        {
-            if (this._option == -1)
-            {
-                throw new InvalidOperationException($"Mass depends on option. Option has not been set yet.");
-            }
-            return this._option;
-        }
-        set { this._option = value; }
-    }
+    public int option { get { return this._option; } }
 
     public float mass
     {
         get
         {
             string chipType = this.equivalentVirtualChip.ChipType;
-            this.equivalentVirtualChip.TryGetProperty<int>(VChip.optionStr, out int option);
-            this.option = option;
 
             switch (chipType)
             {
@@ -188,19 +176,21 @@ public abstract class GeometricChip : StaticChip
                 case VChip.axleStr:
                 case VChip.gunStr:
                 case VChip.coreStr:
-                case VChip.sensorStr:
                     if (this.option == 0)
                     {
                         return PhysicsData.mediumMass;
-                    } else if(this.option == 1)
+                    }
+                    else if (this.option == 1)
                     {
                         return PhysicsData.smallMass;
-                    } else
+                    }
+                    else
                     {
                         Debug.LogWarning($"Selecting unknown option `{this.option}` for chip `{this.equivalentVirtualChip.ChipType}`");
                         return PhysicsData.mediumMass;
                     }
                 case VChip.cowlStr:
+                case VChip.sensorStr:
                     return 0.1f;
                 default:
                     return PhysicsData.mediumMass;

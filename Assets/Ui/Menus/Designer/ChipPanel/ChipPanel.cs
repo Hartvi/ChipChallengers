@@ -158,7 +158,7 @@ public class ChipPanel : BasePanel, InputReceiver, IPointerEnterHandler, IPointe
         {
             int _i = i;
 
-
+            // TODO DROPDOWNS
             // IF OPTION OR CHIP TYPE
             //if (texts[_i].text == VChip.typeStr)
             //{
@@ -238,13 +238,11 @@ public class ChipPanel : BasePanel, InputReceiver, IPointerEnterHandler, IPointe
     void IPointerExitHandler.OnPointerExit(PointerEventData eventData)
     {
         this.insideChipPanel = false;
-        Debug.Log("EXITED CHIP PANEL");
     }
 
     void IPointerEnterHandler.OnPointerEnter(PointerEventData eventData)
     {
         this.insideChipPanel = true;
-        Debug.Log("POINTER ENTERED");
     }
 
     void TabSwitch()

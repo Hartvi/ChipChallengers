@@ -139,46 +139,47 @@ public class ScriptInstance
         {
             throw new ArgumentNullException($"Virtual model does not have real chips initialized!");
         }
-        PRINT.IPrint($"Linking sensors.");
 
         for (int i = 0; i < vModel.chips.Length; ++i)
         {
-            var currentChip = vModel.chips[i];
+            int _i = i;
+            var currentChip = vModel.chips[_i];
             SensorAspect sa = currentChip.rChip.GetComponent<SensorAspect>();
             if (sa is null) { continue; }
 
-            string sensorStr = "";
             bool hasName = currentChip.TryGetProperty<string>(VChip.nameStr, out string nameval);
+            string sensorStr = nameval+UIStrings.Read;
             switch (sa.sensorType)
             {
                 case SensorType.Distance:
                     {
-                        sensorStr = "ReadDistance";
-                        this.script.Globals[nameval + sensorStr] = (Func<float>)sa.ReadDistance;
+                        
+                        this.script.Globals[sensorStr] = (Func<float>)(sa.ReadDistance);
                         break;
                     }
                 case SensorType.Altitude:
                     {
-                        sensorStr = "ReadAltitude";
-                        this.script.Globals[nameval + sensorStr] = (Func<float>)sa.ReadAltitude;
+                        this.script.Globals[sensorStr] = (Func<float>)sa.ReadAltitude;
                         break;
                     }
                 case SensorType.AngularVelocity:
                     {
-                        sensorStr = "ReadAngularVelocity";
-                        this.script.Globals[nameval + sensorStr] = (Func<Script, Table>)sa.ReadAngularVelocity;
+                        this.script.Globals[sensorStr] = (Func<Script, Table>)sa.ReadAngularVelocity;
                         break;
                     }
                 case SensorType.Rotation:
                     {
-                        sensorStr = "ReadRotation";
-                        this.script.Globals[nameval + sensorStr] = (Func<Script, Table>)sa.ReadRotation;
+                        this.script.Globals[sensorStr] = (Func<Script, Table>)sa.ReadRotation;
                         break;
                     }
                 case SensorType.Acceleration:
                     {
-                        sensorStr = "ReadAcceleration";
-                        this.script.Globals[nameval + sensorStr] = (Func<Script, Table>)sa.ReadAcceleration;
+                        this.script.Globals[sensorStr] = (Func<Script, Table>)sa.ReadAcceleration;
+                        break;
+                    }
+                case SensorType.Velocity:
+                    {
+                        this.script.Globals[sensorStr] = (Func<Script, Table>)sa.ReadVelocity;
                         break;
                     }
                 default:
@@ -186,16 +187,8 @@ public class ScriptInstance
                         break;
                     }
             }
-            this.scriptString = this.scriptString.Replace("." + sensorStr, sensorStr);
-            if (hasName)
-            {
-                PRINT.IPrint($"setting function {nameval + sensorStr}");
-            }
-            else
-            {
-                bool hasType = currentChip.TryGetProperty<string>(VChip.typeStr, out string typeval);
-                PRINT.IPrint($"chip {typeval} has no name. default: {nameval}");
-            }
+            this.scriptString = this.scriptString.Replace("." + UIStrings.Read, UIStrings.Read);
+            this.script.DoString(this.scriptString);
         }
     }
 
@@ -228,6 +221,11 @@ public class ScriptInstance
     {
         try
         {
+            //foreach (var k in this.script.Globals.Keys)
+            //{
+            //    PRINT.IPrint($"Key: {k} Value: {this.script.Globals[k]}");
+            //}
+            //PRINT.IPrint($"Script:\n{this.scriptString}");
             DynValue res = script.Call(script.Globals["Loop"]);
         }
         catch (Exception e)

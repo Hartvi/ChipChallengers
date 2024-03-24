@@ -10,6 +10,8 @@ public enum SensorType
 
 public class SensorAspect : BaseAspect
 {
+    public const int NUMSENSORTYPES = 6;
+
     public SensorType sensorType;
     RaycastHit hit;
     Vector3 oldVelocity = Vector3.zero;
@@ -20,6 +22,19 @@ public class SensorAspect : BaseAspect
     - create a function that replaces chip_name.read() with :
        sensorType == Lidar => SensorAspect.ReadLidar()
     //*/
+
+    protected override void Awake()
+    {
+        base.Awake();
+        // Distance, Altitude, AngularVelocity, Rotation, Acceleration, Velocity
+
+        if(this.myChip.option >= SensorAspect.NUMSENSORTYPES)
+        {
+            Debug.LogError($"option was larger than number of possible sensors");
+        }
+        this.sensorType = (SensorType)(this.myChip.option % SensorAspect.NUMSENSORTYPES);
+        //print($"setting sensortype: {this.sensorType}");
+    }
 
     void Update()
     {
@@ -33,7 +48,10 @@ public class SensorAspect : BaseAspect
     {
         Physics.Raycast(this.transform.position, this.transform.forward, out this.hit);
         // uncertainty grow by 1% for every ten meters
-        return this.hit.distance * (1 + Random.value * 0.001f);
+
+        float dist = this.hit.distance * (1 + Random.value * 0.001f);
+        //print($"READ DISTANCE {dist}");
+        return dist;
     }
 
     public float ReadAltitude()

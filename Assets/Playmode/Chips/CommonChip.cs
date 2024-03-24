@@ -14,6 +14,7 @@ public class CommonChip : AngleChip
     public ScriptInstance scriptInstance;
 
     private LoopScript loopScript;
+
     public static CommonChip ClientCore
     {
         get
@@ -113,6 +114,7 @@ public class CommonChip : AngleChip
             }
 #endif
             return true;
+            //TODO:
             return this.DetermineJointElligibility();
         }
     }
@@ -122,7 +124,6 @@ public class CommonChip : AngleChip
         get
         {
             VChip vc = this.equivalentVirtualChip;
-            //Debug.LogWarning($"TODO: frame option should not be aero-elligible");
 
             bool OptionAeroStuff = true;
             if (vc.TryGetProperty<int>(VChip.optionStr, out int option))
@@ -178,7 +179,7 @@ public class CommonChip : AngleChip
 
         // rotates the objects so they are facing the correct direction
         Vector3 facingDirection = (newChild.transform.position - origin).normalized;
-        
+
         float YrotationAngle = Vector3.Dot(facingDirection, newChild.transform.right);
         float YrotationAngle2 = Mathf.Max(0f, -Vector3.Dot(facingDirection, newChild.transform.forward));
 
@@ -226,17 +227,18 @@ public class CommonChip : AngleChip
             m.color = colour;
         }
 
+        int option = -1;
+        if (this.equivalentVirtualChip.TryGetProperty<int>(VChip.optionStr, out option))
+        {
+            this._option = option;
+            this.SelectOption(option);
+        }
+
         // add runtime aspects
         if (this.isAeroElligible)
         {
             // add aspects, TODO: this wont add it to core!!!
             this.gameObject.AddComponent<Aerodynamics>().myChip = this;
-        }
-
-        int option = -1;
-        if (this.equivalentVirtualChip.TryGetProperty<int>(VChip.optionStr, out option))
-        {
-            this.SelectOption(option);
         }
 
         if (this.equivalentVirtualChip.HasHealth())
@@ -249,6 +251,11 @@ public class CommonChip : AngleChip
         if (this.equivalentVirtualChip.ChipType == VChip.cowlStr)
         {
             this.gameObject.AddComponent<CowlAspect>().myChip = this;
+        }
+
+        if (this.equivalentVirtualChip.ChipType == VChip.sensorStr)
+        {
+            this.gameObject.AddComponent<SensorAspect>().myChip = this;
         }
 
         if (this.equivalentVirtualChip.keys.Contains(VChip.valueStr))

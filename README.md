@@ -2,13 +2,15 @@
 ChipChallengers - physics chips and programming all in one
 
 ### TODO
-- `+++` add sensors
+- `+` fix lua throwing an exception when the code is incomplete
+  - `+` autofill available functions??
+  - `+` provide documentation for available lua functions
 - `++` add water
 - `+` Create 3 example maps
 - `+` settings menu
   - volume, number of particles
   - maybe do sliders
-- `+` add particle effects
+- `+` add particles
   - jet smoke
   - wheel dust
   - gun
@@ -31,6 +33,7 @@ ChipChallengers - physics chips and programming all in one
 - `+` find out why the physics timing makes wheels speed up cars differently 
 
 ### Done
+- `+++` add sensors
 - `+` when deleting characters in input boxes, ignore all other input listeners
   - already began in chip panel
 - `+` disable adding other chips to cowls

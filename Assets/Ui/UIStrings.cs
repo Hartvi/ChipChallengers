@@ -5,6 +5,18 @@ using UnityEngine;
 
 public static class UIStrings
 {
+    public const string ReadDistance = "ReadDistance";
+    public const string ReadAltitude = "ReadAltitude";
+    public const string ReadAngularVelocity = "ReadAngularVelocity";
+    public const string ReadRotation = "ReadRotation";
+    public const string ReadAcceleration = "ReadAcceleration";
+    public const string ReadVelocity = "ReadVelocity";
+    public const string Read = "Read";
+    public static readonly string[] SensorNames = new string[] { 
+        ReadDistance, ReadAltitude, ReadAngularVelocity, 
+        ReadRotation, ReadAcceleration, ReadVelocity 
+    };
+
     public const string MiniControls = "   Mini controls:   F1 - show controls   Ctrl+U - go to start   Ctrl+R - reset model   Esc - go to main menu";
 
     public static readonly string[] ControlsKeys = {
