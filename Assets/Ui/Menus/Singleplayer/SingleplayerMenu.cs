@@ -339,7 +339,7 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
             }
             if (Input.GetKeyDown(KeyCode.L))
             {
-                print($"setting active load panel with selected model: {GameManager.Instance.GetModel()}");
+                //print($"setting active load panel with selected model: {GameManager.Instance.GetModel()}");
                 this.LoadPanel.ActivatePanel(GameManager.Instance.GetModel());
                 //this.LoadPanel.gameObject.SetActive(true);
             }

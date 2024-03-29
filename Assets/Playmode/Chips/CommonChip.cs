@@ -252,6 +252,10 @@ public class CommonChip : AngleChip
         {
             this.gameObject.AddComponent<CowlAspect>().myChip = this;
         }
+        else
+        {
+            this.gameObject.AddComponent<DustAspect>().myChip = this;
+        }
 
         if (this.equivalentVirtualChip.ChipType == VChip.sensorStr)
         {

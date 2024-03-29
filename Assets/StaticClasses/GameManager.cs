@@ -5,13 +5,16 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    public void SetModel(string m) {
-        print($"setting model to {m}");
+    public void SetModel(string m)
+    {
+        //print($"setting model to {m}");
         this.selectedModel = m;
     }
-    public string GetModel()  {
-        print($"getting model {this.selectedModel}"); return this.selectedModel;
-        }
+    public string GetModel()
+    {
+        //print($"getting model {this.selectedModel}"); 
+        return this.selectedModel;
+    }
     protected string selectedModel = "";
 
     public static readonly Dictionary<string, Tuple<int, int>> minMaxIntSettings = new Dictionary<string, Tuple<int, int>>()

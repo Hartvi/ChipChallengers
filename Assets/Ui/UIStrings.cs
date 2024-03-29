@@ -5,6 +5,8 @@ using UnityEngine;
 
 public static class UIStrings
 {
+    public const string Dust = "Dust";
+
     public const string ReadDistance = "ReadDistance";
     public const string ReadAltitude = "ReadAltitude";
     public const string ReadAngularVelocity = "ReadAngularVelocity";

@@ -80,7 +80,9 @@ public class HUD : TopProp
     {
         for(int i = 0; i < this.displayVariables.Length; ++i)
         {
-            this.CurrentValueTxts[i].SetText(this.displayVariables[i].currentValue.ToString());
+            // TODO: variable was outside of bounds
+            var t = this.displayVariables[i].currentValue.ToString();
+            this.CurrentValueTxts[i].SetText(t);
         }
     }
 

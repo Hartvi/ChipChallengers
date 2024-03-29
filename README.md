@@ -7,6 +7,8 @@ https://lotramus.itch.io/chip-challengers
 
 
 ### TODO
+- `+` remove air resistance for jets
+- `+` autosave the last model to a `tmp_model`
 - `+` fix lua throwing an exception when the code is incomplete
   - `+` autofill available functions??
   - `+` provide documentation for available lua functions

@@ -148,12 +148,12 @@ public class ScriptInstance
             if (sa is null) { continue; }
 
             bool hasName = currentChip.TryGetProperty<string>(VChip.nameStr, out string nameval);
-            string sensorStr = nameval+UIStrings.Read;
+            string sensorStr = nameval + UIStrings.Read;
             switch (sa.sensorType)
             {
                 case SensorType.Distance:
                     {
-                        
+
                         this.script.Globals[sensorStr] = (Func<float>)(sa.ReadDistance);
                         break;
                     }
