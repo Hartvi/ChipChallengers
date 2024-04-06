@@ -50,8 +50,8 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
     {
         base.Setup();
         this.vProp = new VirtualProp(PropType.Panel, 1f, zero,
-            new VirtualProp(PropType.Panel, 1f, down, 
-                new VirtualProp(PropType.Image, 0.04f, down, 
+            new VirtualProp(PropType.Panel, 1f, down,
+                new VirtualProp(PropType.Image, 0.04f, down,
                     new VirtualProp(PropType.Text, 1f, down, typeof(MiniControls))
                 )
             ),
@@ -155,6 +155,9 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
         Camera.main.transform.position = (Camera.main.transform.position - core.transform.position).normalized * 5f + core.transform.position;
         Camera.main.transform.LookAt(core.transform.position);
         //Camera.main.transform.position = this.core.transform.position + Vector3.up * 10f;
+
+
+        CommonChip.ClientCore.VirtualModel.SaveThisModelToFile(UIStrings.Backup + UIStrings.ModelExtension);
     }
 
     //void Update()
@@ -411,7 +414,7 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
                     {
                         this.cameraFollowSettings.predict *= 2f;
                     }
-                    if(Input.GetKeyDown(KeyCode.KeypadDivide) || Input.GetKeyDown(KeyCode.Slash))
+                    if (Input.GetKeyDown(KeyCode.KeypadDivide) || Input.GetKeyDown(KeyCode.Slash))
                     {
                         this.cameraFollowSettings.predict *= 0.5f;
                     }

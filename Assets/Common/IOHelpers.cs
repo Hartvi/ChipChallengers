@@ -109,6 +109,6 @@ public class IOHelpers
         // Write the content to the file
         File.WriteAllText(filePath, content);
 
-        Debug.Log($"Saved content to file: {filePath}");
+        //Debug.Log($"Saved content to file: {filePath}");
     }
 }

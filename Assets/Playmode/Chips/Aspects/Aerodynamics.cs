@@ -9,7 +9,7 @@ using UnityEngine;
 public class Aerodynamics : BaseAspect
 {
     // https://en.wikipedia.org/wiki/Drag_(physics)#Aerodynamics
-    const float ConstantPartOfDragAndLift = 1f * PhysicsData.seaLevelDensity * (GeometricChip.ChipSide * GeometricChip.ChipSide);
+    const float ConstantPartOfDragAndLift = 6.28f * PhysicsData.seaLevelDensity * (GeometricChip.ChipSide * GeometricChip.ChipSide);
 
     void Start()
     {
@@ -51,13 +51,15 @@ public class Aerodynamics : BaseAspect
         //this.rb.AddForce(commonConstant * (up * DragAndLiftProportion * DragAndLiftProportion + ExtraDrag));
 
         // everything is an aerofoil with infinite stall speed:
-        float invDeltaTime = 1f / Time.deltaTime;
-        this.rb.AddForce(invDeltaTime * (commonConstant * (up * DragAndLiftProportion * DragAndLiftProportion) - 0.05f * velocity));
+        //this.rb.AddForce(invDeltaTime * (commonConstant * (up * DragAndLiftProportion * DragAndLiftProportion) - 0.05f * velocity));
+        Vector3 finalForce = (commonConstant * (up * DragAndLiftProportion * DragAndLiftProportion) - 0.05f * velocity);
         if (underwater == 1)
         {
+            finalForce += -(PhysicsData.seaLevelDensity * 6.28f * velocity + 25f * up * DragAndLiftProportion + Vector3.up);
             // experimentally verified that this does not crash
-            this.rb.AddForce(-invDeltaTime * (1f * velocity + 25f * up * DragAndLiftProportion + Vector3.up));
+            //this.rb.AddForce(-Time.deltaTime* (PhysicsData.seaLevelDensity * velocity + 25f * up * DragAndLiftProportion + Vector3.up), ForceMode.Impulse);
         }
+        this.rb.AddForce(Time.deltaTime * finalForce, ForceMode.Impulse);
     }
 
     //void FixedUpdate()

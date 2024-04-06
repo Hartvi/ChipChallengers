@@ -7,12 +7,11 @@ https://lotramus.itch.io/chip-challengers
 
 
 ### TODO
-- `+` remove air resistance for jets
-- `+` autosave the last model to a `tmp_model`
+- `+` wheel dust
+- `+` add wheel spinning
 - `+` fix lua throwing an exception when the code is incomplete
   - `+` autofill available functions??
   - `+` provide documentation for available lua functions
-- `++` add water
 - `++` add dropdowns for `Option`, `Type` and other fields as necessary
 - `+` Create 3 example maps
 - `+` settings menu
@@ -29,7 +28,7 @@ https://lotramus.itch.io/chip-challengers
   - physics iteration speed
 - `+++` implement multiplayer
 - `+` game modes: pool, snake
-
+---------------------------------------------------------------------------------------------------------------
 - `++` add dropdowns for `Option`, `Type` and other fields as necessary
 - `+` add backgrounds to all menus:
   - settings menu, load panel, map panel, save panel
@@ -41,6 +40,9 @@ https://lotramus.itch.io/chip-challengers
 - `+` find out why the physics timing makes wheels speed up cars differently 
 
 ### Done
+- `+` add jet dust
+- `++` add water
+- `+` autosave the last model as a `tmp_model`
 - `+++` add sensors
 - `+` when deleting characters in input boxes, ignore all other input listeners
   - already began in chip panel

@@ -4,14 +4,14 @@ using UnityEngine;
 
 public class MainCamera : MonoBehaviour
 {
-    int OccasionCounter = 0;
-    float OccasianPeriodSeconds = 10f;
-    int OccasionPeriod;
+    //int OccasionCounter = 0;
+    //float OccasianPeriodSeconds = 10f;
+    //int OccasionPeriod;
 
-    float ObjectFactor = 2f;
-    float TimeStepReductionFactor = 0.8f;
-    int MinNumberOfObjects;
-    int OldObjectCount;
+    //float ObjectFactor = 2f;
+    //float TimeStepReductionFactor = 0.8f;
+    //int MinNumberOfObjects;
+    //int OldObjectCount;
 
     bool aboveY = false;
     GameObject water;

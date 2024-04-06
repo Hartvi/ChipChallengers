@@ -264,7 +264,6 @@ end
 
     public void TriggerModelChanged()
     {
-        //PRINT.print($"TRIGGER MODEL CHANGED");
         foreach (var action in this.ModelChangedActions)
         {
             action(this);

@@ -271,6 +271,7 @@ public class CommonChip : AngleChip
             if (this.equivalentVirtualChip.ChipType == VChip.jetStr)
             {
                 this.gameObject.AddComponent<JetAspect>();
+                this.gameObject.AddComponent<JetDustAspect>();
             }
             if (this.equivalentVirtualChip.keys.Contains(VChip.brakeStr))
             {

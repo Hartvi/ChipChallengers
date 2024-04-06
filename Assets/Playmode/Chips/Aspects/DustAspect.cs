@@ -10,7 +10,7 @@ public class DustAspect : BaseAspect
     {
         base.Awake();
         this.particles = Instantiate(Resources.Load<ParticleSystem>(UIStrings.Dust));
-        this.particles.gameObject.SetActive(true);
+        this.particles.gameObject.SetActive(false);
     }
 
     void OnCollisionEnter(Collision collision)
@@ -19,6 +19,14 @@ public class DustAspect : BaseAspect
         //this.particles.transform.rotation = this.transform.rotation;
         this.particles.gameObject.SetActive(true);
         this.particles.Play();
+    }
+
+    void OnDestroy()
+    {
+        if (this.particles)
+        {
+            Object.Destroy(this.particles.gameObject);
+        }
     }
 
 }

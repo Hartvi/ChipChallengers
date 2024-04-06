@@ -167,7 +167,7 @@ public class VirtualContainer
             this._Position = value;
         }
     }
-    bool useDiscreteSteps = false;
+    //bool useDiscreteSteps = false;
 
     int NumberToDisplay, NumberOfSpawned;
     VirtualItem[] virtualItems;

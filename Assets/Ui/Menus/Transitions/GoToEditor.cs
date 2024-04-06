@@ -19,7 +19,7 @@ public class GoToEditor : BaseTransition
         GoToEditor.Function();
     }
 
-    new public static void Function()
+    public static void Function()
     {
         BaseMenu.SwitchToMenu(typeof(EditorMenu));
 

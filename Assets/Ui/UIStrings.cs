@@ -5,6 +5,10 @@ using UnityEngine;
 
 public static class UIStrings
 {
+
+    public const string Backup = "backup";
+
+    public const string JetDust = "JetDust";
     public const string Dust = "Dust";
 
     public const string ReadDistance = "ReadDistance";
