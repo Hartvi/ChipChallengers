@@ -23,7 +23,7 @@ public class JetDustAspect : BaseAspect
         var em = this.particles.emission;
         em.rateOverTime = Mathf.Min(Mathf.Abs(this.value * 0.1f), 100f);
         var m = this.particles.main;
-        m.startSpeed = Mathf.Abs(this.value * 0.1f);
+        m.startSpeed = Mathf.Abs(this.value * 0.01f);
     }
 
     void OnDestroy()

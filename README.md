@@ -7,25 +7,23 @@ https://lotramus.itch.io/chip-challengers
 
 
 ### TODO
-- `+` wheel dust
-- `+` add wheel spinning
-- `+` fix lua throwing an exception when the code is incomplete
-  - `+` autofill available functions??
-  - `+` provide documentation for available lua functions
-- `++` add dropdowns for `Option`, `Type` and other fields as necessary
-- `+` Create 3 example maps
-- `+` settings menu
-  - volume, number of particles
-  - maybe do sliders
-- `+` add particles
-  - jet smoke
-  - wheel dust
-  - gun
 - `+` add sounds
 - `+` options menu
   - master sound level, sound effect level, music level
   - particle effects - 0-100 %
   - physics iteration speed
+- `+` Create 3 example maps
+- `+` settings menu
+  - volume, number of particles
+  - maybe do sliders
+- `+` add particles
+  - Done: jet smoke
+  - Done: wheel dust
+  - gun
+- `+` fix lua throwing an exception when the code is incomplete
+  - `+` autofill available functions??
+  - `+` provide documentation for available lua functions
+- `++` add dropdowns for `Option`, `Type` and other fields as necessary
 - `+++` implement multiplayer
 - `+` game modes: pool, snake
 ---------------------------------------------------------------------------------------------------------------
@@ -40,6 +38,8 @@ https://lotramus.itch.io/chip-challengers
 - `+` find out why the physics timing makes wheels speed up cars differently 
 
 ### Done
+- `+` wheel dust
+- `+` add wheel spinning
 - `+` add jet dust
 - `++` add water
 - `+` autosave the last model as a `tmp_model`

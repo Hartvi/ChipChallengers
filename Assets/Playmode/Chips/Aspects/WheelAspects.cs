@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class WheelAspects : BaseAspect
 {
+    ParticleSystem particles;
+
     public static readonly Vector3 MomentOfInertia = PhysicsData.mediumMass * new Vector3(1 / 4f, 1 / 2f, 1 / 4f) * StaticChip.ChipSide * StaticChip.ChipSide;
     public static readonly float radius = StaticChip.ChipSide * 0.5f;
 
@@ -14,10 +16,10 @@ public class WheelAspects : BaseAspect
     public static float inertiaInvFixedTime = 0f;
 
     public const float carTyreStiffness = 200 * 1e3f;  // N/mm * 1e3
-    
+
     public static readonly float DepenetrationVelocity = 5f;
     public static readonly float DepenetrationVelocitySqr = DepenetrationVelocity * DepenetrationVelocity;
-    
+
     // tire parameters:
     public const float stiffness = 5;  // =20 means that a deformation of 0.05 yields a depenetration velocity of 1
     public const float B = 10f;
@@ -31,6 +33,7 @@ public class WheelAspects : BaseAspect
     Vector3 xForce;
     Vector3 yForce;
     Vector3 oldUp;
+    float xSlip, ySlip;
 
     // VT = Omega * r
     // deltaVx = Vx - VT
@@ -39,14 +42,23 @@ public class WheelAspects : BaseAspect
 
     float Omega;
 
+    Transform childTransform;
+
     void Start()
     {
         this.gameObject.layer = 7;
-        if(WheelAspects.fixedTimeInvInertia == 0f)
+        if (WheelAspects.fixedTimeInvInertia == 0f)
         {
             WheelAspects.fixedTimeInvInertia = Time.fixedDeltaTime * InvPlanarMomentOfInertia;
             WheelAspects.inertiaInvFixedTime = 1f / WheelAspects.fixedTimeInvInertia;
         }
+        this.childTransform = this.transform.GetChild(0);
+
+        this.particles = Instantiate(Resources.Load<ParticleSystem>(UIStrings.Dust));
+        this.particles.gameObject.SetActive(false);
+        this.particles.transform.position = this.transform.position;
+        this.particles.transform.SetParent(this.transform);
+        this.particles.transform.localScale = Vector3.one;
     }
 
     void ApplyTorque(float T)
@@ -127,11 +139,11 @@ public class WheelAspects : BaseAspect
         float VTX = WheelAspects.radius * this.Omega;
         float VX = xVelocity;
         float invVX = 1f / (1e-8f + Mathf.Abs(VX));
-        float xSlip = (VTX - VX) * invVX;
-        float xImpulse = impulseStrength * Pacejka(xSlip);
+        this.xSlip = (VTX - VX) * invVX;
+        float xImpulse = impulseStrength * Pacejka(this.xSlip);
 
-        float ySlip = arctan(-yVelocity * invVX);
-        float yImpulse = impulseStrength * Pacejka(ySlip);
+        this.ySlip = arctan(-yVelocity * invVX);
+        float yImpulse = impulseStrength * Pacejka(this.ySlip);
 
         return (yImpulse, yDirectionInPlane, xImpulse, xDirectionInPlane);
     }
@@ -140,17 +152,41 @@ public class WheelAspects : BaseAspect
     static float Pacejka(float k)
     {
         float Bk = B * k;
-        return D * Mathf.Sin(C * arctan(Bk - E*(Bk - arctan(Bk))));
+        return D * Mathf.Sin(C * arctan(Bk - E * (Bk - arctan(Bk))));
     }
 
     static float arctan(float x)
     {
-        return (1.7f*x) / (0.4f + Mathf.Sqrt(1.7f+1.3f*x*x));
+        return (1.7f * x) / (0.4f + Mathf.Sqrt(1.7f + 1.3f * x * x));
+    }
+
+    void Update()
+    {
+        this.childTransform.Rotate(Vector3.up, -this.Omega, Space.Self);
+
+        float totalSlip = Mathf.Abs(this.xSlip) + Mathf.Abs(this.ySlip);
+        this.particles.gameObject.SetActive(true);
+        if (!this.particles.isPlaying)
+        {
+            this.particles.Play();
+            var m = this.particles.main;
+            m.startSize = Mathf.Min(1f, totalSlip);
+            m.startLifetime = Mathf.Min(1f, totalSlip);
+            var em = this.particles.emission;
+            em.rateOverTime = 7f * totalSlip;
+        }
+        else
+        {
+            if (!this.particles.isPlaying)
+            {
+                this.particles.gameObject.SetActive(false);
+            }
+        }
     }
 
     void FixedUpdate()
     {
-        if(this.RaycastFromBase(out this.point, out this.forwardPosition, out this.normal))
+        if (this.RaycastFromBase(out this.point, out this.forwardPosition, out this.normal))
         {
             Vector3 n = this.normal;
             // tire deformation
@@ -190,7 +226,7 @@ public class WheelAspects : BaseAspect
         Vector3 basePosition = t.position - forwardShift;
         forwardPosition = t.position + forwardShift;
 
-        if(Physics.Raycast(basePosition, t.forward, out RaycastHit h, GeometricChip.ChipSide, this.layerMask))
+        if (Physics.Raycast(basePosition, t.forward, out RaycastHit h, GeometricChip.ChipSide, this.layerMask))
         {
             point = h.point;
             normal = h.normal;
@@ -201,6 +237,14 @@ public class WheelAspects : BaseAspect
             point = Vector3.zero;
             normal = Vector3.zero;
             return false;
+        }
+    }
+
+    void OnDestroy()
+    {
+        if (this.particles)
+        {
+            Object.Destroy(this.particles.gameObject);
         }
     }
 
