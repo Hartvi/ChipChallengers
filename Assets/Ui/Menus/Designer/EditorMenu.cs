@@ -177,6 +177,7 @@ public class EditorMenu : BaseMenu, InputReceiver
     void OnLeaveMenu()
     {
         this.highlighter.ParentHighlighter.SetActive(false);
+        CommonChip.ClientCore.VirtualModel.SaveThisModelToFile(UIStrings.Backup + UIStrings.ModelExtension);
     }
 
     public VChip selectedVChip

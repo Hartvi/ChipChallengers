@@ -33,7 +33,7 @@ public class WheelAspects : BaseAspect
     Vector3 xForce;
     Vector3 yForce;
     Vector3 oldUp;
-    float xSlip, ySlip;
+    float xSlip = 0f, ySlip = 0f;
 
     // VT = Omega * r
     // deltaVx = Vx - VT
@@ -55,6 +55,12 @@ public class WheelAspects : BaseAspect
         this.childTransform = this.transform.GetChild(0);
 
         this.particles = Instantiate(Resources.Load<ParticleSystem>(UIStrings.Dust));
+
+        var m = this.particles.main;
+        m.startSize = 0f;
+        m.startLifetime = 0f;
+        var em = this.particles.emission;
+        em.rateOverTime = 0f;
         this.particles.gameObject.SetActive(false);
         this.particles.transform.position = this.transform.position;
         this.particles.transform.SetParent(this.transform);

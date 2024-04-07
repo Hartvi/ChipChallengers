@@ -155,9 +155,6 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
         Camera.main.transform.position = (Camera.main.transform.position - core.transform.position).normalized * 5f + core.transform.position;
         Camera.main.transform.LookAt(core.transform.position);
         //Camera.main.transform.position = this.core.transform.position + Vector3.up * 10f;
-
-
-        CommonChip.ClientCore.VirtualModel.SaveThisModelToFile(UIStrings.Backup + UIStrings.ModelExtension);
     }
 
     //void Update()
