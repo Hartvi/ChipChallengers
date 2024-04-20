@@ -7,6 +7,8 @@ https://lotramus.itch.io/chip-challengers
 
 
 ### TODO
+- `+` add more camera views
+  - `+` add view that is located inside the core's POV
 - `+` add sounds
 - `+` options menu
   - master sound level, sound effect level, music level

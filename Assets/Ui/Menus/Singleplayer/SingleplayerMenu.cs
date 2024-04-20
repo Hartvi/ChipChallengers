@@ -6,20 +6,20 @@ using TMPro;
 
 public enum CameraMoveMode
 {
-    Follow, Free
+    Follow, Free, CopyOutside, CopyInside
 }
 
 public struct CameraFollowSettings
 {
-    public float distance;  // meters
+    //public float distance;  // meters
     public Vector2 posShift;  // meters
     public float predict;  // [0,1)
     public float sensitivity;  // (0,1]
     public float lowPass; // (0,1)
 
-    public CameraFollowSettings(float distance, Vector2 posShift, float predict, float sensitivity, float lowPass)
+    public CameraFollowSettings(Vector2 posShift, float predict, float sensitivity, float lowPass)
     {
-        this.distance = distance;
+        //this.distance = distance;
         this.posShift = posShift;
         this.predict = predict;
         this.sensitivity = sensitivity;
@@ -92,7 +92,7 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
         this.LoadPanel = this.GetComponentInChildren<LoadPanel>();
         this.MapPanel = this.GetComponentInChildren<MapPanel>();
 
-        this.cameraFollowSettings = new CameraFollowSettings(distance: 5f, posShift: Vector2.up, predict: 0.05f, sensitivity: 1f, lowPass: 0f);
+        this.cameraFollowSettings = new CameraFollowSettings(posShift: Vector2.up * 3f + Vector2.right * 10f, predict: 0.05f, sensitivity: 1f, lowPass: 0f);
 
         //Action[] deselectedChipCallbacks = new Action[] { () => UIManager.instance.TurnMeOff(this) };
         //this.deselectedCallbacks.SetCallbacks(deselectedChipCallbacks);
@@ -149,42 +149,11 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
         this.MapPanel.SetOnLoadedCallbacks(onLoadedCallbacksTmp);
 
         //TODO: load model after entering playmode???
-        //print($"Current virtual Model: {this.core.VirtualModel}");
         this.Hud.LinkCore(this.core);
 
         Camera.main.transform.position = (Camera.main.transform.position - core.transform.position).normalized * 5f + core.transform.position;
         Camera.main.transform.LookAt(core.transform.position);
-        //Camera.main.transform.position = this.core.transform.position + Vector3.up * 10f;
     }
-
-    //void Update()
-    //{
-
-    //}
-
-    //public Vector3 RaycastFromAbove()
-    //{
-    //    // Starting position of the ray
-    //    Vector3 startPosition = new Vector3(0, 100000, 0);
-
-    //    // Direction of the ray (vertically down)
-    //    Vector3 direction = Vector3.down;
-
-    //    // Create a LayerMask to ignore layers 6 and 7
-    //    int layerMask = ~((1 << 6) | (1 << 7));
-
-    //    // Perform the raycast
-    //    RaycastHit hit;
-    //    if (Physics.Raycast(startPosition, direction, out hit, Mathf.Infinity, layerMask))
-    //    {
-    //        // If hit, return the position of the hit point
-    //        return hit.point + Vector3.up*5f;
-    //    }
-
-    //    // If nothing hit, return (0,0,0)
-    //    return Vector3.zero;
-    //}
-
 
     void CameraFollowMove()
     {
@@ -198,26 +167,26 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
         // 20,10,0 - 18,10,0
         Vector3 lookAtPos = corePos + predict * this.core.rb.velocity;
 
-        //Vector3 deltaCorePos = (corePos - this.oldCorePosition) / Time.deltaTime;
-        // 0,0,0
-        //Vector3 predictVector = predict * deltaCorePos;
-        // 20,10,0 + 0,0,0
-        //Vector3 lookAtPos = corePos + predictVector;
-
         //campos: 16,10,0
         // ((16,10,0 - 20,10,0).mag = 4) - 2 = 2 * 1,0,0 = 2,0,0
-        Vector3 deltaPos = Mathf.Max(0f, (camTransform.position - corePos).magnitude - cs.distance) * camTransform.forward;
+        Vector3 deltaPos = Mathf.Max(0f, (camTransform.position - corePos).magnitude - cs.posShift.x) * camTransform.forward;
 
         float deltaAltitude = (corePos.y + cs.posShift.y) - camTransform.position.y;
-        // deltaRight is in the local frame of the core
-        //float deltaRight = (corePos.x + cs.posShift.x) - camTransform.position.x;
 
         // 16,10,0 + 2,0,0
         camTransform.position = camTransform.position + deltaPos + deltaAltitude * Vector3.up;
 
         camTransform.LookAt(lookAtPos);
+    }
 
-        //this.oldLookAtPos = lookAtPos;
+    void CameraCopyOutside()
+    {
+        CameraFollowSettings cs = this.cameraFollowSettings;
+        Transform camTransform = this.mainCamera.transform;
+        Transform ct = this.core.transform;
+
+        camTransform.position = ct.position - ct.forward * cs.posShift.x + ct.up * cs.posShift.y;
+        camTransform.rotation = ct.rotation;
     }
 
     void CameraFreeMove()
@@ -385,28 +354,36 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
         {
             GameManager.cameraMoveMode = CameraMoveMode.Free;
         }
+        if (Input.GetKeyDown(KeyCode.Alpha3) || Input.GetKeyDown(KeyCode.Keypad3))
+        {
+            GameManager.cameraMoveMode = CameraMoveMode.CopyOutside;
+        }
+
+        if (GameManager.cameraMoveMode == CameraMoveMode.Follow || GameManager.cameraMoveMode == CameraMoveMode.CopyOutside)
+        {
+            if (Input.GetKeyDown(KeyCode.UpArrow))
+            {
+                this.cameraFollowSettings.posShift += Vector2.up;
+            }
+            if (Input.GetKeyDown(KeyCode.DownArrow))
+            {
+                this.cameraFollowSettings.posShift -= Vector2.up;
+            }
+            if (Input.GetKeyDown(KeyCode.Plus) || Input.GetKeyDown(KeyCode.KeypadPlus))
+            {
+                this.cameraFollowSettings.posShift.x -= 1f;
+            }
+            if (Input.GetKeyDown(KeyCode.Minus) || Input.GetKeyDown(KeyCode.KeypadMinus))
+            {
+                this.cameraFollowSettings.posShift.x += 1f;
+            }
+        }
 
         switch (GameManager.cameraMoveMode)
         {
             case CameraMoveMode.Follow:
                 {
                     this.CameraFollowMove();
-                    if (Input.GetKeyDown(KeyCode.Plus) || Input.GetKeyDown(KeyCode.KeypadPlus))
-                    {
-                        this.cameraFollowSettings.distance -= 1f;
-                    }
-                    if (Input.GetKeyDown(KeyCode.Minus) || Input.GetKeyDown(KeyCode.KeypadMinus))
-                    {
-                        this.cameraFollowSettings.distance += 1f;
-                    }
-                    if (Input.GetKeyDown(KeyCode.UpArrow))
-                    {
-                        this.cameraFollowSettings.posShift += Vector2.up;
-                    }
-                    if (Input.GetKeyDown(KeyCode.DownArrow))
-                    {
-                        this.cameraFollowSettings.posShift -= Vector2.up;
-                    }
                     if (Input.GetKeyDown(KeyCode.KeypadMultiply) || Input.GetKeyDown(KeyCode.Asterisk))
                     {
                         this.cameraFollowSettings.predict *= 2f;
@@ -420,6 +397,12 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
             case CameraMoveMode.Free:
                 {
                     this.CameraFreeMove();
+                    break;
+                }
+            // Copy position with offset and rotation
+            case CameraMoveMode.CopyOutside:
+                {
+                    this.CameraCopyOutside();
                     break;
                 }
         }

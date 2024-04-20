@@ -186,7 +186,7 @@ public abstract class GeometricChip : StaticChip
                     }
                     else
                     {
-                        Debug.LogWarning($"Selecting unknown option `{this.option}` for chip `{this.equivalentVirtualChip.ChipType}`");
+                        //Debug.LogWarning($"Selecting unknown option `{this.option}` for chip `{this.equivalentVirtualChip.ChipType}`");
                         return PhysicsData.mediumMass;
                     }
                 case VChip.cowlStr:

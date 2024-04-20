@@ -11,10 +11,10 @@ public static class MonoExtension
         List<T> ret = new List<T>();
         var parent = mb.transform.parent;
         var childCount = parent.childCount;
-        for(int i = 0; i < childCount; ++i)
+        for (int i = 0; i < childCount; ++i)
         {
             var potentialSibling = parent.GetChild(i).GetComponent<T>();
-            if(potentialSibling != null)
+            if (potentialSibling != null)
             {
                 if (takeInactive)
                 {
@@ -36,18 +36,18 @@ public static class MonoExtension
 
     public static void SetTextSizesOf(this MonoBehaviour m, MonoBehaviour[] behaviours, float fontSize)
     {
-        if(behaviours is null)
+        if (behaviours is null)
         {
             throw new ArgumentNullException($"SetTextSize: behaviours array is null.");
         }
-        foreach(var b in behaviours)
+        foreach (var b in behaviours)
         {
             TMP_Text[] ts = b.GetComponentsInChildren<TMP_Text>();
-            if(ts is null)
+            if (ts is null)
             {
                 continue;
             }
-            foreach(var t in ts)
+            foreach (var t in ts)
             {
                 t.fontSize = fontSize;
             }
@@ -123,4 +123,25 @@ public static class MonoExtension
         throw new InvalidOperationException($"Cannot convert float to {typeof(T).Name}, T: {typeof(T)}.");
     }
 
+    public static T AddComponentIdempotent<T>(this GameObject go) where T : Component
+    {
+        Component c = go.GetComponent<T>();
+        if (c is not null)
+        {
+            GameObject.Destroy(c);
+        }
+        //int k = 0;
+        //PRINT.IPrint($"Number of components: {go.GetComponents<T>().Length}");
+        //while (c is not null)
+        //{
+        //    GameObject.Destroy(c);
+        //    if (k++ > 10)
+        //    {
+        //        PRINT.IPrint($"REACHED TOO mANY ITERATIONS IN ADDING COMPONENT: {c.gameObject}");
+        //        return go.AddComponent<T>();
+        //    }
+        //    c = go.GetComponent<T>();
+        //}
+        return go.AddComponent<T>();
+    }
 }

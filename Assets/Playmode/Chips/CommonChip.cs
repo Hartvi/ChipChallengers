@@ -238,28 +238,28 @@ public class CommonChip : AngleChip
         if (this.isAeroElligible)
         {
             // add aspects, TODO: this wont add it to core!!!
-            this.gameObject.AddComponent<Aerodynamics>().myChip = this;
+            this.gameObject.AddComponentIdempotent<Aerodynamics>().myChip = this;
         }
 
         if (this.equivalentVirtualChip.HasHealth())
         {
-            HealthAspect h = this.gameObject.AddComponent<HealthAspect>();
+            HealthAspect h = this.gameObject.AddComponentIdempotent<HealthAspect>();
             h.SetDeathCallbacks(new Action[] { this.Die });
             h.SetHealth(this.equivalentVirtualChip.DefaultHealth());
         }
 
         if (this.equivalentVirtualChip.ChipType == VChip.cowlStr)
         {
-            this.gameObject.AddComponent<CowlAspect>().myChip = this;
+            this.gameObject.AddComponentIdempotent<CowlAspect>().myChip = this;
         }
         else
         {
-            this.gameObject.AddComponent<DustAspect>().myChip = this;
+            this.gameObject.AddComponentIdempotent<DustAspect>().myChip = this;
         }
 
         if (this.equivalentVirtualChip.ChipType == VChip.sensorStr)
         {
-            this.gameObject.AddComponent<SensorAspect>().myChip = this;
+            this.gameObject.AddComponentIdempotent<SensorAspect>().myChip = this;
         }
 
         if (this.equivalentVirtualChip.keys.Contains(VChip.valueStr))
@@ -270,8 +270,8 @@ public class CommonChip : AngleChip
 
             if (this.equivalentVirtualChip.ChipType == VChip.jetStr)
             {
-                this.gameObject.AddComponent<JetAspect>();
-                this.gameObject.AddComponent<JetDustAspect>();
+                this.gameObject.AddComponentIdempotent<JetAspect>();
+                this.gameObject.AddComponentIdempotent<JetDustAspect>();
             }
             if (this.equivalentVirtualChip.keys.Contains(VChip.brakeStr))
             {
@@ -280,11 +280,11 @@ public class CommonChip : AngleChip
                 // WHEEL - power = power, brake = brake
                 if (this.equivalentVirtualChip.ChipType == VChip.wheelStr)
                 {
-                    this.gameObject.AddComponent<WheelAspects>().myChip = this;
+                    this.gameObject.AddComponentIdempotent<WheelAspects>().myChip = this;
                 }
                 if (this.equivalentVirtualChip.ChipType == VChip.gunStr)
                 {
-                    this.gameObject.AddComponent<GunAspect>().myChip = this;
+                    this.gameObject.AddComponentIdempotent<GunAspect>().myChip = this;
                 }
             }
         }
@@ -453,7 +453,7 @@ public class CommonChip : AngleChip
             GameObject.Destroy(this.loopScript);
         }
 
-        this.loopScript = this.gameObject.AddComponent<LoopScript>();
+        this.loopScript = this.gameObject.AddComponentIdempotent<LoopScript>();
         this.loopScript.vModel = this.VirtualModel;
         this.loopScript.loopFunction = this.scriptInstance.CallLoop;
 
