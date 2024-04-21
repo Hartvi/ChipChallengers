@@ -40,6 +40,8 @@ https://lotramus.itch.io/chip-challengers
 - `+` find out why the physics timing makes wheels speed up cars differently 
 
 ### Done
+- `+` when opening load/save panel, select the text input field
+- `+` when typing name into load or save panel, scroll to show models containing those names
 - `+` wheel dust
 - `+` add wheel spinning
 - `+` add jet dust

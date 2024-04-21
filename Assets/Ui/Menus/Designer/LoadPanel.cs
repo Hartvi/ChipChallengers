@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.IO;
 using System.Collections;
 using System.Collections.Generic;
@@ -27,6 +28,51 @@ public class LoadPanel : BaseScrollMenu
         this.scrollbar.scrollbar.value = 0f;
 
         this.input.placeholder.SetText(UIStrings.EnterModelName);
+        // scroll to models with names starting with entered string
+        this.input.input.onValueChanged.AddListener(this.ScrollToName);
+    }
+
+    void ScrollToName(string s)
+    {
+        //print($"scroll: {this.itemScroll}");
+        //print($"container: {this.itemScroll.virtualContainer}");
+        //print($"container: {this.itemScroll.virtualContainer.items}");
+        var items = this.itemScroll.virtualContainer.items;
+        int latestIndex = 0;
+        for (int i = items.Length - 1; i >= 0; i--)
+        {
+            var label = items[i].label;
+            bool matchingLabel = true;
+            for (int k = s.Length - 1; k >= 0; k--)
+            {
+                if (label.Length >= s.Length)
+                {
+                    if (label[k] != s[k])
+                    {
+                        matchingLabel = false;
+                        break;
+                    }
+                }
+                else
+                {
+                    matchingLabel = false;
+                    break;
+                }
+            }
+            if (matchingLabel)
+            {
+                latestIndex = i;
+            }
+        }
+        /*
+        0 => 0
+        len-displaynum+1 => 1
+        y = kx + b
+        b = 0
+        1 = k (l-d)
+         */
+        //this.itemScroll.Scroll(Mathf.Min(1f, ((float)(latestIndex)) / ((float)items.Length - this.itemScroll.NumberOfDisplayItems)));
+        this.scrollbar.scrollbar.value = Mathf.Min(1f, ((float)(latestIndex)) / ((float)items.Length - this.itemScroll.NumberOfDisplayItems));
     }
 
     public override void OnEnable()
@@ -72,7 +118,7 @@ public class LoadPanel : BaseScrollMenu
         HistoryStack.SaveState(core.VirtualModel.ToLuaString());
         this.DeactivatePanel();
 
-        foreach(Action a in LoadPanel.OnLoadedCallbacks)
+        foreach (Action a in LoadPanel.OnLoadedCallbacks)
         {
             a();
         }
@@ -100,7 +146,7 @@ public class LoadPanel : BaseScrollMenu
         core.VirtualModel.AddModelChangedCallback(x => HistoryStack.SaveState(core.VirtualModel.ToLuaString()));
         HistoryStack.SaveState(core.VirtualModel.ToLuaString());
 
-        foreach(Action a in LoadPanel.OnLoadedCallbacks)
+        foreach (Action a in LoadPanel.OnLoadedCallbacks)
         {
             a();
         }

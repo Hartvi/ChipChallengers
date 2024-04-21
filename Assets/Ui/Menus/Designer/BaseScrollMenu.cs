@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using UnityEngine.EventSystems;
 using TMPro;
 
 public class BaseScrollMenu : BasePanel, InputReceiver
@@ -87,9 +88,12 @@ public class BaseScrollMenu : BasePanel, InputReceiver
     public void ActivatePanel(string inputFieldText="")
     {
         this.input.input.SetTextWithoutNotify(inputFieldText);
-
         UIManager.instance.SwitchToMe(this);
         this.gameObject.SetActive(true);
+        EventSystem.current.SetSelectedGameObject(null);
+        EventSystem.current.SetSelectedGameObject(this.input.input.gameObject);
+        this.input.input.ActivateInputField();
+        this.input.input.Select();
     }
 
     public virtual void OnEnable()

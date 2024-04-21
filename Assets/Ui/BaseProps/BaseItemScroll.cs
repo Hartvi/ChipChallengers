@@ -44,7 +44,7 @@ public class BaseItemScroll : BasePanel
                 throw new FieldAccessException($"Cannot set number of items more than once: UI structure is defined at compile time.");
             }
 
-            if(this.displayItem == null)
+            if (this.displayItem == null)
             {
                 throw new FieldAccessException($"Must set display element before initializing list.");
             }
@@ -52,7 +52,7 @@ public class BaseItemScroll : BasePanel
             this._NumberOfSpawnedItems = value + 2;
             this.items = new TopProp[_NumberOfSpawnedItems];
             this.items[0] = this.displayItem;
-            for(int i = 1; i < _NumberOfSpawnedItems; ++i)
+            for (int i = 1; i < _NumberOfSpawnedItems; ++i)
             {
                 TopProp newItem = Instantiate(this.displayItem);
                 newItem.transform.SetParent(this.displayItem.transform.parent);
@@ -81,9 +81,9 @@ public class BaseItemScroll : BasePanel
         this.realItemSize = this.realSize / NumberOfDisplayItems;
         this.realEdge = -0.5f * this.realSize * StackDirection;
 
-        for(int i = 0; i < this.items.Length; ++i)
+        for (int i = 0; i < this.items.Length; ++i)
         {
-            if(this.items[i] == null)
+            if (this.items[i] == null)
             {
                 throw new NullReferenceException($"TopProp items[{i}] out of {this._NumberOfSpawnedItems} is null.");
             }
@@ -97,24 +97,25 @@ public class BaseItemScroll : BasePanel
         return this.realEdge + relativePosition * StackDirection * this.realSize;
     }
 
-   public override void Setup()
+    public override void Setup()
     {
         base.Setup();
     }
-    
+
     public void Scroll(float x)
     {
         // contains names and relative positions
         VirtualItem[] visibleItems = this.virtualContainer.MoveItems(x);
-        
+
         // real position: real position * realSize
         // real position (wrt this panel): (panel position - 0.5*panelsize*stackDirection) + realsize * relative position
         Vector2[] realPositions = visibleItems.Select(x => this.RealPosition(x.relativePosition)).ToArray();
-        if(realPositions.Length > this.items.Length)
+        if (realPositions.Length > this.items.Length)
         {
             throw new ArgumentException($"Number of positions: {realPositions.Length} does not match number of UI elements: {this.items.Length}.");
         }
-        for(int i = 0; i < this.items.Length; ++i) {
+        for (int i = 0; i < this.items.Length; ++i)
+        {
             if (i >= realPositions.Length)
             {
                 this.items[i].gameObject.SetActive(false);
@@ -139,12 +140,12 @@ public class VirtualItem
     public float defaultPosition;
     public float relativePosition;
     public string label;
-    
+
 
     public VirtualItem(string label, float defaultPosition)
     {
         this.label = label;
-        if(defaultPosition < 0f)
+        if (defaultPosition < 0f)
         {
             throw new ArgumentOutOfRangeException($"Default position of item must be non-negative: {defaultPosition}.");
         }
@@ -171,6 +172,7 @@ public class VirtualContainer
 
     int NumberToDisplay, NumberOfSpawned;
     VirtualItem[] virtualItems;
+    public VirtualItem[] items { get { return this.virtualItems; } }
     int NumberOfItems { get { return this.virtualItems.Length; } }
     float MaxMoveDelta;
 
@@ -201,7 +203,7 @@ public class VirtualContainer
     public void UpdateLabels(string[] labels)
     {
         VirtualItem[] virtualItems = labels.Select((x, i) => new VirtualItem(x, this.DefaultOffset + i * this.DefaultInterval)).ToArray();
-        
+
         this.virtualItems = virtualItems;
 
         // labels.Length = T = M+N elements. M displayed. N not displayed.
@@ -212,19 +214,19 @@ public class VirtualContainer
 
     public VirtualItem[] MoveItems(float x)
     {
-        if(x < 0f || x > 1f)
+        if (x < 0f || x > 1f)
         {
             throw new ArgumentOutOfRangeException($"Can only scroll in interval [0, 1], currently attempting {x}.");
         }
 
-        for(int i = 0; i < this.virtualItems.Length; ++i)
+        for (int i = 0; i < this.virtualItems.Length; ++i)
         {
             var vItem = this.virtualItems[i];
             vItem.relativePosition = vItem.defaultPosition - this.MaxMoveDelta * x;
             // offset = 0.5*item height
             // top item: offset, bottom item: number of display items - offset
             // visible items: +-1 the edges
-            
+
         }
         float maxOffset = 1f + this.DefaultOffset;
         return this.virtualItems.Where(vItem => vItem.relativePosition >= -this.DefaultOffset && vItem.relativePosition <= maxOffset).ToArray();
