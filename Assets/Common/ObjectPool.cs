@@ -20,9 +20,10 @@ public class ObjectPool<T>
         }
     }
 
-    public T Next() {
+    public T Next()
+    {
         this.currentIndex = this.currentIndex + 1;
-        if(this.currentIndex == objects.Length)
+        if (this.currentIndex == objects.Length)
         {
             this.currentIndex = 0;
         }
@@ -31,7 +32,7 @@ public class ObjectPool<T>
 
     public void DeleteObjects()
     {
-        for(int i = 0; i < this.objects.Length; ++i)
+        for (int i = 0; i < this.objects.Length; ++i)
         {
             //PRINT.IPrint($"Deleting object {i}: {this.objects[i]}");
             this.deleteObject(this.objects[i]);

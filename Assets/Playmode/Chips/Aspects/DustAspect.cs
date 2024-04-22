@@ -16,7 +16,6 @@ public class DustAspect : BaseAspect
     void OnCollisionEnter(Collision collision)
     {
         this.particles.transform.position = this.transform.position;
-        //this.particles.transform.rotation = this.transform.rotation;
         this.particles.gameObject.SetActive(true);
         this.particles.Play();
     }

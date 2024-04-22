@@ -255,6 +255,7 @@ public class CommonChip : AngleChip
         else
         {
             this.gameObject.AddComponentIdempotent<DustAspect>().myChip = this;
+            this.gameObject.AddComponentIdempotent<HitSoundAspect>().myChip = this;
         }
 
         if (this.equivalentVirtualChip.ChipType == VChip.sensorStr)
@@ -271,6 +272,7 @@ public class CommonChip : AngleChip
             if (this.equivalentVirtualChip.ChipType == VChip.jetStr)
             {
                 this.gameObject.AddComponentIdempotent<JetAspect>();
+                this.gameObject.AddComponentIdempotent<JetSoundAspect>();
                 this.gameObject.AddComponentIdempotent<JetDustAspect>();
             }
             if (this.equivalentVirtualChip.keys.Contains(VChip.brakeStr))
@@ -281,10 +283,13 @@ public class CommonChip : AngleChip
                 if (this.equivalentVirtualChip.ChipType == VChip.wheelStr)
                 {
                     this.gameObject.AddComponentIdempotent<WheelAspects>().myChip = this;
+                    this.gameObject.AddComponentIdempotent<WheelSoundAspect>().myChip = this;
+                    this.gameObject.AddComponentIdempotent<TireSoundAspect>().myChip = this;
                 }
                 if (this.equivalentVirtualChip.ChipType == VChip.gunStr)
                 {
                     this.gameObject.AddComponentIdempotent<GunAspect>().myChip = this;
+                    this.gameObject.AddComponentIdempotent<GunSoundAspect>().myChip = this;
                 }
             }
         }

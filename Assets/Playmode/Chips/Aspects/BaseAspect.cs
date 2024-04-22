@@ -10,6 +10,7 @@ public abstract class BaseAspect : MonoBehaviour
     public float value => myChip.value;
     public float brake => myChip.brake;
 
+
     protected virtual void Awake()
     {
         this.myChip = this.gameObject.GetComponent<CommonChip>();

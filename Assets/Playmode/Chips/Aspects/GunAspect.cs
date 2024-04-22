@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class GunAspect : BaseAspect
 {
-    float charge = 0f;
+    float _charge = 0f;
+    public float charge => _charge;
     float power = 1f;
     float dPowerPerFrame = 1f;
 
@@ -53,10 +54,10 @@ public class GunAspect : BaseAspect
 
     void Update()
     {
-        if (this.charge < 1f)
+        if (this._charge < 1f)
         {
-            this.charge += this.dPowerPerFrame * Time.deltaTime;
-            //print($"Charge: {this.charge}");
+            this._charge += this.dPowerPerFrame * Time.deltaTime;
+            print($"Charge: {this.charge}");
         } // if charge is full then check if shooting
         else if (this.brake > 1e-9f)
         {
@@ -69,7 +70,7 @@ public class GunAspect : BaseAspect
         // charge is full, shoot
         Vector3 forward = this.transform.forward;
         this.rb.AddForce(-forward * this.recoilImpulse, ForceMode.Impulse);
-        this.charge = 0f;
+        this._charge = 0f;
 
         Vector3 initialBulletPosition = this.transform.position + forward * GeometricChip.ChipSide;
 

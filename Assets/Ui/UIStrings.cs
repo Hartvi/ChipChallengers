@@ -5,6 +5,7 @@ using UnityEngine;
 
 public static class UIStrings
 {
+    public const string Sounds = "Sounds";
 
     public const string Backup = "backup";
 

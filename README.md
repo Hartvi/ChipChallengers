@@ -9,7 +9,6 @@ https://lotramus.itch.io/chip-challengers
 ### TODO
 - `+` add more camera views
   - `+` add view that is located inside the core's POV
-- `+` add sounds
 - `+` options menu
   - master sound level, sound effect level, music level
   - particle effects - 0-100 %
@@ -40,6 +39,7 @@ https://lotramus.itch.io/chip-challengers
 - `+` find out why the physics timing makes wheels speed up cars differently 
 
 ### Done
+- `+` add sounds
 - `+` when opening load/save panel, select the text input field
 - `+` when typing name into load or save panel, scroll to show models containing those names
 - `+` wheel dust

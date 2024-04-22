@@ -43,6 +43,7 @@ public class WheelAspects : BaseAspect
     float Omega;
 
     Transform childTransform;
+    public float totalSlip = 0f, totalSlip1 = 0f, totalSlip2 = 0f;
 
     void Start()
     {
@@ -170,7 +171,10 @@ public class WheelAspects : BaseAspect
     {
         this.childTransform.Rotate(Vector3.up, -this.Omega, Space.Self);
 
-        float totalSlip = Mathf.Abs(this.xSlip) + Mathf.Abs(this.ySlip);
+        this.totalSlip = 0.3333f * (Mathf.Abs(this.xSlip) + Mathf.Abs(this.ySlip) + this.totalSlip1 + this.totalSlip2);
+        this.totalSlip2 = this.totalSlip1;
+        this.totalSlip1 = this.totalSlip;
+
         this.particles.gameObject.SetActive(true);
         if (!this.particles.isPlaying)
         {
@@ -221,6 +225,11 @@ public class WheelAspects : BaseAspect
             this.impulse = FinalImpulse + targetVelocity;
             this.rb.AddForceAtPosition(this.impulse, this.point, ForceMode.Impulse);
             this.ApplyForce();
+        }
+        else
+        {
+            this.xSlip = 0f;
+            this.ySlip = 0f;
         }
         this.ApplyTorque(this.value);
     }
