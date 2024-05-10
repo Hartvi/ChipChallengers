@@ -104,7 +104,10 @@ public abstract class GeometricChip : StaticChip
             {
                 foreach (CommonChip child in this._AllChildren)
                 {
-                    GameObject.Destroy(child.gameObject);
+                    if (child && child.gameObject)
+                    {
+                        GameObject.Destroy(child.gameObject);
+                    }
                 }
             }
             //this._AllChildren.Clear();

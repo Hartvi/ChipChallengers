@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class ChipPanel : BasePanel, InputReceiver, IPointerEnterHandler, IPointerExitHandler
 {
@@ -13,9 +14,11 @@ public class ChipPanel : BasePanel, InputReceiver, IPointerEnterHandler, IPointe
 
     ItemBase NameItem;
     ItemBase ValueItem;
+    ItemBase PopUpItem;
 
     BaseImage backgroundImage;
     bool insideChipPanel = false;
+    int deselectTimer = -1;
 
     void Start()
     {
@@ -27,6 +30,12 @@ public class ChipPanel : BasePanel, InputReceiver, IPointerEnterHandler, IPointe
         this.ValueItem = items[1];
         ItemBase[] nameItems = this.NameItem.DisplayNItems<ItemBase>(10);
         ItemBase[] valueItems = this.ValueItem.DisplayNItems<ItemBase>(10);
+        this.PopUpItem = items[2];
+        ItemBase[] popUpItems = this.PopUpItem.DisplayNItems<ItemBase>(10);
+        foreach (var v in popUpItems)
+        {
+            v.gameObject.SetActive(false);
+        }
 
         // TEST
         //DisplayChipProperties(VChip.allPropertiesStr, VChip.allPropertiesDefaults);
@@ -45,13 +54,18 @@ public class ChipPanel : BasePanel, InputReceiver, IPointerEnterHandler, IPointe
     {
         base.Setup();
         this.vProp = new VirtualProp(PropType.Panel, 1f,
-                new VirtualProp(PropType.Image, 1f,
+            new VirtualProp(PropType.Image, 1f,
                 new VirtualProp(PropType.Panel, -1f, right,
                     new VirtualProp(PropType.Panel, 0.5f, down,
                         new VirtualProp(PropType.Text, 1f / (float)VChip.allPropertiesStr.Length, typeof(ItemBase))
                     ),
                     new VirtualProp(PropType.Panel, 0.5f, down,
                         new VirtualProp(PropType.Input, 1f / (float)VChip.allPropertiesStr.Length, typeof(ItemBase))
+                    ),
+                    new VirtualProp(PropType.Panel, 0.25f, down,
+                        new VirtualProp(PropType.Panel, 1f / (float)VChip.allPropertiesStr.Length, left,
+                            new VirtualProp(PropType.Button, 1f, typeof(ItemBase))
+                        )
                     )
                 )
             )
@@ -202,6 +216,56 @@ public class ChipPanel : BasePanel, InputReceiver, IPointerEnterHandler, IPointe
                 }
             }
             inputs[_i].onEndEdit.RemoveAllListeners();
+            inputs[_i].onSelect.RemoveAllListeners();
+            if (texts[_i].text == VChip.typeStr)
+            {
+                inputs[_i].onSelect.AddListener(
+                    x =>
+                    {
+                        ItemBase[] popUpItems = this.PopUpItem.DisplayNItems<ItemBase>(VChip.chipNames.Length);
+                        //print($"num chip types: {VChip.chipNames.Length}");
+                        for (int k = 0; k < popUpItems.Length; ++k)
+                        {
+                            var btn = popUpItems[k].GetComponent<Button>();
+                            btn.GetComponentInChildren<TMP_Text>().fontSize = UIUtils.SmallFontSize;
+                            btn.onClick.RemoveAllListeners();
+                            int _k = k;
+                            btn.onClick.AddListener(
+                                () =>
+                                {
+                                    inputs[_i].text = VChip.chipNames[_k];
+                                    ItemBase[] popUpItems = this.PopUpItem.DisplayNItems<ItemBase>(VChip.chipNames.Length);
+                                    //print($"num chip types: {VChip.chipNames.Length}");
+                                    for (int k = 0; k < popUpItems.Length; ++k)
+                                    {
+                                        popUpItems[k].gameObject.SetActive(false);
+                                    }
+                                    inputs[_i].onEndEdit.Invoke(inputs[_i].text);
+                                }
+                            );
+                            //print($"button: {btn}");
+                            var txt = btn.GetComponentInChildren<TMP_Text>();
+                            txt.text = VChip.chipNames[k];
+                            // TODO: place buttons in correct positions
+                            // set small font size
+                        }
+                        float xShift = inputs[_i].gameObject.RT().sizeDelta.x * 0.5f + this.PopUpItem.gameObject.RT().sizeDelta.x * 0.5f;
+                        this.PopUpItem.transform.position = inputs[_i].transform.position - Vector3.right * xShift;
+                        TopProp.StackFrom(this.PopUpItem.Siblings<ItemBase>(takeInactive: false));
+                    }
+                );
+                inputs[_i].onDeselect.AddListener(
+                    x =>
+                    {
+                        this.deselectTimer = 5;
+                        //var ps = this.PopUpItem.Siblings<ItemBase>(takeInactive: false);
+                        //foreach (var p in ps)
+                        //{
+                        //    p.gameObject.SetActive(false);
+                        //}
+                    }
+                );
+            }
             inputs[_i].onEndEdit.AddListener(
                 x =>
                 {
@@ -232,8 +296,6 @@ public class ChipPanel : BasePanel, InputReceiver, IPointerEnterHandler, IPointe
         };
         return action;
     }
-
-
 
     void IPointerExitHandler.OnPointerExit(PointerEventData eventData)
     {
@@ -274,6 +336,18 @@ public class ChipPanel : BasePanel, InputReceiver, IPointerEnterHandler, IPointe
 
     void Update()
     {
+        if (this.deselectTimer > 0)
+        {
+            this.deselectTimer = this.deselectTimer - 1;
+            if (this.deselectTimer == 0)
+            {
+                var ps = this.PopUpItem.Siblings<ItemBase>(takeInactive: false);
+                foreach (var p in ps)
+                {
+                    p.gameObject.SetActive(false);
+                }
+            }
+        }
 
         if (Input.GetMouseButtonDown(0))
         {

@@ -27,7 +27,7 @@ public class WheelSoundAspect : BaseSoundAspect
         if (everyNthCounter++ >= everyNth)
         {
             var s = this.soundPool.Next();
-            s.volume = Mathf.Min(Mathf.Max(0f, this.value * 0.03f), 0.8f);
+            s.volume = GameManager.RealTimeSettings.Volume * Mathf.Min(Mathf.Max(0f, this.value * 0.03f), 0.8f);
             s.Play();
             everyNthCounter = 0;
         }

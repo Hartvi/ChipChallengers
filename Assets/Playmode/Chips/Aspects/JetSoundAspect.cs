@@ -27,8 +27,7 @@ public class JetSoundAspect : BaseSoundAspect
         if (everyNthCounter++ >= everyNth)
         {
             var s = this.soundPool.Next();
-            s.volume = Mathf.Max(0f, this.value * 0.001f);
-            s.Play();
+            s.volume = GameManager.RealTimeSettings.Volume * Mathf.Abs(this.value * 0.001f);
             everyNthCounter = 0;
         }
     }

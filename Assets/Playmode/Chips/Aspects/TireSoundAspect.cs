@@ -34,7 +34,7 @@ public class TireSoundAspect : BaseSoundAspect
             if (this.wheelAspect.totalSlip > slipOffset)
             {
                 var s = this.soundPool.Next();
-                s.volume = this.wheelAspect.totalSlip - slipOffset;
+                s.volume = GameManager.RealTimeSettings.Volume * (this.wheelAspect.totalSlip - slipOffset);
                 s.Play();
             }
         }

@@ -57,7 +57,6 @@ public class GunAspect : BaseAspect
         if (this._charge < 1f)
         {
             this._charge += this.dPowerPerFrame * Time.deltaTime;
-            print($"Charge: {this.charge}");
         } // if charge is full then check if shooting
         else if (this.brake > 1e-9f)
         {

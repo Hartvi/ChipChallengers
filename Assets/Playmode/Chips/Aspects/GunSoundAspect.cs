@@ -28,7 +28,9 @@ public class GunSoundAspect : BaseSoundAspect
     {
         if (this.gunAspect.charge < this.oldCharge)
         {
-            this.soundPool.Next().Play();
+            var s = this.soundPool.Next();
+            s.volume = GameManager.RealTimeSettings.Volume;
+            s.Play();
         }
         this.oldCharge = this.gunAspect.charge;
     }

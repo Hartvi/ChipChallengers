@@ -19,7 +19,7 @@ public class GameManager : MonoBehaviour
 
     public static readonly Dictionary<string, Tuple<int, int>> minMaxIntSettings = new Dictionary<string, Tuple<int, int>>()
     {
-        { UIStrings.Framerate, new Tuple<int, int>(5, 1000) },
+        { UIStrings.Framerate, new Tuple<int, int>(5, 100) },
         { UIStrings.PhysicsRate, new Tuple<int, int>(50, 2000) },
         { UIStrings.Volume, new Tuple<int, int>(0, 100) },
         { UIStrings.PhysicsParticles, new Tuple<int, int>(0, 100) }
@@ -38,6 +38,10 @@ public class GameManager : MonoBehaviour
 
     Dictionary<string, Func<int, int>> SettingUpdateFunctions = new Dictionary<string, Func<int, int>>();
     public Dictionary<string, Func<int>> GettingUpdateFunctions = new Dictionary<string, Func<int>>();
+    public static class RealTimeSettings
+    {
+        public static float Volume;
+    }
 
     void Awake()
     {
@@ -104,6 +108,8 @@ public class GameManager : MonoBehaviour
         {
             i = defaultIntSettings[s];
         }
+
+        GameManager.RealTimeSettings.Volume = (float)(i) / 100f;
         return i;
     }
 

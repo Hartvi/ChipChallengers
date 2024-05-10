@@ -84,8 +84,8 @@ public class WheelAspects : BaseAspect
         // T = dOmega * I / dt
         Vector3 up = this.transform.up;
         Vector3 newUp = up * this.Omega;
-        Vector3 torque = (newUp - oldUp) * WheelAspects.inertiaInvFixedTime;
-        this.rb.AddTorque(torque + T * up);
+        Vector3 torque = (newUp - oldUp) * WheelAspects.fixedTimeInvInertia;
+        this.rb.AddTorque(10f * torque + Time.fixedDeltaTime * (T * up), ForceMode.Impulse);
 
         this.oldUp = newUp;
         this.Omega = this.Omega + dOmega;
@@ -106,8 +106,8 @@ public class WheelAspects : BaseAspect
 
         this.xForce = xImpulse * xDir;
         this.yForce = yImpulse * yDir;
-        this.rb.AddForceAtPosition(this.yForce, this.point, ForceMode.Impulse);
-        this.rb.AddForceAtPosition(this.xForce, this.point, ForceMode.Impulse);
+        this.rb.AddForceAtPosition(1000f * this.yForce * Time.fixedDeltaTime, this.point, ForceMode.Impulse);
+        this.rb.AddForceAtPosition(1000f * this.xForce * Time.fixedDeltaTime, this.point, ForceMode.Impulse);
 
         // impulse = S (F) dt => no need to multiply xImpulse * dt to get dOmega since dOmega = k * Force * dt
         float dOmega = -radius * xImpulse * InvPlanarMomentOfInertia;
@@ -223,7 +223,7 @@ public class WheelAspects : BaseAspect
             Vector3 FinalImpulse = (ImpulseDifference > 0f) ? NaiveImpulse : J;
 
             this.impulse = FinalImpulse + targetVelocity;
-            this.rb.AddForceAtPosition(this.impulse, this.point, ForceMode.Impulse);
+            this.rb.AddForceAtPosition(1000f * this.impulse * Time.fixedDeltaTime, this.point, ForceMode.Impulse);
             this.ApplyForce();
         }
         else

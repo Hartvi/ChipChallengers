@@ -21,9 +21,9 @@ public class ItemBase : TopProp
             ++numberOfChildren;
             if (newSibling.isActiveAndEnabled)
             {
-                if(hasBeenInactive)
+                if (hasBeenInactive)
                 {
-                    throw new ArgumentNullException($"Items are not continuously inactive. Active: {i} after inactive {i-1}.");
+                    throw new ArgumentNullException($"Items are not continuously inactive. Active: {i} after inactive {i - 1}.");
                 }
                 siblings.Add(newSibling);
             }
@@ -43,9 +43,9 @@ public class ItemBase : TopProp
     public ItemBase AddItem()
     {
         var siblings = this.Siblings<ItemBase>(takeInactive: true);
-        for(int i = 0; i < siblings.Length; ++i)
+        for (int i = 0; i < siblings.Length; ++i)
         {
-            if(!siblings[i].gameObject.activeSelf)
+            if (!siblings[i].gameObject.activeSelf)
             {
                 siblings[i].gameObject.SetActive(true);
                 return siblings[i];
@@ -58,20 +58,20 @@ public class ItemBase : TopProp
     public void HideItem()
     {
         var siblings = this.Siblings<ItemBase>(takeInactive: false);
-        siblings[siblings.Length -1].gameObject.SetActive(false);
+        siblings[siblings.Length - 1].gameObject.SetActive(false);
     }
-    public T[] DisplayNItems<T>(int n) where T: ItemBase
+    public T[] DisplayNItems<T>(int n) where T : ItemBase
     {
         var siblings = this.Siblings<ItemBase>(takeInactive: true);
         if (n > siblings.Length)
         {
-            for(int i = 0; i < n - siblings.Length; ++i)
+            for (int i = 0; i < n - siblings.Length; ++i)
             {
                 AddItem();
             }
             siblings = this.Siblings<ItemBase>(takeInactive: true);
         }
-        for(int i = 0; i < siblings.Length; ++i)
+        for (int i = 0; i < siblings.Length; ++i)
         {
             siblings[i].gameObject.SetActive(i < n);
         }

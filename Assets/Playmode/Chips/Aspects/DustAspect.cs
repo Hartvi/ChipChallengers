@@ -24,7 +24,7 @@ public class DustAspect : BaseAspect
     {
         if (this.particles)
         {
-            Object.Destroy(this.particles.gameObject);
+            Object.DestroyImmediate(this.particles.gameObject);
         }
     }
 

@@ -3,10 +3,14 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
 
 public class SettingFields : BasePanel
 {
+
+    BaseInput[] baseInputs;
+    private Dictionary<string, BaseInput> baseInputsMap = new Dictionary<string, BaseInput>();
 
     public override void Setup()
     {
@@ -19,9 +23,18 @@ public class SettingFields : BasePanel
                     new VirtualProp(PropType.Text, -1f)
                 ),
                 new VirtualProp(PropType.Panel, 0.5f, down, // column for input fields for each property
-                    new VirtualProp(PropType.Input, 0.33f),
-                    new VirtualProp(PropType.Input, 0.33f),
-                    new VirtualProp(PropType.Input, -1f)
+                    new VirtualProp(PropType.Panel, 0.33f, right,
+                        new VirtualProp(PropType.Input, 0.5f),
+                        new VirtualProp(PropType.Slider, 0.5f)
+                    ),
+                    new VirtualProp(PropType.Panel, 0.33f, right,
+                        new VirtualProp(PropType.Input, 0.5f),
+                        new VirtualProp(PropType.Slider, 0.5f)
+                    ),
+                    new VirtualProp(PropType.Panel, 0.33f, right,
+                        new VirtualProp(PropType.Input, 0.5f),
+                        new VirtualProp(PropType.Slider, 0.5f)
+                    )
                 )
             ),
             new VirtualProp(PropType.Panel, 0.1f),
@@ -32,7 +45,8 @@ public class SettingFields : BasePanel
     void Start()
     {
         BaseText[] baseTexts = this.GetComponentsInChildren<BaseText>();
-        BaseInput[] baseInputs = this.GetComponentsInChildren<BaseInput>(); ;
+        this.baseInputs = this.GetComponentsInChildren<BaseInput>(); ;
+        BaseSlider[] baseSliders = this.GetComponentsInChildren<BaseSlider>(); ;
 
         for (int i = 0; i < baseTexts.Length; ++i)
         {
@@ -43,40 +57,64 @@ public class SettingFields : BasePanel
             baseTexts[i].text.SetText(currentSettingName);
             baseTexts[i].text.fontSize = UIUtils.SmallFontSize;
 
-            baseInputs[_i].input.onEndEdit.AddListener(x => OnEndInput(baseInputs[_i].input, x, currentSettingName));
+            this.baseInputs[_i].input.onEndEdit.AddListener(x => OnEndInput(this.baseInputs[_i].input, baseSliders[_i].slider, x, currentSettingName));
+            baseSliders[_i].slider.onValueChanged.AddListener(x => this.OnChangeSlider(x, currentSettingName));
 
             var smf = UIUtils.SmallFontSize;
-            baseInputs[_i].placeholder.fontSize = smf;
-            baseInputs[_i].input.textComponent.fontSize = smf;
+            this.baseInputs[_i].placeholder.fontSize = smf;
+            this.baseInputs[_i].input.textComponent.fontSize = smf;
 
-            baseInputs[_i].placeholder.SetText(UIStrings.EnterANumber);
+            this.baseInputs[_i].placeholder.SetText(UIStrings.EnterANumber);
 
-            baseInputs[i].input.SetTextWithoutNotify(this.GetPrefStringValue(currentSettingName));
+            string prefValStr = this.GetPrefStringValue(currentSettingName);
+            var csn = GameManager.minMaxIntSettings[currentSettingName];
+            float prefVal = (float)(int.Parse(prefValStr) - csn.Item1) / (csn.Item2 - csn.Item1);
+            baseSliders[_i].slider.SetValueWithoutNotify(prefVal);
+
+            this.baseInputs[_i].input.SetTextWithoutNotify(prefValStr);
+
+            this.baseInputsMap[currentSettingName] = this.baseInputs[_i];
         }
     }
 
-    void OnEndInput(TMP_InputField inputField, string txt, string settingName)
+    void OnChangeSlider(float val, string settingName)
     {
-        string tmp = txt;
-        int a;
-
-        while(!int.TryParse(tmp, out a)) {
-            tmp = tmp.Substring(0, tmp.Length - 1);
-        }
-
-        //a = GameManager.Instance.SaturateIntSetting(settingName, a);
-        
-
         if (UIStrings.SettingsIntProperties.Contains(settingName))
         {
-            //print($"setting {settingName} to {a}");
-            this.SetIntSetting(settingName, a);
+            var s = GameManager.minMaxIntSettings[settingName];
+            int v = (int)(val * (s.Item2 - s.Item1)) + s.Item1;
+            this.SetIntSetting(settingName, v);
+            this.baseInputsMap[settingName].input.SetTextWithoutNotify(v.ToString());
         }
         else
         {
             throw new InvalidOperationException($"Non-int settings have not been implemented.");
         }
-        
+    }
+
+    void OnEndInput(TMP_InputField inputField, Slider slider, string txt, string settingName)
+    {
+        string tmp = txt;
+        int a;
+
+        while (!int.TryParse(tmp, out a))
+        {
+            tmp = tmp.Substring(0, tmp.Length - 1);
+        }
+
+        if (UIStrings.SettingsIntProperties.Contains(settingName))
+        {
+            //print($"setting {settingName} to {a}");
+            var csn = GameManager.minMaxIntSettings[settingName];
+            this.SetIntSetting(settingName, a);
+            float prefVal = (float)(this.GetIntSetting(settingName) - csn.Item1) / (csn.Item2 - csn.Item1);
+            slider.SetValueWithoutNotify(prefVal);
+        }
+        else
+        {
+            throw new InvalidOperationException($"Non-int settings have not been implemented.");
+        }
+
         inputField.SetTextWithoutNotify(this.GetIntSetting(settingName).ToString());
     }
 
@@ -92,7 +130,8 @@ public class SettingFields : BasePanel
         }
     }
 
-    int GetIntSetting(string settingName) {
+    int GetIntSetting(string settingName)
+    {
         return GameManager.Instance.GettingUpdateFunctions[settingName]();
     }
 

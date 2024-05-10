@@ -22,6 +22,7 @@ public class HitSoundAspect : BaseSoundAspect
     void OnCollisionEnter(Collision collision)
     {
         var s = this.soundPool.Next();
+        s.volume = GameManager.RealTimeSettings.Volume;
         s.Play();
     }
 }

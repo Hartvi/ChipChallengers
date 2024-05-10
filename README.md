@@ -7,16 +7,11 @@ https://lotramus.itch.io/chip-challengers
 
 
 ### TODO
+- `+` dropdown button options for selecting chip type and option - in `ChipPanel.cs`
+  - `+` done for type
+- `+` Create 3 example maps
 - `+` add more camera views
   - `+` add view that is located inside the core's POV
-- `+` options menu
-  - master sound level, sound effect level, music level
-  - particle effects - 0-100 %
-  - physics iteration speed
-- `+` Create 3 example maps
-- `+` settings menu
-  - volume, number of particles
-  - maybe do sliders
 - `+` add particles
   - Done: jet smoke
   - Done: wheel dust
@@ -39,6 +34,10 @@ https://lotramus.itch.io/chip-challengers
 - `+` find out why the physics timing makes wheels speed up cars differently 
 
 ### Done
+- `+` options menu
+  - master sound level, sound effect level, music level
+  - particle effects - 0-100 %
+  - physics iteration speed
 - `+` add sounds
 - `+` when opening load/save panel, select the text input field
 - `+` when typing name into load or save panel, scroll to show models containing those names
