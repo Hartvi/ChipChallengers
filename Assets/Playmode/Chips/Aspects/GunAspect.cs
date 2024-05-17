@@ -86,6 +86,9 @@ public class GunAspect : BaseAspect
 
     void OnDestroy()
     {
-        this.bulletPool.DeleteObjects();
+        if (this.bulletPool is not null)
+        {
+            this.bulletPool.DeleteObjects();
+        }
     }
 }

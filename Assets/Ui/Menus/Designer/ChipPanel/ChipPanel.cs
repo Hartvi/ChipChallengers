@@ -172,40 +172,6 @@ public class ChipPanel : BasePanel, InputReceiver, IPointerEnterHandler, IPointe
         {
             int _i = i;
 
-            // TODO DROPDOWNS
-            // IF OPTION OR CHIP TYPE
-            //if (texts[_i].text == VChip.typeStr)
-            //{
-            //    TMP_Text t = texts[_i];
-            //    var dropdowns = t.Siblings<DropdownItemScroll>(true);
-            //    // if has dropdown, display it
-            //    // position the drop down to be below/above the input field
-            //    if(dropdowns.Length == 0)
-            //    {
-            //        //var d = Instantiate(Resources.Load<GameObject>("UI/Panel")).AddComponent<DropdownItemScroll>();
-            //        //d.Setup();
-            //        //d.AddChildren();
-            //        //print($"dropdown: {d}");
-            //        //d.transform.SetParent(t.transform.parent);
-
-            //        ItemBase ib = inputs[_i].GetComponent<ItemBase>();
-            //        VirtualProp ddvp = new VirtualProp(PropType.Panel, 1.0f, typeof(DropdownItemScroll));
-            //        ib.vProp.Children.Add(ddvp);
-            //        ddvp.Parent = ib.vProp;
-            //        ib.AddChildren();
-
-            //        dropdowns = t.Siblings<DropdownItemScroll>(true);
-            //    }
-            //    if (dropdowns.Length == 1)
-            //    {
-            //        DropdownItemScroll d = dropdowns[0];
-            //        d.itemScroll.SetupItemList(x => { t.SetText(x); }, 3, VChip.chipNames);
-            //        d.itemScroll.Scroll(0f);
-            //        d.bScrollbar.scrollbar.value = 0f;
-            //    } 
-            //    //.transform.parent
-            //}
-
             // TODO inputs[_i] was null????
             if (inputs[_i] is null)
             {
@@ -258,11 +224,52 @@ public class ChipPanel : BasePanel, InputReceiver, IPointerEnterHandler, IPointe
                     x =>
                     {
                         this.deselectTimer = 5;
-                        //var ps = this.PopUpItem.Siblings<ItemBase>(takeInactive: false);
-                        //foreach (var p in ps)
-                        //{
-                        //    p.gameObject.SetActive(false);
-                        //}
+                    }
+                );
+            }
+            if (texts[_i].text == VChip.optionStr)
+            {
+                inputs[_i].onSelect.AddListener(
+                    x =>
+                    {
+                        string[] optionNames = ArrayExtensions.AccessLikeDict(vc.ChipType, VChip.optionNames.keys, VChip.optionNames.values);
+                        ItemBase[] popUpItems = this.PopUpItem.DisplayNItems<ItemBase>(optionNames.Length);
+                        //print($"num chip types: {VChip.chipNames.Length}");
+                        for (int k = 0; k < popUpItems.Length; ++k)
+                        {
+                            var btn = popUpItems[k].GetComponent<Button>();
+                            btn.GetComponentInChildren<TMP_Text>().fontSize = UIUtils.SmallFontSize;
+                            btn.onClick.RemoveAllListeners();
+                            int _k = k;
+                            btn.onClick.AddListener(
+                                () =>
+                                {
+                                    inputs[_i].text = _k.ToString();
+                                    ItemBase[] popUpItems = this.PopUpItem.DisplayNItems<ItemBase>(optionNames.Length);
+                                    //print($"num chip types: {VChip.chipNames.Length}");
+                                    for (int k = 0; k < popUpItems.Length; ++k)
+                                    {
+                                        popUpItems[k].gameObject.SetActive(false);
+                                    }
+                                    inputs[_i].onEndEdit.Invoke(inputs[_i].text);
+                                }
+                            );
+                            //print($"button: {btn}");
+                            var txt = btn.GetComponentInChildren<TMP_Text>();
+                            txt.text = optionNames[k];
+                            print($"Option name: {txt.text}");
+                            // TODO: place buttons in correct positions
+                            // set small font size
+                        }
+                        float xShift = inputs[_i].gameObject.RT().sizeDelta.x * 0.5f + this.PopUpItem.gameObject.RT().sizeDelta.x * 0.5f;
+                        this.PopUpItem.transform.position = inputs[_i].transform.position - Vector3.right * xShift;
+                        TopProp.StackFrom(this.PopUpItem.Siblings<ItemBase>(takeInactive: false));
+                    }
+                );
+                inputs[_i].onDeselect.AddListener(
+                    x =>
+                    {
+                        this.deselectTimer = 5;
                     }
                 );
             }

@@ -7,23 +7,19 @@ https://lotramus.itch.io/chip-challengers
 
 
 ### TODO
-- `+` dropdown button options for selecting chip type and option - in `ChipPanel.cs`
-  - `+` done for type
 - `+` Create 3 example maps
 - `+` add more camera views
   - `+` add view that is located inside the core's POV
 - `+` add particles
   - Done: jet smoke
   - Done: wheel dust
-  - gun
+  - gun: TODO FLASH BANG
 - `+` fix lua throwing an exception when the code is incomplete
   - `+` autofill available functions??
   - `+` provide documentation for available lua functions
-- `++` add dropdowns for `Option`, `Type` and other fields as necessary
 - `+++` implement multiplayer
 - `+` game modes: pool, snake
 ---------------------------------------------------------------------------------------------------------------
-- `++` add dropdowns for `Option`, `Type` and other fields as necessary
 - `+` add backgrounds to all menus:
   - settings menu, load panel, map panel, save panel
 - `+` intro tutorial
@@ -34,6 +30,7 @@ https://lotramus.itch.io/chip-challengers
 - `+` find out why the physics timing makes wheels speed up cars differently 
 
 ### Done
+- `+` dropdown button options for selecting chip type and option - in `ChipPanel.cs`
 - `+` options menu
   - master sound level, sound effect level, music level
   - particle effects - 0-100 %
