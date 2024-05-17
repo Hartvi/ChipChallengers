@@ -9,4 +9,8 @@ public class JetAspect : BaseAspect
         //print($"adding force: {this.value}");
         this.rb.AddForce(this.transform.up * this.value);
     }
+    public override void RuntimeFunction()
+    {
+    }
+
 }

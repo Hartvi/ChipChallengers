@@ -44,6 +44,8 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
 
     HUD Hud;
 
+    public static List<BaseAspect> RuntimeFunctions = new List<BaseAspect>();
+
     // HUD, etc
     // km/h m/s variables
     public override void Setup()
@@ -257,6 +259,14 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
 
     void InputReceiver.HandleInputs()
     {
+        foreach (var rtf in SingleplayerMenu.RuntimeFunctions)
+        {
+            if (rtf != null)
+            {
+                rtf.RuntimeFunction();
+            }
+        }
+
         this.core.HandleInputs();
 
         //#if UNITY_EDITOR

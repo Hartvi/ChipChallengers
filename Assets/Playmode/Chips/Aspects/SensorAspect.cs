@@ -36,7 +36,7 @@ public class SensorAspect : BaseAspect
         //print($"setting sensortype: {this.sensorType}");
     }
 
-    void Update()
+    public override void RuntimeFunction()
     {
         if (this.sensorType == SensorType.Acceleration)
         {

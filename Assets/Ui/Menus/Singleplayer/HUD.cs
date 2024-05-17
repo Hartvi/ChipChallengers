@@ -82,6 +82,7 @@ public class HUD : TopProp
         {
             // TODO: variable was outside of bounds
             var t = this.displayVariables[i].currentValue.ToString();
+            if(this.CurrentValues.Length == i) { break; }
             this.CurrentValueTxts[i].SetText(t);
         }
     }

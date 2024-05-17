@@ -17,9 +17,11 @@ public class JetDustAspect : BaseAspect
         particles.transform.SetParent(this.transform, false);
         Quaternion q = Quaternion.Euler(90f, 0f, 0f);
         particles.transform.localRotation = q;
+        var em = this.particles.emission;
+        em.rateOverTime = 0f;
     }
 
-    void Update()
+    public override void RuntimeFunction()
     {
         var em = this.particles.emission;
         em.rateOverTime = Mathf.Min(Mathf.Abs(this.value * 0.1f), 100f);

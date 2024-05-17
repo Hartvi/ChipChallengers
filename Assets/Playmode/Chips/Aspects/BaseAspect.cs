@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
@@ -14,7 +15,14 @@ public abstract class BaseAspect : MonoBehaviour
     protected virtual void Awake()
     {
         this.myChip = this.gameObject.GetComponent<CommonChip>();
+        //if (SingleplayerMenu.Instance is null)
+        //{
+        //    throw new NullReferenceException("BaseAspect requires SingleplayerMenu to be initialized");
+        //}
+        SingleplayerMenu.RuntimeFunctions.Add(this);
     }
-    
+
+    public abstract void RuntimeFunction();
+
 }
 

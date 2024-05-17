@@ -43,7 +43,7 @@ public class WheelAspects : BaseAspect
     float Omega;
 
     Transform childTransform;
-    public float totalSlip = 0f, totalSlip1 = 0f, totalSlip2 = 0f;
+    public float totalSlip = 0f, totalSlip1 = 0f, totalSlip2 = 0f, totalSlip3 = 0f;
 
     void Start()
     {
@@ -145,7 +145,7 @@ public class WheelAspects : BaseAspect
 
         float VTX = WheelAspects.radius * this.Omega;
         float VX = xVelocity;
-        float invVX = 1f / (1e-8f + Mathf.Abs(VX));
+        float invVX = 1f / (1e-1f + Mathf.Abs(VX));
         this.xSlip = (VTX - VX) * invVX;
         float xImpulse = impulseStrength * Pacejka(this.xSlip);
 
@@ -167,11 +167,14 @@ public class WheelAspects : BaseAspect
         return (1.7f * x) / (0.4f + Mathf.Sqrt(1.7f + 1.3f * x * x));
     }
 
-    void Update()
+    public override void RuntimeFunction()
     {
+        if (this.childTransform == null) { return; }
         this.childTransform.Rotate(Vector3.up, -this.Omega, Space.Self);
 
-        this.totalSlip = 0.3333f * (Mathf.Abs(this.xSlip) + Mathf.Abs(this.ySlip) + this.totalSlip1 + this.totalSlip2);
+        //this.totalSlip = 0.5f * (Mathf.Abs(this.xSlip) + Mathf.Abs(this.ySlip) + this.totalSlip1);
+        this.totalSlip = 0.25f * (Mathf.Abs(this.xSlip) + Mathf.Abs(this.ySlip) + this.totalSlip1 + this.totalSlip2 + this.totalSlip3);
+        this.totalSlip3 = this.totalSlip2;
         this.totalSlip2 = this.totalSlip1;
         this.totalSlip1 = this.totalSlip;
 
@@ -187,10 +190,10 @@ public class WheelAspects : BaseAspect
         }
         else
         {
-            if (!this.particles.isPlaying)
-            {
-                this.particles.gameObject.SetActive(false);
-            }
+            //if (!this.particles.isPlaying)
+            //{
+            //    this.particles.gameObject.SetActive(false);
+            //}
         }
     }
 

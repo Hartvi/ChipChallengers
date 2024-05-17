@@ -48,4 +48,8 @@ public class HealthAspect : BaseAspect
         print($"Test: HealthAspect: Dying");
     }
 
+   public override void RuntimeFunction()
+    {
+    }
+
 }

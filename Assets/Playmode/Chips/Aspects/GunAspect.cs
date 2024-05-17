@@ -52,13 +52,13 @@ public class GunAspect : BaseAspect
         );
     }
 
-    void Update()
+    public override void RuntimeFunction()
     {
         if (this._charge < 1f)
         {
             this._charge += this.dPowerPerFrame * Time.deltaTime;
         } // if charge is full then check if shooting
-        else if (this.brake > 1e-9f)
+        else if (this.brake > 1e-4f)
         {
             this.Fire();
         }

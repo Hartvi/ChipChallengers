@@ -290,6 +290,7 @@ public class CommonChip : AngleChip
                 {
                     this.gameObject.AddComponentIdempotent<GunAspect>().myChip = this;
                     this.gameObject.AddComponentIdempotent<GunSoundAspect>().myChip = this;
+                    this.gameObject.AddComponentIdempotent<GunDustAspect>().myChip = this;
                 }
             }
         }
@@ -427,6 +428,7 @@ public class CommonChip : AngleChip
 
     public void TriggerSpawn(VModel virtualModel, bool freeze)
     {
+        SingleplayerMenu.RuntimeFunctions.Clear();
         this.VirtualModel = virtualModel;
 
         foreach (VVar v in this.VirtualModel.variables)

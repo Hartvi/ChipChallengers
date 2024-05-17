@@ -13,4 +13,9 @@ public class BaseSoundAspect : BaseAspect
         this.soundPool = new ObjectPool<AudioSource>(this.NumberOfSounds, () => this.gameObject.AddComponent<AudioSource>(), (x) => Destroy(x));
     }
 
+    public override void RuntimeFunction()
+    {
+    }
+
+
 }

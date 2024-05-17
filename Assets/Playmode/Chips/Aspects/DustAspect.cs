@@ -13,6 +13,10 @@ public class DustAspect : BaseAspect
         this.particles.gameObject.SetActive(false);
     }
 
+    public override void RuntimeFunction()
+    {
+    }
+
     void OnCollisionEnter(Collision collision)
     {
         this.particles.transform.position = this.transform.position;

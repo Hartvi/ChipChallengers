@@ -9,4 +9,8 @@ public class CowlAspect : BaseAspect
         this.gameObject.layer = 7;
     }
 
+
+    public override void RuntimeFunction()
+    {
+    }
 }

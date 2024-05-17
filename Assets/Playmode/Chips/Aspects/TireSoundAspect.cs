@@ -7,7 +7,7 @@ public class TireSoundAspect : BaseSoundAspect
     WheelAspects wheelAspect;
     int everyNthCounter = 0;
     int everyNth = 5;
-    const float slipOffset = 0.13f;
+    const float slipOffset = 1.0f;
 
     protected override void Awake()
     {
@@ -26,7 +26,7 @@ public class TireSoundAspect : BaseSoundAspect
         this.wheelAspect = this.GetComponent<WheelAspects>();
     }
 
-    void Update()
+    public override void RuntimeFunction()
     {
         if (everyNthCounter++ >= everyNth)
         {

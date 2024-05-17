@@ -27,7 +27,7 @@ public class Aerodynamics : BaseAspect
         }
     }
 
-    void Update()
+    public override void RuntimeFunction()
     {
         Transform t = this.transform;
         Vector3 velocity = this.rb.velocity;

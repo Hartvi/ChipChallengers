@@ -7,11 +7,8 @@ https://lotramus.itch.io/chip-challengers
 
 
 ### TODO
+- `+` mute sounds when in menu
 - `+` Create 3 example maps
-- `+` add particles
-  - Done: jet smoke
-  - Done: wheel dust
-  - gun: TODO FLASH BANG
 - `+` fix lua throwing an exception when the code is incomplete
   - `+` autofill available functions??
   - `+` provide documentation for available lua functions
@@ -28,6 +25,9 @@ https://lotramus.itch.io/chip-challengers
 - `+` find out why the physics timing makes wheels speed up cars differently 
 
 ### Done
+- `+` add particles
+  - Done: jet smoke
+  - Done: wheel dust
 - `+` add more camera views
   - `+` add view that is located inside the core's POV
 - `+` dropdown button options for selecting chip type and option - in `ChipPanel.cs`
