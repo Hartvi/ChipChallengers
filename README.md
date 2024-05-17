@@ -8,8 +8,6 @@ https://lotramus.itch.io/chip-challengers
 
 ### TODO
 - `+` Create 3 example maps
-- `+` add more camera views
-  - `+` add view that is located inside the core's POV
 - `+` add particles
   - Done: jet smoke
   - Done: wheel dust
@@ -30,6 +28,8 @@ https://lotramus.itch.io/chip-challengers
 - `+` find out why the physics timing makes wheels speed up cars differently 
 
 ### Done
+- `+` add more camera views
+  - `+` add view that is located inside the core's POV
 - `+` dropdown button options for selecting chip type and option - in `ChipPanel.cs`
 - `+` options menu
   - master sound level, sound effect level, music level

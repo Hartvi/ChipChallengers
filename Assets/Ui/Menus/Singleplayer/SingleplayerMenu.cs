@@ -179,6 +179,15 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
         camTransform.LookAt(lookAtPos);
     }
 
+    void CameraCopyInside()
+    {
+        Transform camTransform = this.mainCamera.transform;
+        Transform ct = this.core.transform;
+
+        camTransform.position = ct.position;
+        camTransform.rotation = ct.rotation;
+    }
+
     void CameraCopyOutside()
     {
         CameraFollowSettings cs = this.cameraFollowSettings;
@@ -358,6 +367,10 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
         {
             GameManager.cameraMoveMode = CameraMoveMode.CopyOutside;
         }
+        if (Input.GetKeyDown(KeyCode.Alpha4) || Input.GetKeyDown(KeyCode.Keypad4))
+        {
+            GameManager.cameraMoveMode = CameraMoveMode.CopyInside;
+        }
 
         if (GameManager.cameraMoveMode == CameraMoveMode.Follow || GameManager.cameraMoveMode == CameraMoveMode.CopyOutside)
         {
@@ -403,6 +416,12 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
             case CameraMoveMode.CopyOutside:
                 {
                     this.CameraCopyOutside();
+                    break;
+                }
+            // Copy position & rotation without any offsets etc
+            case CameraMoveMode.CopyInside:
+                {
+                    this.CameraCopyInside();
                     break;
                 }
         }

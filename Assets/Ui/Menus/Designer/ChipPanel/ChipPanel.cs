@@ -189,7 +189,6 @@ public class ChipPanel : BasePanel, InputReceiver, IPointerEnterHandler, IPointe
                     x =>
                     {
                         ItemBase[] popUpItems = this.PopUpItem.DisplayNItems<ItemBase>(VChip.chipNames.Length);
-                        //print($"num chip types: {VChip.chipNames.Length}");
                         for (int k = 0; k < popUpItems.Length; ++k)
                         {
                             var btn = popUpItems[k].GetComponent<Button>();
@@ -201,7 +200,6 @@ public class ChipPanel : BasePanel, InputReceiver, IPointerEnterHandler, IPointe
                                 {
                                     inputs[_i].text = VChip.chipNames[_k];
                                     ItemBase[] popUpItems = this.PopUpItem.DisplayNItems<ItemBase>(VChip.chipNames.Length);
-                                    //print($"num chip types: {VChip.chipNames.Length}");
                                     for (int k = 0; k < popUpItems.Length; ++k)
                                     {
                                         popUpItems[k].gameObject.SetActive(false);
@@ -209,11 +207,8 @@ public class ChipPanel : BasePanel, InputReceiver, IPointerEnterHandler, IPointe
                                     inputs[_i].onEndEdit.Invoke(inputs[_i].text);
                                 }
                             );
-                            //print($"button: {btn}");
                             var txt = btn.GetComponentInChildren<TMP_Text>();
                             txt.text = VChip.chipNames[k];
-                            // TODO: place buttons in correct positions
-                            // set small font size
                         }
                         float xShift = inputs[_i].gameObject.RT().sizeDelta.x * 0.5f + this.PopUpItem.gameObject.RT().sizeDelta.x * 0.5f;
                         this.PopUpItem.transform.position = inputs[_i].transform.position - Vector3.right * xShift;
@@ -234,7 +229,6 @@ public class ChipPanel : BasePanel, InputReceiver, IPointerEnterHandler, IPointe
                     {
                         string[] optionNames = ArrayExtensions.AccessLikeDict(vc.ChipType, VChip.optionNames.keys, VChip.optionNames.values);
                         ItemBase[] popUpItems = this.PopUpItem.DisplayNItems<ItemBase>(optionNames.Length);
-                        //print($"num chip types: {VChip.chipNames.Length}");
                         for (int k = 0; k < popUpItems.Length; ++k)
                         {
                             var btn = popUpItems[k].GetComponent<Button>();
@@ -246,7 +240,6 @@ public class ChipPanel : BasePanel, InputReceiver, IPointerEnterHandler, IPointe
                                 {
                                     inputs[_i].text = _k.ToString();
                                     ItemBase[] popUpItems = this.PopUpItem.DisplayNItems<ItemBase>(optionNames.Length);
-                                    //print($"num chip types: {VChip.chipNames.Length}");
                                     for (int k = 0; k < popUpItems.Length; ++k)
                                     {
                                         popUpItems[k].gameObject.SetActive(false);
@@ -254,12 +247,8 @@ public class ChipPanel : BasePanel, InputReceiver, IPointerEnterHandler, IPointe
                                     inputs[_i].onEndEdit.Invoke(inputs[_i].text);
                                 }
                             );
-                            //print($"button: {btn}");
                             var txt = btn.GetComponentInChildren<TMP_Text>();
                             txt.text = optionNames[k];
-                            print($"Option name: {txt.text}");
-                            // TODO: place buttons in correct positions
-                            // set small font size
                         }
                         float xShift = inputs[_i].gameObject.RT().sizeDelta.x * 0.5f + this.PopUpItem.gameObject.RT().sizeDelta.x * 0.5f;
                         this.PopUpItem.transform.position = inputs[_i].transform.position - Vector3.right * xShift;
