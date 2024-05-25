@@ -102,6 +102,7 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
         //this.OnEnterMenu();
         this.selectedCallbacks.SetCallbacks(new Action[] { this.OnEnterMenu, () => UIManager.instance.SwitchToMe(this) });
         this.selectedCallbacks.Invoke();
+        this.deselectedCallbacks.SetCallbacks(new Action[] { this.OnLeaveMenu });
 
         this.ControlsPanel = this.gameObject.GetComponentInChildren<ControlsPanel>(true);
 
@@ -110,9 +111,17 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
         Camera.main.transform.position = this.core.transform.position + Vector3.up * 10f;
     }
 
-    // when going from other menus:
+    void OnLeaveMenu()
+    {
+        GameManager.RealTimeSettings.InMenu = true;
+        Time.fixedDeltaTime = 0.1f;
+    }
+
     void OnEnterMenu()
     {
+        string s = UIStrings.PhysicsRate;
+        Time.fixedDeltaTime = 1f / (float)(PlayerPrefs.GetInt(s));
+        GameManager.RealTimeSettings.InMenu = false;
         GameManager.Instance.UpdateSettings();
 
         // ignore wheel and default layer collisions

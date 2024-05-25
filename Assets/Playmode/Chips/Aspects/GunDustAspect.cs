@@ -28,7 +28,7 @@ public class GunDustAspect : BaseAspect
     {
         this.gunAspect = this.GetComponent<GunAspect>();
         var em = this.particles.emission;
-        em.rateOverTime = Mathf.Abs(this.value);
+        em.rateOverTime = GameManager.RealTimeSettings.ParticleRate * Mathf.Abs(this.value);
         var m = this.particles.main;
         m.startSpeed = Mathf.Abs(this.value * 0.1f);
         m.startSize = 0.1f * this.value;

@@ -38,9 +38,18 @@ public class GameManager : MonoBehaviour
 
     Dictionary<string, Func<int, int>> SettingUpdateFunctions = new Dictionary<string, Func<int, int>>();
     public Dictionary<string, Func<int>> GettingUpdateFunctions = new Dictionary<string, Func<int>>();
+
     public static class RealTimeSettings
     {
-        public static float Volume;
+        public static float Volume
+        {
+            get { return RealTimeSettings.InMenu ? 0f : RealTimeSettings._Volume; }
+            set { RealTimeSettings._Volume = value; }
+        }
+        private static float _Volume = 1f;
+        public static bool InMenu = false;
+
+        public static float ParticleRate;
     }
 
     void Awake()
@@ -96,6 +105,7 @@ public class GameManager : MonoBehaviour
         {
             i = defaultIntSettings[s];
         }
+        GameManager.RealTimeSettings.ParticleRate = (float)(i) / 100f;
         return i;
     }
 

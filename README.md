@@ -7,7 +7,6 @@ https://lotramus.itch.io/chip-challengers
 
 
 ### TODO
-- `+` mute sounds when in menu
 - `+` Create 3 example maps
 - `+` fix lua throwing an exception when the code is incomplete
   - `+` autofill available functions??
@@ -25,6 +24,8 @@ https://lotramus.itch.io/chip-challengers
 - `+` find out why the physics timing makes wheels speed up cars differently 
 
 ### Done
+- `+` add particle setting
+- `+` mute sounds when in menu
 - `+` add particles
   - Done: jet smoke
   - Done: wheel dust

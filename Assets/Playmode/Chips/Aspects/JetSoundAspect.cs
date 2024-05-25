@@ -10,6 +10,7 @@ public class JetSoundAspect : BaseSoundAspect
     {
         base.Awake();
         this.audioClip = Resources.Load<AudioClip>(UIStrings.Sounds + "/jet");
+        
         this.NumberOfSounds = 5;
     }
 
@@ -28,6 +29,7 @@ public class JetSoundAspect : BaseSoundAspect
         {
             var s = this.soundPool.Next();
             s.volume = GameManager.RealTimeSettings.Volume * Mathf.Abs(this.value * 0.001f);
+            s.Play();
             everyNthCounter = 0;
         }
     }

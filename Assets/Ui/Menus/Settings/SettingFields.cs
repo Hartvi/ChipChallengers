@@ -20,9 +20,14 @@ public class SettingFields : BasePanel
                 new VirtualProp(PropType.Panel, 0.5f, down, // column for descriptions of property
                     new VirtualProp(PropType.Text, 0.33f),
                     new VirtualProp(PropType.Text, 0.33f),
-                    new VirtualProp(PropType.Text, -1f)
+                    new VirtualProp(PropType.Text, 0.33f),
+                    new VirtualProp(PropType.Text, 0.33f)
                 ),
                 new VirtualProp(PropType.Panel, 0.5f, down, // column for input fields for each property
+                    new VirtualProp(PropType.Panel, 0.33f, right,
+                        new VirtualProp(PropType.Input, 0.5f),
+                        new VirtualProp(PropType.Slider, 0.5f)
+                    ),
                     new VirtualProp(PropType.Panel, 0.33f, right,
                         new VirtualProp(PropType.Input, 0.5f),
                         new VirtualProp(PropType.Slider, 0.5f)

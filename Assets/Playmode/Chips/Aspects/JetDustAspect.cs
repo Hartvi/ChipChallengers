@@ -24,7 +24,7 @@ public class JetDustAspect : BaseAspect
     public override void RuntimeFunction()
     {
         var em = this.particles.emission;
-        em.rateOverTime = Mathf.Min(Mathf.Abs(this.value * 0.1f), 100f);
+        em.rateOverTime = GameManager.RealTimeSettings.ParticleRate * Mathf.Min(Mathf.Abs(this.value * 0.1f), 100f);
         var m = this.particles.main;
         m.startSpeed = Mathf.Abs(this.value * 1f);
         if (this.value > 0 && this.oldVal <= 0)
