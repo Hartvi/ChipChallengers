@@ -39,7 +39,11 @@ public class VVar
         set
         {
             this._currentValue = Mathf.Max(Mathf.Min(value, this.maxValue), this.minValue);
-            //PRINT.print($"Setting current value {this._currentValue} of variable {this.name}");
+            //if(this.name == "angle")
+            //{
+            //    PRINT.IPrint($"Setting variable {this.name}: {this._currentValue}. Listeners: {this.valueChangedCallbacks.Length}");
+            //}
+            //PRINT.IPrint($"Setting current value {this._currentValue} of variable {this.name}");
 
             foreach (Action<float, VVar> a in this.valueChangedCallbacks)
             {
@@ -47,8 +51,16 @@ public class VVar
                 // by default, building with default angle resets target vector to be 0 at the default angle,
                 // which means we might have to subtract the default angle when setting the angle;
                 // NOT to be confused with non-angle instances
+                //if (this.name == "angle")
+                //{
+                //    PRINT.IPrint($"lel");
+                //}
                 a(this._currentValue, this);
             }
+            //if (this.name == "angle")
+            //{
+            //    PRINT.IPrint($"\n");
+            //}
         }
     }
     public bool hasChanged = false;

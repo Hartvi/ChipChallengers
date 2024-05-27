@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using System.Linq;
 
 public enum CameraMoveMode
 {
@@ -157,7 +158,8 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
 
         this.LoadPanel.SetOnLoadedCallbacks(onLoadedCallbacksTmp);
 
-        this.MapPanel.SetOnLoadedCallbacks(onLoadedCallbacksTmp);
+        var mapLoadedCallbacks = onLoadedCallbacksTmp.Concat(new Action[] { this.core.ResetToDefaultLocation }).ToArray();
+        this.MapPanel.SetOnLoadedCallbacks(mapLoadedCallbacks);
 
         //TODO: load model after entering playmode???
         this.Hud.LinkCore(this.core);

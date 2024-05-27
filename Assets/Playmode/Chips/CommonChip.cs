@@ -203,8 +203,7 @@ public class CommonChip : AngleChip
                 );
             newChild.cj = cj;
 
-            // TODO: position mode for axle AND velocity mode for axle => spring/damper
-            this.ConfigureJointAxis(cj);
+            cj.angularXMotion = ConfigurableJointMotion.Free;
             newChild.ConfigureJointSpringDamper(cj);
         }
 
@@ -318,15 +317,7 @@ public class CommonChip : AngleChip
         jd.positionSpring = spring;
         jd.positionDamper = damper;
         jd.maximumForce = Mathf.Max(spring, damper);
-
-        if (cj.angularXMotion == ConfigurableJointMotion.Free)
-        {
-            cj.angularXDrive = jd;
-        }
-        if (cj.angularZMotion == ConfigurableJointMotion.Free)
-        {
-            cj.angularYZDrive = jd;
-        }
+        cj.angularXDrive = jd;
 
         float defaultDamper = (float)ArrayExtensions.AccessLikeDict(VChip.damperStr, VChip.allPropertiesStr, VChip.allPropertiesDefaultsObjects);
         float defaultSpring = (float)ArrayExtensions.AccessLikeDict(VChip.springStr, VChip.allPropertiesStr, VChip.allPropertiesDefaultsObjects);
@@ -336,18 +327,6 @@ public class CommonChip : AngleChip
         //    cj.angularXMotion = ConfigurableJointMotion.Locked;
         //    cj.angularZMotion = ConfigurableJointMotion.Locked;
         //}
-    }
-    private void ConfigureJointAxis(ConfigurableJoint cj)
-    {
-        int or = this.equivalentVirtualChip.orientation;
-        switch (or)
-        {
-            case 0: cj.angularXMotion = ConfigurableJointMotion.Free; break;
-            case 1: cj.angularZMotion = ConfigurableJointMotion.Free; break;
-            case 2: cj.angularXMotion = ConfigurableJointMotion.Free; break;
-            case 3: cj.angularZMotion = ConfigurableJointMotion.Free; break;
-            default: throw new ArgumentException($"Orientation {or} is not in [0,3].");
-        }
     }
 
     protected void SetupRigidbody()

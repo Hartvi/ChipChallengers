@@ -7,7 +7,11 @@ https://lotramus.itch.io/chip-challengers
 
 
 ### TODO
-- `+` Create 3 example maps
+- `+` add lua function to print stuff to screen as text
+  - `+` to draw lines on the screen
+  - DONE: `+` to read mouse position
+- `+` add option to create balls/capsules/cubes in playmode
+- `+` add lua scripts that can add checkpoint gates, objects and other things into playmode
 - `+` fix lua throwing an exception when the code is incomplete
   - `+` autofill available functions??
   - `+` provide documentation for available lua functions
@@ -24,6 +28,9 @@ https://lotramus.itch.io/chip-challengers
 - `+` find out why the physics timing makes wheels speed up cars differently 
 
 ### Done
+- `+` FIX BUG: entering angle in some chips fails to turn them FIX LUA
+- `+` when loading new map, reset position
+- `+` Create 3 example maps
 - `+` add particle setting
 - `+` mute sounds when in menu
 - `+` add particles

@@ -22,6 +22,10 @@ public abstract class AngleChip : OptionChip
 
     public delegate bool ParseFuncDelegate<T>(string s, out T result);
 
+    //void Update()
+    //{
+    //    print($"joint: {this.cj.targetRotation}");
+    //}
 
     protected float GetBrake()
     {
@@ -105,7 +109,6 @@ public abstract class AngleChip : OptionChip
             else
             {
                 property = existingVar.currentValue.FromVariableFloat<T>();
-                //print($"Property {propertyName}: exists: {property}");
                 existingVar.AddValueChangedCallback(VariableCallbackFunction);
 
                 // add also the option to remove the callback in case the chip dies
@@ -137,6 +140,7 @@ public abstract class AngleChip : OptionChip
             //print($"wuaternoin: {Quaternion.Euler(a, 0f, 0f)}");
             // TODO ITS NOT `this.cj` SINCE THIS IS RUNNING ON THE CORE, IT HAS TO REFERENCE THE TARGET JOINTS
             // maybe, not sure
+            //print($"Setting angle on {this.GetInstanceID()}");
             this.cj.targetRotation = Quaternion.Euler(a, 0f, 0f);
         }
         else

@@ -41,7 +41,41 @@ public class ExtraFunctions : MonoBehaviour
         return Mathf.Cos(x);
     }
 
+    public static Table Mouse(Script script)
+    {
+        Table tbl = new Table(script);
+        var mp = Input.mousePosition;
+        tbl[1] = (mp[0] / Screen.width - 0.5f) * 2f;
+        tbl[2] = (mp[1] / Screen.height - 0.5f) * 2f;
+        //for (int i = 1; i <= 2; i++)
+        //    tbl[i] = mp[i - 1];
 
+        return tbl;
+    }
+
+    public static Table Clicked(Script script)
+    {
+        Table tbl = new Table(script);
+        tbl[1] = Input.GetMouseButton(0);
+        tbl[2] = Input.GetMouseButton(1);
+        return tbl;
+    }
+
+    public static Table MouseDown(Script script)
+    {
+        Table tbl = new Table(script);
+        tbl[1] = Input.GetMouseButtonDown(0);
+        tbl[2] = Input.GetMouseButtonDown(1);
+        return tbl;
+    }
+    
+    public static Table MouseUp(Script script)
+    {
+        Table tbl = new Table(script);
+        tbl[1] = Input.GetMouseButtonUp(0);
+        tbl[2] = Input.GetMouseButtonUp(1);
+        return tbl;
+    }
     public void TestFuncs()
     {
         string scriptCode = @"    
@@ -91,6 +125,7 @@ public class ScriptInstance
         this.script.Globals["KeyUp"] = (Func<char, bool>)ExtraFunctions.KeyUp;
         this.script.Globals["Sin"] = (Func<float, float>)ExtraFunctions.Sin;
         this.script.Globals["Cos"] = (Func<float, float>)ExtraFunctions.Cos;
+        this.script.Globals["Mouse"] = (Func<Script, Table>)ExtraFunctions.Mouse;
         this.script.Globals["Print"] = (Action<string>)ExtraFunctions.Print;
         this.script.Globals["SetVar"] = (Action<string, float>)this.SetVariable;
         this.script.Globals["GetVar"] = (Func<string, float>)this.GetVariable;
