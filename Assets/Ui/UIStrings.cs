@@ -5,6 +5,8 @@ using UnityEngine;
 
 public static class UIStrings
 {
+    public const string Player = "player";
+
     public const string Sounds = "Sounds";
 
     public const string Backup = "backup";
@@ -35,6 +37,8 @@ public static class UIStrings
 
     public const string ModelExtension = ".txt";
     public const string MapExtension = ".obj";
+    public const string ScenarioExtension = ".lua";
+    public const string ScenarioString = "Scenario";
 
     public const string Core = "Core";
 
@@ -83,6 +87,7 @@ public static class UIStrings
     public const string Bullet = "Bullet";
 
     // MAP RELATED
+    public const string EnterScenarioName = "Enter scenario name";
     public const string EnterMapName = "Enter map name";
     public const string EnterModelName = "Enter model name";
 

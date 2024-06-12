@@ -7,8 +7,22 @@ https://lotramus.itch.io/chip-challengers
 
 
 ### TODO
-- `+` add lua function to print stuff to screen as text
+- `+` WHEELS SHOULD ACT ON OTHER RIGID BODIES
+- `+` scenarios;
+  - lua file: it should have a map
+  - available functions:
+    - spawn sphere, cube, capsule
+    - starting position for all players
+    - naming of all spawned objects: e.g. player1, player2, sphere1, sphere2
+    - it should have gates that register who has passed through
+    - it should be able to print on each player's screen
+    - it should run as a background script
+    - there should be a lose/win condition
+    - there should be a timer
+    - options: bubble tanks, rocket league
+- `+` add lua functions
   - `+` to draw lines on the screen
+  - `+` to print stuff to screen as text
   - DONE: `+` to read mouse position
 - `+` add option to create balls/capsules/cubes in playmode
 - `+` add lua scripts that can add checkpoint gates, objects and other things into playmode

@@ -1,19 +1,18 @@
-using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Dummiesman;
+using System.IO;
 
-public class VMap
+public class VScenario : MonoBehaviour
 {
-    public const string DefaultFileName = "first_map.obj";
-    
-    string mapName = "first_map.obj";
-    public string FileName { get { return this.mapName; } }
+    public const string DefaultFileName = "";
+
+    string scenarioName = "";
+    public string FileName { get { return this.scenarioName; } }
 
     GameObject loadedObject;
 
-    public void LoadNewMap(string name)
+    public void LoadNewScenario(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -26,12 +25,12 @@ public class VMap
             3f);
             return;
         }
-        this.mapName = name.Substring(0, name.Length - UIStrings.MapExtension.Length);;
+        this.scenarioName = name.Substring(0, name.Length - UIStrings.ScenarioExtension.Length);
 
         string error = "";
-        string objPath = Path.Join(IOHelpers.GetMapsDirectory(), name).Replace("\\", "/");
+        string scenarioPath = Path.Join(IOHelpers.GetScenariosDirectory(), name).Replace("\\", "/");
 
-        if (!File.Exists(objPath))
+        if (!File.Exists(scenarioPath))
         {
             error = "File doesn't exist.";
             DisplaySingleton.Instance.DisplayText(x =>
@@ -46,17 +45,15 @@ public class VMap
             if (this.loadedObject != null)
                 GameObject.Destroy(this.loadedObject);
 
-            this.loadedObject = new OBJLoader().Load(objPath);
+            this.loadedObject = new GameObject(UIStrings.ScenarioString);
+            var gs = this.loadedObject.AddComponent<GameScript>();
 
-            MeshRenderer[] meshRenderers = this.loadedObject.GetComponentsInChildren<MeshRenderer>();
-            foreach(MeshRenderer m in meshRenderers)
-            {
-                m.gameObject.AddComponent<MeshCollider>();
-                m.gameObject.SetActive(true);
-            }
+            string fileContents = File.ReadAllText(scenarioPath);
+            gs.Activate(fileContents);
+
             this.loadedObject.SetActive(true);
+
             error = string.Empty;
         }
     }
 }
-

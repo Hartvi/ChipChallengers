@@ -26,9 +26,30 @@ public class ExtraFunctions : MonoBehaviour
     }
 
 
-    public static void Print(string s)
+    public static void Print(string s, Table tbl)
     {
-        UnityEngine.Debug.Log(s);
+        Vector2 position = Vector2.zero;
+
+        var tblx = tbl.Get("x");
+        var tbly = tbl.Get("y");
+        position.x = tblx == DynValue.Nil ? 0f : (float)tblx.Number;
+        position.y = tbly == DynValue.Nil ? 0f : (float)tbly.Number;
+
+        var tblr = tbl.Get("r");
+        float r = tblr == DynValue.Nil ? 0f : (float)tblr.Number;
+        var tblg = tbl.Get("g");
+        float g = tblg == DynValue.Nil ? 0f : (float)tblg.Number;
+        var tblb = tbl.Get("b");
+        float b = tblb == DynValue.Nil ? 0f : (float)tblb.Number;
+
+        DisplaySingleton.Instance.DisplayText(
+            txt =>
+            {
+                txt.transform.position = new Vector2(Screen.width * (0.5f + position.x * 0.5f), Screen.height * (0.5f + position.y * 0.5f));
+                txt.color = new Color(r, g, b);
+                txt.SetText(s);
+            }, 0.5f
+        );
     }
 
     public static float Sin(float x)
@@ -47,13 +68,10 @@ public class ExtraFunctions : MonoBehaviour
         var mp = Input.mousePosition;
         tbl[1] = (mp[0] / Screen.width - 0.5f) * 2f;
         tbl[2] = (mp[1] / Screen.height - 0.5f) * 2f;
-        //for (int i = 1; i <= 2; i++)
-        //    tbl[i] = mp[i - 1];
-
         return tbl;
     }
 
-    public static Table Clicked(Script script)
+    public static Table IsClicked(Script script)
     {
         Table tbl = new Table(script);
         tbl[1] = Input.GetMouseButton(0);
@@ -68,7 +86,7 @@ public class ExtraFunctions : MonoBehaviour
         tbl[2] = Input.GetMouseButtonDown(1);
         return tbl;
     }
-    
+
     public static Table MouseUp(Script script)
     {
         Table tbl = new Table(script);
@@ -91,7 +109,7 @@ public class ExtraFunctions : MonoBehaviour
         script.Globals["KeyUp"] = (Func<char, bool>)KeyUp;
         script.Globals["Sin"] = (Func<float, float>)Sin;
         script.Globals["Cos"] = (Func<float, float>)Cos;
-        script.Globals["Print"] = (Action<string>)Print;
+        script.Globals["Print"] = (Action<string, Table>)Print;
 
         script.DoString(scriptCode);
 
@@ -126,7 +144,10 @@ public class ScriptInstance
         this.script.Globals["Sin"] = (Func<float, float>)ExtraFunctions.Sin;
         this.script.Globals["Cos"] = (Func<float, float>)ExtraFunctions.Cos;
         this.script.Globals["Mouse"] = (Func<Script, Table>)ExtraFunctions.Mouse;
-        this.script.Globals["Print"] = (Action<string>)ExtraFunctions.Print;
+        this.script.Globals["IsClicked"] = (Func<Script, Table>)ExtraFunctions.IsClicked;
+        this.script.Globals["MouseDown"] = (Func<Script, Table>)ExtraFunctions.MouseDown;
+        this.script.Globals["MouseUp"] = (Func<Script, Table>)ExtraFunctions.MouseUp;
+        this.script.Globals["Print"] = (Action<string, Table>)ExtraFunctions.Print;
         this.script.Globals["SetVar"] = (Action<string, float>)this.SetVariable;
         this.script.Globals["GetVar"] = (Func<string, float>)this.GetVariable;
 

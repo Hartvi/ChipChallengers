@@ -18,24 +18,24 @@ public static class UIUtils
     {
         get
         {
-            return (2*Screen.width + Screen.height) / 7.5e1f;
+            return (2 * Screen.width + Screen.height) / 7.5e1f;
         }
     }
     public static float LargeFontSize
     {
         get
         {
-            return (2*Screen.width + Screen.height) / 5e1f;
+            return (2 * Screen.width + Screen.height) / 5e1f;
         }
     }
     public static readonly GameObject Panel, Button, Toggle, Image, Slider, Dropdown, Input, RawImage, ScrollView, Scrollbar, Text;//, FullscreenPanel;
     public static readonly TMP_FontAsset DefaultFont;
-    public static readonly Color DarkRed = 0.5f*Color.red + 0.5f*Color.black;
+    public static readonly Color DarkRed = 0.5f * Color.red + 0.5f * Color.black;
     public static readonly GameObject[] TextBearingUI;
     static UIUtils()
     {
         Panel = Resources.Load("UI/Panel") as GameObject;
-        
+
         //PRINT.print("INSTANTIATING UIUtils");
         Button = Resources.Load("UI/Button") as GameObject;
         Toggle = Resources.Load("UI/Toggle") as GameObject;
@@ -48,19 +48,18 @@ public static class UIUtils
         Scrollbar = Resources.Load("UI/Scrollbar") as GameObject;
         Text = Resources.Load("UI/Text (TMP)") as GameObject;
 
-        TextBearingUI = new GameObject[]{ Button, Toggle, Dropdown, Input, Text };
+        TextBearingUI = new GameObject[] { Button, Toggle, Dropdown, Input, Text };
 
         string mediumFontName = "DraftingMono-Medium SDF";
         DefaultFont = Resources.Load<TMP_FontAsset>($"Fonts/{mediumFontName}");
-        foreach(var tbui in UIUtils.TextBearingUI)
+
+
+        foreach (var tbui in UIUtils.TextBearingUI)
         {
-            //PRINT.print($"tbui: {tbui}");
-            //UnityEngine.Debug.Log(tbui);
-            //PRINT.print($"tbui txts:: {tbui.GetComponentsInChildren<TMP_Text>()}");
-            foreach(var txt in tbui.GetComponentsInChildren<TMP_Text>())
+            foreach (var txt in tbui.GetComponentsInChildren<TMP_Text>())
             {
                 UIUtils.SetFont(txt, mediumFontName);
-                txt.color = UIUtils.DarkRed;
+                txt.color = Color.black;
             }
         }
 

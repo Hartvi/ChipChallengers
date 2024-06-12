@@ -17,25 +17,38 @@ public class DisplaySingleton : MonoBehaviour
         }
     }
 
+    ObjectPool<TMP_Text> textPool;
+
     GameObject parent;
-    TMP_Text text;
-    float lastTime, interval;
+    //TMP_Text text;
+    float[] lastTime, interval;
+    private int numberOfTexts = 10;
 
     void Awake()
     {
         Canvas canvas = GameObject.FindObjectOfType<Canvas>();
         this.parent = canvas.gameObject;
-        this.text = Instantiate(UIUtils.Text).GetComponent<TMP_Text>();
-        this.text.transform.SetParent(this.parent.transform);
+        //this.text = Instantiate(UIUtils.Text).GetComponent<TMP_Text>();
+        //this.text.transform.SetParent(this.parent.transform);
+        this.textPool = new ObjectPool<TMP_Text>(this.numberOfTexts, () =>
+            {
+                var txt = Instantiate(UIUtils.Text).GetComponent<TMP_Text>();
+                txt.transform.SetParent(this.parent.transform);
+                return txt;
+            },
+            (x) => { GameObject.Destroy(x.gameObject); }
+        );
+        this.lastTime = new float[this.numberOfTexts];
+        this.interval = new float[this.numberOfTexts];
     }
 
     public void DisplayText(Action<TMP_Text> modification, float interval)
     {
-        this.lastTime = Time.time;
-        this.interval = interval;
-        modification(this.text);
-        this.gameObject.SetActive(true);
-        this.text.gameObject.SetActive(true);
+        TMP_Text txt = this.textPool.Next();
+        modification(txt);
+        txt.gameObject.SetActive(true);
+        this.lastTime[this.textPool.currentIndex] = Time.time;
+        this.interval[this.textPool.currentIndex] = interval;
     }
 
     public static void BasicLargeModification(TMP_Text txt)
@@ -91,10 +104,12 @@ public class DisplaySingleton : MonoBehaviour
 
     void Update()
     {
-        if(Input.GetKeyDown(KeyCode.Escape) || (Time.time - this.lastTime > this.interval))
+        for (int i = 0; i < this.textPool.objects.Length; ++i)
         {
-            this.gameObject.SetActive(false);
-            this.text.gameObject.SetActive(false);
+            if ((Time.time - this.lastTime[i]) > this.interval[i])
+            {
+                this.textPool.objects[i].gameObject.SetActive(false);
+            }
         }
     }
 

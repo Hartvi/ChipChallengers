@@ -6,7 +6,7 @@ using UnityEngine;
 public class ObjectPool<T>
 {
     public T[] objects;
-    int currentIndex = 0;
+    public int currentIndex = 0;
     Action<T> deleteObject;
 
     public ObjectPool(int numObjects, Func<T> genObject, Action<T> deleteObject)

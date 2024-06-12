@@ -8,6 +8,7 @@ public class IOHelpers
 {
     public const string ModelsDirectoryName = "Models/";
     public const string MapsDirectoryName = "Maps/";
+    public const string ScenariosDirectoryName = "Scenarios/";
     public const string ModelFileType = "txt";
 
     public static string EnsureFileExtension(string fileName)
@@ -34,6 +35,32 @@ public class IOHelpers
         return IOHelpers.LoadTextFile(Path.Join(ModelsDirectoryName, modelName));
     }
 
+    public static string GetScenariosDirectory()
+    {
+        string ScenariosDir = Path.Join(Application.streamingAssetsPath, IOHelpers.ScenariosDirectoryName);
+
+        if (!Directory.Exists(ScenariosDir))
+        {
+            Directory.CreateDirectory(ScenariosDir);
+        }
+        return ScenariosDir;
+    }
+
+    public static string[] GetAllScenarios()
+    {
+        string ScenariosDir = Path.Join(Application.streamingAssetsPath, IOHelpers.ScenariosDirectoryName);
+
+        if (!Directory.Exists(ScenariosDir))
+        {
+            Directory.CreateDirectory(ScenariosDir);
+        }
+
+        DirectoryInfo d = new DirectoryInfo(ScenariosDir);
+        FileInfo[] fi = d.GetFiles("*.*").Where(f => f.Extension.Equals(UIStrings.ScenarioExtension)).ToArray();
+
+        return fi.Select(x => x.Name.Substring(0, x.Name.Length - UIStrings.ScenarioExtension.Length)).ToArray();
+    }
+
     public static string GetMapsDirectory()
     {
         string MapsDir = Path.Join(Application.streamingAssetsPath, IOHelpers.MapsDirectoryName);
@@ -44,6 +71,7 @@ public class IOHelpers
         }
         return MapsDir;
     }
+
     public static string[] GetAllMaps()
     {
         string MapsDir = Path.Join(Application.streamingAssetsPath, IOHelpers.MapsDirectoryName);

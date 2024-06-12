@@ -32,6 +32,7 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
 {
     //public static SingleplayerMenu Instance;
     public static VMap myVMap = new VMap();
+    public static VScenario myVScenario = new VScenario();
 
     Camera mainCamera;
     //Vector3 oldLookAtPos = Vector3.zero;
@@ -39,6 +40,7 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
 
     private LoadPanel LoadPanel;
     private MapPanel MapPanel;
+    private ScenarioPanel ScenarioPanel;
     private ControlsPanel ControlsPanel;
 
     private CommonChip core;
@@ -79,7 +81,8 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
             //    )
             //),
             new VirtualProp(PropType.Panel, 1f, typeof(LoadPanel)),
-            new VirtualProp(PropType.Panel, 1f, typeof(MapPanel))
+            new VirtualProp(PropType.Panel, 1f, typeof(MapPanel)),
+            new VirtualProp(PropType.Panel, 1f, typeof(ScenarioPanel))
         );
     }
 
@@ -94,6 +97,7 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
 
         this.LoadPanel = this.GetComponentInChildren<LoadPanel>();
         this.MapPanel = this.GetComponentInChildren<MapPanel>();
+        this.ScenarioPanel = this.GetComponentInChildren<ScenarioPanel>();
 
         this.cameraFollowSettings = new CameraFollowSettings(posShift: Vector2.up * 3f + Vector2.right * 10f, predict: 0.05f, sensitivity: 1f, lowPass: 0f);
 
@@ -178,7 +182,7 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
         // 0
         float predict = cs.predict;
         // 20,10,0 - 18,10,0
-        Vector3 lookAtPos = corePos + predict * this.core.rb.velocity;
+        Vector3 lookAtPos = corePos;// + predict * this.core.rb.velocity;
 
         //campos: 16,10,0
         // ((16,10,0 - 20,10,0).mag = 4) - 2 = 2 * 1,0,0 = 2,0,0
@@ -302,7 +306,10 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
             if (Input.GetKeyDown(KeyCode.M))
             {
                 this.MapPanel.ActivatePanel(SingleplayerMenu.myVMap.FileName);
-                //this.MapPanel.gameObject.SetActive(true);
+            }
+            if (Input.GetKeyDown(KeyCode.C))
+            {
+                this.ScenarioPanel.ActivatePanel(SingleplayerMenu.myVScenario.FileName);
             }
             if (Input.GetKeyDown(KeyCode.E))
             {
@@ -347,6 +354,10 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
             {
                 this.LoadPanel.ActivatePanel(CommonChip.ClientCore.VirtualModel.ModelName);
                 //this.LoadPanel.gameObject.SetActive(true);
+            }
+            if (Input.GetKeyDown(KeyCode.K))
+            {
+                this.ScenarioPanel.ActivatePanel(SingleplayerMenu.myVScenario.FileName);
             }
             if (Input.GetKeyDown(KeyCode.U))
             {

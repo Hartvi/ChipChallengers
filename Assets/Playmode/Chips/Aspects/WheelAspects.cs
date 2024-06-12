@@ -183,10 +183,10 @@ public class WheelAspects : BaseAspect
         {
             this.particles.Play();
             var m = this.particles.main;
-            m.startSize = Mathf.Min(1f, totalSlip);
-            m.startLifetime = Mathf.Min(1f, totalSlip);
+            m.startSize = Mathf.Min(0.5f, totalSlip);
+            m.startLifetime = Mathf.Min(0.5f, totalSlip);
             var em = this.particles.emission;
-            em.rateOverTime = GameManager.RealTimeSettings.ParticleRate * 7f * totalSlip;
+            em.rateOverTime = GameManager.RealTimeSettings.ParticleRate * 3f * totalSlip;
         }
         else
         {
