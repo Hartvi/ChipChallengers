@@ -20,6 +20,7 @@ public class Checkpoint : MonoBehaviour
 
     void Update()
     {
+        if (targetObjects == null) { return; }
         for (int i = 0; i < targetObjects.Length; ++i)
         {
             var to = targetObjects[i];

@@ -5,29 +5,6 @@ using UnityEngine;
 using TMPro;
 using System.Linq;
 
-public enum CameraMoveMode
-{
-    Follow, Free, CopyOutside, CopyInside
-}
-
-public struct CameraFollowSettings
-{
-    //public float distance;  // meters
-    public Vector2 posShift;  // meters
-    public float predict;  // [0,1)
-    public float sensitivity;  // (0,1]
-    public float lowPass; // (0,1)
-
-    public CameraFollowSettings(Vector2 posShift, float predict, float sensitivity, float lowPass)
-    {
-        //this.distance = distance;
-        this.posShift = posShift;
-        this.predict = predict;
-        this.sensitivity = sensitivity;
-        this.lowPass = lowPass;
-    }
-}
-
 public class SingleplayerMenu : BaseMenu, InputReceiver
 {
     //public static SingleplayerMenu Instance;
@@ -37,6 +14,12 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
     Camera mainCamera;
     //Vector3 oldLookAtPos = Vector3.zero;
     CameraFollowSettings cameraFollowSettings;
+    Vector3 lastMousePos = Vector3.zero;
+    Vector3 lastCorePos = Vector3.zero;
+    Vector3 lastCoreVelocity = Vector3.zero;
+    Vector3 lastCoreAcceleration = Vector3.zero;
+    Vector3 lastCamError = Vector3.zero;
+    Vector3 camErrorSum = Vector3.zero;
 
     private LoadPanel LoadPanel;
     private MapPanel MapPanel;
@@ -177,23 +160,31 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
         CameraFollowSettings cs = this.cameraFollowSettings;
         Transform camTransform = this.mainCamera.transform;
 
-        // 20,10,0
         Vector3 corePos = this.core.transform.position;
-        // 0
-        float predict = cs.predict;
-        // 20,10,0 - 18,10,0
-        Vector3 lookAtPos = corePos;// + predict * this.core.rb.velocity;
+        //float predict = cs.predict;
+        //Vector3 coreAcceleration = 0.01f * (this.core.rb.velocity - this.lastCoreVelocity) + 0.99f * this.lastCoreAcceleration;
+        //Vector3 error = corePos - this.lastCorePos;
+        //Vector3 errorerror = error - this.lastCamError;
+        //Vector3 lookAtPos = Time.deltaTime * (10f * error + 10f * errorerror + 1f * this.camErrorSum) + this.lastCorePos;
 
-        //campos: 16,10,0
-        // ((16,10,0 - 20,10,0).mag = 4) - 2 = 2 * 1,0,0 = 2,0,0
+        Vector3 lookAtPos = corePos;
+
+        // the camera stays behind the object:
         Vector3 deltaPos = Mathf.Max(0f, (camTransform.position - corePos).magnitude - cs.posShift.x) * camTransform.forward;
 
-        float deltaAltitude = (corePos.y + cs.posShift.y) - camTransform.position.y;
-
-        // 16,10,0 + 2,0,0
-        camTransform.position = camTransform.position + deltaPos + deltaAltitude * Vector3.up;
+        // camera stays above the object in world coordinates
+        //float deltaAltitude = (corePos.y + cs.posShift.y) - camTransform.position.y;
+        Vector3 deltaPosY = 0.1f * (corePos.y + cs.posShift.y - camTransform.position.y) * camTransform.up;
+        //camTransform.position = camTransform.position + deltaPos + deltaAltitude * Vector3.up;
+        camTransform.position = camTransform.position + deltaPos + deltaPosY;
 
         camTransform.LookAt(lookAtPos);
+        //this.lastCorePos = lookAtPos;
+        //this.lastCamError = error;
+        //this.camErrorSum += error;
+
+        //this.lastCoreVelocity = this.core.rb.velocity;
+        //this.lastCoreAcceleration = coreAcceleration;
     }
 
     void CameraCopyInside()
@@ -428,15 +419,27 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
         {
             case CameraMoveMode.Follow:
                 {
+                    if (Input.GetMouseButton(1))
+                    {
+                        Vector3 mouseVelocity = Input.mousePosition - this.lastMousePos;
+                        Transform camTransform = this.mainCamera.transform;
+                        camTransform.position += -0.033f * (mouseVelocity.x * camTransform.right);
+                        this.cameraFollowSettings.posShift.y += -0.033f * mouseVelocity.y; //  +  * camTransform.up
+                    }
+                    if (Input.mouseScrollDelta.y != 0f)
+                    {
+                        this.cameraFollowSettings.posShift.x += -0.033f * Input.mouseScrollDelta.y;
+                    }
                     this.CameraFollowMove();
-                    if (Input.GetKeyDown(KeyCode.KeypadMultiply) || Input.GetKeyDown(KeyCode.Asterisk))
-                    {
-                        this.cameraFollowSettings.predict *= 2f;
-                    }
-                    if (Input.GetKeyDown(KeyCode.KeypadDivide) || Input.GetKeyDown(KeyCode.Slash))
-                    {
-                        this.cameraFollowSettings.predict *= 0.5f;
-                    }
+                    //if (Input.GetKeyDown(KeyCode.KeypadMultiply) || Input.GetKeyDown(KeyCode.Asterisk))
+                    //{
+                    //    this.cameraFollowSettings.predict *= 2f;
+                    //}
+                    //if (Input.GetKeyDown(KeyCode.KeypadDivide) || Input.GetKeyDown(KeyCode.Slash))
+                    //{
+                    //    this.cameraFollowSettings.predict *= 0.5f;
+                    //}
+                    this.lastMousePos = Input.mousePosition;
                     break;
                 }
             case CameraMoveMode.Free:
@@ -460,5 +463,28 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
 
     }
 
+}
+
+public enum CameraMoveMode
+{
+    Follow, Free, CopyOutside, CopyInside
+}
+
+public struct CameraFollowSettings
+{
+    //public float distance;  // meters
+    public Vector2 posShift;  // meters
+    public float predict;  // [0,1)
+    public float sensitivity;  // (0,1]
+    public float lowPass; // (0,1)
+
+    public CameraFollowSettings(Vector2 posShift, float predict, float sensitivity, float lowPass)
+    {
+        //this.distance = distance;
+        this.posShift = posShift;
+        this.predict = predict;
+        this.sensitivity = sensitivity;
+        this.lowPass = lowPass;
+    }
 }
 

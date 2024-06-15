@@ -172,11 +172,33 @@ public abstract class GeometricChip : StaticChip
             switch (chipType)
             {
                 // TODO: masses for each chip
-                case VChip.wheelStr:
-                case VChip.jetStr:
-                case VChip.rudderStr:
                 case VChip.chipStr:
+                case VChip.rudderStr:
                 case VChip.axleStr:
+                    switch (this.option)
+                    {
+                        case 0:
+                            { return PhysicsData.mediumMass; }
+                        case 1:
+                            { return PhysicsData.smallMass; }
+                        case 2:
+                            { return PhysicsData.largeMass; }
+                        case 3:
+                            { return PhysicsData.hugeMass; }
+                        default: { return PhysicsData.mediumMass; }
+                    }
+                case VChip.wheelStr:
+                    switch (this.option)
+                    {
+                        case 0:
+                            { return PhysicsData.mediumMass; }
+                        case 1:
+                            { return 0.5f * (PhysicsData.mediumMass + PhysicsData.largeMass); }
+                        case 2:
+                            { return PhysicsData.largeMass; }
+                        default: { return PhysicsData.mediumMass; }
+                    }
+                case VChip.jetStr:
                 case VChip.gunStr:
                 case VChip.coreStr:
                     if (this.option == 0)

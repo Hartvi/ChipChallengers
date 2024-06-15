@@ -26,7 +26,7 @@ public class GunAspect : BaseAspect
         this.projectileVelocity = 333f;
         Debug.LogWarning($"TODO: update bullet strengths when physics rate is changed");
 
-        this.bulletWeightPerTime = this.projectileWeight / Time.fixedDeltaTime;
+        this.bulletWeightPerTime = this.projectileWeight;
         this.recoilImpulse = this.bulletWeightPerTime * this.projectileVelocity;
         // dp/dt = (dm*dv)/dt = m*dv/dt 
         // dv = vel, dt = fixeddeltatime, m = projectileweight
@@ -40,7 +40,7 @@ public class GunAspect : BaseAspect
         // lifetime = 5 seconds
         // number of bullets = rate * lifetime
         //print($"Time.deltaTime {Time.deltaTime} this.dPowerPerFrame {this.dPowerPerFrame} Bullet.LifeTime {Bullet.LifeTime}");
-        int numberOfBullets = Mathf.CeilToInt(1f / this.dPowerPerFrame * Bullet.LifeTime);
+        int numberOfBullets = Mathf.CeilToInt(this.dPowerPerFrame * Bullet.LifeTime);
         //print($"Number of bullets: {numberOfBullets}");
         this.bulletPool = new ObjectPool<Bullet>(numberOfBullets, GenerateBullet, x =>
         {

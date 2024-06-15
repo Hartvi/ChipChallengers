@@ -263,6 +263,7 @@ public class EditorMenu : BaseMenu, InputReceiver
                 cam.transform.LookAt(this.lastSelectedPosition);
             }
         }
+        Camera.main.transform.position += 0.11f * Input.mouseScrollDelta.y * Camera.main.transform.transform.forward;
 
     }
 

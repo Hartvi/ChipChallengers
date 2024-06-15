@@ -21,6 +21,8 @@ public class DustAspect : BaseAspect
     {
         this.particles.transform.position = this.transform.position;
         this.particles.gameObject.SetActive(true);
+        var em = this.particles.emission;
+        em.rateOverTime = 3f * GameManager.RealTimeSettings.ParticleRate;
         this.particles.Play();
     }
 

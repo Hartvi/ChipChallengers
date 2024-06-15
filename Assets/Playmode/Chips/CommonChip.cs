@@ -197,7 +197,7 @@ public class CommonChip : AngleChip
             var parentRealChip = this.RealParent;
 
             newChild.SetupGeometry();
-            newChild.SetupRigidbody();
+            //newChild.SetupRigidbody();
             ConfigurableJoint cj = JointUtility.AttachWithConfigurableJoint(
                 newChild.gameObject, parentRealChip.gameObject, origin, direction
                 );
@@ -232,6 +232,7 @@ public class CommonChip : AngleChip
             this._option = option;
             this.SelectOption(option);
         }
+        this.SetupRigidbody();
 
         // add runtime aspects
         if (this.isAeroElligible)
@@ -283,7 +284,7 @@ public class CommonChip : AngleChip
                 {
                     this.gameObject.AddComponentIdempotent<WheelAspects>().myChip = this;
                     this.gameObject.AddComponentIdempotent<WheelSoundAspect>().myChip = this;
-                    this.gameObject.AddComponentIdempotent<TireSoundAspect>().myChip = this;
+                    //this.gameObject.AddComponentIdempotent<TireSoundAspect>().myChip = this;
                 }
                 if (this.equivalentVirtualChip.ChipType == VChip.gunStr)
                 {
@@ -488,7 +489,11 @@ public class CommonChip : AngleChip
 
         foreach (GeometricChip chip in c.AllChips)
         {
-            chip.GetComponent<Rigidbody>().isKinematic = true;
+            var r = chip.GetComponent<Rigidbody>();
+            if (r != null)
+            {
+                chip.GetComponent<Rigidbody>().isKinematic = true;
+            }
         }
     }
 

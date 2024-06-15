@@ -7,6 +7,16 @@ https://lotramus.itch.io/chip-challengers
 
 
 ### TODO
+- `+` make wheels from four rays
+- `+` fix cosmetics
+  - `+` cowls should have one inverse transform parent
+- `+` stop camera from clipping through surfaces
+- `+` add models for each option
+  - `+` make it defined in LUA files
+  - `+` LUA file contains: model for the chip, its options and corresponding weights
+- `+` fix camera shaking
+- `+` setup masses for chip options
+- `+` increase aerodynamic efficiency
 - `+` WHEELS SHOULD ACT ON OTHER RIGID BODIES
 - `+` scenarios;
   - lua file: it should have a map
@@ -18,8 +28,9 @@ https://lotramus.itch.io/chip-challengers
     - it should be able to print on each player's screen
     - it should run as a background script
     - there should be a lose/win condition
-    - there should be a timer
-    - options: bubble tanks, rocket league
+    - race setting - Race({{x,y,z}, {x,y,z}, {x,y,z}})
+    - there should be a timer function
+    - options: bubble tanks, rocket league, racing
 - `+` add lua functions
   - `+` to draw lines on the screen
   - `+` to print stuff to screen as text
