@@ -11,6 +11,7 @@ public static class UIStrings
 
     public const string Backup = "backup";
 
+    public const string JetFlame = "JetFlame";
     public const string JetDust = "JetDust";
     public const string Dust = "Dust";
 

@@ -53,7 +53,7 @@ public class GunDustAspect : BaseAspect
     {
         if (this.particles)
         {
-            Object.Destroy(this.particles.gameObject);
+            GameObject.Destroy(this.particles.gameObject);
         }
     }
 }

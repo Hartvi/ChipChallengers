@@ -7,7 +7,7 @@ using TMPro;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class ChipPanel : BasePanel, InputReceiver, IPointerEnterHandler, IPointerExitHandler
+public class ChipPanel : BaseSidePanel, InputReceiver
 {
     int inputIndex = 0;
     TMP_InputField[] currentInputs;
@@ -17,7 +17,6 @@ public class ChipPanel : BasePanel, InputReceiver, IPointerEnterHandler, IPointe
     ItemBase PopUpItem;
 
     BaseImage backgroundImage;
-    bool insideChipPanel = false;
     int deselectTimer = -1;
 
     void Start()
@@ -293,16 +292,6 @@ public class ChipPanel : BasePanel, InputReceiver, IPointerEnterHandler, IPointe
         return action;
     }
 
-    void IPointerExitHandler.OnPointerExit(PointerEventData eventData)
-    {
-        this.insideChipPanel = false;
-    }
-
-    void IPointerEnterHandler.OnPointerEnter(PointerEventData eventData)
-    {
-        this.insideChipPanel = true;
-    }
-
     void TabSwitch()
     {
         if (Input.GetKeyDown(KeyCode.Tab))
@@ -323,11 +312,6 @@ public class ChipPanel : BasePanel, InputReceiver, IPointerEnterHandler, IPointe
 
             this.currentInputs[this.inputIndex].Select();
         }
-    }
-
-    bool InputReceiver.IsActive()
-    {
-        return this.gameObject.activeSelf;
     }
 
     void Update()
@@ -357,13 +341,13 @@ public class ChipPanel : BasePanel, InputReceiver, IPointerEnterHandler, IPointe
     void InputReceiver.HandleInputs()
     {
         this.TabSwitch();
-        if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1))
+        //if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1))
+        //{
+        if (!this.insideChipPanel)
         {
-            if (!this.insideChipPanel)
-            {
-                UIManager.instance.TurnMeOff(this);
-            }
+            UIManager.instance.TurnMeOff(this);
         }
+        //}
     }
 
     void InputReceiver.OnStopReceiving()
@@ -373,42 +357,10 @@ public class ChipPanel : BasePanel, InputReceiver, IPointerEnterHandler, IPointe
     void InputReceiver.OnStartReceiving()
     {
     }
-}
-
-public class ModuloInt
-{
-    int i;
-    int Max;
-
-    public static ModuloInt operator ++(ModuloInt mi)
+    bool InputReceiver.IsActive()
     {
-        ++mi.i;
-
-        if (mi.i >= mi.Max)
-        {
-            mi.i = 0;
-        }
-        return mi;
+        return this.gameObject.activeSelf;
     }
 
-    public static implicit operator int(ModuloInt d) => d.i;
-    public static explicit operator ModuloInt(int d) => new ModuloInt(d);
-
-    public ModuloInt(int d)
-    {
-        this.Max = d;
-        this.i = d == 0 ? 0 : d % this.Max;
-    }
-
-    public ModuloInt(int d, int m)
-    {
-        this.i = m == 0 ? 0 : d % m;
-        this.Max = m;
-    }
-
-    public override string ToString()
-    {
-        return this.i.ToString();
-    }
 }
 

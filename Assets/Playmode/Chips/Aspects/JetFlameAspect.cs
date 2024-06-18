@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class JetDustAspect : BaseAspect
+public class JetFlameAspect : BaseAspect
 {
     ParticleSystem particles;
     float oldVal = 0f;
@@ -10,7 +10,7 @@ public class JetDustAspect : BaseAspect
     protected override void Awake()
     {
         base.Awake();
-        this.particles = Instantiate(Resources.Load<ParticleSystem>(UIStrings.JetDust));
+        this.particles = Instantiate(Resources.Load<ParticleSystem>(UIStrings.JetFlame));
         this.particles.gameObject.SetActive(true);
         particles.transform.position = Vector3.zero;
         //particles.transform.rotation = Quaternion.Euler(Vector3.up);
@@ -23,12 +23,10 @@ public class JetDustAspect : BaseAspect
 
     public override void RuntimeFunction()
     {
-        if (this.brake < 1e-3f) { return; }
-
         var em = this.particles.emission;
-        em.rateOverTime = GameManager.RealTimeSettings.ParticleRate * Mathf.Min(0.01f * this.brake * Mathf.Abs(this.value * 0.1f), 100f);
+        em.rateOverTime = GameManager.RealTimeSettings.ParticleRate * Mathf.Min(Mathf.Abs(this.value * 0.1f), 50f);
         var m = this.particles.main;
-        m.startSpeed = Mathf.Abs(this.value);
+        m.startSpeed = Mathf.Min(6f, Mathf.Abs(this.value * 0.01f));
         if (this.value > 0 && this.oldVal <= 0)
         {
             this.particles.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);

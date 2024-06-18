@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ScriptPanel : BasePanel
+public class ScriptPanel : BaseSidePanel, InputReceiver
 {
     DragButton btn;
     BaseInput input;
@@ -67,4 +67,36 @@ public class ScriptPanel : BasePanel
 
     public bool IsSelected => this.input.input.isFocused;
 
+
+    void Update()
+    {
+
+        if (Input.GetMouseButtonDown(0))
+        {
+            if (this.insideChipPanel)
+            {
+                UIManager.instance.SwitchToMe(this);
+            }
+        }
+    }
+
+    void InputReceiver.HandleInputs()
+    {
+        if (!this.insideChipPanel)
+        {
+            UIManager.instance.TurnMeOff(this);
+        }
+    }
+
+    void InputReceiver.OnStopReceiving()
+    {
+    }
+
+    void InputReceiver.OnStartReceiving()
+    {
+    }
+    bool InputReceiver.IsActive()
+    {
+        return this.gameObject.activeSelf;
+    }
 }

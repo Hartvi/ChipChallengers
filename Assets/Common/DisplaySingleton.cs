@@ -45,6 +45,8 @@ public class DisplaySingleton : MonoBehaviour
     public void DisplayText(Action<TMP_Text> modification, float interval)
     {
         TMP_Text txt = this.textPool.Next();
+        // do not overwrite existing text
+        if (txt.gameObject.activeSelf) { return; }
         modification(txt);
         txt.gameObject.SetActive(true);
         this.lastTime[this.textPool.currentIndex] = Time.time;

@@ -15,6 +15,7 @@ public class GameScript : MonoBehaviour
     Dictionary<string, GameObject> AllObjects = new Dictionary<string, GameObject>();
     HashSet<string> PlayerObjects = new HashSet<string>();
     Dictionary<string, float> times = new Dictionary<string, float>();
+    bool isRace = false;
 
     public void Activate(string scriptString)
     {
@@ -151,7 +152,8 @@ public class GameScript : MonoBehaviour
                 DisplaySingleton.BasicMediumModification(txt);
                 txt.transform.position = new Vector2(Screen.width * (0.5f + position.x * 0.5f), Screen.height * (0.5f + position.y * 0.5f));
                 txt.color = new Color(r, g, b);
-                txt.enableWordWrapping = true;
+                txt.enableWordWrapping = false;
+                txt.overflowMode = TMPro.TextOverflowModes.Overflow;
                 txt.horizontalAlignment = TMPro.HorizontalAlignmentOptions.Center;
                 txt.SetText(s);
             }, t
@@ -341,6 +343,18 @@ public class GameScript : MonoBehaviour
                 float radius = 0.5f * Mathf.Max(sizeVector.x, sizeVector.y, sizeVector.z);
                 string prevgate = previousGateName;
                 // Make the first gate start the timer
+                // Set 
+                void RaceLoop()
+                {
+                    if (this.times.TryGetValue("race", out float val))
+                    {
+                        float currentTime = Time.time - val;
+                        DynValue tb = DynValue.FromObject(this.script, new Dictionary<string, double>() { { "r", 0.2 }, { "g", 0.2 }, { "b", 0.2 }, { "x", -0.7 }, { "y", 0.7 }, { "t", 0.1 } });
+                        Print($"TIME: {(int)currentTime} SECONDS", tb.Table);
+                    }
+                }
+                this.script.Globals["RaceLoop"] = (Action)RaceLoop;
+                this.isRace = true;
                 if (i == 2)
                 {
                     void a()
@@ -374,13 +388,14 @@ public class GameScript : MonoBehaviour
             {
                 Vector3 sizeVector = chk.transform.localScale;
                 float radius = 0.5f * Mathf.Max(sizeVector.x, sizeVector.y, sizeVector.z);
-                DynValue tb = DynValue.FromObject(this.script, new Dictionary<string, double>() { { "r", 1.0 }, { "g", 1.0 }, { "b", 1.0 }, { "t", 3.0 } });
+                DynValue tb = DynValue.FromObject(this.script, new Dictionary<string, double>() { { "r", 0.2 }, { "g", 0.2 }, { "b", 0.2 }, { "y", 0.33 }, { "t", 3.0 } });
                 void a()
                 {
                     double timetaken = GetTime("race");
 
-                    Print($"FINISHED IN {(int)timetaken}.{(int)((timetaken - (int)timetaken) * 1000)} SECONDS", tb.Table);
+                    Print($"FINISHED IN {(int)timetaken}.{(int)((timetaken - (int)timetaken) * 100)} SECONDS", tb.Table);
                     Hide(gateName);
+                    this.isRace = false;
                 }
                 chk.Setup(radius, new GameObject[] { AllObjects["player1"] }, a);
             }
@@ -510,6 +525,15 @@ public class GameScript : MonoBehaviour
                 this.AllObjects[k] = o;
                 return k;
             }
+        }
+    }
+    void Update()
+    {
+        this.CallLoop();
+
+        if (this.isRace)
+        {
+            DynValue res = script.Call(script.Globals["RaceLoop"]);
         }
     }
 

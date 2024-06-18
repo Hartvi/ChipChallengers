@@ -26,7 +26,7 @@ public class CreateChipPanel : BasePanel
                     new VirtualProp(PropType.Button, 1 / 9f),
                     new VirtualProp(PropType.Button, 1 / 9f),
                     new VirtualProp(PropType.Button, 1 / 9f),
-                    new VirtualProp(PropType.Button, 1 / 9f),
+                    //new VirtualProp(PropType.Button, 1 / 9f),
                     new VirtualProp(PropType.Button, 1 / 9f)
                 )
             );
@@ -102,12 +102,14 @@ public class CreateChipPanel : BasePanel
 
         // TODO make this more secure:
         // HOW???
+        // TODO NEWCHIP CAN BE NULL????
         this.editorMenu.selectedChip = this.editorMenu.highlighter.SelectVChip(newChip.rChip.equivalentVirtualChip.id);
         this.gameObject.SetActive(false);
     }
 
     public CommonChip PasteCallback(VChip selectedVChip, LocalDirection dir, bool mirror)
     {
+        
         VChip pastedParentChip = Clipboard.AttachTo(selectedVChip, (int)dir, mirror);
 
         this.gameObject.SetActive(false);

@@ -302,13 +302,14 @@ end
 
     public VVar GetSelectedVariable()
     {
-        if (this._SelectedVariable == null) throw new NullReferenceException($"Selected variable is null. Set it first.");
+        //if (this._SelectedVariable == null) throw new NullReferenceException($"Selected variable is null. Set it first.");
         return this._SelectedVariable;
     }
 
     public void DeleteSelectedVariable()
     {
         VVar selectedVar = this.GetSelectedVariable();
+        if (selectedVar == null) { return; }
         string selectedVarName = selectedVar.name;
 
         this.variables = this.variables.Where(x => x != selectedVar).ToArray(); //  .Concat(new VirtualVariable[]{ v }).ToArray();

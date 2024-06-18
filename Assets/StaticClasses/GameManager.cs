@@ -30,7 +30,7 @@ public class GameManager : MonoBehaviour
 
         { UIStrings.Framerate, 50 },
         { UIStrings.PhysicsRate, 500 },
-        { UIStrings.Volume, 100 },
+        { UIStrings.Volume, 20 },
         { UIStrings.PhysicsParticles, 100 }
     };
 

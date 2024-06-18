@@ -7,19 +7,14 @@ https://lotramus.itch.io/chip-challengers
 
 
 ### TODO
-- `+` make wheels from four rays
-- `+` fix cosmetics
-  - `+` cowls should have one inverse transform parent
 - `+` stop camera from clipping through surfaces
-- `+` add models for each option
-  - `+` make it defined in LUA files
-  - `+` LUA file contains: model for the chip, its options and corresponding weights
 - `+` fix camera shaking
-- `+` setup masses for chip options
 - `+` increase aerodynamic efficiency
-- `+` WHEELS SHOULD ACT ON OTHER RIGID BODIES
 - `+` scenarios;
   - lua file: it should have a map
+  - `+` in LUA make objs loadable, which can then give them positions and make the move like obstacles
+  - `+` coin collector mode
+  - `+` game modes: pool, snake
   - available functions:
     - spawn sphere, cube, capsule
     - starting position for all players
@@ -41,7 +36,8 @@ https://lotramus.itch.io/chip-challengers
   - `+` autofill available functions??
   - `+` provide documentation for available lua functions
 - `+++` implement multiplayer
-- `+` game modes: pool, snake
+- `+` fix cosmetics
+  - `+` cowls should have one inverse transform parent
 ---------------------------------------------------------------------------------------------------------------
 - `+` add backgrounds to all menus:
   - settings menu, load panel, map panel, save panel
@@ -53,6 +49,10 @@ https://lotramus.itch.io/chip-challengers
 - `+` find out why the physics timing makes wheels speed up cars differently 
 
 ### Done
+- `+` setup masses for chip options
+- `+` fix that variable, script panels can delete chips - make them like chippanel
+- `+` WHEELS SHOULD ACT ON OTHER RIGID BODIES
+- `+` make wheels from four rays
 - `+` FIX BUG: entering angle in some chips fails to turn them FIX LUA
 - `+` when loading new map, reset position
 - `+` Create 3 example maps

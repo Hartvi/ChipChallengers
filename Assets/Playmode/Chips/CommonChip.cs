@@ -274,6 +274,7 @@ public class CommonChip : AngleChip
                 this.gameObject.AddComponentIdempotent<JetAspect>();
                 this.gameObject.AddComponentIdempotent<JetSoundAspect>();
                 this.gameObject.AddComponentIdempotent<JetDustAspect>();
+                this.gameObject.AddComponentIdempotent<JetFlameAspect>();
             }
             if (this.equivalentVirtualChip.keys.Contains(VChip.brakeStr))
             {

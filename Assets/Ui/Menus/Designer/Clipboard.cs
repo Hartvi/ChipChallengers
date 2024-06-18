@@ -24,7 +24,7 @@ public static class Clipboard
         CommonChip core = CommonChip.ClientCore;
         CommonChip cc = core.AllChildren.FirstOrDefault(x => x.equivalentVirtualChip.id == id) as CommonChip;
 
-        if(cc is null)
+        if (cc is null)
         {
             return;
         }
@@ -33,9 +33,9 @@ public static class Clipboard
         var tuple = cc.equivalentVirtualChip.GetValueTuple();
 
         VChip virtualCore = new VChip(
-            tuple.keys, 
+            tuple.keys,
             tuple.values,
-            tuple.orientation, 
+            tuple.orientation,
             null
         );
         // begin func
@@ -53,12 +53,10 @@ public static class Clipboard
 
     public static VChip AttachTo(VChip vc, int newOrientation, bool mirror)
     {
-        if (Clipboard.newParent is null) return CommonChip.ClientCore.equivalentVirtualChip;
         // chip we wanna attach it to
-        //IPrint($"new parent chip: {vc.ChipType} id: {vc.id}");
-        //IPrint($"Orientation: {newOrientation}");
+        if (Clipboard.newParent is null) return CommonChip.ClientCore.equivalentVirtualChip;
 
-        
+
         // Clipboard.newParent is the virtual core that we don't want to copy
         // we want to connect Clipboard.Children to the argument `vc`
         // correct the orientation then build
@@ -68,6 +66,24 @@ public static class Clipboard
         VChip[] oldChildren = new VChip[] { oldOriginalChild };
 
         VChip[] newChips = Clipboard.CopyChildren(vc, oldChildren, mirror);
+        if (vc.ChipType == VChip.cowlStr)
+        {
+            foreach (var newChip in newChips)
+            {
+                if (newChip.ChipType != VChip.cowlStr)
+                {
+                    DisplaySingleton.Instance.DisplayText(
+                        txt =>
+                        {
+                            DisplaySingleton.ErrorMsgModification(txt);
+                            txt.SetText("Cannot paste non-cowl chips on cowls!");
+                        }, 3f
+                    );
+
+                    return null;
+                }
+            }
+        }
 
         CommonChip core = CommonChip.ClientCore;
 
@@ -95,7 +111,7 @@ public static class Clipboard
                 VChip oldChild = oldChildrenss[i];
                 var valueTuple = oldChild.GetValueTuple();
                 bool orientationIsLeftOrRight = valueTuple.orientation == 1 || valueTuple.orientation == 3;
-                
+
                 VChip newChild = new VChip(
                     valueTuple.keys,
                     valueTuple.values,

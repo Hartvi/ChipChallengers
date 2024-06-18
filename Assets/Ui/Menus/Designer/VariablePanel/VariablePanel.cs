@@ -5,7 +5,7 @@ using UnityEngine;
 using System.Linq;
 using TMPro;
 
-public class VariablePanel : BasePanel
+public class VariablePanel : BaseSidePanel, InputReceiver
 {
     public const int NUMDISPLAYITEMS = 7;
     
@@ -108,5 +108,36 @@ public class VariablePanel : BasePanel
         this.itemScroll.Scroll(0f);
     }
 
+    void Update()
+    {
+
+        if (Input.GetMouseButtonDown(0))
+        {
+            if (this.insideChipPanel)
+            {
+                UIManager.instance.SwitchToMe(this);
+            }
+        }
+    }
+
+    void InputReceiver.HandleInputs()
+    {
+        if (!this.insideChipPanel)
+        {
+            UIManager.instance.TurnMeOff(this);
+        }
+    }
+
+    void InputReceiver.OnStopReceiving()
+    {
+    }
+
+    void InputReceiver.OnStartReceiving()
+    {
+    }
+    bool InputReceiver.IsActive()
+    {
+        return this.gameObject.activeSelf;
+    }
 }
 

@@ -1,13 +1,12 @@
 a = {
-    keys={ "Chip", "Rudder", "Axle", "Gun", "Wheel", "Jet", "Sensor", "Cowl" },
+    keys={ "Chip", "Rudder", "Axle", "Gun", "Wheel", "Jet", "Sensor" },
     values={
         {"Basic", "Frame", "Weight", "Armor"},
         {"Basic", "Frame", "Weight", "Armor"},
         {"Basic", "Frame", "Weight", "Armor"},
-        {"Basic", "Frame"},
-        {"Basic", "XL", "XXL"},
+        {"Basic"},
+        {"Basic", "Large", "XL"},
         {"Turbofan", "Balloon"},
         {"LiDAR", "Altimeter", "Tachometer", "Gyroscope", "Accelerometer", "Compass"},
-        {"Square", "Triangle", "Semi-circle", "Circle"}
     }
 }

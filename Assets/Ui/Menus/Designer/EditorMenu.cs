@@ -121,6 +121,7 @@ public class EditorMenu : BaseMenu, InputReceiver
 
     void OnEnterMenu()
     {
+        GameManager.cameraMoveMode = CameraMoveMode.Follow;
         // TODO: options: set framerate, sound level
         Application.targetFrameRate = 30;
 
@@ -178,6 +179,7 @@ public class EditorMenu : BaseMenu, InputReceiver
     {
         this.highlighter.ParentHighlighter.SetActive(false);
         CommonChip.ClientCore.VirtualModel.SaveThisModelToFile(UIStrings.Backup + UIStrings.ModelExtension);
+        GameManager.cameraMoveMode = CameraMoveMode.Follow;
     }
 
     public VChip selectedVChip
@@ -215,6 +217,7 @@ public class EditorMenu : BaseMenu, InputReceiver
         if (Input.GetMouseButton(1))
         {
             Camera cam = Camera.main;
+            cam.transform.position += 0.11f * Input.mouseScrollDelta.y * Camera.main.transform.transform.forward;
             float moveX = Input.GetAxis("Mouse X");
             float moveY = Input.GetAxis("Mouse Y");
 
@@ -263,7 +266,6 @@ public class EditorMenu : BaseMenu, InputReceiver
                 cam.transform.LookAt(this.lastSelectedPosition);
             }
         }
-        Camera.main.transform.position += 0.11f * Input.mouseScrollDelta.y * Camera.main.transform.transform.forward;
 
     }
 

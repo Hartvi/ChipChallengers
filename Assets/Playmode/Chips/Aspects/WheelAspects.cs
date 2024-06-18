@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,12 +9,12 @@ public class WheelAspects : BaseAspect
     ParticleSystem particles;
 
     public static readonly Vector3 MomentOfInertia = PhysicsData.mediumMass * new Vector3(1 / 4f, 1 / 2f, 1 / 4f) * StaticChip.ChipSide * StaticChip.ChipSide;
-    public static readonly float radius = StaticChip.ChipSide * 0.5f;
+    float radius = StaticChip.ChipSide * 0.5f;
 
     public static readonly float PlanarMomentOfInertia = WheelAspects.MomentOfInertia[1];
     public static readonly float InvPlanarMomentOfInertia = 1f / WheelAspects.MomentOfInertia[1];
     public static float fixedTimeInvInertia = 0f;
-    public static float inertiaInvFixedTime = 0f;
+    //public static float inertiaInvFixedTime = 0f;
 
     public const float carTyreStiffness = 200 * 1e3f;  // N/mm * 1e3
 
@@ -29,7 +30,7 @@ public class WheelAspects : BaseAspect
     public const float k1 = 1e-4f;
     public const float k2 = 1e-8f;
 
-    Vector3 point, forwardPosition, normal, impulse, v1;
+    Vector3 point, contactVector, normal, impulse, v1;
     Vector3 xForce;
     Vector3 yForce;
     Vector3 oldUp;
@@ -45,13 +46,19 @@ public class WheelAspects : BaseAspect
     Transform childTransform;
     public float totalSlip = 0f, totalSlip1 = 0f, totalSlip2 = 0f, totalSlip3 = 0f;
 
+    Func<Vector3>[] vectors;
+    float[] vectorsDists;
+    bool upsideDownContact = false;
+
+    Rigidbody collidingRigidbody;
+
     void Start()
     {
         this.gameObject.layer = 7;
         if (WheelAspects.fixedTimeInvInertia == 0f)
         {
-            WheelAspects.fixedTimeInvInertia = Time.fixedDeltaTime * InvPlanarMomentOfInertia;
-            WheelAspects.inertiaInvFixedTime = 1f / WheelAspects.fixedTimeInvInertia;
+            WheelAspects.fixedTimeInvInertia = Time.fixedDeltaTime * InvPlanarMomentOfInertia * (this.myChip.option > 0 ? (1 + 0.5f * this.myChip.option) : 1);
+            //WheelAspects.inertiaInvFixedTime = 1f / WheelAspects.fixedTimeInvInertia;
         }
         this.childTransform = this.transform.GetChild(0);
 
@@ -66,6 +73,36 @@ public class WheelAspects : BaseAspect
         this.particles.transform.position = this.transform.position;
         this.particles.transform.SetParent(this.transform);
         this.particles.transform.localScale = Vector3.one;
+        if (this.myChip.option > 0)
+        {
+            vectors = new Func<Vector3>[6];
+            this.vectors[0] = () => this.transform.forward;
+            this.vectors[1] = () => this.transform.forward + this.transform.right;
+            this.vectors[2] = () => this.transform.forward - this.transform.right;
+            this.vectors[3] = () => -this.transform.forward;
+            this.vectors[4] = () => this.transform.right - 0.5f * this.transform.forward;
+            this.vectors[5] = () => -this.transform.right - 0.5f * this.transform.forward;
+
+            this.vectorsDists = new float[6];
+            this.vectorsDists[0] = GeometricChip.ChipSide + this.myChip.option * 0.5f * 0.5f * GeometricChip.ChipSide;
+            this.vectorsDists[1] = 1f / 1.414f * GeometricChip.ChipSide + this.myChip.option * 0.5f * 0.5f * GeometricChip.ChipSide;
+            this.vectorsDists[2] = 1f / 1.414f * GeometricChip.ChipSide + this.myChip.option * 0.5f * 0.5f * GeometricChip.ChipSide;
+            this.vectorsDists[3] = this.myChip.option * 0.5f * 0.5f * GeometricChip.ChipSide;
+            this.vectorsDists[4] = (this.myChip.option + 0.25f) * 0.5f * GeometricChip.ChipSide;
+            this.vectorsDists[5] = (this.myChip.option + 0.25f) * 0.5f * GeometricChip.ChipSide;
+            this.radius = this.radius * (this.myChip.option * 0.5f + 1);
+        }
+        else
+        {
+            vectors = new Func<Vector3>[3];
+            this.vectors[0] = () => this.transform.forward;
+            this.vectors[1] = () => this.transform.forward + this.transform.right;
+            this.vectors[2] = () => this.transform.forward - this.transform.right;
+            this.vectorsDists = new float[3];
+            this.vectorsDists[0] = GeometricChip.ChipSide;
+            this.vectorsDists[1] = 1f / 1.414f * GeometricChip.ChipSide;
+            this.vectorsDists[2] = 1f / 1.414f * GeometricChip.ChipSide;
+        }
     }
 
     void ApplyTorque(float T)
@@ -106,8 +143,16 @@ public class WheelAspects : BaseAspect
 
         this.xForce = xImpulse * xDir;
         this.yForce = yImpulse * yDir;
-        this.rb.AddForceAtPosition(1000f * this.yForce * Time.fixedDeltaTime, this.point, ForceMode.Impulse);
-        this.rb.AddForceAtPosition(1000f * this.xForce * Time.fixedDeltaTime, this.point, ForceMode.Impulse);
+        //if (this.upsideDownContact)
+        //{
+        //    this.xForce = -this.xForce;
+        //}
+        Vector3 totalForce = 1000f * Time.fixedDeltaTime * (this.yForce + this.xForce);
+        this.rb.AddForceAtPosition(totalForce, this.point, ForceMode.Impulse);
+        if (this.collidingRigidbody != null)
+        {
+            this.collidingRigidbody.AddForceAtPosition(-totalForce, this.point, ForceMode.Impulse);
+        }
 
         // impulse = S (F) dt => no need to multiply xImpulse * dt to get dOmega since dOmega = k * Force * dt
         float dOmega = -radius * xImpulse * InvPlanarMomentOfInertia;
@@ -131,7 +176,7 @@ public class WheelAspects : BaseAspect
         //Vector3 transversalVelocity = yVelocity * yDirectionInPlane;
 
         // A: less accurate but faster:
-        Vector3 right = this.transform.right;
+        Vector3 right = this.upsideDownContact ? -this.transform.right : this.transform.right;
         // project orthonormal on plane - this projection doesn't need normalization wrt vector magnitude since it's 1
         // but we want to stretch it to signify direction, i.e. a unit vector
         Vector3 xDirectionInPlane = (right - Vector3.Dot(right, n) * n).normalized;
@@ -143,7 +188,7 @@ public class WheelAspects : BaseAspect
         // change in deformation
         float impulseStrength = this.impulse.magnitude;
 
-        float VTX = WheelAspects.radius * this.Omega;
+        float VTX = this.radius * this.Omega;
         float VX = xVelocity;
         float invVX = 1f / (1e-1f + Mathf.Abs(VX));
         this.xSlip = (VTX - VX) * invVX;
@@ -199,11 +244,11 @@ public class WheelAspects : BaseAspect
 
     void FixedUpdate()
     {
-        if (this.RaycastFromBase(out this.point, out this.forwardPosition, out this.normal))
+        if (this.RaycastFromBase(out this.point, out this.contactVector, out this.normal))
         {
             Vector3 n = this.normal;
             // tire deformation
-            Vector3 err = (this.point - this.forwardPosition).magnitude * n;
+            Vector3 err = (this.point - this.contactVector).magnitude * n;
             // J = p2 - p1
             // s.t. ||p2|| <= m ||v_const||
             // p2 = J + p1 <= m ||v_const||
@@ -237,32 +282,41 @@ public class WheelAspects : BaseAspect
         this.ApplyTorque(this.value);
     }
 
-    bool RaycastFromBase(out Vector3 point, out Vector3 forwardPosition, out Vector3 normal)
+    bool RaycastFromBase(out Vector3 point, out Vector3 contactVector, out Vector3 normal)
     {
+        this.upsideDownContact = false;
         Transform t = this.transform;
         Vector3 forwardShift = 0.5f * GeometricChip.ChipSide * t.forward;
         Vector3 basePosition = t.position - forwardShift;
-        forwardPosition = t.position + forwardShift;
 
-        if (Physics.Raycast(basePosition, t.forward, out RaycastHit h, GeometricChip.ChipSide, this.layerMask))
+        for (int i = 0; i < this.vectors.Length; ++i)
         {
-            point = h.point;
-            normal = h.normal;
-            return true;
+            Vector3 rayDirection = this.vectors[i]();
+            //Debug.DrawRay(basePosition + t.up, rayDirection.normalized * this.vectorsDists[i], Color.red);
+            if (Physics.Raycast(basePosition, rayDirection, out RaycastHit h, this.vectorsDists[i], this.layerMask))
+            {
+                point = h.point;
+                normal = h.normal;
+                contactVector = basePosition + rayDirection * this.vectorsDists[i];
+                this.collidingRigidbody = h.collider.GetComponent<Rigidbody>();
+                if (i >= 3)
+                {
+                    this.upsideDownContact = true;
+                }
+                return true;
+            }
         }
-        else
-        {
-            point = Vector3.zero;
-            normal = Vector3.zero;
-            return false;
-        }
+        point = Vector3.zero;
+        normal = Vector3.zero;
+        contactVector = Vector3.zero;
+        return false;
     }
 
     void OnDestroy()
     {
         if (this.particles)
         {
-            Object.Destroy(this.particles.gameObject);
+            GameObject.Destroy(this.particles.gameObject);
         }
     }
 

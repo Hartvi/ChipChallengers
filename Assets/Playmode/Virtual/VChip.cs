@@ -49,12 +49,12 @@ public class VChip
     public static readonly string[] staticPropertiesStr = new string[] { "Spring", "Damper", "Option", "Name", "Type" };
     public static readonly CPR[] staticPropertiesEnum = new CPR[] { CPR.Spring, CPR.Damper, CPR.Option, CPR.Name, CPR.Type };
 
-    public static readonly string[] chipNames = new string[] { chipStr, rudderStr, axleStr, gunStr, wheelStr, jetStr, sensorStr, cowlStr };
+    public static readonly string[] chipNames = new string[] { chipStr, rudderStr, axleStr, gunStr, wheelStr, jetStr, sensorStr };
 
     public static readonly CommonChip baseChip;
     public const string baseChipName = "BaseChip";
 
-    public static readonly CTP[] chipEnums = new CTP[] { CTP.Chip, CTP.Rudder, CTP.Axle, CTP.Gun, CTP.Wheel, CTP.Jet, CTP.Sensor, CTP.Cowl };
+    public static readonly CTP[] chipEnums = new CTP[] { CTP.Chip, CTP.Rudder, CTP.Axle, CTP.Gun, CTP.Wheel, CTP.Jet, CTP.Sensor };
 
     public static readonly Dictionary<string, CPR> str2ChipProperty;
     public static readonly Dictionary<string, GameObject> chipTemplates;
@@ -286,7 +286,7 @@ public class VChip
         try
         {
             string strVal = ArrayExtensions.AccessLikeDict(key, this.keys, this.vals);
-            
+
             if (string.IsNullOrWhiteSpace(strVal))
             {
                 object objVal = ArrayExtensions.AccessLikeDict(key, VChip.allPropertiesStr, VChip.allPropertiesDefaultsObjects);
