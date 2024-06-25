@@ -9,7 +9,7 @@ using UnityEngine;
 public class Aerodynamics : BaseAspect
 {
     // https://en.wikipedia.org/wiki/Drag_(physics)#Aerodynamics
-    const float ConstantPartOfDragAndLift = 6.28f * PhysicsData.seaLevelDensity * (GeometricChip.ChipSide * GeometricChip.ChipSide);
+    const float ConstantPartOfDragAndLift = 2f * Mathf.PI * PhysicsData.seaLevelDensity * (GeometricChip.ChipSide * GeometricChip.ChipSide);
 
     void Start()
     {

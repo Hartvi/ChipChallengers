@@ -33,7 +33,7 @@ public class PhysicsData : MonoBehaviour
     public const float wheelRadius0 = 1f;
     public const float tinyMass = 0.25f * mediumMass;
     public const float smallMass = 0.5f * mediumMass;
-    public const float mediumMass = 2.5f;
+    public const float mediumMass = 2.0f;
     public const float largeMass = 2f * mediumMass;
     public const float hugeMass = 4f * mediumMass;
 }

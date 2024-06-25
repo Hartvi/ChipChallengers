@@ -8,8 +8,8 @@ public class WheelAspects : BaseAspect
 {
     ParticleSystem particles;
 
-    public static readonly Vector3 MomentOfInertia = PhysicsData.mediumMass * new Vector3(1 / 4f, 1 / 2f, 1 / 4f) * StaticChip.ChipSide * StaticChip.ChipSide;
     float radius = StaticChip.ChipSide * 0.5f;
+    public static readonly Vector3 MomentOfInertia = PhysicsData.mediumMass * new Vector3(1 / 4f, 1 / 2f, 1 / 4f) * StaticChip.ChipSide * StaticChip.ChipSide;
 
     public static readonly float PlanarMomentOfInertia = WheelAspects.MomentOfInertia[1];
     public static readonly float InvPlanarMomentOfInertia = 1f / WheelAspects.MomentOfInertia[1];
@@ -18,7 +18,7 @@ public class WheelAspects : BaseAspect
 
     public const float carTyreStiffness = 200 * 1e3f;  // N/mm * 1e3
 
-    public static readonly float DepenetrationVelocity = 5f;
+    public static readonly float DepenetrationVelocity = 10f;
     public static readonly float DepenetrationVelocitySqr = DepenetrationVelocity * DepenetrationVelocity;
 
     // tire parameters:

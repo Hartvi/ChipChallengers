@@ -217,7 +217,7 @@ public class ChipPanel : BaseSidePanel, InputReceiver
                 inputs[_i].onDeselect.AddListener(
                     x =>
                     {
-                        this.deselectTimer = 5;
+                        this.deselectTimer = 30;
                     }
                 );
             }
