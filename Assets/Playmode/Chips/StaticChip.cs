@@ -2,8 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Mirror;
 
-public abstract class StaticChip : MonoBehaviour
+public abstract class StaticChip : NetworkBehaviour
 {
 
     // PUBLIC GENERAL CONSTANTS
@@ -104,14 +105,9 @@ public abstract class StaticChip : MonoBehaviour
             throw new ArgumentException($"Chip of type {type} doesn't exist.");
         }
 
-        CommonChip baseChip = Instantiate(VChip.baseChip);
+        CommonChip newChip = Instantiate(VChip.chipTemplates[type]).AddComponent<CommonChip>();
 
-        GameObject newChip = Instantiate(VChip.chipTemplates[type]);
-
-        newChip.transform.SetParent(baseChip.transform, false);
-        newChip.transform.localScale = Vector3.one;
-
-        return baseChip.gameObject.GetComponent<T>();
+        return newChip.gameObject.GetComponent<T>();
     }
 
     public static Vector3 RaycastFromAbove()

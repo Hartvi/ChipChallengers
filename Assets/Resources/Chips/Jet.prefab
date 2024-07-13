@@ -1505,6 +1505,7 @@ GameObject:
   - component: {fileID: 3555320736083304447}
   - component: {fileID: 7171681204197454543}
   - component: {fileID: 5988667311061107723}
+  - component: {fileID: -4008503931279682578}
   m_Layer: 0
   m_Name: Jet
   m_TagString: Untagged
@@ -1604,6 +1605,23 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &-4008503931279682578
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5803569268948404102}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 0
+  _assetId: 1496765258
+  serverOnly: 0
+  visibility: 0
+  hasSpawned: 0
 --- !u!1 &5827113358753044896
 GameObject:
   m_ObjectHideFlags: 0
