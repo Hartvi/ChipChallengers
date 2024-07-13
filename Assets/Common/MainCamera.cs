@@ -16,16 +16,16 @@ public class MainCamera : MonoBehaviour
     bool aboveY = false;
     GameObject water;
 
-    CoreChip core;
-    void Awake()
-    {
-        core = Instantiate(Resources.Load<GameObject>("Chips/Core")).AddComponent<CoreChip>();
-        core.gameObject.layer = 6;
-        core.gameObject.AddComponent<Rigidbody>();
-        core.gameObject.AddComponent<BoxCollider>();
-        core.name = UIStrings.Core;
-        //print($"Core: {core}");
-    }
+    //CoreChip core;
+    //void Awake()
+    //{
+    //    core = Instantiate(Resources.Load<GameObject>("Chips/Core")).AddComponent<CoreChip>();
+    //    core.gameObject.layer = 6;
+    //    core.gameObject.AddComponent<Rigidbody>();
+    //    core.gameObject.AddComponent<BoxCollider>();
+    //    core.name = UIStrings.Core;
+    //    //print($"Core: {core}");
+    //}
 
     void Start()
     {
