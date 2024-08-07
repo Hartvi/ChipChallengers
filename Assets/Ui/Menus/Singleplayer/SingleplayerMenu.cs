@@ -305,11 +305,11 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
                 if (!shiftPressed)
                 {
                     Quaternion newRot = Quaternion.Euler(0f, this.core.transform.rotation.eulerAngles.y, 0f);
-                    this.core.transform.rotation = newRot;
-                    //this.core.transform.rotation = Quaternion.identity;
+                    //this.core.transform.rotation = newRot;
                 }
-                this.core.transform.position += Vector3.up * 2f;
-                this.core.TriggerSpawn(this.core.VirtualModel, false);
+                //this.core.transform.position += Vector3.up * 2f;
+                //this.core.TriggerSpawn(this.core.VirtualModel, false);
+                this.core.CmdResetCore();
             }
 #if UNITY_EDITOR
             if (Input.GetKeyDown(KeyCode.T))
@@ -317,28 +317,16 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
                 this.core.CmdResetToDefaultLocation();
                 // set the camera position, since it might not catch up fast enough
                 Camera.main.transform.position = this.core.transform.position + Vector3.up * 10f;
-
-                //Vector3 spawnPosition = this.RaycastFromAbove();
-                //this.core.rb.velocity = Vector3.zero;
-                //if(!shiftPressed)
-                //{
-                //    this.core.transform.rotation = Quaternion.identity;
-                //}
-                //this.core.transform.position = spawnPosition;
-                //this.core.TriggerSpawn(this.core.VirtualModel, false);
             }
             if (Input.GetKeyDown(KeyCode.L))
             {
-                //print($"setting active load panel with selected model: {GameManager.Instance.GetModel()}");
                 this.LoadPanel.ActivatePanel(GameManager.Instance.GetModel());
-                //this.LoadPanel.gameObject.SetActive(true);
 
             }
 #else
             if (Input.GetKeyDown(KeyCode.O))
             {
                 this.LoadPanel.ActivatePanel(GameManager.Instance.GetModel());
-                //this.LoadPanel.gameObject.SetActive(true);
             }
             if (Input.GetKeyDown(KeyCode.K))
             {
@@ -349,15 +337,6 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
                 this.core.CmdResetToDefaultLocation();
                 // set the camera position, since it might not catch up fast enough
                 Camera.main.transform.position = this.core.transform.position + Vector3.up*10f;
-
-                //Vector3 spawnPosition = RaycastFromAbove();
-                //this.core.rb.velocity = Vector3.zero;
-                //if(!shiftPressed)
-                //{
-                //    this.core.transform.rotation = Quaternion.identity;
-                //}
-                //this.core.transform.position = spawnPosition;
-                //this.core.TriggerSpawn(this.core.VirtualModel, false);
             }
 #endif
         }

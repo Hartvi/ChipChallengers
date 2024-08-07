@@ -114,50 +114,17 @@ public class CoreChip : CommonChip
         this.equivalentVirtualChip = new VChip(keys1, vals1, 0, null);
     }
 
-    void Start()
+    public override void OnStartClient()
     {
-        //string[] keys1 = new string[] { VChip.nameStr, VChip.typeStr };
-        //string[] vals1 = new string[] { VChip.coreStr, VChip.coreStr };
-        //var vc = new VChip(keys1, vals1, 0, null);
-        //var VirtualModel = new VModel();
-        //VirtualModel.chips = new VChip[] { vc };//, vc2, vc3, vc4, vc5, vc6, vc7, vc8 };
-        //this.VirtualModel = VirtualModel;
-        ////print($"Core equivalent chip is NULL: {core.equivalentVirtualChip is null}");
-        ////core.equivalentVirtualChip = vc;
-        ////print("core name: "+core.name);
-
-        //TextAsset textFile = Resources.Load<TextAsset>("aguncar");
-        //LoadPanel.LoadString(textFile.text);
-
-        //VModel VirtualModel = VModel.FromLuaModel(textFile.text);
-
-        ////var VirtualModel = new VModel();
-        ////VirtualModel.chips = new VChip[] { vc };//, vc2, vc3, vc4, vc5, vc6, vc7, vc8 };
-
-        ////VirtualModel.AddModelChangedCallback(x => core.TriggerSpawn(x, true));
-
-        //core.VirtualModel = VirtualModel;
-        //core.history.SaveState(core.VirtualModel.ToLuaString());
-
-        //print($"Core model: {core.VirtualModel}");
-        //VirtualModel.AddModelChangedCallback(x => core.history.SaveState(VirtualModel.ToLuaString()));
+        // THIS IS SO JOINTS WORK ON THE SERVER
+        // THE CLIENT WILL SEND CONTROL COMMANDS TO THE SERVER WHICH WILL THEN ACT ON THEM
+        base.OnStartClient();
     }
-
 
     [Server]
     public override void OnStartServer()
     {
         print($"srv: OnStartServer");
-        //string[] keys1 = new string[] { VChip.nameStr, VChip.typeStr };
-        //string[] vals1 = new string[] { VChip.coreStr, VChip.coreStr };
-        //var vc = new VChip(keys1, vals1, 0, null);
-        //var VirtualModel = new VModel();
-        //VirtualModel.chips = new VChip[] { vc };//, vc2, vc3, vc4, vc5, vc6, vc7, vc8 };
-        //this.VirtualModel = VirtualModel;
-
-        //print($"Core equivalent chip is NULL: {core.equivalentVirtualChip is null}");
-        //core.equivalentVirtualChip = vc;
-        //print("core name: "+core.name);
 
         TextAsset textFile = Resources.Load<TextAsset>("aguncar");
         this.LoadString(textFile.text);
@@ -182,6 +149,7 @@ public class CoreChip : CommonChip
     [Command]
     public void CmdLoadString(string state)
     {
+        print($"Building core: {this.netId}");
         this.RuntimeFunctions.Clear();
         this.LoadString(state);
     }
@@ -191,7 +159,6 @@ public class CoreChip : CommonChip
     {
         print($"srv: LoadString");
         VModel model = null;
-        //CommonChip core = CommonChip.ClientCore.GetComponent<CommonChip>();
         try
         {
             model = VModel.FromLuaModel(state);
@@ -232,30 +199,49 @@ public class CoreChip : CommonChip
     }
 
     [Command]
+    public void CmdTriggerSpawn()
+    {
+        this.TriggerSpawn(this.VirtualModel, false);
+    }
+
+    [Command]
     public void CmdResetCore()
     {
         print($"clt=>srv: CmdResetCore");
-        this.transform.rotation = Quaternion.identity;
-        this.rb.velocity = Vector3.zero;
-
         // delete after build listeners
+        this.RpcResetRotationVelocity();
         this.SetAfterBuildListeners(new Action[] { });
-        this.TriggerSpawn(this.VirtualModel, false);
+        this.RpcRetrigger();
     }
 
     [Command]
     public void CmdResetToDefaultLocation()
     {
         print($"clt=>srv: CmdResetToDefaultLocation");
+        this.RpcResetLocation();
+        this.RpcResetRotationVelocity();
+        this.SetAfterBuildListeners(new Action[] { });
+        this.RpcRetrigger();
+    }
 
+    [ClientRpc]
+    public void RpcResetLocation()
+    {
         Vector3 spawnPosition = StaticChip.RaycastFromAbove();
-
-        this.rb.velocity = Vector3.zero;
-
-        this.transform.rotation = Quaternion.identity;
         this.transform.position = spawnPosition;
+    }
 
-        this.TriggerSpawn(this.VirtualModel, false);
+    [ClientRpc]
+    public void RpcResetRotationVelocity()
+    {
+        this.rb.velocity = Vector3.zero;
+        this.transform.rotation = Quaternion.identity;
+    }
+
+    [ClientRpc]
+    public void RpcRetrigger()
+    {
+        this.CmdTriggerSpawn();
     }
 
     [Server]
@@ -339,6 +325,7 @@ public class CoreChip : CommonChip
         //}
         //this.VisualizePosition = true;
 
+        this.SrvFreezeClientModel();
         if (freeze)
         {
             this.SrvFreezeClientModel();
@@ -421,8 +408,7 @@ public class CoreChip : CommonChip
 
     public void HandleInputs()
     {
-        Debug.Assert(this.isLocalPlayer);
-        //Debug.Assert(this.isServer);
-        this.loopScript.HandleInputs();
+        //Debug.Assert(this.isLocalPlayer);
+        //this.loopScript.HandleInputs();
     }
 }
