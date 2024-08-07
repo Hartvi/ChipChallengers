@@ -52,8 +52,9 @@ public class WheelAspects : BaseAspect
 
     Rigidbody collidingRigidbody;
 
-    void Start()
+    protected override void Start()
     {
+        base.Start();
         this.gameObject.layer = 7;
         if (WheelAspects.fixedTimeInvInertia == 0f)
         {
@@ -312,8 +313,9 @@ public class WheelAspects : BaseAspect
         return false;
     }
 
-    void OnDestroy()
+    protected override void OnDestroy()
     {
+        base.OnDestroy();
         if (this.particles)
         {
             GameObject.Destroy(this.particles.gameObject);

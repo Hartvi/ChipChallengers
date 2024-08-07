@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using Mirror;
 
 public class LoadPanel : BaseScrollMenu
 {
@@ -17,7 +18,7 @@ public class LoadPanel : BaseScrollMenu
 
         this.itemScroll.SetupItemList(FillInput, Screen.height / 70, IOHelpers.GetAllModels());
 
-        this.btns[0].btn.onClick.AddListener(this.RebuildWithNewModel);
+        this.btns[0].btn.onClick.AddListener(this.RebuildWithNewModelOnline);
 
         this.btns[1].btn.onClick.AddListener(this.DeactivatePanel);
 
@@ -82,11 +83,12 @@ public class LoadPanel : BaseScrollMenu
     }
 
 
-    void RebuildWithNewModel()
+    void RebuildWithNewModelOnline()
     {
         VModel model = null;
         string modelNameWithExtension = this.input.input.text + UIStrings.ModelExtension;
         GameManager.Instance.SetModel(this.input.input.text);
+        // SWITCH TO SERVER
 #if UNITY_EDITOR
         model = VModel.LoadModelFromFile(modelNameWithExtension);
 #else
@@ -109,13 +111,15 @@ public class LoadPanel : BaseScrollMenu
             DisplaySingleton.Instance.DisplayText(LoadPanel.ModelIsInvalid, 3f);
             return;
         }
+        string luaModel = IOHelpers.LoadModel(modelNameWithExtension);
 
-        CommonChip core = CommonChip.ClientCore;
+        var core = CoreChip.ClientCoreChip;
 
-        core.TriggerSpawn(this.loadedModel, true);
-        core.VirtualModel.AddModelChangedCallback(x => core.TriggerSpawn(x, true));
-        core.VirtualModel.AddModelChangedCallback(x => HistoryStack.SaveState(core.VirtualModel.ToLuaString()));
-        HistoryStack.SaveState(core.VirtualModel.ToLuaString());
+        core.CmdLoadString(luaModel);
+        //core.TriggerSpawn(this.loadedModel, true);
+        //core.VirtualModel.AddModelChangedCallback(x => core.TriggerSpawn(x, true));
+        //core.VirtualModel.AddModelChangedCallback(x => core.history.SaveState(core.VirtualModel.ToLuaString()));
+        //core.history.SaveState(core.VirtualModel.ToLuaString());
         this.DeactivatePanel();
 
         foreach (Action a in LoadPanel.OnLoadedCallbacks)
@@ -124,33 +128,78 @@ public class LoadPanel : BaseScrollMenu
         }
     }
 
-    public static void LoadString(string state)
-    {
-        VModel model = null;
-        CommonChip core = CommonChip.ClientCore;
-        try
-        {
-            model = VModel.FromLuaModel(state);
-        }
-        catch (Exception e)
-        {
-            UnityEngine.Debug.LogWarning($"string model could not be loaded.");
-            UnityEngine.Debug.Log(e.Message);
-            DisplaySingleton.Instance.DisplayText(LoadPanel.UndoRedoNotValid, 3f);
+//    void RebuildWithNewModel()
+//    {
+//        VModel model = null;
+//        string modelNameWithExtension = this.input.input.text + UIStrings.ModelExtension;
+//        GameManager.Instance.SetModel(this.input.input.text);
+//        // SWITCH TO SERVER
+//#if UNITY_EDITOR
+//        model = VModel.LoadModelFromFile(modelNameWithExtension);
+//#else
+//        try
+//        {
+//            model = VModel.LoadModelFromFile(this.input.input.text + UIStrings.ModelExtension);
+//        }
+//        catch (Exception e)
+//        {
+//            UnityEngine.Debug.LogWarning($"Model could not be loaded.");
+//            UnityEngine.Debug.Log(e.Message);
+//            DisplaySingleton.Instance.DisplayText(LoadPanel.ModelDoesNotExist, 3f);
+//        }
+//#endif
 
-            return;
-        }
+//        this.loadedModel = model;
+//        if (this.loadedModel == null)
+//        {
+//            // TODO: show error
+//            DisplaySingleton.Instance.DisplayText(LoadPanel.ModelIsInvalid, 3f);
+//            return;
+//        }
 
-        core.TriggerSpawn(model, true);
-        core.VirtualModel.AddModelChangedCallback(x => core.TriggerSpawn(x, true));
-        core.VirtualModel.AddModelChangedCallback(x => HistoryStack.SaveState(core.VirtualModel.ToLuaString()));
-        HistoryStack.SaveState(core.VirtualModel.ToLuaString());
+//        var core = CoreChip.ClientCoreChip;
 
-        foreach (Action a in LoadPanel.OnLoadedCallbacks)
-        {
-            a();
-        }
-    }
+//        core.TriggerSpawn(this.loadedModel, true);
+//        core.VirtualModel.AddModelChangedCallback(x => core.TriggerSpawn(x, true));
+//        core.VirtualModel.AddModelChangedCallback(x => core.history.SaveState(core.VirtualModel.ToLuaString()));
+//        core.history.SaveState(core.VirtualModel.ToLuaString());
+//        this.DeactivatePanel();
+
+//        foreach (Action a in LoadPanel.OnLoadedCallbacks)
+//        {
+//            a();
+//        }
+//    }
+
+    //[Server]
+    //public static void LoadString(string state)
+    //{
+    //    print($"srv");
+    //    VModel model = null;
+    //    var core = CoreChip.ClientCoreChip;
+    //    try
+    //    {
+    //        model = VModel.FromLuaModel(state);
+    //    }
+    //    catch (Exception e)
+    //    {
+    //        UnityEngine.Debug.LogWarning($"string model could not be loaded.");
+    //        UnityEngine.Debug.Log(e.Message);
+    //        DisplaySingleton.Instance.DisplayText(LoadPanel.UndoRedoNotValid, 3f);
+
+    //        return;
+    //    }
+
+    //    core.TriggerSpawn(model, true);
+    //    core.VirtualModel.AddModelChangedCallback(x => core.TriggerSpawn(x, true));
+    //    core.VirtualModel.AddModelChangedCallback(x => core.history.SaveState(core.VirtualModel.ToLuaString()));
+    //    core.history.SaveState(core.VirtualModel.ToLuaString());
+
+    //    foreach (Action a in LoadPanel.OnLoadedCallbacks)
+    //    {
+    //        a();
+    //    }
+    //}
 
     //public static void LoadTmp()
     //{
@@ -171,8 +220,8 @@ public class LoadPanel : BaseScrollMenu
 
     //    core.TriggerSpawn(model, true);
     //    core.VirtualModel.AddModelChangedCallback(x => core.TriggerSpawn(x, true));
-    //    core.VirtualModel.AddModelChangedCallback(x => HistoryStack.SaveState(core.VirtualModel.ToLuaString()));
-    //    HistoryStack.SaveState(core.VirtualModel.ToLuaString());
+    //    core.VirtualModel.AddModelChangedCallback(x => core.history.SaveState(core.VirtualModel.ToLuaString()));
+    //    core.history.SaveState(core.VirtualModel.ToLuaString());
 
     //    foreach(Action a in LoadPanel.OnLoadedCallbacks)
     //    {
@@ -185,18 +234,18 @@ public class LoadPanel : BaseScrollMenu
         this.input.input.SetTextWithoutNotify(modelName);
     }
 
-    static void ModelDoesNotExist(TMP_Text txt)
+    public static void ModelDoesNotExist(TMP_Text txt)
     {
         DisplaySingleton.ErrorMsgModification(txt);
         txt.SetText("Model could not be loaded.");
     }
 
-    static void ModelIsInvalid(TMP_Text txt)
+    public static void ModelIsInvalid(TMP_Text txt)
     {
         DisplaySingleton.ErrorMsgModification(txt);
         txt.SetText("Model is invalid.");
     }
-    static void UndoRedoNotValid(TMP_Text txt)
+    public static void UndoRedoNotValid(TMP_Text txt)
     {
         DisplaySingleton.ErrorMsgModification(txt);
         txt.SetText("Undo/redo is invalid.");

@@ -20,7 +20,7 @@ public class ScriptPanel : BaseSidePanel, InputReceiver
 
     void Start()
     {
-        CommonChip core = CommonChip.ClientCore;
+        CoreChip core = CoreChip.ClientCoreChip;
         this.input = this.GetComponentInChildren<BaseInput>();
         this.btn = this.GetComponentInChildren<DragButton>();
 
@@ -62,7 +62,7 @@ public class ScriptPanel : BaseSidePanel, InputReceiver
         if (this.input is null) return;
         //if (this.input.input is null) return;
         //if (this.input.input is null) return;
-        this.input.input.SetTextWithoutNotify(CommonChip.ClientCore.VirtualModel.script);
+        this.input.input.SetTextWithoutNotify(CoreChip.ClientCoreChip.VirtualModel.script);
     }
 
     public bool IsSelected => this.input.input.isFocused;

@@ -19,10 +19,14 @@ public class HitSoundAspect : BaseSoundAspect
             s.clip = this.audioClip;
         }
     }
+
     void OnCollisionEnter(Collision collision)
     {
-        var s = this.soundPool.Next();
-        s.volume = GameManager.RealTimeSettings.Volume;
-        s.Play();
+        if (this.soundPool != null)
+        {
+            var s = this.soundPool.Next();
+            s.volume = GameManager.RealTimeSettings.Volume;
+            s.Play();
+        }
     }
 }

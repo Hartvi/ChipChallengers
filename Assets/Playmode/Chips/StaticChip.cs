@@ -105,7 +105,7 @@ public abstract class StaticChip : NetworkBehaviour
             throw new ArgumentException($"Chip of type {type} doesn't exist.");
         }
 
-        CommonChip newChip = Instantiate(VChip.chipTemplates[type]).AddComponent<CommonChip>();
+        CommonChip newChip = Instantiate(VChip.chipTemplates[type]).GetComponent<CommonChip>();
 
         return newChip.gameObject.GetComponent<T>();
     }

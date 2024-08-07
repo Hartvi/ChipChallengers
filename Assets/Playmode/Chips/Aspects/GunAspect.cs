@@ -84,8 +84,9 @@ public class GunAspect : BaseAspect
         return b;
     }
 
-    void OnDestroy()
+    protected override void OnDestroy()
     {
+        base.OnDestroy();
         if (this.bulletPool is not null)
         {
             this.bulletPool.DeleteObjects();

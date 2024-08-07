@@ -96,14 +96,14 @@ public class VariableFields : BaseImage
         }
         string[] vals = this.inputs.Select(x => x.input.text).ToArray();
         VVar v = new VVar(vals);
-        CommonChip.ClientCore.VirtualModel.AddAndSelectVariable(v);
+        CoreChip.ClientCoreChip.VirtualModel.AddAndSelectVariable(v);
         // add variable, select it
         // update the display panel for variables
     }
 
     public void DeleteSelectedVariable()
     {
-        CommonChip.ClientCore.VirtualModel.DeleteSelectedVariable();
+        CoreChip.ClientCoreChip.VirtualModel.DeleteSelectedVariable();
     }
 
     private void SanitizeInputField(TMP_InputField inputField, string input)

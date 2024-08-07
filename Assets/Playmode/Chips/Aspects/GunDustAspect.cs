@@ -24,8 +24,9 @@ public class GunDustAspect : BaseAspect
         particles.transform.localRotation = q;
     }
 
-    void Start()
+    protected override void Start()
     {
+        base.Start();
         this.gunAspect = this.GetComponent<GunAspect>();
         var em = this.particles.emission;
         em.rateOverTime = GameManager.RealTimeSettings.ParticleRate * Mathf.Abs(this.value);
@@ -49,8 +50,9 @@ public class GunDustAspect : BaseAspect
         this.oldCharge = this.gunAspect.charge;
     }
 
-    void OnDestroy()
+    protected override void OnDestroy()
     {
+        base.OnDestroy();
         if (this.particles)
         {
             GameObject.Destroy(this.particles.gameObject);

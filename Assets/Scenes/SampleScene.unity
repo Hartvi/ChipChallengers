@@ -475,8 +475,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 515135280}
-  - component: {fileID: 515135279}
   - component: {fileID: 515135278}
+  - component: {fileID: 515135279}
   - component: {fileID: 515135281}
   m_Layer: 0
   m_Name: NetworkManager
@@ -1108,7 +1108,6 @@ GameObject:
   - component: {fileID: 963194227}
   - component: {fileID: 963194226}
   - component: {fileID: 963194229}
-  - component: {fileID: 963194230}
   - component: {fileID: 963194231}
   m_Layer: 0
   m_Name: Main Camera
@@ -1194,18 +1193,6 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1b54d3df3e92e674aa7c8200b0cfe9e6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &963194230
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 963194225}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 21824f179f2493140a811dc085ea5000, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &963194231
@@ -1617,7 +1604,6 @@ GameObject:
   - component: {fileID: 1336074531}
   - component: {fileID: 1336074530}
   - component: {fileID: 1336074529}
-  - component: {fileID: 1336074528}
   - component: {fileID: 1336074533}
   m_Layer: 0
   m_Name: virtualchiptest
@@ -1626,18 +1612,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 0
---- !u!114 &1336074528
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1336074527}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6713964b8dd01ed4dac77cf41567544b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!65 &1336074529
 BoxCollider:
   m_ObjectHideFlags: 0

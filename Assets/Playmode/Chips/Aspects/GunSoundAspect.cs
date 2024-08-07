@@ -35,8 +35,9 @@ public class GunSoundAspect : BaseSoundAspect
         this.oldCharge = this.gunAspect.charge;
     }
 
-    void OnDestroy()
+    protected override void OnDestroy()
     {
+        base.OnDestroy();
         // normally has to be done when this spawns extra objects
         //this.soundPool.DeleteObjects();
     }

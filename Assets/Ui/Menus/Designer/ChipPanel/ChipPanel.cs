@@ -46,7 +46,7 @@ public class ChipPanel : BaseSidePanel, InputReceiver
         em.highlighter.SetHighlightCallbacks(new Action<VChip>[] { this.DisplayChip });
 
         // add default values so it renders fine at the start
-        this.DisplayChip(CommonChip.ClientCore.equivalentVirtualChip);
+        this.DisplayChip(CoreChip.ClientCoreChip.equivalentVirtualChip);
     }
 
     public override void Setup()

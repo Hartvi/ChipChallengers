@@ -75,7 +75,7 @@ public class SavePanel : BaseScrollMenu
         string msg = null;
         try
         {
-            msg = CommonChip.ClientCore.VirtualModel.SaveThisModelToFile(modelNameWithExtension);
+            msg = CoreChip.ClientCoreChip.VirtualModel.SaveThisModelToFile(modelNameWithExtension);
             GameManager.Instance.SetModel(modelName);
         }
         catch

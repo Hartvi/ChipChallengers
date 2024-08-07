@@ -42,8 +42,9 @@ public class JetDustAspect : BaseAspect
         this.oldVal = this.value;
     }
 
-    void OnDestroy()
+    protected override void OnDestroy()
     {
+        base.OnDestroy();
         if (this.particles)
         {
             Object.Destroy(this.particles.gameObject);

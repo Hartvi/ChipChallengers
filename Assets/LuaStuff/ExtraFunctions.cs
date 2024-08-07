@@ -6,12 +6,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using MoonSharp.Interpreter;
 
-public class ExtraFunctions : MonoBehaviour
+public class ExtraFunctions
 {
     public static bool Key(char k)
     {
         bool ret = Input.GetKey(InputHelper.chartoKeycode[k]);
-        //if (ret) print($"Getting key: {k}");
         return ret;
     }
 
@@ -93,33 +92,6 @@ public class ExtraFunctions : MonoBehaviour
         tbl[1] = Input.GetMouseButtonUp(0);
         tbl[2] = Input.GetMouseButtonUp(1);
         return tbl;
-    }
-    public void TestFuncs()
-    {
-        string scriptCode = @"    
-        -- comment
-        function loop ()
-            --Print(Key('a'));
-        end";
-
-        Script script = new Script();
-
-        script.Globals["Key"] = (Func<char, bool>)Key;
-        script.Globals["KeyDown"] = (Func<char, bool>)KeyDown;
-        script.Globals["KeyUp"] = (Func<char, bool>)KeyUp;
-        script.Globals["Sin"] = (Func<float, float>)Sin;
-        script.Globals["Cos"] = (Func<float, float>)Cos;
-        script.Globals["Print"] = (Action<string, Table>)Print;
-
-        script.DoString(scriptCode);
-
-        DynValue res = script.Call(script.Globals["loop"]);
-    }
-
-
-    void Update()
-    {
-        TestFuncs();
     }
 
 }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using MoonSharp.Interpreter;
 using System.Linq;
+using Mirror;
 
 public class VModel
 {
@@ -358,6 +359,7 @@ end
         this.DeleteActions = this.DeleteActions.Concat(new Action<string>[] { action }).ToArray();
     }
 
+    [Client]
     public string SaveThisModelToFile(string modelName)
     {
         var modelLua = this.ToLuaString();
@@ -387,7 +389,7 @@ end
 
     VChip[] GetChipAndChildren(string id)
     {
-        CommonChip core = CommonChip.ClientCore;
+        var core = CoreChip.ClientCoreChip;
         VModel vm = core.VirtualModel;
         var allchips = core.AllChips;
 

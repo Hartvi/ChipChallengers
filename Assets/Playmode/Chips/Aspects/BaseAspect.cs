@@ -3,8 +3,9 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Mirror;
 
-public abstract class BaseAspect : MonoBehaviour
+public abstract class BaseAspect : NetworkBehaviour
 {
     public CommonChip myChip;
     public Rigidbody rb => myChip.rb;
@@ -19,10 +20,26 @@ public abstract class BaseAspect : MonoBehaviour
         //{
         //    throw new NullReferenceException("BaseAspect requires SingleplayerMenu to be initialized");
         //}
-        SingleplayerMenu.RuntimeFunctions.Add(this);
     }
 
+    protected virtual void Start()
+    {
+        this.myChip.myCore.RuntimeFunctions.Add(this);
+    }
+
+    //public override void OnStartClient()
+    //{
+    //    print($"STARTING ASPECT ON CLIENT");
+    //    //    base.OnStartClient();
+    //    //    this.myChip.myCore.RuntimeFunctions.Add(this);
+    //    //    //SingleplayerMenu.RuntimeFunctions.Add(this);
+    //}
+
     public abstract void RuntimeFunction();
+
+    protected virtual void OnDestroy()
+    {
+    }
 
 }
 

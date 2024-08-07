@@ -3,45 +3,45 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public static class HistoryStack
+public class HistoryStack
 {
-    static Stack<string> pastEdits = new Stack<string>();
-    static Stack<string> futureEdits = new Stack<string>();
+    Stack<string> pastEdits = new Stack<string>();
+    Stack<string> futureEdits = new Stack<string>();
 
-    public static void SaveState(string state)
+    public void SaveState(string state)
     {
         //PRINT.IPrint($"Pushing new state");
-        pastEdits.Push(state);
-        futureEdits.Clear();  // clear future edits once a new state is saved
+        this.pastEdits.Push(state);
+        this.futureEdits.Clear();  // clear future edits once a new state is saved
     }
 
-    public static string Undo()
+    public string Undo()
     {
-        if (pastEdits.Count == 1)
-            return pastEdits.Peek();
+        if (this.pastEdits.Count == 1)
+            return this.pastEdits.Peek();
         //throw new InvalidOperationException("No more states to undo.");
 
-        if (pastEdits.Count == 0)
-            return CommonChip.ClientCore.VirtualModel.ToLuaString();
+        if (this.pastEdits.Count == 0)
+            return CoreChip.ClientCoreChip.VirtualModel.ToLuaString();
 
-        futureEdits.Push(pastEdits.Pop());
-        return pastEdits.Peek();
+        this.futureEdits.Push(this.pastEdits.Pop());
+        return this.pastEdits.Peek();
     }
 
-    public static string Redo()
+    public string Redo()
     {
-        if (futureEdits.Count == 0)
+        if (this.futureEdits.Count == 0)
         {
-            if (pastEdits.Count == 0)
+            if (this.pastEdits.Count == 0)
             {
-                return CommonChip.ClientCore.VirtualModel.ToLuaString();
+                return CoreChip.ClientCoreChip.VirtualModel.ToLuaString();
             }
-            return pastEdits.Peek();
+            return this.pastEdits.Peek();
         }
         //throw new InvalidOperationException("No more states to redo.");
 
-        var state = futureEdits.Pop();
-        pastEdits.Push(state);
+        var state = this.futureEdits.Pop();
+        this.pastEdits.Push(state);
         return state;
     }
 }

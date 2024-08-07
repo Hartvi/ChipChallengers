@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Mirror;
 
 public class LoopScript : MonoBehaviour
 {
@@ -15,6 +16,7 @@ public class LoopScript : MonoBehaviour
         UnityEngine.Debug.LogWarning($"NOTE: Loopscript only using Update()");
     }
 
+    [Server]
     public void HandleInputs()
     {
         this.loopFunction();
