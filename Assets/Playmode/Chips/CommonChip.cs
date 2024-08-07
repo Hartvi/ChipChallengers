@@ -8,28 +8,56 @@ using Mirror;
 
 public class CommonChip : AngleChip
 {
+
 #if UNITY_EDITOR
     static bool hasWarned = false;
     static bool hasWarned1 = false;
 #endif
-    public ScriptInstance scriptInstance;
 
-    private LoopScript loopScript;
+    //{
+    //    get
+    //    {
+    //        //NetworkClient.localPlayer
+    //        UnityEngine.Debug.LogWarning($"TODO: get each core for each client and only change the one that is new or receives a message from the client");
+    //        int k = 0;
+    //        //print($"number of commonchips: {GameObject.FindObjectsOfType<CommonChip>(true).Length}");
+    //        foreach (var o in GameObject.FindObjectsOfType<NetworkIdentity>())
+    //        {
+    //            k++;
+    //            if (o == null)
+    //            {
+    //                throw new NullReferenceException($"A chip in CommonChip.ClientCore is null!");
+    //            }
+    //            var ni = o.GetComponent<NetworkIdentity>();
+    //            //if (ni == null || ni.netId == 0)
+    //            //{
+    //            //    throw new NullReferenceException($"netId of {o.name} is null!");
+    //            //}
+    //            if (ni != null && ni.isServer)
+    //            {
+    //                print($"{ni.name}: I am a server!");
+    //            }
+    //            //else if (o.netIdentity == null)
+    //            //{
+    //            //    print($"netId: {o.GetComponent<NetworkIdentity>().netId}");
+    //            //    throw new NullReferenceException($"NetIdentity of {o.name} is null");
+    //            //}
+    //            // 
 
-    public static CommonChip ClientCore
-    {
-        get
-        {
-            foreach (var o in GameObject.FindObjectsOfType<CommonChip>())
-            {
-                if (o.IsOnClient && o.equivalentVirtualChip.IsCore)
-                {
-                    return o;
-                }
-            }
-            throw new NullReferenceException($"Couldn't find client's core.");
-        }
-    }
+    //            //print($"ONCLIENT: {o.IsOnClient}  ISCORE: {o.equivalentVirtualChip.IsCore}");
+    //            //if (o.IsOnClient && o.equivalentVirtualChip.IsCore)
+    //            //{
+    //            //    return o;
+    //            //}
+    //            if (ni.isLocalPlayer)
+    //            {
+    //                print($"IS PLAYER: {ni.name}");
+    //                return ni;
+    //            }
+    //        }
+    //        throw new NullReferenceException($"Couldn't find client's core.");
+    //    }
+    //}
 
     public bool IsOnClient
     {
@@ -151,19 +179,18 @@ public class CommonChip : AngleChip
             return this._RealParent;
         }
     }
-    Action[] _AfterBuildActions = new Action[] { };
 
-    public void HandleInputs()
-    {
-        this.loopScript.HandleInputs();
-    }
 
     // FUNCTIONS:
-    public CommonChip[] AddChild(VChip childChip)
+    [Server]
+    public CommonChip[] AddChild(VChip childChip, CoreChip core)
     {
+        print($"srv: AddChild");
+        Debug.Assert(!this.isClientOnly);
         var childType = childChip.ChipType;
 
         CommonChip newChild = GeometricChip.InstantiateChip<CommonChip>(childType);
+        newChild.myCore = core;
 
         newChild.equivalentVirtualChip = childChip;
         newChild.SetParent(this);
@@ -208,7 +235,7 @@ public class CommonChip : AngleChip
             newChild.ConfigureJointSpringDamper(cj);
         }
 
-        var _newChildren = newChild.AddChildren();
+        var _newChildren = newChild.AddChildren(core);
         CommonChip[] newChildrenArr = new CommonChip[_newChildren.Length + 1];
         // this is the changing part that fills up the list
         _newChildren.CopyTo(newChildrenArr, 0);// (newChild);
@@ -216,8 +243,16 @@ public class CommonChip : AngleChip
         return newChildrenArr;
     }
 
-    public CommonChip[] AddChildren()
+    [Server]
+    public CommonChip[] AddChildren(CoreChip core)
     {
+        print($"srv: AddChildren");
+        // Not yet on the server, the object gets spawned later
+        Debug.Assert(core != null);
+        Debug.Assert(!this.isClientOnly);
+        //print($"ISCLIENT: {this.isClient} ISSERVER: {this.isServer} CORE: {this.name}");
+        //Debug.Assert(this.isServer);
+
         Color colour = this.GetColour();
         this.mrs = this.GetComponentsInChildren<MeshRenderer>().Where(x => x.tag == VChip.colourStr).ToArray();
         this.materials = this.mrs.Select(x => x.material).ToArray();
@@ -302,7 +337,7 @@ public class CommonChip : AngleChip
         // when there are no Children left then the recursion stops
         foreach (VChip childChip in this.equivalentVirtualChip.Children)
         {
-            chips.AddRange(this.AddChild(childChip));
+            chips.AddRange(this.AddChild(childChip, core));
         }
         return chips.ToArray();
     }
@@ -408,101 +443,6 @@ public class CommonChip : AngleChip
         return this._IsJointElligible;
     }
 
-    public void TriggerSpawn(VModel virtualModel, bool freeze)
-    {
-        SingleplayerMenu.RuntimeFunctions.Clear();
-        this.VirtualModel = virtualModel;
-
-        foreach (VVar v in this.VirtualModel.variables)
-        {
-            v.valueChangedCallbacks = new Action<float, VVar>[] { };
-            v.currentValue = v.defaultValue;
-        }
-
-        this.transform.localScale = StaticChip.ChipSize;
-
-        // this should replace the argument
-        VChip core = this.VirtualModel.Core;
-
-        this.equivalentVirtualChip = core;
-
-        if (!this.equivalentVirtualChip.IsCore)
-        {
-            throw new ArgumentException($"Cannot trigger spawn from a non-core chip. (Current: {core.ChipType})");
-        }
-
-        this.SetupRigidbody();
-
-        // handle script
-        this.scriptInstance = new ScriptInstance(virtualModel);
-
-        if (this.loopScript is not null)
-        {
-            Debug.LogWarning($"Loop script is being added twice, deleting old one");
-            GameObject.Destroy(this.loopScript);
-        }
-
-        this.loopScript = this.gameObject.AddComponentIdempotent<LoopScript>();
-        this.loopScript.vModel = this.VirtualModel;
-        this.loopScript.loopFunction = this.scriptInstance.CallLoop;
-
-
-        // this performs clean-up as well
-        this.AllChildren = this.AddChildren();  // trigger the tsunami
-        // TODO: remove this and FIX Clipboard
-        if (this.VirtualModel.chips.Length != this.AllChips.Length)
-        {
-            Debug.LogWarning($"Fix clipboard to get rid of this warning");
-            // this is to register chips that haven't been added in
-            this.VirtualModel.SetChipsWithoutNotify(this.AllChips.Select(x => x.equivalentVirtualChip).ToArray());
-        }
-        this.scriptInstance.LinkSensors(this.VirtualModel);
-
-
-        //foreach (var c in this.AllChildren)
-        //{
-        //    c.VisualizePosition = true;
-        //}
-        //this.VisualizePosition = true;
-
-        if (freeze)
-        {
-            CommonChip.FreezeClientModel();
-        }
-        foreach (var a in this._AfterBuildActions)
-        {
-            a();
-        }
-    }
-
-    public static void UnfreezeClientModel()
-    {
-        var c = CommonChip.ClientCore;
-
-        foreach (GeometricChip chip in c.AllChips)
-        {
-            chip.GetComponent<Rigidbody>().isKinematic = false;
-        }
-    }
-
-    public static void FreezeClientModel()
-    {
-        var c = CommonChip.ClientCore;
-
-        foreach (GeometricChip chip in c.AllChips)
-        {
-            var r = chip.GetComponent<Rigidbody>();
-            if (r != null)
-            {
-                chip.GetComponent<Rigidbody>().isKinematic = true;
-            }
-        }
-    }
-
-    public void SetAfterBuildListeners(Action[] actions)
-    {
-        this._AfterBuildActions = actions;
-    }
 
     public void Die()
     {
@@ -545,16 +485,5 @@ public class CommonChip : AngleChip
         return myDescendants.ToArray();
     }
 
-    public void ResetToDefaultLocation()
-    {
-        Vector3 spawnPosition = StaticChip.RaycastFromAbove();
-
-        this.rb.velocity = Vector3.zero;
-
-        this.transform.rotation = Quaternion.identity;
-        this.transform.position = spawnPosition;
-
-        this.TriggerSpawn(this.VirtualModel, false);
-    }
 }
 

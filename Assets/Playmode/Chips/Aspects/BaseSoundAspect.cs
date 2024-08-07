@@ -8,8 +8,9 @@ public class BaseSoundAspect : BaseAspect
     protected ObjectPool<AudioSource> soundPool;
     protected int NumberOfSounds = 4;
 
-    protected virtual void Start()
+    protected override void Start()
     {
+        base.Start();
         this.soundPool = new ObjectPool<AudioSource>(this.NumberOfSounds, () => this.gameObject.AddComponent<AudioSource>(), (x) => Destroy(x));
     }
 

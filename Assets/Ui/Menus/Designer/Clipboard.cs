@@ -3,12 +3,14 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Mirror;
 using static PRINT;
 
 public static class Clipboard
 {
     static VChip newParent = null;
 
+    [Client]
     public static void Copy(string id)
     {
         // public VChip(string[] keys, string[] vals, int orientation, VChip parentChip)
@@ -21,7 +23,7 @@ public static class Clipboard
         //    null
         //);
 
-        CommonChip core = CommonChip.ClientCore;
+        var core = CoreChip.ClientCoreChip;
         CommonChip cc = core.AllChildren.FirstOrDefault(x => x.equivalentVirtualChip.id == id) as CommonChip;
 
         if (cc is null)
@@ -54,7 +56,7 @@ public static class Clipboard
     public static VChip AttachTo(VChip vc, int newOrientation, bool mirror)
     {
         // chip we wanna attach it to
-        if (Clipboard.newParent is null) return CommonChip.ClientCore.equivalentVirtualChip;
+        if (Clipboard.newParent is null) return CoreChip.ClientCoreChip.equivalentVirtualChip;
 
 
         // Clipboard.newParent is the virtual core that we don't want to copy
@@ -85,7 +87,7 @@ public static class Clipboard
             }
         }
 
-        CommonChip core = CommonChip.ClientCore;
+        CoreChip core = CoreChip.ClientCoreChip;
 
         VModel vm = core.VirtualModel;
         vm.chips = vm.chips.Concat(newChips).ToArray();

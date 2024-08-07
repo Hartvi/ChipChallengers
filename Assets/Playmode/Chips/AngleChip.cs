@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Mirror;
 
 public abstract class AngleChip : OptionChip
 {
@@ -57,8 +58,17 @@ public abstract class AngleChip : OptionChip
         return this.GetProperty<float>(VChip.angleStr, float.TryParse, SetAngleDelegate);
     }
 
+    [Server]
     protected T GetProperty<T>(string propertyName, ParseFuncDelegate<T> ParseFunc, Action<float, VVar> VariableCallbackFunction)
     {
+        //if (!this.IsCore)
+        //{
+        //    DisplaySingleton.Instance.DisplayText(x =>
+        //    {
+        //        x.SetText($"UnfreezeClientModel: {this.name} isn't a core!");
+        //    }, 3f);
+        //}
+        
         string propertyStr = ArrayExtensions.AccessLikeDict(propertyName, this.equivalentVirtualChip.keys, this.equivalentVirtualChip.vals);
 
         if (propertyStr is null)
@@ -81,8 +91,7 @@ public abstract class AngleChip : OptionChip
 
         if (StringHelpers.IsVariableName(propertyStr))
         {
-
-            CommonChip core = CommonChip.ClientCore;
+            var core = this.myCore;
             VVar existingVar = core.VirtualModel.variables.FirstOrDefault(x => x.name == propertyStr);
 
             if (existingVar == null)

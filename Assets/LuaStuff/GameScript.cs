@@ -21,7 +21,7 @@ public class GameScript : MonoBehaviour
     {
         // add owner player
         string player1 = UIStrings.Player + "1";
-        AllObjects.Add(player1, CommonChip.ClientCore.gameObject);
+        AllObjects.Add(player1, CoreChip.ClientCoreChip.gameObject);
         PlayerObjects.Add(player1);
 
         this.scriptString = scriptString;
@@ -229,7 +229,7 @@ public class GameScript : MonoBehaviour
         }
         if (this.PlayerObjects.Contains(name))
         {
-            var core = this.AllObjects[name].GetComponent<CommonChip>();
+            var core = this.AllObjects[name].GetComponent<CoreChip>();
             core.transform.rotation = Quaternion.Euler(p.x, p.y, p.z);
             core.rb.velocity = Vector3.zero;
             core.TriggerSpawn(core.VirtualModel, false);
@@ -263,7 +263,7 @@ public class GameScript : MonoBehaviour
         }
         if (this.PlayerObjects.Contains(name))
         {
-            var core = this.AllObjects[name].GetComponent<CommonChip>();
+            var core = this.AllObjects[name].GetComponent<CoreChip>();
             core.transform.position = p;
             //core.transform.rotation = Quaternion.identity;
             core.rb.velocity = Vector3.zero;

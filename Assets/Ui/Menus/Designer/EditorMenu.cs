@@ -7,18 +7,18 @@ using System.Linq;
 
 public class EditorMenu : BaseMenu, InputReceiver
 {
-    private CommonChip _core;
-    private CommonChip core
-    {
-        get
-        {
-            if (this._core is null)
-            {
-                this._core = CommonChip.ClientCore;
-            }
-            return this._core;
-        }
-    }
+    //private CommonChip _core;
+    //private CommonChip core
+    //{
+    //    get
+    //    {
+    //        if (this._core is null)
+    //        {
+    //            this._core = CommonChip.ClientCore;
+    //        }
+    //        return this._core;
+    //    }
+    //}
 
     public static EditorMenu Instance;
 
@@ -105,7 +105,7 @@ public class EditorMenu : BaseMenu, InputReceiver
         //this.OnEnterMenu();
 
         Action[] selectedChipCallbacks = new Action[] {
-            CommonChip.FreezeClientModel,
+            CoreChip.ClientCoreChip.CmdFreezeClientModel,
             this.OnEnterMenu,
             () => UIManager.instance.SwitchToMe(this)
         };
@@ -153,7 +153,7 @@ public class EditorMenu : BaseMenu, InputReceiver
         };
 
         // core stuff:
-        CommonChip core = CommonChip.ClientCore;
+        var core = CoreChip.ClientCoreChip;
         // TODO: clean up callbacks, etc after leacing this menu
         core.SetAfterBuildListeners(afterBuildListeners);
         // TODO: update value, option, etc in the editor to how it should look like.
@@ -178,7 +178,7 @@ public class EditorMenu : BaseMenu, InputReceiver
     void OnLeaveMenu()
     {
         this.highlighter.ParentHighlighter.SetActive(false);
-        CommonChip.ClientCore.VirtualModel.SaveThisModelToFile(UIStrings.Backup + UIStrings.ModelExtension);
+        CoreChip.ClientCoreChip.VirtualModel.SaveThisModelToFile(UIStrings.Backup + UIStrings.ModelExtension);
         GameManager.cameraMoveMode = CameraMoveMode.Follow;
     }
 
@@ -312,11 +312,11 @@ public class EditorMenu : BaseMenu, InputReceiver
             if (Input.GetKeyDown(KeyCode.Z))
             {
 #if UNITY_EDITOR
-                LoadPanel.LoadString(HistoryStack.Undo());
+                CoreChip.ClientCoreChip.CmdUndoHistory();
 #else
             try
             {
-                LoadPanel.LoadString(HistoryStack.Undo());
+                CoreChip.ClientCoreChip.CmdUndoHistory();
             }
             catch {}
 #endif
@@ -324,19 +324,19 @@ public class EditorMenu : BaseMenu, InputReceiver
             if (Input.GetKeyDown(KeyCode.Y))
             {
 #if UNITY_EDITOR
-                LoadPanel.LoadString(HistoryStack.Redo());
+                CoreChip.ClientCoreChip.CmdRedoHistory();
 #else
-            try
-            {
-                LoadPanel.LoadString(HistoryStack.Redo());
-            }
-            catch {}
+                try
+                {
+                    CoreChip.ClientCoreChip.CmdRedoHistory();
+                }
+                catch {}
 #endif
             }
             if (Input.GetKeyDown(KeyCode.C))
             {
                 VChip vc = this.selectedVChip;
-                CommonChip core = CommonChip.ClientCore;
+                var core = CoreChip.ClientCoreChip;
                 VModel vm = core.VirtualModel;
 
                 if (vc.parentId is not null)
@@ -358,7 +358,7 @@ public class EditorMenu : BaseMenu, InputReceiver
         if (Input.GetKeyDown(KeyCode.Delete))
         {
             VChip vc = this.selectedVChip;
-            CommonChip core = CommonChip.ClientCore;
+            var core = CoreChip.ClientCoreChip;
             VModel vm = core.VirtualModel;
 
             if (!string.IsNullOrWhiteSpace(vc.parentId))

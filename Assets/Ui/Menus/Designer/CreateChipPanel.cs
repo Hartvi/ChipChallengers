@@ -93,7 +93,7 @@ public class CreateChipPanel : BasePanel
     void BtnCallback(string chipName, LocalDirection localDirection, VChip parent)
     {
         VChip newChip = new VChip(chipName, localDirection, parent);
-        CommonChip core = CommonChip.ClientCore;
+        var core = CoreChip.ClientCoreChip;
 
         VModel vm = core.VirtualModel;
         vm.chips = vm.chips.Concat(new VChip[] { newChip }).ToArray();

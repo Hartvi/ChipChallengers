@@ -1,5 +1,6 @@
 
 ### TODO
+- `+` multiplayer - 1. make it so the models load on other instances
 - `+` just add maps and races on them
 - `+` stop camera from clipping through surfaces
 - `+` fix camera shaking
@@ -125,3 +126,13 @@
 - `+` ctrl+v in editor
 - `++` createchippanel must be completely on screen when activated
 - `+++` LUA should only show error on screen when it encounters an error in the editor and playmode. Right now it throws an exception that stops the whole program
+
+
+## MP PIPELINE
+INPUTS: client => server
+loading models: model string gets sent from client to server
+server then saves the string to its history
+editing: send commands to the server, i.e. send what gets added where??? what gets deleted
+  - basically REST API but the entries are dependent on each other?
+server prints things back to the client in the form of a clientrpc
+client communicates with server using its core

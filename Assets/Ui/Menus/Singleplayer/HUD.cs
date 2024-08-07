@@ -99,7 +99,7 @@ public class HUD : TopProp
         this.velocityHUD.SetFocus(f);
     }
 
-    public void LinkCore(CommonChip core)
+    public void LinkCore(CoreChip core)
     {
         this.velocityHUD = this.GetComponentInChildren<VelocityHUD>();
 

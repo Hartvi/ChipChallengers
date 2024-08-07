@@ -40,8 +40,9 @@ public class TireSoundAspect : BaseSoundAspect
         }
     }
 
-    void OnDestroy()
+    protected override void OnDestroy()
     {
+        base.OnDestroy();
         // normally has to be done when this spawns extra objects
         //this.soundPool.DeleteObjects();
     }

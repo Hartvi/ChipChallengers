@@ -6,6 +6,7 @@ using UnityEngine;
 
 public abstract class GeometricChip : StaticChip
 {
+    public CoreChip myCore = null;
 
     public GeometricChip parentChip = null;
     protected List<GeometricChip> childChips = new List<GeometricChip>();
@@ -26,94 +27,6 @@ public abstract class GeometricChip : StaticChip
     }
 
     public bool IsCore { get { return this.equivalentVirtualChip.IsCore; } }
-    public GeometricChip[] AllChips
-    {
-        get
-        {
-            return this.AllChildren.Concat(new[] { this }).ToArray();
-        }
-    }
-
-    //public VChip[] AllVirtualChips
-    //{
-    //    get
-    //    {
-    //        if (!this.equivalentVirtualChip.IsCore) throw new FieldAccessException("Trying to access all virtual chips from a non-core object.");
-
-    //        var virtualChips = this.AllChips.Select(child => child.equivalentVirtualChip).ToArray();
-    //        return virtualChips;
-    //    }
-    //}
-
-    public VVar[] AllVirtualVariables
-    {
-        get
-        {
-            if (!this.equivalentVirtualChip.IsCore) throw new FieldAccessException("Trying to access all virtual variables from a non-core object.");
-            //return this.VirtualVariables.ToArray();
-            return this.VirtualModel.variables;
-        }
-    }
-
-    //protected string script;
-
-    private VModel _VirtualModel;
-    public VModel VirtualModel
-    {
-        get
-        {
-            if (!this.IsCore) throw new FieldAccessException("Trying to access virtual model from a non-core object.");
-            if (this._VirtualModel == null)
-            {
-                throw new NullReferenceException($"Virtual model of core is null.");
-                //this._VirtualModel = new VirtualModel();
-            }
-            // taking chips away goes through real chips
-            // adding chips goes through VirtualModel
-            //this._VirtualModel.chips = this.AllVirtualChips;
-            //this._VirtualModel.variables = this.AllVirtualVariables;
-            //this._VirtualModel.script = this.script ?? "";
-            return this._VirtualModel;
-        }
-        set
-        {
-            //print($"set virtual model");
-            this._VirtualModel = value;
-            this.equivalentVirtualChip = value.Core;
-        }
-    }
-
-    private CommonChip[] _AllChildren;
-    public CommonChip[] AllChildren
-    {
-        get
-        {
-            if (!this.equivalentVirtualChip.IsCore)
-            {
-                throw new MemberAccessException($"Get: Only chip designated as core can access all Children.");
-            }
-            return this._AllChildren;
-        }
-        set
-        {
-            if (!this.equivalentVirtualChip.IsCore)
-            {
-                throw new MemberAccessException($"Set: Only chip designated as core can access all Children.");
-            }
-            if (this._AllChildren is not null)
-            {
-                foreach (CommonChip child in this._AllChildren)
-                {
-                    if (child && child.gameObject)
-                    {
-                        GameObject.Destroy(child.gameObject);
-                    }
-                }
-            }
-            //this._AllChildren.Clear();
-            this._AllChildren = value;
-        }
-    }
 
     private bool _VisualizePosition = false;
     private GameObject VisualizeSphere;

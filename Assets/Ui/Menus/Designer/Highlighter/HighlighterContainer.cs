@@ -106,17 +106,17 @@ public class HighlighterContainer : MonoBehaviour
     {
         // TODO make the assignment from this function more secure, maybe `out CommonChip selectedChip`? and `bool` return
 
-        CommonChip cc = CommonChip.ClientCore.AllChips.FirstOrDefault(x => x.equivalentVirtualChip.id == chipId) as CommonChip;
+        CommonChip cc = CoreChip.ClientCoreChip.AllChips.FirstOrDefault(x => x.equivalentVirtualChip.id == chipId) as CommonChip;
 
         if(cc is null)
         {
             //UnityEngine.Debug.LogWarning($"Clicked on a null object. ID: {chipId}, perhaps fix it to the second to last object");
             string parentId = chipId.Substring(0, chipId.Length - 1);
-            cc = CommonChip.ClientCore.AllChips.FirstOrDefault(x => x.equivalentVirtualChip.id == parentId) as CommonChip;
+            cc = CoreChip.ClientCoreChip.AllChips.FirstOrDefault(x => x.equivalentVirtualChip.id == parentId) as CommonChip;
             if (cc is null)
             {
                 UnityEngine.Debug.LogError($"Not even the parent of id {chipId}, {parentId} exists");
-                cc = CommonChip.ClientCore;
+                cc = CoreChip.ClientCoreChip;
             }
             //throw new NullReferenceException($"Chip with id {chipId} does not exist.");
         }

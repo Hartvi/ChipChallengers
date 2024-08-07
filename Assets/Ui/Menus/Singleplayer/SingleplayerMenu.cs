@@ -26,11 +26,11 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
     private ScenarioPanel ScenarioPanel;
     private ControlsPanel ControlsPanel;
 
-    private CommonChip core;
+    private CoreChip core;
 
     HUD Hud;
 
-    public static List<BaseAspect> RuntimeFunctions = new List<BaseAspect>();
+    //public static List<BaseAspect> RuntimeFunctions = new List<BaseAspect>();
 
     // HUD, etc
     // km/h m/s variables
@@ -94,7 +94,8 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
 
         this.ControlsPanel = this.gameObject.GetComponentInChildren<ControlsPanel>(true);
 
-        this.core.ResetToDefaultLocation();
+        this.core = CoreChip.ClientCoreChip;
+        this.core.CmdResetToDefaultLocation();
         // set the camera position, since it might not catch up fast enough
         Camera.main.transform.position = this.core.transform.position + Vector3.up * 10f;
     }
@@ -121,22 +122,17 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
         // ignore wheel to player collisions
         Physics.IgnoreLayerCollision(7, 6);
 
-        this.core = CommonChip.ClientCore;
+        this.core = CoreChip.ClientCoreChip;
 
-
-        this.core.transform.rotation = Quaternion.identity;
-        this.core.rb.velocity = Vector3.zero;
-
-        // delete after build listeners
-        this.core.SetAfterBuildListeners(new Action[] { });
-        this.core.TriggerSpawn(this.core.VirtualModel, false);
+        // SEND COMMANDS PERTAINING TO CORE
+        this.core.CmdResetCore();
 
         // when model is loaded: add callbacks to rebuild the model, add callbacks to link the variables to the HUD
         Action[] onLoadedCallbacksTmp = new Action[] {
-            () => {
-                this.core.TriggerSpawn(this.core.VirtualModel, false);
-                this.core.transform.position += Vector3.up;
-                },
+            //() => {
+            //    this.core.TriggerSpawn(this.core.VirtualModel, false);
+            //    this.core.transform.position += Vector3.up;
+            //    },
             () => this.Hud.LinkCore(this.core),
             () => {
                 Camera.main.transform.position = this.core.transform.position + Vector3.up * 10f;
@@ -145,7 +141,7 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
 
         this.LoadPanel.SetOnLoadedCallbacks(onLoadedCallbacksTmp);
 
-        var mapLoadedCallbacks = onLoadedCallbacksTmp.Concat(new Action[] { this.core.ResetToDefaultLocation }).ToArray();
+        var mapLoadedCallbacks = onLoadedCallbacksTmp.Concat(new Action[] { this.core.CmdResetToDefaultLocation }).ToArray();
         this.MapPanel.SetOnLoadedCallbacks(mapLoadedCallbacks);
 
         //TODO: load model after entering playmode???
@@ -252,25 +248,22 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
 
     void InputReceiver.OnStartReceiving()
     {
-        CommonChip.UnfreezeClientModel();
+        CoreChip.ClientCoreChip.CmdUnfreezeClientModel();
     }
 
     void InputReceiver.OnStopReceiving()
     {
         //print($"Singleplayer menu stopping receiving");
-        CommonChip.FreezeClientModel();
+        CoreChip.ClientCoreChip.CmdFreezeClientModel();
     }
 
     bool InputReceiver.IsActive() => this.gameObject.activeSelf;
 
     void InputReceiver.HandleInputs()
     {
-        foreach (var rtf in SingleplayerMenu.RuntimeFunctions)
+        foreach (var rtf in this.core.RuntimeFunctions)
         {
-            if (rtf != null)
-            {
-                rtf.RuntimeFunction();
-            }
+            rtf.RuntimeFunction();
         }
 
         this.core.HandleInputs();
@@ -321,7 +314,7 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
 #if UNITY_EDITOR
             if (Input.GetKeyDown(KeyCode.T))
             {
-                this.core.ResetToDefaultLocation();
+                this.core.CmdResetToDefaultLocation();
                 // set the camera position, since it might not catch up fast enough
                 Camera.main.transform.position = this.core.transform.position + Vector3.up * 10f;
 
@@ -339,11 +332,12 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
                 //print($"setting active load panel with selected model: {GameManager.Instance.GetModel()}");
                 this.LoadPanel.ActivatePanel(GameManager.Instance.GetModel());
                 //this.LoadPanel.gameObject.SetActive(true);
+
             }
 #else
             if (Input.GetKeyDown(KeyCode.O))
             {
-                this.LoadPanel.ActivatePanel(CommonChip.ClientCore.VirtualModel.ModelName);
+                this.LoadPanel.ActivatePanel(GameManager.Instance.GetModel());
                 //this.LoadPanel.gameObject.SetActive(true);
             }
             if (Input.GetKeyDown(KeyCode.K))
@@ -352,7 +346,7 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
             }
             if (Input.GetKeyDown(KeyCode.U))
             {
-                this.core.ResetToDefaultLocation();
+                this.core.CmdResetToDefaultLocation();
                 // set the camera position, since it might not catch up fast enough
                 Camera.main.transform.position = this.core.transform.position + Vector3.up*10f;
 

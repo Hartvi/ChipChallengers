@@ -11,8 +11,9 @@ public class Aerodynamics : BaseAspect
     // https://en.wikipedia.org/wiki/Drag_(physics)#Aerodynamics
     const float ConstantPartOfDragAndLift = 2f * Mathf.PI * PhysicsData.seaLevelDensity * (GeometricChip.ChipSide * GeometricChip.ChipSide);
 
-    void Start()
+    protected override void Start()
     {
+        base.Start();
         Aerodynamics[] aes = this.gameObject.GetComponents<Aerodynamics>();
         if (aes.Length > 1)
         {

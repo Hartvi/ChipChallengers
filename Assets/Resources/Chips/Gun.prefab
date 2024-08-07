@@ -10,7 +10,9 @@ GameObject:
   m_Component:
   - component: {fileID: 2410944052848349250}
   - component: {fileID: 4913920634074799972}
-  m_Layer: 0
+  - component: {fileID: -5144670607319546988}
+  - component: {fileID: 133640138275024105}
+  m_Layer: 6
   m_Name: Gun
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -50,6 +52,35 @@ MonoBehaviour:
   serverOnly: 0
   visibility: 0
   hasSpawned: 0
+--- !u!114 &-5144670607319546988
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1702286167754461947}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf75288a61700944295c3422cd29df3a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  parentChip: {fileID: 0}
+--- !u!65 &133640138275024105
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1702286167754461947}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &2053273258563508840
 GameObject:
   m_ObjectHideFlags: 0
@@ -61,7 +92,7 @@ GameObject:
   - component: {fileID: 6898030582075075204}
   - component: {fileID: 4018292686945232034}
   - component: {fileID: 4181944516656481326}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Cube (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -144,7 +175,7 @@ GameObject:
   - component: {fileID: 4449305726719507153}
   - component: {fileID: 4304927736882742741}
   - component: {fileID: 1817982286355601413}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Cube (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -225,7 +256,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7681579604068848220}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Option 0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -266,7 +297,7 @@ GameObject:
   - component: {fileID: 279671749572537188}
   - component: {fileID: 4152242842076188424}
   - component: {fileID: 634196441338098875}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Cube gun (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -349,7 +380,7 @@ GameObject:
   - component: {fileID: 4753070319455246798}
   - component: {fileID: 1241910264859196677}
   - component: {fileID: 2355390708770939375}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Cube (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -432,7 +463,7 @@ GameObject:
   - component: {fileID: 8853848391005745791}
   - component: {fileID: 6781913142043208149}
   - component: {fileID: 1320712957029828880}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Cube gun
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -515,7 +546,7 @@ GameObject:
   - component: {fileID: 8903598209124416162}
   - component: {fileID: 6445969126445515931}
   - component: {fileID: 3034197874753200687}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Cube (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -596,7 +627,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4684914355450065023}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: GameObject
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -634,7 +665,7 @@ GameObject:
   - component: {fileID: 8204283854533046192}
   - component: {fileID: 6907351212268181074}
   - component: {fileID: 1778700077225217345}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Cube gun (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -717,7 +748,7 @@ GameObject:
   - component: {fileID: 5997864151940778023}
   - component: {fileID: 8014909667887905718}
   - component: {fileID: 8920006183707537139}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Cube gun (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -800,7 +831,7 @@ GameObject:
   - component: {fileID: 4887676846593811380}
   - component: {fileID: 3789438436587817170}
   - component: {fileID: 2311931093328268065}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Cube gun (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -883,7 +914,7 @@ GameObject:
   - component: {fileID: 1340660519272324968}
   - component: {fileID: 8797722102546256310}
   - component: {fileID: 1719794163208669025}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Cube (5)
   m_TagString: Colour
   m_Icon: {fileID: 0}
@@ -1023,6 +1054,10 @@ PrefabInstance:
       value: chip_3d
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 4ba35b68e151da1449919d4853b13651, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 4ba35b68e151da1449919d4853b13651, type: 3}
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
@@ -1040,6 +1075,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 7681579604068848220}
     m_Modifications:
+    - target: {fileID: -8700617353114198275, guid: e10171576b8113e469d394064b61c0e5, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: e10171576b8113e469d394064b61c0e5, type: 3}
       propertyPath: m_RootOrder
       value: 0
@@ -1096,9 +1135,33 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -8391222552659086748, guid: e10171576b8113e469d394064b61c0e5, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: -7029948723529949830, guid: e10171576b8113e469d394064b61c0e5, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: -5568371526223589888, guid: e10171576b8113e469d394064b61c0e5, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 65702495048144492, guid: e10171576b8113e469d394064b61c0e5, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: e10171576b8113e469d394064b61c0e5, type: 3}
       propertyPath: m_Name
       value: gun_3d
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: e10171576b8113e469d394064b61c0e5, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 5148817236446094103, guid: e10171576b8113e469d394064b61c0e5, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e10171576b8113e469d394064b61c0e5, type: 3}

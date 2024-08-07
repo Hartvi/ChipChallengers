@@ -6,8 +6,9 @@ public class CowlAspect : BaseAspect
 {
     Transform parentTf;
     Transform inverseTf;
-    void Start()
+    protected override void Start()
     {
+        base.Start();
         this.gameObject.layer = 7;
         GameObject.Destroy(this.gameObject.GetComponent<Joint>());
         GameObject.Destroy(this.gameObject.GetComponent<Rigidbody>());
@@ -27,6 +28,7 @@ public class CowlAspect : BaseAspect
 
     public override void RuntimeFunction()
     {
+        print($"COWL ASPECT");
         if (parentTf != null && inverseTf != null)
         {
             inverseTf.position = parentTf.position;
@@ -34,8 +36,9 @@ public class CowlAspect : BaseAspect
         }
     }
 
-    void OnDestroy()
+    protected override void OnDestroy()
     {
+        base.OnDestroy();
         if (this.inverseTf != null)
         {
             Destroy(this.inverseTf.gameObject);

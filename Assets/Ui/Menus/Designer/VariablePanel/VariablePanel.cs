@@ -56,7 +56,7 @@ public class VariablePanel : BaseSidePanel, InputReceiver
 
     public void AddListenersToModel()
     {
-        VModel vModel = CommonChip.ClientCore.VirtualModel;
+        VModel vModel = CoreChip.ClientCoreChip.VirtualModel;
         BaseScrollbar bscb = this.bScrollbar;
 
         vModel.AddAddedVariableListener(x => this.ReloadVariables());
@@ -71,7 +71,7 @@ public class VariablePanel : BaseSidePanel, InputReceiver
 
     public void SelectVariable(string variableName)
     {
-        CommonChip clientCore = CommonChip.ClientCore;
+        var clientCore = CoreChip.ClientCoreChip;
         clientCore.VirtualModel.SetSelectedVariable(variableName);
         VVar v = clientCore.VirtualModel.GetSelectedVariable();
 
@@ -99,7 +99,7 @@ public class VariablePanel : BaseSidePanel, InputReceiver
 
     public void ReloadVariables()
     {
-        CommonChip clientCore = CommonChip.ClientCore;
+        var clientCore = CoreChip.ClientCoreChip;
         string[] vs = clientCore.VirtualModel.variables.Select(x => x.name).Where(x => x.IsVariableName()).ToArray();
         this.myLabels = vs;
         //print($"itemscroll: {this.itemScroll}, ");

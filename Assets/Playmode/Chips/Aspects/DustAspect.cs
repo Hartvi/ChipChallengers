@@ -26,8 +26,9 @@ public class DustAspect : BaseAspect
         this.particles.Play();
     }
 
-    void OnDestroy()
+    protected override void OnDestroy()
     {
+        base.OnDestroy();
         if (this.particles)
         {
             Object.DestroyImmediate(this.particles.gameObject);
