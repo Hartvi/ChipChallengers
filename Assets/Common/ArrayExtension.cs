@@ -58,7 +58,7 @@ public class CustomArray<T> : IList<T>
 #if UNITY_EDITOR
     static bool hasWarned = false;
 #endif
-    private T[] _vals;
+    public T[] _vals;
 
     public CustomArray(int size)
     {

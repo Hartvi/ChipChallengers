@@ -23,11 +23,6 @@ public abstract class AngleChip : OptionChip
 
     public delegate bool ParseFuncDelegate<T>(string s, out T result);
 
-    //void Update()
-    //{
-    //    print($"joint: {this.cj.targetRotation}");
-    //}
-
     protected float GetBrake()
     {
         Action<float, VVar> SetBrakeDelegate = (x, v) => this.SetBrake(x);

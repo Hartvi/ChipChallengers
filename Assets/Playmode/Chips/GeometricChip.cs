@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Mirror;
 
 public abstract class GeometricChip : StaticChip
 {
@@ -10,7 +11,6 @@ public abstract class GeometricChip : StaticChip
 
     public GeometricChip parentChip = null;
     protected List<GeometricChip> childChips = new List<GeometricChip>();
-    //public IReadOnlyList<GeometricChip> ChildChips => childChips;
 
     private VChip _equivalentVirtualChip;
     public VChip equivalentVirtualChip

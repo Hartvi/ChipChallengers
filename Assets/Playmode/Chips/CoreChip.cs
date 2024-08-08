@@ -124,6 +124,7 @@ public class CoreChip : CommonChip
     [Server]
     public override void OnStartServer()
     {
+        base.OnStartServer();
         print($"srv: OnStartServer");
 
         TextAsset textFile = Resources.Load<TextAsset>("aguncar");
@@ -346,7 +347,6 @@ public class CoreChip : CommonChip
                 x.SetText($"UnfreezeClientModel: {this.name} isn't a core!");
             }, 3f);
         }
-        //var c = CommonChip.ClientCore;
 
         foreach (GeometricChip chip in this.AllChips)
         {
@@ -367,7 +367,6 @@ public class CoreChip : CommonChip
                 x.SetText($"FreezeClientModel: {this.name} isn't a core!");
             }, 3f);
         }
-        //var c = CommonChip.ClientCore;
 
         foreach (GeometricChip chip in this.AllChips)
         {
@@ -389,7 +388,6 @@ public class CoreChip : CommonChip
                 x.SetText($"FreezeClientModel: {this.name} isn't a core!");
             }, 3f);
         }
-        //var c = CommonChip.ClientCore;
 
         foreach (GeometricChip chip in this.AllChips)
         {
