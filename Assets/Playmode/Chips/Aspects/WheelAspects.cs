@@ -215,7 +215,9 @@ public class WheelAspects : BaseAspect
 
     public override void RuntimeFunction()
     {
-        if (this.childTransform == null) { return; }
+        if (this.childTransform == null) {
+            print($"CHILD TRANSFORM OF WHEEL IS NONE");
+            return; }
         this.childTransform.Rotate(Vector3.up, -this.Omega, Space.Self);
 
         //this.totalSlip = 0.5f * (Mathf.Abs(this.xSlip) + Mathf.Abs(this.ySlip) + this.totalSlip1);

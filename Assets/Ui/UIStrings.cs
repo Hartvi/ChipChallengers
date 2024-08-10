@@ -5,6 +5,10 @@ using UnityEngine;
 
 public static class UIStrings
 {
+    public const string Key = "Key";
+    public const string KeyDown = "KeyDown";
+    public const string KeyUp = "KeyUp";
+
     public const string Player = "player";
 
     public const string Sounds = "Sounds";

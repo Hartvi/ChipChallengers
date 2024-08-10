@@ -261,13 +261,6 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
 
     void InputReceiver.HandleInputs()
     {
-        foreach (var rtf in this.core.RuntimeFunctions)
-        {
-            rtf.RuntimeFunction();
-        }
-
-        this.core.HandleInputs();
-
         //#if UNITY_EDITOR
         if (Input.GetKey(KeyCode.Space))
         {
@@ -301,7 +294,7 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
             }
             if (Input.GetKeyDown(KeyCode.R))
             {
-                this.core.rb.velocity = Vector3.zero;
+                //this.core.rb.velocity = Vector3.zero;
                 if (!shiftPressed)
                 {
                     Quaternion newRot = Quaternion.Euler(0f, this.core.transform.rotation.eulerAngles.y, 0f);

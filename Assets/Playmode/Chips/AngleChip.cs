@@ -15,7 +15,7 @@ public abstract class AngleChip : OptionChip
     protected CallbackArray RemoveMeFromVariableCallbacks = new CallbackArray(true);
 
     // these will be listened to during FixedUpdate
-    protected float _value = 0f;
+    protected float _value = 1000f;
     public float value { get { return this._value; } }
 
     protected float _brake = 0f;

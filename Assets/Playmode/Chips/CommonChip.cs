@@ -15,7 +15,12 @@ public class CommonChip : AngleChip
     string[] sharedKeys;
 
     [SyncVar]
-    uint parentNetId = 0;
+    public uint parentNetId = 0;
+    [SyncVar]
+    public string stringId = "a";
+
+    [SyncVar]
+    public uint myCoreNetId = 0;
 
     public override void OnStartServer()
     {
@@ -23,48 +28,47 @@ public class CommonChip : AngleChip
         StartCoroutine(WaitForParentChip());
     }
 
+    [Server]
     IEnumerator WaitForParentChip()
     {
-        yield return new WaitUntil(() => (this.parentChip != null) || (this.IsCore));
+        yield return new WaitUntil(() => (this.parentChip != null && this.myCoreNetId != 0) || this.IsCore);
         if (this.parentChip != null)
         {
             this.parentNetId = this.parentChip.netId;
+            this.stringId = this.equivalentVirtualChip.id;
         }
-        //print($"CHIP: {this.name}  ID: {this.netId}  PARENT NETID: {this.parentNetId}");
+        print($"srv: CHIP: {this.name}  ID: {this.netId}  PARENT NETID: {this.parentNetId}");
     }
 
     public override void OnStartClient()
     {
         base.OnStartClient();
-        print($"CHIP: {this.name}  ID: {this.netId} ");
-        StartCoroutine(Example());
+        //print($"CHIP: {this.name}  ID: {this.netId} ");
+        StartCoroutine(WaitForParentId());
     }
 
-    IEnumerator Example()
+    [Client]
+    IEnumerator WaitForParentId()
     {
-        yield return new WaitUntil(() => this.parentNetId != 0);
-        print($"CHIP: {this.name}  ID: {this.netId}  PARENT NETID: {this.parentNetId}");
+        yield return new WaitUntil(() => (this.parentNetId != 0 && this.myCoreNetId != 0) || this.IsCore);
+        if (!this.IsCore)
+        {
+            var core = GameObject.FindObjectsOfType<CoreChip>().FirstOrDefault(x => x.netId == this.myCoreNetId);
+            if (core.clientSideChips >= core.serverSideChips)
+            {
+                core.clientSideChips = 1;
+            }
+            core.clientSideChips++;
+            //print($"clt: NUMBER OF CLIENT CHIPS: {core.clientSideChips} core: {core.netId}  parentid: {this.parentNetId}");
+            //print($"NUMBER OF SERVER CHIPS: {core.serverSideChips} {core.netId}");
+            //print($"CHIP: {this.name}  ID: {this.netId}  PARENT NETID: {this.parentNetId}");
+        }
     }
 
 #if UNITY_EDITOR
     static bool hasWarned = false;
     static bool hasWarned1 = false;
 #endif
-
-    public bool IsOnClient
-    {
-        get
-        {
-#if UNITY_EDITOR
-            if (!CommonChip.hasWarned1)
-            {
-                CommonChip.hasWarned1 = true;
-                Debug.LogWarning($"TODO check if it's on client in multiplayer.");
-            }
-#endif
-            return true;
-        }
-    }
 
     public bool IsFocusable
     {
@@ -177,11 +181,12 @@ public class CommonChip : AngleChip
     [Server]
     public CommonChip[] AddChild(VChip childChip, CoreChip core)
     {
-        print($"srv: AddChild");
         Debug.Assert(!this.isClientOnly);
         var childType = childChip.ChipType;
 
         CommonChip newChild = GeometricChip.InstantiateChip<CommonChip>(childType);
+        Debug.Assert(core.netId != 0);
+        newChild.myCoreNetId = core.netId;
         newChild.myCore = core;
 
         newChild.equivalentVirtualChip = childChip;
@@ -238,7 +243,6 @@ public class CommonChip : AngleChip
     [Server]
     public CommonChip[] AddChildren(CoreChip core)
     {
-        print($"srv: AddChildren");
         // Not yet on the server, the object gets spawned later
         Debug.Assert(core != null);
         Debug.Assert(!this.isClientOnly);
@@ -338,11 +342,11 @@ public class CommonChip : AngleChip
     [Client]
     public CommonChip[] CltAddChild(VChip childChip, CoreChip core)
     {
-        print($"clt: AddChild");
-        Debug.Assert(!this.isClientOnly);
+        Debug.Assert(this.isClient);
         var childType = childChip.ChipType;
+        //print($"CltAddChild: CHILD of {this.equivalentVirtualChip.ChipType}: {childChip.ChipType} THIS NETID: {this.netId}");
 
-        CommonChip newChild = GeometricChip.InstantiateChip<CommonChip>(childType);
+        CommonChip newChild = GameObject.FindObjectsOfType<CommonChip>().First(x => x.parentNetId == this.netId && childChip.id == x.stringId);
         newChild.myCore = core;
 
         newChild.equivalentVirtualChip = childChip;
@@ -388,7 +392,7 @@ public class CommonChip : AngleChip
             newChild.ConfigureJointSpringDamper(cj);
         }
 
-        var _newChildren = newChild.AddChildren(core);
+        var _newChildren = newChild.CltAddChildren(core);
         CommonChip[] newChildrenArr = new CommonChip[_newChildren.Length + 1];
         // this is the changing part that fills up the list
         _newChildren.CopyTo(newChildrenArr, 0);// (newChild);
@@ -399,10 +403,10 @@ public class CommonChip : AngleChip
     [Client]
     public CommonChip[] CltAddChildren(CoreChip core)
     {
-        print($"clt: AddChildren");
+        //print($"clt: AddChildren");
         // Not yet on the server, the object gets spawned later
         Debug.Assert(core != null);
-        Debug.Assert(!this.isClientOnly);
+        Debug.Assert(this.isClient);
         //print($"ISCLIENT: {this.isClient} ISSERVER: {this.isServer} CORE: {this.name}");
         //Debug.Assert(this.isServer);
 
@@ -427,7 +431,10 @@ public class CommonChip : AngleChip
         if (this.isAeroElligible)
         {
             // add aspects, TODO: this wont add it to core!!!
-            this.gameObject.AddComponentIdempotent<Aerodynamics>().myChip = this;
+            if (this.gameObject.GetComponent<Aerodynamics>() == null)
+            {
+                this.gameObject.AddComponentIdempotent<Aerodynamics>().myChip = this;
+            }
         }
 
         if (this.equivalentVirtualChip.HasHealth())
@@ -488,9 +495,10 @@ public class CommonChip : AngleChip
         List<CommonChip> chips = new List<CommonChip>();
 
         // when there are no Children left then the recursion stops
-        foreach (VChip childChip in this.equivalentVirtualChip.Children)
+        //print($"clt: number of children of {this.name}: {this.equivalentVirtualChip.ArrChildren.Length}");
+        foreach (VChip childChip in this.equivalentVirtualChip.ArrChildren)
         {
-            chips.AddRange(this.AddChild(childChip, core));
+            chips.AddRange(this.CltAddChild(childChip, core));
         }
         return chips.ToArray();
     }
