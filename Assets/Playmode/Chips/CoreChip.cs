@@ -1,4 +1,5 @@
 using System;
+using System.Text.RegularExpressions;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
@@ -11,6 +12,18 @@ public class CoreChip : CommonChip
 
     [SyncVar]
     public string modelString = null;
+    string clientModelString = null;
+
+    [SyncVar]
+    public int serverSideChips = 1;
+
+    public int clientSideChips = 1;
+    bool clientTriggerReady => serverSideChips == clientSideChips;
+
+    public InputMessage inputMessage = new InputMessage();
+
+    [SyncVar]
+    char[] keysToCheck = new char[0];
 
     public static NetworkIdentity ClientCore => NetworkClient.localPlayer;
     public static CoreChip ClientCoreChip => NetworkClient.localPlayer.GetComponent<CoreChip>();
@@ -26,7 +39,6 @@ public class CoreChip : CommonChip
     {
         get
         {
-            Debug.Assert(this.isServer);
             return this.AllChildren.Concat(new[] { this }).ToArray();
         }
     }
@@ -46,21 +58,19 @@ public class CoreChip : CommonChip
     {
         get
         {
-            if (!this.IsCore) throw new FieldAccessException("Trying to access virtual model from a non-core object.");
             if (this.isClientOnly)
             {
-                return VModel.FromLuaModel(this.modelString);
+                if (this.clientModelString != this.modelString)
+                {
+                    var m = VModel.FromLuaModel(this.modelString);
+                    this.equivalentVirtualChip = m.Core;
+                    this._VirtualModel = m;
+                }
             }
             else if (this._VirtualModel == null)
             {
                 throw new NullReferenceException($"Virtual model of core is null.");
-                //this._VirtualModel = new VirtualModel();
             }
-            // taking chips away goes through real chips
-            // adding chips goes through VirtualModel
-            //this._VirtualModel.chips = this.AllVirtualChips;
-            //this._VirtualModel.variables = this.AllVirtualVariables;
-            //this._VirtualModel.script = this.script ?? "";
             return this._VirtualModel;
         }
         set
@@ -119,13 +129,13 @@ public class CoreChip : CommonChip
         // THIS IS SO JOINTS WORK ON THE SERVER
         // THE CLIENT WILL SEND CONTROL COMMANDS TO THE SERVER WHICH WILL THEN ACT ON THEM
         base.OnStartClient();
+        //StartCoroutine(WaitForModelString());
     }
 
     [Server]
     public override void OnStartServer()
     {
         base.OnStartServer();
-        print($"srv: OnStartServer");
 
         TextAsset textFile = Resources.Load<TextAsset>("aguncar");
         this.LoadString(textFile.text);
@@ -145,12 +155,16 @@ public class CoreChip : CommonChip
 
     void Update()
     {
+        foreach (var rtf in this.RuntimeFunctions)
+        {
+            rtf.RuntimeFunction();
+        }
+        this.HandleInputs();
     }
 
     [Command]
     public void CmdLoadString(string state)
     {
-        print($"Building core: {this.netId}");
         this.RuntimeFunctions.Clear();
         this.LoadString(state);
     }
@@ -177,7 +191,8 @@ public class CoreChip : CommonChip
         this.TriggerSpawn(model, true);
         this.VirtualModel.AddModelChangedCallback(x => this.TriggerSpawn(x, true));
         this.VirtualModel.AddModelChangedCallback(x => this.history.SaveState(this.VirtualModel.ToLuaString()));
-        //this.history.SaveState(this.VirtualModel.ToLuaString());
+
+        this.keysToCheck = this.GetInputCharactersFromModel(state);
 
         foreach (Action a in this.OnLoadedCallbacks)
         {
@@ -185,17 +200,47 @@ public class CoreChip : CommonChip
         }
     }
 
+    char[] GetInputCharactersFromModel(string m)
+    {
+        List<char> ks = new List<char>();
+        string parenthesesPattern = @"(\(""([a-zA-Z])""\))|(\('([a-zA-Z])'\))";
+
+        string keyDownPattern = UIStrings.KeyDown + parenthesesPattern;
+        string keyUpPattern = UIStrings.KeyUp + parenthesesPattern;
+        string keyPattern = UIStrings.Key + parenthesesPattern;
+
+        MatchCollection matches = Regex.Matches(m, keyDownPattern);
+        foreach (Match match in matches)
+        {
+            string capturedCharacter = match.Groups[2].Success ? match.Groups[2].Value : match.Groups[4].Value;
+            ks.Add(capturedCharacter[0]);
+        }
+
+        matches = Regex.Matches(m, keyUpPattern);
+        foreach (Match match in matches)
+        {
+            string capturedCharacter = match.Groups[2].Success ? match.Groups[2].Value : match.Groups[4].Value;
+            ks.Add(capturedCharacter[0]);
+        }
+
+        matches = Regex.Matches(m, keyPattern);
+        foreach (Match match in matches)
+        {
+            string capturedCharacter = match.Groups[2].Success ? match.Groups[2].Value : match.Groups[4].Value;
+            ks.Add(capturedCharacter[0]);
+        }
+        return ks.ToArray();
+    }
+
     [Command]
     public void CmdUndoHistory()
     {
-        print($"clt=>srv");
         this.LoadString(this.history.Undo());
     }
 
     [Command]
     public void CmdRedoHistory()
     {
-        print($"clt=>srv");
         this.LoadString(this.history.Redo());
     }
 
@@ -203,6 +248,8 @@ public class CoreChip : CommonChip
     public void CmdTriggerSpawn()
     {
         this.TriggerSpawn(this.VirtualModel, false);
+        //this.CltTriggerSpawn();
+
     }
 
     [Command]
@@ -211,7 +258,8 @@ public class CoreChip : CommonChip
         print($"clt=>srv: CmdResetCore");
         // delete after build listeners
         this.RpcResetRotationVelocity();
-        this.SetAfterBuildListeners(new Action[] { });
+        Action[] actions = new Action[] { };
+        this.SetAfterBuildListeners(actions);
         this.RpcRetrigger();
     }
 
@@ -243,7 +291,20 @@ public class CoreChip : CommonChip
     public void RpcRetrigger()
     {
         this.CmdTriggerSpawn();
+        if (this.isClientOnly)
+        {
+            StartCoroutine(WaitForClientTrigger());
+        }
     }
+
+    [Client]
+    IEnumerator WaitForClientTrigger()
+    {
+        print($"CLIENT READY: {this.clientTriggerReady} {this.netId}");
+        yield return new WaitUntil(() => this.clientTriggerReady);
+        //this.CltTriggerSpawn();
+    }
+
 
     [Server]
     public void TriggerSpawn(VModel virtualModel, bool freeze)
@@ -289,7 +350,7 @@ public class CoreChip : CommonChip
         this.SetupRigidbody();
 
         // handle script
-        this.scriptInstance = new ScriptInstance(virtualModel);
+        this.scriptInstance = new ScriptInstance(this, virtualModel);
 
         if (this.loopScript is not null)
         {
@@ -305,11 +366,15 @@ public class CoreChip : CommonChip
         // this performs clean-up as well
         this.myCore = this;
         this.AllChildren = this.AddChildren(this);  // trigger the tsunami
+        // Core + its children
+        this.serverSideChips = this.AllChildren.Length + 1;
+
         foreach (var child in this.AllChildren)
         {
             var tmpNi = child.GetComponent<NetworkIdentity>();
             NetworkServer.Spawn(child.gameObject);
         }
+
         // TODO: remove this and FIX Clipboard
         if (this.VirtualModel.chips.Length != this.AllChips.Length)
         {
@@ -317,16 +382,11 @@ public class CoreChip : CommonChip
             // this is to register chips that haven't been added in
             this.VirtualModel.SetChipsWithoutNotify(this.AllChips.Select(x => x.equivalentVirtualChip).ToArray());
         }
-        this.scriptInstance.LinkSensors(this.VirtualModel);
+        if (this.isLocalPlayer)
+        {
+            this.scriptInstance.LinkSensors(this.VirtualModel);
+        }
 
-
-        //foreach (var c in this.AllChildren)
-        //{
-        //    c.VisualizePosition = true;
-        //}
-        //this.VisualizePosition = true;
-
-        this.SrvFreezeClientModel();
         if (freeze)
         {
             this.SrvFreezeClientModel();
@@ -406,7 +466,130 @@ public class CoreChip : CommonChip
 
     public void HandleInputs()
     {
-        //Debug.Assert(this.isLocalPlayer);
-        //this.loopScript.HandleInputs();
+        if (this.isServer)
+        {
+            this.loopScript.HandleInputs();
+        }
+
+        if (this.isLocalPlayer)
+        {
+            List<char> ks = new List<char>();
+            List<char> kds = new List<char>();
+            List<char> kus = new List<char>();
+            foreach (var k in this.keysToCheck)
+            {
+                if (Input.GetKey(InputHelper.chartoKeycode[k]))
+                {
+                    ks.Add(k);
+                }
+                if (Input.GetKeyDown(InputHelper.chartoKeycode[k]))
+                {
+                    kds.Add(k);
+                }
+                if (Input.GetKeyUp(InputHelper.chartoKeycode[k]))
+                {
+                    kus.Add(k);
+                }
+            }
+            bool[] bs = new bool[3] { Input.GetMouseButton(0), Input.GetMouseButton(1), Input.GetMouseButton(2) };
+            bool[] bds = new bool[3] { Input.GetMouseButtonDown(0), Input.GetMouseButtonDown(1), Input.GetMouseButtonDown(2) };
+            bool[] bus = new bool[3] { Input.GetMouseButtonUp(0), Input.GetMouseButtonUp(1), Input.GetMouseButtonUp(2) };
+            float[] mouse = new float[2] { Input.mousePosition.x, Input.mousePosition.y };
+            this.CmdSendInputsToServer(ks.ToArray(), kds.ToArray(), kus.ToArray(), bs, bds, bus, mouse);
+
+        }
+        //foreach (char c in this.inputMessage.Keys)
+        //{
+        //    print($"PRESSED KEY: {c}");
+        //}
+    }
+
+    [Command]
+    void CmdSendInputsToServer(char[] ks, char[] kds, char[] kus, bool[] bs, bool[] bds, bool[] bus, float[] mouse)
+    {
+        this.inputMessage.Keys = ks;
+        this.inputMessage.KeysDown = kds;
+        this.inputMessage.KeysUp = kus;
+
+        this.inputMessage.MouseClicked = bs;
+        this.inputMessage.MouseDown = bds;
+        this.inputMessage.MouseUp = bus;
+        this.inputMessage.MousePos = mouse;
+    }
+
+    [Client]
+    public void CltTriggerSpawn()
+    {
+        print($"clt: TriggerSpawn CORE: {this.netId}");
+        Debug.Assert(this.isClient);
+
+        var ni = this.GetComponent<NetworkIdentity>();
+        if (ni.netId == 0)
+        {
+            throw new NullReferenceException($"Attempting to TriggerSpawn on offline chip!");
+        }
+        if (!ni.isClient)
+        {
+            throw new AccessViolationException($"TriggerSpawn must be called only on client!");
+        }
+        this.RuntimeFunctions.Clear();
+        this.VirtualModel = this.VirtualModel;
+
+        foreach (VVar v in this.VirtualModel.variables)
+        {
+            v.valueChangedCallbacks = new Action<float, VVar>[] { };
+            v.currentValue = v.defaultValue;
+        }
+
+        this.transform.localScale = StaticChip.ChipSize;
+
+        // this should replace the argument
+        VChip core = this.VirtualModel.Core;
+
+        this.equivalentVirtualChip = core;
+
+        if (!this.equivalentVirtualChip.IsCore)
+        {
+            throw new ArgumentException($"Cannot trigger spawn from a non-core chip. (Current: {core.ChipType})");
+        }
+
+        this.SetupRigidbody();
+
+        // handle script
+        this.scriptInstance = new ScriptInstance(this, this.VirtualModel);
+
+        if (this.loopScript is not null)
+        {
+            Debug.LogWarning($"Loop script is being added twice, deleting old one");
+            GameObject.Destroy(this.loopScript);
+        }
+
+        this.loopScript = this.gameObject.AddComponentIdempotent<LoopScript>();
+        this.loopScript.vModel = this.VirtualModel;
+        this.loopScript.loopFunction = this.scriptInstance.CallLoop;
+
+
+        // this performs clean-up as well
+        this.myCore = this;
+        this.AllChildren = this.CltAddChildren(this);  // trigger the tsunami
+        // Core + its children
+        //this.serverSideChips = this.AllChildren.Length + 1;
+
+        // TODO: remove this and FIX Clipboard
+        if (this.VirtualModel.chips.Length != this.AllChips.Length)
+        {
+            Debug.LogWarning($"Fix clipboard to get rid of this warning");
+            // this is to register chips that haven't been added in
+            this.VirtualModel.SetChipsWithoutNotify(this.AllChips.Select(x => x.equivalentVirtualChip).ToArray());
+        }
+        //if (this.isLocalPlayer)
+        //{
+        //    this.scriptInstance.LinkSensors(this.VirtualModel);
+        //}
+
+        foreach (var a in this._AfterBuildActions)
+        {
+            a();
+        }
     }
 }

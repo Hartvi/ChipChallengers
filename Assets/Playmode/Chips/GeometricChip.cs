@@ -13,20 +13,34 @@ public abstract class GeometricChip : StaticChip
     protected List<GeometricChip> childChips = new List<GeometricChip>();
 
     private VChip _equivalentVirtualChip;
+    [SyncVar]
+    string equivalentChipId = "";
+
     public VChip equivalentVirtualChip
     {
         get
         {
+            if (this.isClientOnly && this._equivalentVirtualChip == null)
+            {
+                this._equivalentVirtualChip = this.myCore.VirtualModel.chips.First(x => x.id == this.equivalentChipId);
+            }
             return this._equivalentVirtualChip;
         }
         set
         {
             this._equivalentVirtualChip = value;
+            this.equivalentChipId = value.id;
             value.rChip = (CommonChip)this;
         }
     }
 
-    public bool IsCore { get { return this.equivalentVirtualChip.IsCore; } }
+    public bool IsCore
+    {
+        get
+        {
+            return this is CoreChip;
+        }
+    }
 
     private bool _VisualizePosition = false;
     private GameObject VisualizeSphere;
@@ -154,17 +168,22 @@ public abstract class GeometricChip : StaticChip
         {
             throw new ArgumentException($"Chip {this} already has child {childChip}");
         }
-        this.childChips.Add(childChip);
+            this.childChips.Add(childChip);
     }
 
     public void SetParent(GeometricChip parentChip)
     {
         // null parents not allowed in this function - we can only add Children to core and lower, not null
+        Debug.Assert(this.myCore == parentChip.myCore);
         if (this.parentChip != null)
         {
-            throw new ArgumentException($"Parent of {this} must be null, cannot already have had a Parent.");
+            throw new ArgumentException($"Parent of {this} must be null, cannot already have had a Parent {this.parentChip}.");
         }
         this.parentChip = parentChip;
+        if (this.isClient)
+        {
+            print($"SETTING PARENT {this.parentChip} of {this}");
+        }
 
         //print($"current Parent {parentChip.name} of {name}");
         parentChip.SetChild(this);

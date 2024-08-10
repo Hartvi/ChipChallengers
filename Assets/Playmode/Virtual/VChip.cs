@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using MoonSharp.Interpreter;
+using Mirror;
 
 public enum CPR
 {
@@ -205,10 +206,10 @@ public class VChip
     //private List<VChip> _childrenList = new List<VChip>();
 
     public VChip[] Children = { };
+    public VChip[] ArrChildren => Array.FindAll(MyModel.chips, x => x.parentId == this.id);
 
     //[NonSerialized]
     //private Dictionary<string, object> instanceProperties;
-    [NonSerialized]
     public CommonChip rChip;
 
     //[Obsolete("Remove this in the future and load only through editor.")]

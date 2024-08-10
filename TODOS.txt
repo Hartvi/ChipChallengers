@@ -1,9 +1,10 @@
 
 ### TODO
 - `+` in multiplayer: 
+  - unspawn objects
   - add joints to objects on client
   - basically rebuild the model also on client so the core of the client also follows joint constraints
-
+  - rebuild model on clients
 - `+` multiplayer - 1. make it so the models load on other instances
 - `+` just add maps and races on them
 - `+` stop camera from clipping through surfaces

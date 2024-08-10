@@ -6,120 +6,38 @@ using System.Collections.Generic;
 using UnityEngine;
 using MoonSharp.Interpreter;
 
-public class ExtraFunctions
-{
-    public static bool Key(char k)
-    {
-        bool ret = Input.GetKey(InputHelper.chartoKeycode[k]);
-        return ret;
-    }
-
-    public static bool KeyDown(char k)
-    {
-        return Input.GetKeyDown(InputHelper.chartoKeycode[k]);
-    }
-
-    public static bool KeyUp(char k)
-    {
-        return Input.GetKeyUp(InputHelper.chartoKeycode[k]);
-    }
-
-
-    public static void Print(string s, Table tbl)
-    {
-        Vector2 position = Vector2.zero;
-
-        var tblx = tbl.Get("x");
-        var tbly = tbl.Get("y");
-        position.x = tblx == DynValue.Nil ? 0f : (float)tblx.Number;
-        position.y = tbly == DynValue.Nil ? 0f : (float)tbly.Number;
-
-        var tblr = tbl.Get("r");
-        float r = tblr == DynValue.Nil ? 0f : (float)tblr.Number;
-        var tblg = tbl.Get("g");
-        float g = tblg == DynValue.Nil ? 0f : (float)tblg.Number;
-        var tblb = tbl.Get("b");
-        float b = tblb == DynValue.Nil ? 0f : (float)tblb.Number;
-
-        DisplaySingleton.Instance.DisplayText(
-            txt =>
-            {
-                txt.transform.position = new Vector2(Screen.width * (0.5f + position.x * 0.5f), Screen.height * (0.5f + position.y * 0.5f));
-                txt.color = new Color(r, g, b);
-                txt.SetText(s);
-            }, 0.5f
-        );
-    }
-
-    public static float Sin(float x)
-    {
-        return Mathf.Sin(x);
-    }
-
-    public static float Cos(float x)
-    {
-        return Mathf.Cos(x);
-    }
-
-    public static Table Mouse(Script script)
-    {
-        Table tbl = new Table(script);
-        var mp = Input.mousePosition;
-        tbl[1] = (mp[0] / Screen.width - 0.5f) * 2f;
-        tbl[2] = (mp[1] / Screen.height - 0.5f) * 2f;
-        return tbl;
-    }
-
-    public static Table IsClicked(Script script)
-    {
-        Table tbl = new Table(script);
-        tbl[1] = Input.GetMouseButton(0);
-        tbl[2] = Input.GetMouseButton(1);
-        return tbl;
-    }
-
-    public static Table MouseDown(Script script)
-    {
-        Table tbl = new Table(script);
-        tbl[1] = Input.GetMouseButtonDown(0);
-        tbl[2] = Input.GetMouseButtonDown(1);
-        return tbl;
-    }
-
-    public static Table MouseUp(Script script)
-    {
-        Table tbl = new Table(script);
-        tbl[1] = Input.GetMouseButtonUp(0);
-        tbl[2] = Input.GetMouseButtonUp(1);
-        return tbl;
-    }
-
-}
 
 public class ScriptInstance
 {
+    CoreChip myCore;
+    InputMessage inputMessage => myCore.inputMessage;
+
     Script script;
     string scriptString;
 
     Dictionary<string, VVar> Name2Var;
 
-    public ScriptInstance(VModel vModel)
+    public ScriptInstance(CoreChip cc, VModel vModel)
     {
+        this.myCore = cc;
         this.Name2Var = vModel.variables.ToDictionary(x => x.name, x => x);
         this.scriptString = vModel.script == null ? "" : vModel.script;
 
         this.script = new Script();
 
-        this.script.Globals["Key"] = (Func<char, bool>)ExtraFunctions.Key;
-        this.script.Globals["KeyDown"] = (Func<char, bool>)ExtraFunctions.KeyDown;
-        this.script.Globals["KeyUp"] = (Func<char, bool>)ExtraFunctions.KeyUp;
-        this.script.Globals["Sin"] = (Func<float, float>)ExtraFunctions.Sin;
-        this.script.Globals["Cos"] = (Func<float, float>)ExtraFunctions.Cos;
-        this.script.Globals["Mouse"] = (Func<Script, Table>)ExtraFunctions.Mouse;
-        this.script.Globals["IsClicked"] = (Func<Script, Table>)ExtraFunctions.IsClicked;
-        this.script.Globals["MouseDown"] = (Func<Script, Table>)ExtraFunctions.MouseDown;
-        this.script.Globals["MouseUp"] = (Func<Script, Table>)ExtraFunctions.MouseUp;
-        this.script.Globals["Print"] = (Action<string, Table>)ExtraFunctions.Print;
+        // USER INPUTS
+        this.script.Globals[UIStrings.Key] = (Func<char, bool>)this.Key;
+        this.script.Globals[UIStrings.KeyDown] = (Func<char, bool>)this.KeyDown;
+        this.script.Globals[UIStrings.KeyUp] = (Func<char, bool>)this.KeyUp;
+        this.script.Globals["Mouse"] = (Func<Script, Table>)this.Mouse;
+        this.script.Globals["IsClicked"] = (Func<Script, Table>)this.IsClicked;
+        this.script.Globals["MouseDown"] = (Func<Script, Table>)this.MouseDown;
+        this.script.Globals["MouseUp"] = (Func<Script, Table>)this.MouseUp;
+
+        // GENERAL
+        this.script.Globals["Sin"] = (Func<float, float>)this.Sin;
+        this.script.Globals["Cos"] = (Func<float, float>)this.Cos;
+        this.script.Globals["Print"] = (Action<string, Table>)this.Print;
         this.script.Globals["SetVar"] = (Action<string, float>)this.SetVariable;
         this.script.Globals["GetVar"] = (Func<string, float>)this.GetVariable;
 
@@ -247,6 +165,9 @@ public class ScriptInstance
 
     public void CallLoop()
     {
+#if UNITY_EDITOR
+        DynValue res = script.Call(script.Globals["Loop"]);
+#else
         try
         {
             //foreach (var k in this.script.Globals.Keys)
@@ -267,6 +188,7 @@ public class ScriptInstance
                 }, 5f
             );
         }
+#endif
     }
 
     public void SetVariable(string var, float val)
@@ -278,5 +200,96 @@ public class ScriptInstance
     public float GetVariable(string var)
     {
         return this.Name2Var[var].currentValue;
+    }
+
+    public bool Key(char k)
+    {
+        return this.inputMessage.Keys.Contains(k);
+        //bool ret = Input.GetKey(InputHelper.chartoKeycode[k]);
+        //return ret;
+    }
+
+    public bool KeyDown(char k)
+    {
+        return this.inputMessage.KeysDown.Contains(k);
+        //return Input.GetKeyDown(InputHelper.chartoKeycode[k]);
+    }
+
+    public bool KeyUp(char k)
+    {
+        return this.inputMessage.KeysUp.Contains(k);
+        //return Input.GetKeyUp(InputHelper.chartoKeycode[k]);
+    }
+
+    public Table Mouse(Script script)
+    {
+        Table tbl = new Table(script);
+        var mp = this.inputMessage.MousePos;
+        tbl[1] = (mp[0] / Screen.width - 0.5f) * 2f;
+        tbl[2] = (mp[1] / Screen.height - 0.5f) * 2f;
+        return tbl;
+    }
+
+    public Table IsClicked(Script script)
+    {
+        Table tbl = new Table(script);
+        tbl[1] = this.inputMessage.MouseClicked[0];
+        tbl[2] = this.inputMessage.MouseClicked[1];
+        tbl[3] = this.inputMessage.MouseClicked[2];
+        return tbl;
+    }
+
+    public Table MouseDown(Script script)
+    {
+        Table tbl = new Table(script);
+        tbl[1] = this.inputMessage.MouseDown[0];
+        tbl[2] = this.inputMessage.MouseDown[1];
+        tbl[3] = this.inputMessage.MouseDown[2];
+        return tbl;
+    }
+
+    public Table MouseUp(Script script)
+    {
+        Table tbl = new Table(script);
+        tbl[1] = this.inputMessage.MouseUp[0];
+        tbl[2] = this.inputMessage.MouseUp[1];
+        tbl[3] = this.inputMessage.MouseUp[2];
+        return tbl;
+    }
+
+    public void Print(string s, Table tbl)
+    {
+        Vector2 position = Vector2.zero;
+
+        var tblx = tbl.Get("x");
+        var tbly = tbl.Get("y");
+        position.x = tblx == DynValue.Nil ? 0f : (float)tblx.Number;
+        position.y = tbly == DynValue.Nil ? 0f : (float)tbly.Number;
+
+        var tblr = tbl.Get("r");
+        float r = tblr == DynValue.Nil ? 0f : (float)tblr.Number;
+        var tblg = tbl.Get("g");
+        float g = tblg == DynValue.Nil ? 0f : (float)tblg.Number;
+        var tblb = tbl.Get("b");
+        float b = tblb == DynValue.Nil ? 0f : (float)tblb.Number;
+
+        DisplaySingleton.Instance.DisplayText(
+            txt =>
+            {
+                txt.transform.position = new Vector2(Screen.width * (0.5f + position.x * 0.5f), Screen.height * (0.5f + position.y * 0.5f));
+                txt.color = new Color(r, g, b);
+                txt.SetText(s);
+            }, 0.5f
+        );
+    }
+
+    public float Sin(float x)
+    {
+        return Mathf.Sin(x);
+    }
+
+    public float Cos(float x)
+    {
+        return Mathf.Cos(x);
     }
 }

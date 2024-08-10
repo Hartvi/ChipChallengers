@@ -11,6 +11,8 @@ public class ObjectPool<T>
 
     public ObjectPool(int numObjects, Func<T> genObject, Action<T> deleteObject)
     {
+        Debug.Assert(numObjects > 0);
+        //PRINT.IPrint($"NUMBER OF OBJECTS: {numObjects}");
         this.objects = new T[numObjects];
         this.deleteObject = deleteObject;
 

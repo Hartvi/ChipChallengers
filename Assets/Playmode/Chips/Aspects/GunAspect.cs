@@ -40,7 +40,7 @@ public class GunAspect : BaseAspect
         // lifetime = 5 seconds
         // number of bullets = rate * lifetime
         //print($"Time.deltaTime {Time.deltaTime} this.dPowerPerFrame {this.dPowerPerFrame} Bullet.LifeTime {Bullet.LifeTime}");
-        int numberOfBullets = Mathf.CeilToInt(this.dPowerPerFrame * Bullet.LifeTime);
+        int numberOfBullets = Mathf.Max(1, Mathf.CeilToInt(this.dPowerPerFrame * Bullet.LifeTime));
         //print($"Number of bullets: {numberOfBullets}");
         this.bulletPool = new ObjectPool<Bullet>(numberOfBullets, GenerateBullet, x =>
         {

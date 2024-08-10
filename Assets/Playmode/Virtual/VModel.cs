@@ -17,8 +17,9 @@ public class VModel
         {
             for (int i = 0; i < this.chips.Length; ++i)
             {
-                if (this.chips[i].rChip is null)
+                if (this.chips[i].rChip == null)
                 {
+                    PRINT.IPrint($"CHIP {i}: {this.chips[i].ChipType} IS NOT REAL");
                     return false;
                 }
             }
@@ -43,7 +44,7 @@ public class VModel
         }
         set
         {
-            //PRINT.print($"Setting chips to length: {value.Length}");
+            //PRINT.IPrint($"Setting chips to length: {value.Length}");
             this._chips = value;
             for (int i = 0; i < this._chips.Length; ++i)
             {
