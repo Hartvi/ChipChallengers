@@ -25,7 +25,6 @@ public class CoreChip : CommonChip
     [SyncVar]
     char[] keysToCheck = new char[0];
 
-    public static NetworkIdentity ClientCore => NetworkClient.localPlayer;
     public static CoreChip ClientCoreChip => NetworkClient.localPlayer.GetComponent<CoreChip>();
 
     Action[] _AfterBuildActions = new Action[] { };
@@ -40,16 +39,6 @@ public class CoreChip : CommonChip
         get
         {
             return this.AllChildren.Concat(new[] { this }).ToArray();
-        }
-    }
-
-    public VVar[] AllVirtualVariables
-    {
-        get
-        {
-            if (!this.equivalentVirtualChip.IsCore) throw new FieldAccessException("Trying to access all virtual variables from a non-core object.");
-            //return this.VirtualVariables.ToArray();
-            return this.VirtualModel.variables;
         }
     }
 
@@ -129,7 +118,6 @@ public class CoreChip : CommonChip
         // THIS IS SO JOINTS WORK ON THE SERVER
         // THE CLIENT WILL SEND CONTROL COMMANDS TO THE SERVER WHICH WILL THEN ACT ON THEM
         base.OnStartClient();
-        //StartCoroutine(WaitForModelString());
     }
 
     [Server]
@@ -142,7 +130,7 @@ public class CoreChip : CommonChip
 
         Action[] onLoadedCallbacksTmp = new Action[] {
             () => {
-                this.TriggerSpawn(this.VirtualModel, false);
+                this.TriggerSpawn(false);
                 this.transform.position += Vector3.up;
                 }
             //() => this.Hud.LinkCore(this),
@@ -188,8 +176,9 @@ public class CoreChip : CommonChip
             return;
         }
 
-        this.TriggerSpawn(model, true);
-        this.VirtualModel.AddModelChangedCallback(x => this.TriggerSpawn(x, true));
+        this.VirtualModel = model;
+        this.TriggerSpawn(true);
+        this.VirtualModel.AddModelChangedCallback(x => this.TriggerSpawn(true));
         this.VirtualModel.AddModelChangedCallback(x => this.history.SaveState(this.VirtualModel.ToLuaString()));
 
         this.keysToCheck = this.GetInputCharactersFromModel(state);
@@ -247,9 +236,7 @@ public class CoreChip : CommonChip
     [Command]
     public void CmdTriggerSpawn()
     {
-        this.TriggerSpawn(this.VirtualModel, false);
-        //this.CltTriggerSpawn();
-
+        this.TriggerSpawn(false);
     }
 
     [Command]
@@ -291,23 +278,10 @@ public class CoreChip : CommonChip
     public void RpcRetrigger()
     {
         this.CmdTriggerSpawn();
-        if (this.isClientOnly)
-        {
-            StartCoroutine(WaitForClientTrigger());
-        }
     }
-
-    [Client]
-    IEnumerator WaitForClientTrigger()
-    {
-        print($"CLIENT READY: {this.clientTriggerReady} {this.netId}");
-        yield return new WaitUntil(() => this.clientTriggerReady);
-        //this.CltTriggerSpawn();
-    }
-
 
     [Server]
-    public void TriggerSpawn(VModel virtualModel, bool freeze)
+    public void TriggerSpawn(bool freeze)
     {
         print($"srv: TriggerSpawn");
         Debug.Assert(!this.isClientOnly);
@@ -327,7 +301,6 @@ public class CoreChip : CommonChip
             throw new AccessViolationException($"TriggerSpawn must be called only on server!");
         }
         this.RuntimeFunctions.Clear();
-        this.VirtualModel = virtualModel;
 
         foreach (VVar v in this.VirtualModel.variables)
         {
@@ -350,7 +323,7 @@ public class CoreChip : CommonChip
         this.SetupRigidbody();
 
         // handle script
-        this.scriptInstance = new ScriptInstance(this, virtualModel);
+        this.scriptInstance = new ScriptInstance(this, this.VirtualModel);
 
         if (this.loopScript is not null)
         {
@@ -517,79 +490,4 @@ public class CoreChip : CommonChip
         this.inputMessage.MousePos = mouse;
     }
 
-    [Client]
-    public void CltTriggerSpawn()
-    {
-        print($"clt: TriggerSpawn CORE: {this.netId}");
-        Debug.Assert(this.isClient);
-
-        var ni = this.GetComponent<NetworkIdentity>();
-        if (ni.netId == 0)
-        {
-            throw new NullReferenceException($"Attempting to TriggerSpawn on offline chip!");
-        }
-        if (!ni.isClient)
-        {
-            throw new AccessViolationException($"TriggerSpawn must be called only on client!");
-        }
-        this.RuntimeFunctions.Clear();
-        this.VirtualModel = this.VirtualModel;
-
-        foreach (VVar v in this.VirtualModel.variables)
-        {
-            v.valueChangedCallbacks = new Action<float, VVar>[] { };
-            v.currentValue = v.defaultValue;
-        }
-
-        this.transform.localScale = StaticChip.ChipSize;
-
-        // this should replace the argument
-        VChip core = this.VirtualModel.Core;
-
-        this.equivalentVirtualChip = core;
-
-        if (!this.equivalentVirtualChip.IsCore)
-        {
-            throw new ArgumentException($"Cannot trigger spawn from a non-core chip. (Current: {core.ChipType})");
-        }
-
-        this.SetupRigidbody();
-
-        // handle script
-        this.scriptInstance = new ScriptInstance(this, this.VirtualModel);
-
-        if (this.loopScript is not null)
-        {
-            Debug.LogWarning($"Loop script is being added twice, deleting old one");
-            GameObject.Destroy(this.loopScript);
-        }
-
-        this.loopScript = this.gameObject.AddComponentIdempotent<LoopScript>();
-        this.loopScript.vModel = this.VirtualModel;
-        this.loopScript.loopFunction = this.scriptInstance.CallLoop;
-
-
-        // this performs clean-up as well
-        this.myCore = this;
-        this.AllChildren = this.CltAddChildren(this);  // trigger the tsunami
-        // Core + its children
-        //this.serverSideChips = this.AllChildren.Length + 1;
-
-        // TODO: remove this and FIX Clipboard
-        if (this.VirtualModel.chips.Length != this.AllChips.Length)
-        {
-            Debug.LogWarning($"Fix clipboard to get rid of this warning");
-            // this is to register chips that haven't been added in
-            this.VirtualModel.SetChipsWithoutNotify(this.AllChips.Select(x => x.equivalentVirtualChip).ToArray());
-        }
-        //if (this.isLocalPlayer)
-        //{
-        //    this.scriptInstance.LinkSensors(this.VirtualModel);
-        //}
-
-        foreach (var a in this._AfterBuildActions)
-        {
-            a();
-        }
-    }
 }

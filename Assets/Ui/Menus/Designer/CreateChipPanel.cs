@@ -98,7 +98,7 @@ public class CreateChipPanel : BasePanel
         VModel vm = core.VirtualModel;
         vm.chips = vm.chips.Concat(new VChip[] { newChip }).ToArray();
 
-        core.TriggerSpawn(vm, true);
+        core.TriggerSpawn(true);
 
         // TODO make this more secure:
         // HOW???
