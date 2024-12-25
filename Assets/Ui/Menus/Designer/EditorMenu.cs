@@ -166,7 +166,7 @@ public class EditorMenu : BaseMenu, InputReceiver
         this.selectedChip = this.highlighter.SelectVChip("a");
 
         // rebuild the model so it's not flat when entering designer mode
-        core.TriggerSpawn(core.VirtualModel, true);
+        core.TriggerSpawn(true);
 
         // slow down physics to save power
         Time.fixedDeltaTime = 0.1f;

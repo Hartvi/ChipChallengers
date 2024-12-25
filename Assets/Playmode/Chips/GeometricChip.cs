@@ -164,21 +164,20 @@ public abstract class GeometricChip : StaticChip
     public void SetChild(GeometricChip childChip)
     {
         // we don't want duplicates
-        if (this.childChips.Contains(childChip))
+        if (!this.childChips.Contains(childChip))
         {
-            throw new ArgumentException($"Chip {this} already has child {childChip}");
-        }
             this.childChips.Add(childChip);
+        }
     }
 
     public void SetParent(GeometricChip parentChip)
     {
         // null parents not allowed in this function - we can only add Children to core and lower, not null
         Debug.Assert(this.myCore == parentChip.myCore);
-        if (this.parentChip != null)
-        {
-            throw new ArgumentException($"Parent of {this} must be null, cannot already have had a Parent {this.parentChip}.");
-        }
+        //if (this.parentChip != null)
+        //{
+        //    throw new ArgumentException($"Parent of {this} must be null, cannot already have had a Parent {this.parentChip}.");
+        //}
         this.parentChip = parentChip;
         if (this.isClient)
         {
