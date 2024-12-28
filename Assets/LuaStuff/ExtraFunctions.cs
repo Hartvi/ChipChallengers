@@ -81,6 +81,14 @@ public class ScriptInstance
     /// <param name="vModel"></param>
     public void LinkSensors(VModel vModel)
     {
+        //foreach(var vc in vModel.chips)
+        //{
+        //    PRINT.IPrint($"rChip: {vc.rChip}");
+        //    if (vc.rChip)
+        //    {
+        //        PRINT.IPrint($"netId: {vc.rChip.netId}");
+        //    }
+        //}
         if (!vModel.hasRealChips)
         {
             throw new ArgumentNullException($"Virtual model does not have real chips initialized!");

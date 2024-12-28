@@ -12,13 +12,16 @@ public class CoreChip : CommonChip
 
     [SyncVar]
     public string modelString = null;
-    string clientModelString = null;
+    public string loadedModelString = null;
+    [SyncVar]
+    public int numberOfChips = 1;
+    [SyncVar]
+    public uint[] netIds = new uint[0];
+    public uint[] oldNetIds = new uint[0];
 
     [SyncVar]
-    public int serverSideChips = 1;
-
-    public int clientSideChips = 1;
-    bool clientTriggerReady => serverSideChips == clientSideChips;
+    public uint srvResetCounter = 0;
+    public uint cltResetCounter = 0;
 
     public InputMessage inputMessage = new InputMessage();
 
@@ -42,69 +45,73 @@ public class CoreChip : CommonChip
         }
     }
 
-    private VModel _VirtualModel;
+    private VModel _ServerVirtualModel;
+    private VModel _ClientVirtualModel;
     public VModel VirtualModel
     {
         get
         {
-            if (this.isClientOnly)
+            if (this.isServer)
             {
-                if (this.clientModelString != this.modelString)
+                if (this._ServerVirtualModel == null)
                 {
-                    var m = VModel.FromLuaModel(this.modelString);
-                    this.equivalentVirtualChip = m.Core;
-                    this._VirtualModel = m;
+                    throw new NullReferenceException($"{this.netId}: Server virtual model of core is null.");
                 }
+                return this._ServerVirtualModel;
             }
-            else if (this._VirtualModel == null)
+            if (this._ClientVirtualModel == null)
             {
-                throw new NullReferenceException($"Virtual model of core is null.");
+                throw new NullReferenceException($"{this.netId}: Client virtual model of core is null.");
             }
-            return this._VirtualModel;
+            return this._ClientVirtualModel;
         }
         set
         {
-            //print($"set virtual model");
+            // Only the server can load models
             if (this.isServer)
             {
                 this.modelString = value.ToLuaString();
+                this._ServerVirtualModel = value;
             }
-            this._VirtualModel = value;
+            if (this.isClient)
+            {
+                this._ClientVirtualModel = value;
+            }
             this.equivalentVirtualChip = value.Core;
         }
     }
 
-    private CommonChip[] _AllChildren;
-    public CommonChip[] AllChildren
-    {
-        get
-        {
-            if (!this.equivalentVirtualChip.IsCore)
-            {
-                throw new MemberAccessException($"Get: Only chip designated as core can access all Children.");
-            }
-            return this._AllChildren;
-        }
-        set
-        {
-            if (!this.equivalentVirtualChip.IsCore)
-            {
-                throw new MemberAccessException($"Set: Only chip designated as core can access all Children.");
-            }
-            if (this._AllChildren is not null)
-            {
-                foreach (CommonChip child in this._AllChildren)
-                {
-                    if (child && child.gameObject)
-                    {
-                        GameObject.Destroy(child.gameObject);
-                    }
-                }
-            }
-            //this._AllChildren.Clear();
-            this._AllChildren = value;
-        }
-    }
+    public CommonChip[] AllChildren;
+    //public CommonChip[] AllChildren
+    //{
+    //    get
+    //    {
+    //        if (!this.equivalentVirtualChip.IsCore)
+    //        {
+    //            throw new MemberAccessException($"Get: Only chip designated as core can access all Children.");
+    //        }
+    //        return this._AllChildren;
+    //    }
+    //    set
+    //    {
+    //        if (!this.equivalentVirtualChip.IsCore)
+    //        {
+    //            throw new MemberAccessException($"Set: Only chip designated as core can access all Children.");
+    //        }
+    //        if (this._AllChildren is not null)
+    //        {
+    //            foreach (CommonChip child in this._AllChildren)
+    //            {
+    //                if (child && child.gameObject)
+    //                {
+    //                    GameObject.Destroy(child.gameObject);
+    //                }
+    //            }
+    //        }
+    //        //this._AllChildren.Clear();
+    //        this._AllChildren = value;
+    //    }
+    //}
 
     void Awake()
     {
@@ -118,6 +125,7 @@ public class CoreChip : CommonChip
         // THIS IS SO JOINTS WORK ON THE SERVER
         // THE CLIENT WILL SEND CONTROL COMMANDS TO THE SERVER WHICH WILL THEN ACT ON THEM
         base.OnStartClient();
+        //this.CmdTriggerSpawn();
     }
 
     [Server]
@@ -128,24 +136,61 @@ public class CoreChip : CommonChip
         TextAsset textFile = Resources.Load<TextAsset>("aguncar");
         this.LoadString(textFile.text);
 
-        Action[] onLoadedCallbacksTmp = new Action[] {
-            () => {
-                this.TriggerSpawn(false);
-                this.transform.position += Vector3.up;
-                }
-            //() => this.Hud.LinkCore(this),
-            //() => {
-            //    Camera.main.transform.position = this.transform.position + Vector3.up * 10f;
-            //}
-        };
-        this.OnLoadedCallbacks = onLoadedCallbacksTmp;
+        //Action[] onLoadedCallbacksTmp = new Action[] {
+        //    () => {
+        //        this.TriggerSpawn(false);
+        //        this.transform.position += Vector3.up;
+        //        }
+        //    //() => this.Hud.LinkCore(this),
+        //    //() => {
+        //    //    Camera.main.transform.position = this.transform.position + Vector3.up * 10f;
+        //    //}
+        //};
+        //this.OnLoadedCallbacks = onLoadedCallbacksTmp;
     }
 
+    [Client]
     void Update()
     {
+        // Wait until we can check that all netids exist and that their length is equal to numberofchips
+        if (this.netIds.Length == this.numberOfChips && (this.srvResetCounter != this.cltResetCounter || this.netIds != this.oldNetIds && this.loadedModelString != this.modelString))
+        {
+            //print($"{this.netId}: netId: {this.netIds.Last()}  len: {this.netIds.Length}");
+            bool ready = true;
+            foreach (var netId in this.netIds)
+            {
+                if (!NetworkClient.spawned.ContainsKey(netId))
+                {
+                    print($"Not spawned: {netId}");
+                    ready = false;
+                }
+            }
+            if (ready)
+            {
+                print($"{this.netId}: triggering spawn");
+                this.VirtualModel = VModel.FromLuaModel(this.modelString);
+                this.TriggerSpawn(false);
+                this.oldNetIds = this.netIds;
+                this.loadedModelString = this.modelString;
+                this.cltResetCounter = this.srvResetCounter;
+                //if(this == CoreChip.ClientCoreChip)
+                //{
+                //    SingleplayerMenu.Hud.LinkCore(this.core);
+                //}
+                print($"{this.netId}: finished spawn");
+            }
+        }
+        //return;
         foreach (var rtf in this.RuntimeFunctions)
         {
-            rtf.RuntimeFunction();
+            if (rtf != null)
+            {
+                rtf.RuntimeFunction();
+            }
+            else
+            {
+                //print($"{this.netId}: RTF: {rtf}");
+            }
         }
         this.HandleInputs();
     }
@@ -177,9 +222,9 @@ public class CoreChip : CommonChip
         }
 
         this.VirtualModel = model;
-        this.TriggerSpawn(true);
-        this.VirtualModel.AddModelChangedCallback(x => this.TriggerSpawn(true));
-        this.VirtualModel.AddModelChangedCallback(x => this.history.SaveState(this.VirtualModel.ToLuaString()));
+        //this.TriggerSpawn(true);
+        //this.VirtualModel.AddModelChangedCallback(x => this.TriggerSpawn(true));
+        //this.VirtualModel.AddModelChangedCallback(x => this.history.SaveState(this.VirtualModel.ToLuaString()));
 
         this.keysToCheck = this.GetInputCharactersFromModel(state);
 
@@ -236,7 +281,7 @@ public class CoreChip : CommonChip
     [Command]
     public void CmdTriggerSpawn()
     {
-        this.TriggerSpawn(false);
+        StartCoroutine(this.GenerateChips());
     }
 
     [Command]
@@ -244,6 +289,7 @@ public class CoreChip : CommonChip
     {
         print($"clt=>srv: CmdResetCore");
         // delete after build listeners
+        // sends to host as well
         this.RpcResetRotationVelocity();
         Action[] actions = new Action[] { };
         this.SetAfterBuildListeners(actions);
@@ -280,26 +326,68 @@ public class CoreChip : CommonChip
         this.CmdTriggerSpawn();
     }
 
+    private IEnumerator WaitForChipsToBeOnline(List<CommonChip> children)
+    {
+        HashSet<uint> netids = new HashSet<uint>();
+        while (netids.Count < children.Count)
+        {
+            // Check if chips are initialized
+            foreach (var chip in children)
+            {
+                if (chip.isClient && chip.netId != 0)
+                {
+                    netids.Add(chip.netId);
+                }
+            }
+
+            yield return null; // Wait until next frame
+        }
+    }
+
     [Server]
+    public IEnumerator GenerateChips()
+    {
+        // ONLY ON THE SERVER
+        // spawn function:
+        // Destroy all of my existing chips
+        if (this.AllChildren is not null)
+        {
+            foreach (var c in this.AllChildren)
+            {
+                NetworkServer.Destroy(c.gameObject);
+            }
+        }
+        this.netIds = new uint[] { this.netId };
+        var allchildren = new List<CommonChip>();
+        // First instantiate all chips on the clients
+        foreach (var vc in this.VirtualModel.chips)
+        {
+            if (vc.IsCore)
+            {
+                this.myCoreNetId = this.netId;
+                this.stringId = vc.id;
+                // Continue because we don't want to spawn the core
+                continue;
+            }
+            var childType = vc.ChipType;
+            CommonChip newChild = GeometricChip.InstantiateChip<CommonChip>(childType);
+            newChild.myCoreNetId = this.netId;
+            newChild.stringId = vc.id;
+            allchildren.Add(newChild);
+            NetworkServer.Spawn(newChild.gameObject);
+        }
+        this.AllChildren = allchildren.ToArray();
+        this.numberOfChips = this.AllChildren.Length + 1;
+        yield return StartCoroutine(WaitForChipsToBeOnline(allchildren));
+        print($"GENERATED CHIPS: {this.netId}: netids: {this.netIds.Length}");
+        this.srvResetCounter += 1;
+        yield break;
+    }
+
+    [Client]
     public void TriggerSpawn(bool freeze)
     {
-        print($"srv: TriggerSpawn");
-        Debug.Assert(!this.isClientOnly);
-        Debug.Assert(this.isServer);
-
-        var ni = this.GetComponent<NetworkIdentity>();
-        if (this.equivalentVirtualChip.ChipType != VChip.coreStr)
-        {
-            throw new InvalidOperationException($"Attempting to TriggerSpawn on non-core chip: {this.equivalentVirtualChip.ChipType}!");
-        }
-        if (ni.netId == 0)
-        {
-            throw new NullReferenceException($"Attempting to TriggerSpawn on offline chip!");
-        }
-        if (!ni.isServer)
-        {
-            throw new AccessViolationException($"TriggerSpawn must be called only on server!");
-        }
+        // Trigger spawn only later on when all the chips are visible on the client
         this.RuntimeFunctions.Clear();
 
         foreach (VVar v in this.VirtualModel.variables)
@@ -308,7 +396,7 @@ public class CoreChip : CommonChip
             v.currentValue = v.defaultValue;
         }
 
-        this.transform.localScale = StaticChip.ChipSize;
+        //this.transform.localScale = StaticChip.ChipSize;
 
         // this should replace the argument
         VChip core = this.VirtualModel.Core;
@@ -325,28 +413,24 @@ public class CoreChip : CommonChip
         // handle script
         this.scriptInstance = new ScriptInstance(this, this.VirtualModel);
 
-        if (this.loopScript is not null)
+        // Destroy loop script component
+        for (int i = 0; i < 10; ++i)
         {
-            Debug.LogWarning($"Loop script is being added twice, deleting old one");
-            GameObject.Destroy(this.loopScript);
+            if (this.GetComponent<LoopScript>())
+            {
+                GameObject.Destroy(this.GetComponent<LoopScript>());
+            }
         }
-
-        this.loopScript = this.gameObject.AddComponentIdempotent<LoopScript>();
+        this.loopScript = this.gameObject.AddComponent<LoopScript>();
         this.loopScript.vModel = this.VirtualModel;
         this.loopScript.loopFunction = this.scriptInstance.CallLoop;
 
 
         // this performs clean-up as well
         this.myCore = this;
+        // AllChildren on the client
         this.AllChildren = this.AddChildren(this);  // trigger the tsunami
-        // Core + its children
-        this.serverSideChips = this.AllChildren.Length + 1;
-
-        foreach (var child in this.AllChildren)
-        {
-            var tmpNi = child.GetComponent<NetworkIdentity>();
-            NetworkServer.Spawn(child.gameObject);
-        }
+        //print($"all children: {this.AllChildren.Length}");
 
         // TODO: remove this and FIX Clipboard
         if (this.VirtualModel.chips.Length != this.AllChips.Length)
@@ -355,10 +439,15 @@ public class CoreChip : CommonChip
             // this is to register chips that haven't been added in
             this.VirtualModel.SetChipsWithoutNotify(this.AllChips.Select(x => x.equivalentVirtualChip).ToArray());
         }
-        if (this.isLocalPlayer)
+        //if (this.isLocalPlayer)
+        //{
+        foreach (var rc in this.AllChildren)
         {
-            this.scriptInstance.LinkSensors(this.VirtualModel);
+            Debug.Assert(rc.equivalentVirtualChip != null);
+            //print($"{this.netId}, {rc.netId}: {this.VirtualModel.chips.First(x => x == rc.equivalentVirtualChip)}");
         }
+        this.scriptInstance.LinkSensors(this.VirtualModel);
+        //}
 
         if (freeze)
         {
@@ -441,7 +530,7 @@ public class CoreChip : CommonChip
     {
         if (this.isServer)
         {
-            this.loopScript.HandleInputs();
+            this.loopScript?.HandleInputs();
         }
 
         if (this.isLocalPlayer)

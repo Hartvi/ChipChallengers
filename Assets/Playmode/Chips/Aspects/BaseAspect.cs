@@ -25,6 +25,7 @@ public abstract class BaseAspect : NetworkBehaviour
     protected virtual void Start()
     {
         this.myChip.myCore.RuntimeFunctions.Add(this);
+        //print($"Adding {this} to runtime functions");
     }
 
     //public override void OnStartClient()

@@ -83,6 +83,7 @@ public class VelocityHUD : BasePanel
 
     void Update()
     {
+        if(this._focus == null) { return; }
         SetVelocity();
         SetPosition();
     }

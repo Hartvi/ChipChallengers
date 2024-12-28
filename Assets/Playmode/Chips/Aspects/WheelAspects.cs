@@ -118,15 +118,17 @@ public class WheelAspects : BaseAspect
         float absOmega = Mathf.Abs(this.Omega);
         float dOmega = T * WheelAspects.fixedTimeInvInertia - Mathf.Sign(this.Omega) * (this.brake * WheelAspects.fixedTimeInvInertia + k1 * absOmega + k2 * absOmega * absOmega);
 
-        // T * dt / I = dOmega
-        // T = dOmega * I / dt
-        Vector3 up = this.transform.up;
-        Vector3 newUp = up * this.Omega;
-        Vector3 torque = (newUp - oldUp) * WheelAspects.fixedTimeInvInertia;
-        this.rb.AddTorque(10f * torque + Time.fixedDeltaTime * (T * up), ForceMode.Impulse);
-
-        this.oldUp = newUp;
-        this.Omega = this.Omega + dOmega;
+        //if (this.myChip.netIdentity != null && this.myChip.isServer)
+        {
+            // T * dt / I = dOmega
+            // T = dOmega * I / dt
+            Vector3 up = this.transform.up;
+            Vector3 newUp = up * this.Omega;
+            Vector3 torque = (newUp - oldUp) * WheelAspects.fixedTimeInvInertia;
+            this.rb.AddTorque(10f * torque + Time.fixedDeltaTime * (T * up), ForceMode.Impulse);
+            this.oldUp = newUp;
+            this.Omega = this.Omega + dOmega;
+        }
     }
 
     void ApplyForce()

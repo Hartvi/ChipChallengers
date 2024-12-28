@@ -9,13 +9,8 @@ using System.Threading.Tasks;
 
 public class CommonChip : AngleChip
 {
-    [SyncVar]
-    string[] sharedVals;
-    [SyncVar]
-    string[] sharedKeys;
-
-    [SyncVar]
-    public uint parentNetId = 0;
+    //[SyncVar]
+    //public uint parentNetId = 0;
     [SyncVar]
     public string stringId = "a";
 
@@ -25,45 +20,81 @@ public class CommonChip : AngleChip
     public override void OnStartServer()
     {
         base.OnStartServer();
-        StartCoroutine(WaitForParentChip());
-    }
-
-    [Server]
-    IEnumerator WaitForParentChip()
-    {
-        yield return new WaitUntil(() => (this.parentChip != null && this.myCoreNetId != 0) || this.IsCore);
-        if (this.parentChip != null)
-        {
-            this.parentNetId = this.parentChip.netId;
-            this.stringId = this.equivalentVirtualChip.id;
-        }
-        print($"srv: CHIP: {this.name}  ID: {this.netId}  PARENT NETID: {this.parentNetId}");
+        StartCoroutine(SrvWaitForCoreId());
     }
 
     public override void OnStartClient()
     {
         base.OnStartClient();
-        //print($"CHIP: {this.name}  ID: {this.netId} ");
-        StartCoroutine(WaitForParentId());
-    }
-
-    [Client]
-    IEnumerator WaitForParentId()
-    {
-        yield return new WaitUntil(() => (this.parentNetId != 0 && this.myCoreNetId != 0) || this.IsCore);
-        if (!this.IsCore)
+        if (!this.isServer)
         {
-            var core = GameObject.FindObjectsOfType<CoreChip>().FirstOrDefault(x => x.netId == this.myCoreNetId);
-            if (core.clientSideChips >= core.serverSideChips)
-            {
-                core.clientSideChips = 1;
-            }
-            core.clientSideChips++;
-            //print($"clt: NUMBER OF CLIENT CHIPS: {core.clientSideChips} core: {core.netId}  parentid: {this.parentNetId}");
-            //print($"NUMBER OF SERVER CHIPS: {core.serverSideChips} {core.netId}");
-            //print($"CHIP: {this.name}  ID: {this.netId}  PARENT NETID: {this.parentNetId}");
+            this.rb.isKinematic = true;
         }
     }
+
+    [Server]
+    IEnumerator SrvWaitForCoreId()
+    {
+        // Wait until myCoreNetId is not 0
+        while (this.myCoreNetId == 0)
+        {
+            yield return null; // Wait for the next frame
+        }
+
+        // Once myCoreNetId is set, proceed with the logic
+        if (NetworkServer.spawned.TryGetValue(this.myCoreNetId, out var networkObject))
+        {
+            var cc = networkObject.GetComponent<CoreChip>();
+            if (cc != null)
+            {
+                if (this.netId != this.myCoreNetId)
+                {
+                    cc.netIds = cc.netIds.Concat(new uint[] { this.netId }).ToArray();
+                }
+            }
+            else
+            {
+                Debug.LogError("CoreChip component not found on the spawned object.");
+            }
+        }
+        else
+        {
+            Debug.LogError($"No spawned object found with netId: {this.myCoreNetId}");
+        }
+    }
+
+    //[Server]
+    //IEnumerator WaitForParentChip()
+    //{
+    //    yield return new WaitUntil(() => (this.parentChip != null && this.myCoreNetId != 0) || this.IsCore);
+    //    if (this.parentChip != null)
+    //    {
+    //        this.parentNetId = this.parentChip.netId;
+    //        this.stringId = this.equivalentVirtualChip.id;
+    //    }
+    //    print($"srv: CHIP: {this.name}  ID: {this.netId}  PARENT NETID: {this.parentNetId}");
+    //}
+
+    //public override void OnStartClient()
+    //{
+    //    base.OnStartClient();
+    //StartCoroutine(WaitForParentId());
+    //}
+
+    //[Client]
+    //IEnumerator WaitForParentId()
+    //{
+    //    yield return new WaitUntil(() => (this.parentNetId != 0 && this.myCoreNetId != 0) || this.IsCore);
+    //    if (!this.IsCore)
+    //    {
+    //        var core = GameObject.FindObjectsOfType<CoreChip>().FirstOrDefault(x => x.netId == this.myCoreNetId);
+    //        if (core.clientSideChips >= core.serverSideChips)
+    //        {
+    //            core.clientSideChips = 1;
+    //        }
+    //        core.clientSideChips++;
+    //    }
+    //}
 
 #if UNITY_EDITOR
     static bool hasWarned = false;
@@ -86,21 +117,14 @@ public class CommonChip : AngleChip
         {
             if (this._rb == null)
             {
-                if (this.IsReal)
+                this._rb = this.gameObject.GetComponent<Rigidbody>();
+                if (this._rb == null)
                 {
-                    this._rb = this.gameObject.GetComponent<Rigidbody>();
-                    if (this._rb == null)
-                    {
-                        this._rb = this.gameObject.AddComponent<Rigidbody>();
-                    }
-                    else
-                    {
-                        Debug.LogWarning($"Rigidbody has been added from the outside?");
-                    }
+                    this._rb = this.gameObject.AddComponent<Rigidbody>();
                 }
                 else
                 {
-                    throw new NullReferenceException($"Rigidbody of {this} is null.");
+                    Debug.LogWarning($"Rigidbody has been added from the outside?");
                 }
             }
 
@@ -176,20 +200,18 @@ public class CommonChip : AngleChip
         }
     }
 
-
     // FUNCTIONS:
-    [Server]
+    [Client]
     public CommonChip[] AddChild(VChip childChip, CoreChip core)
     {
-        Debug.Assert(!this.isClientOnly);
         var childType = childChip.ChipType;
 
-        CommonChip newChild = GeometricChip.InstantiateChip<CommonChip>(childType);
-        Debug.Assert(core.netId != 0);
-        newChild.myCoreNetId = core.netId;
-        newChild.myCore = core;
+        // TODO select the chip that matches the netId AND stringID
+        CommonChip newChild = NetworkClient.spawned.First(x => core.netIds.Contains(x.Key) && x.Value.GetComponent<CommonChip>().stringId == childChip.id).Value.GetComponent<CommonChip>();
 
         newChild.equivalentVirtualChip = childChip;
+        print($"core: {core.netId}, {newChild.netId}: SETTING equivalent chip: {newChild.equivalentVirtualChip.rChip}");
+        newChild.myCore = core;
         newChild.SetParent(this);
 
         Vector3 newChildGlobalPosition = StaticChip.GetThisGlobalOffsetWrtParent(newChild);
@@ -231,6 +253,7 @@ public class CommonChip : AngleChip
             cj.angularXMotion = ConfigurableJointMotion.Free;
             newChild.ConfigureJointSpringDamper(cj);
         }
+
 
         var _newChildren = newChild.AddChildren(core);
         CommonChip[] newChildrenArr = new CommonChip[_newChildren.Length + 1];
@@ -240,13 +263,9 @@ public class CommonChip : AngleChip
         return newChildrenArr;
     }
 
-    [Server]
+    [Client]
     public CommonChip[] AddChildren(CoreChip core)
     {
-        // Not yet on the server, the object gets spawned later
-        Debug.Assert(core != null);
-        Debug.Assert(!this.isClientOnly);
-
         Color colour = this.GetColour();
         this.mrs = this.GetComponentsInChildren<MeshRenderer>().Where(x => x.tag == VChip.colourStr).ToArray();
         this.materials = this.mrs.Select(x => x.material).ToArray();
@@ -265,13 +284,13 @@ public class CommonChip : AngleChip
         this.SetupRigidbody();
 
         // add runtime aspects
-        if (this.isAeroElligible)
+        if (this.isAeroElligible && this.isServer)
         {
             // add aspects, TODO: this wont add it to core!!!
             this.gameObject.AddComponentIdempotent<Aerodynamics>().myChip = this;
         }
 
-        if (this.equivalentVirtualChip.HasHealth())
+        if (this.equivalentVirtualChip.HasHealth() && this.isServer)
         {
             HealthAspect h = this.gameObject.AddComponentIdempotent<HealthAspect>();
             h.SetDeathCallbacks(new Action[] { this.Die });
@@ -288,7 +307,7 @@ public class CommonChip : AngleChip
             this.gameObject.AddComponentIdempotent<HitSoundAspect>().myChip = this;
         }
 
-        if (this.equivalentVirtualChip.ChipType == VChip.sensorStr)
+        if (this.equivalentVirtualChip.ChipType == VChip.sensorStr && !this.isServer)
         {
             this.gameObject.AddComponentIdempotent<SensorAspect>().myChip = this;
         }
@@ -319,6 +338,7 @@ public class CommonChip : AngleChip
                 }
                 if (this.equivalentVirtualChip.ChipType == VChip.gunStr)
                 {
+                    //if(this.isServer) 
                     this.gameObject.AddComponentIdempotent<GunAspect>().myChip = this;
                     this.gameObject.AddComponentIdempotent<GunSoundAspect>().myChip = this;
                     this.gameObject.AddComponentIdempotent<GunDustAspect>().myChip = this;
@@ -326,181 +346,13 @@ public class CommonChip : AngleChip
             }
         }
 
-        // TODO POPULATE CHIP VALUES AND MAP IT TO NETID???
-        this.sharedKeys = this.equivalentVirtualChip.keys._vals;
-        this.sharedVals = this.equivalentVirtualChip.vals._vals;
-
-        List<CommonChip> chips = new List<CommonChip>();
+        List<CommonChip> allChildren = new List<CommonChip>();
         // when there are no Children left then the recursion stops
         foreach (VChip childChip in this.equivalentVirtualChip.Children)
         {
-            chips.AddRange(this.AddChild(childChip, core));
+            allChildren.AddRange(this.AddChild(childChip, core));
         }
-        return chips.ToArray();
-    }
-
-    [Client]
-    public CommonChip[] CltAddChild(VChip childChip, CoreChip core)
-    {
-        Debug.Assert(this.isClient);
-        var childType = childChip.ChipType;
-        //print($"CltAddChild: CHILD of {this.equivalentVirtualChip.ChipType}: {childChip.ChipType} THIS NETID: {this.netId}");
-
-        CommonChip newChild = GameObject.FindObjectsOfType<CommonChip>().First(x => x.parentNetId == this.netId && childChip.id == x.stringId);
-        newChild.myCore = core;
-
-        newChild.equivalentVirtualChip = childChip;
-        newChild.SetParent(this);
-
-        Vector3 newChildGlobalPosition = StaticChip.GetThisGlobalOffsetWrtParent(newChild);
-        newChild.transform.position = newChildGlobalPosition;
-        newChild.transform.rotation = this.transform.rotation;
-
-        // TODO fix get angle to take from `keys` and `values`
-        float angle = newChild.GetAngle();
-
-        (Vector3 origin, Vector3 direction) = StaticChip.GetThisAxisOfRotationWrtParent(newChild, VChip.chipNameToEnum[childChip.ChipType]);
-        newChild.transform.RotateAround(origin, direction, angle);
-
-        // rotates the objects so they are facing the correct direction
-        Vector3 facingDirection = (newChild.transform.position - origin).normalized;
-
-        float YrotationAngle = Vector3.Dot(facingDirection, newChild.transform.right);
-        float YrotationAngle2 = Mathf.Max(0f, -Vector3.Dot(facingDirection, newChild.transform.forward));
-
-        // apply transforms after measuring all information
-        newChild.transform.RotateAround(newChild.transform.position, newChild.transform.up, 90f * YrotationAngle);
-        newChild.transform.RotateAround(newChild.transform.position, newChild.transform.up, 180f * YrotationAngle2);
-
-        if (!newChild.IsJointElligible)
-        {
-            newChild.transform.SetParent(this.inverse);
-        }
-        else
-        {
-            // TODO: create joint
-            var parentRealChip = this.RealParent;
-
-            newChild.SetupGeometry();
-            //newChild.SetupRigidbody();
-            ConfigurableJoint cj = JointUtility.AttachWithConfigurableJoint(
-                newChild.gameObject, parentRealChip.gameObject, origin, direction
-                );
-            newChild.cj = cj;
-
-            cj.angularXMotion = ConfigurableJointMotion.Free;
-            newChild.ConfigureJointSpringDamper(cj);
-        }
-
-        var _newChildren = newChild.CltAddChildren(core);
-        CommonChip[] newChildrenArr = new CommonChip[_newChildren.Length + 1];
-        // this is the changing part that fills up the list
-        _newChildren.CopyTo(newChildrenArr, 0);// (newChild);
-        newChildrenArr[_newChildren.Length] = newChild;
-        return newChildrenArr;
-    }
-
-    [Client]
-    public CommonChip[] CltAddChildren(CoreChip core)
-    {
-        //print($"clt: AddChildren");
-        // Not yet on the server, the object gets spawned later
-        Debug.Assert(core != null);
-        Debug.Assert(this.isClient);
-        //print($"ISCLIENT: {this.isClient} ISSERVER: {this.isServer} CORE: {this.name}");
-        //Debug.Assert(this.isServer);
-
-        Color colour = this.GetColour();
-        this.mrs = this.GetComponentsInChildren<MeshRenderer>().Where(x => x.tag == VChip.colourStr).ToArray();
-        this.materials = this.mrs.Select(x => x.material).ToArray();
-        // to set the colour at build time
-        foreach (Material m in this.materials)
-        {
-            m.color = colour;
-        }
-
-        int option = -1;
-        if (this.equivalentVirtualChip.TryGetProperty<int>(VChip.optionStr, out option))
-        {
-            this._option = option;
-            this.SelectOption(option);
-        }
-        this.SetupRigidbody();
-
-        // add runtime aspects
-        if (this.isAeroElligible)
-        {
-            // add aspects, TODO: this wont add it to core!!!
-            if (this.gameObject.GetComponent<Aerodynamics>() == null)
-            {
-                this.gameObject.AddComponentIdempotent<Aerodynamics>().myChip = this;
-            }
-        }
-
-        if (this.equivalentVirtualChip.HasHealth())
-        {
-            HealthAspect h = this.gameObject.AddComponentIdempotent<HealthAspect>();
-            h.SetDeathCallbacks(new Action[] { this.Die });
-            h.SetHealth(this.equivalentVirtualChip.DefaultHealth());
-        }
-
-        if (this.equivalentVirtualChip.ChipType == VChip.cowlStr)
-        {
-            this.gameObject.AddComponentIdempotent<CowlAspect>().myChip = this;
-        }
-        else
-        {
-            this.gameObject.AddComponentIdempotent<DustAspect>().myChip = this;
-            this.gameObject.AddComponentIdempotent<HitSoundAspect>().myChip = this;
-        }
-
-        if (this.equivalentVirtualChip.ChipType == VChip.sensorStr)
-        {
-            this.gameObject.AddComponentIdempotent<SensorAspect>().myChip = this;
-        }
-
-        if (this.equivalentVirtualChip.keys.Contains(VChip.valueStr))
-        {
-
-            // TODO cosmetics as in jet spitting fire and wheel turning discs
-            this._value = this.GetValue();
-
-            if (this.equivalentVirtualChip.ChipType == VChip.jetStr)
-            {
-                this.gameObject.AddComponentIdempotent<JetAspect>();
-                this.gameObject.AddComponentIdempotent<JetSoundAspect>();
-                this.gameObject.AddComponentIdempotent<JetDustAspect>();
-                this.gameObject.AddComponentIdempotent<JetFlameAspect>();
-            }
-            if (this.equivalentVirtualChip.keys.Contains(VChip.brakeStr))
-            {
-                this._brake = this.GetBrake();
-                // GUN - power = gun power, brake to trigger,
-                // WHEEL - power = power, brake = brake
-                if (this.equivalentVirtualChip.ChipType == VChip.wheelStr)
-                {
-                    this.gameObject.AddComponentIdempotent<WheelAspects>().myChip = this;
-                    this.gameObject.AddComponentIdempotent<WheelSoundAspect>().myChip = this;
-                    //this.gameObject.AddComponentIdempotent<TireSoundAspect>().myChip = this;
-                }
-                if (this.equivalentVirtualChip.ChipType == VChip.gunStr)
-                {
-                    this.gameObject.AddComponentIdempotent<GunAspect>().myChip = this;
-                    this.gameObject.AddComponentIdempotent<GunSoundAspect>().myChip = this;
-                    this.gameObject.AddComponentIdempotent<GunDustAspect>().myChip = this;
-                }
-            }
-        }
-
-        List<CommonChip> chips = new List<CommonChip>();
-
-        // when there are no Children left then the recursion stops
-        //print($"clt: number of children of {this.name}: {this.equivalentVirtualChip.ArrChildren.Length}");
-        foreach (VChip childChip in this.equivalentVirtualChip.ArrChildren)
-        {
-            chips.AddRange(this.CltAddChild(childChip, core));
-        }
-        return chips.ToArray();
+        return allChildren.ToArray();
     }
 
     private void ConfigureJointSpringDamper(ConfigurableJoint cj)
