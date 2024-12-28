@@ -78,6 +78,7 @@ public class HUD : TopProp
 
     void Update()
     {
+        if (this.displayVariables == null) { return; }
         for(int i = 0; i < this.displayVariables.Length; ++i)
         {
             // TODO: variable was outside of bounds

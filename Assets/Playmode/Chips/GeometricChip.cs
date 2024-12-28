@@ -30,6 +30,7 @@ public abstract class GeometricChip : StaticChip
         {
             this._equivalentVirtualChip = value;
             this.equivalentChipId = value.id;
+            //print($"{this.netId}: SETTING VIRTUAL CHIP: {this}");
             value.rChip = (CommonChip)this;
         }
     }
@@ -173,16 +174,16 @@ public abstract class GeometricChip : StaticChip
     public void SetParent(GeometricChip parentChip)
     {
         // null parents not allowed in this function - we can only add Children to core and lower, not null
-        Debug.Assert(this.myCore == parentChip.myCore);
+        Debug.Assert(this.myCore == parentChip.myCore, $"Parent chip core: {parentChip.myCore} this core: {this.myCore}");
         //if (this.parentChip != null)
         //{
         //    throw new ArgumentException($"Parent of {this} must be null, cannot already have had a Parent {this.parentChip}.");
         //}
         this.parentChip = parentChip;
-        if (this.isClient)
-        {
-            print($"SETTING PARENT {this.parentChip} of {this}");
-        }
+        //if (this.isClient)
+        //{
+        //    print($"SETTING PARENT {this.parentChip} of {this}");
+        //}
 
         //print($"current Parent {parentChip.name} of {name}");
         parentChip.SetChild(this);

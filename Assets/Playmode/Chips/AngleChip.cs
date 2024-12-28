@@ -149,7 +149,7 @@ public abstract class AngleChip : OptionChip
         }
         else
         {
-            print($"Trying to set angle: {Quaternion.Euler(a, 0f, 0f)}: {a} but joint is NULL, chip: {this.equivalentVirtualChip.id}");
+            //print($"Trying to set angle: {Quaternion.Euler(a, 0f, 0f)}: {a} but joint is NULL, chip: {this.equivalentVirtualChip.id}");
             //throw new NullReferenceException($"Trying to set angle: {Quaternion.Euler(a, 0f, 0f)} but joint is NULL, chip: {this.equivalentVirtualChip.id}");
         }
     }

@@ -95,7 +95,7 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
         this.ControlsPanel = this.gameObject.GetComponentInChildren<ControlsPanel>(true);
 
         this.core = CoreChip.ClientCoreChip;
-        this.core.CmdResetToDefaultLocation();
+        //this.core.CmdResetToDefaultLocation();
         // set the camera position, since it might not catch up fast enough
         Camera.main.transform.position = this.core.transform.position + Vector3.up * 10f;
     }
@@ -145,7 +145,8 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
         this.MapPanel.SetOnLoadedCallbacks(mapLoadedCallbacks);
 
         //TODO: load model after entering playmode???
-        this.Hud.LinkCore(this.core);
+        Debug.Log("TODO: add HUD");
+        //this.Hud.LinkCore(this.core);
 
         Camera.main.transform.position = (Camera.main.transform.position - core.transform.position).normalized * 5f + core.transform.position;
         Camera.main.transform.LookAt(core.transform.position);
@@ -248,6 +249,7 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
 
     void InputReceiver.OnStartReceiving()
     {
+        return;
         CoreChip.ClientCoreChip.CmdUnfreezeClientModel();
     }
 
