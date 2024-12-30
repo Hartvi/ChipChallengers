@@ -98,14 +98,16 @@ public class CreateChipPanel : BasePanel
         VModel vm = core.VirtualModel;
         vm.chips = vm.chips.Concat(new VChip[] { newChip }).ToArray();
 
-        core.TriggerSpawn(true);
+        core.srvResetCounter += 1;
 
         // TODO make this more secure:
         // HOW???
         // TODO NEWCHIP CAN BE NULL????
-        this.editorMenu.selectedChip = this.editorMenu.highlighter.SelectVChip(newChip.rChip.equivalentVirtualChip.id);
+        this.editorMenu.selectedChip = this.editorMenu.highlighter.SelectVChip(newChip.id);// rChip.equivalentVirtualChip.id);
         this.gameObject.SetActive(false);
     }
+
+    //IEnumerator WaitForChip(VChip) { }
 
     public CommonChip PasteCallback(VChip selectedVChip, LocalDirection dir, bool mirror)
     {

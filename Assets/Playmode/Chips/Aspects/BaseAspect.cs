@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
 
-public abstract class BaseAspect : NetworkBehaviour
+public abstract class BaseAspect : MonoBehaviour
 {
     public CommonChip myChip;
     public Rigidbody rb => myChip.rb;
@@ -37,10 +37,8 @@ public abstract class BaseAspect : NetworkBehaviour
     //}
 
     public abstract void RuntimeFunction();
-
     protected virtual void OnDestroy()
     {
     }
-
 }
 
