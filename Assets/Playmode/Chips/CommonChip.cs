@@ -26,10 +26,10 @@ public class CommonChip : AngleChip
     public override void OnStartClient()
     {
         base.OnStartClient();
-        if (!this.isServer)
-        {
-            this.rb.isKinematic = true;
-        }
+        //if (!this.isServer)
+        //{
+        //    this.rb.isKinematic = true;
+        //}
     }
 
     [Server]
@@ -210,7 +210,7 @@ public class CommonChip : AngleChip
         CommonChip newChild = NetworkClient.spawned.First(x => core.netIds.Contains(x.Key) && x.Value.GetComponent<CommonChip>().stringId == childChip.id).Value.GetComponent<CommonChip>();
 
         newChild.equivalentVirtualChip = childChip;
-        print($"core: {core.netId}, {newChild.netId}: SETTING equivalent chip: {newChild.equivalentVirtualChip.rChip}");
+        //print($"core: {core.netId}, {newChild.netId}: SETTING equivalent chip: {newChild.equivalentVirtualChip.rChip}");
         newChild.myCore = core;
         newChild.SetParent(this);
 
@@ -267,6 +267,7 @@ public class CommonChip : AngleChip
     public CommonChip[] AddChildren(CoreChip core)
     {
         Color colour = this.GetColour();
+        //print($"COLOUR: {colour}");
         this.mrs = this.GetComponentsInChildren<MeshRenderer>().Where(x => x.tag == VChip.colourStr).ToArray();
         this.materials = this.mrs.Select(x => x.material).ToArray();
         // to set the colour at build time
@@ -290,7 +291,7 @@ public class CommonChip : AngleChip
             this.gameObject.AddComponentIdempotent<Aerodynamics>().myChip = this;
         }
 
-        if (this.equivalentVirtualChip.HasHealth() && this.isServer)
+        if (this.equivalentVirtualChip.HasHealth())
         {
             HealthAspect h = this.gameObject.AddComponentIdempotent<HealthAspect>();
             h.SetDeathCallbacks(new Action[] { this.Die });

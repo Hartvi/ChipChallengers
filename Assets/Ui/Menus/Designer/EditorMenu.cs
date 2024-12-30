@@ -123,7 +123,7 @@ public class EditorMenu : BaseMenu, InputReceiver
     {
         GameManager.cameraMoveMode = CameraMoveMode.Follow;
         // TODO: options: set framerate, sound level
-        Application.targetFrameRate = 30;
+        Application.targetFrameRate = 24;
 
         this.highlighter.ParentHighlighter.SetActive(true);
 
@@ -154,6 +154,8 @@ public class EditorMenu : BaseMenu, InputReceiver
 
         // core stuff:
         var core = CoreChip.ClientCoreChip;
+        core.freeze = true;
+        //core.rb.isKinematic = true;
         // TODO: clean up callbacks, etc after leacing this menu
         core.SetAfterBuildListeners(afterBuildListeners);
         // TODO: update value, option, etc in the editor to how it should look like.
@@ -166,7 +168,7 @@ public class EditorMenu : BaseMenu, InputReceiver
         this.selectedChip = this.highlighter.SelectVChip("a");
 
         // rebuild the model so it's not flat when entering designer mode
-        core.TriggerSpawn(true);
+        core.srvResetCounter += 1;
 
         // slow down physics to save power
         Time.fixedDeltaTime = 0.1f;

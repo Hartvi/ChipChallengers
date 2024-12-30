@@ -123,6 +123,8 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
         Physics.IgnoreLayerCollision(7, 6);
 
         this.core = CoreChip.ClientCoreChip;
+        //print("SET NEW CORE");
+        this.core.freeze = false;
 
         // SEND COMMANDS PERTAINING TO CORE
         this.core.CmdResetCore();
@@ -157,7 +159,12 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
         CameraFollowSettings cs = this.cameraFollowSettings;
         Transform camTransform = this.mainCamera.transform;
 
+        if (this.core == null) { return; }
         Vector3 corePos = this.core.transform.position;
+        if ((camTransform.position - corePos).sqrMagnitude > 225)
+        {
+            camTransform.position = corePos;
+        }
         //float predict = cs.predict;
         //Vector3 coreAcceleration = 0.01f * (this.core.rb.velocity - this.lastCoreVelocity) + 0.99f * this.lastCoreAcceleration;
         //Vector3 error = corePos - this.lastCorePos;

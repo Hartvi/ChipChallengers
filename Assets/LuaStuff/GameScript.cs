@@ -232,7 +232,7 @@ public class GameScript : MonoBehaviour
             var core = this.AllObjects[name].GetComponent<CoreChip>();
             core.transform.rotation = Quaternion.Euler(p.x, p.y, p.z);
             core.rb.velocity = Vector3.zero;
-            core.TriggerSpawn(false);
+            core.srvResetCounter += 1;
         }
         else
         {
@@ -267,7 +267,7 @@ public class GameScript : MonoBehaviour
             core.transform.position = p;
             //core.transform.rotation = Quaternion.identity;
             core.rb.velocity = Vector3.zero;
-            core.TriggerSpawn(false);
+            core.srvResetCounter += 1;
         }
         else
         {

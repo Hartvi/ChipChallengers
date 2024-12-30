@@ -14,7 +14,7 @@ public class CoreChip : CommonChip
     public string modelString = null;
     public string loadedModelString = null;
     [SyncVar]
-    public int numberOfChips = 1;
+    public int numberOfChips = -1;
     [SyncVar]
     public uint[] netIds = new uint[0];
     public uint[] oldNetIds = new uint[0];
@@ -27,7 +27,8 @@ public class CoreChip : CommonChip
 
     [SyncVar]
     char[] keysToCheck = new char[0];
-
+    [SyncVar]
+    public bool freeze = false;
     public static CoreChip ClientCoreChip => NetworkClient.localPlayer.GetComponent<CoreChip>();
 
     Action[] _AfterBuildActions = new Action[] { };
@@ -153,7 +154,7 @@ public class CoreChip : CommonChip
     void Update()
     {
         // Wait until we can check that all netids exist and that their length is equal to numberofchips
-        if (this.netIds.Length == this.numberOfChips && (this.srvResetCounter != this.cltResetCounter || this.netIds != this.oldNetIds && this.loadedModelString != this.modelString))
+        if (this.netIds.Length == this.numberOfChips && (this.srvResetCounter != this.cltResetCounter))
         {
             //print($"{this.netId}: netId: {this.netIds.Last()}  len: {this.netIds.Length}");
             bool ready = true;
@@ -167,9 +168,9 @@ public class CoreChip : CommonChip
             }
             if (ready)
             {
-                print($"{this.netId}: triggering spawn");
+                print($"{this.netId}: triggering spawn: netids: {this.netIds.Length} oldnetids: {this.oldNetIds.Length} cltcounter: {this.cltResetCounter} srvcounter: {this.srvResetCounter} model strings equal: {this.loadedModelString == this.modelString}");
                 this.VirtualModel = VModel.FromLuaModel(this.modelString);
-                this.TriggerSpawn(false);
+                this.TriggerSpawn();
                 this.oldNetIds = this.netIds;
                 this.loadedModelString = this.modelString;
                 this.cltResetCounter = this.srvResetCounter;
@@ -223,7 +224,11 @@ public class CoreChip : CommonChip
 
         this.VirtualModel = model;
         //this.TriggerSpawn(true);
-        //this.VirtualModel.AddModelChangedCallback(x => this.TriggerSpawn(true));
+        this.VirtualModel.AddModelChangedCallback(x => {
+            this.srvResetCounter += 1;
+            this.history.SaveState(this.modelString);
+            //this.modelString = x.ToLuaString();
+        });
         //this.VirtualModel.AddModelChangedCallback(x => this.history.SaveState(this.VirtualModel.ToLuaString()));
 
         this.keysToCheck = this.GetInputCharactersFromModel(state);
@@ -385,7 +390,7 @@ public class CoreChip : CommonChip
     }
 
     [Client]
-    public void TriggerSpawn(bool freeze)
+    public void TriggerSpawn()
     {
         // Trigger spawn only later on when all the chips are visible on the client
         this.RuntimeFunctions.Clear();
@@ -449,7 +454,7 @@ public class CoreChip : CommonChip
         this.scriptInstance.LinkSensors(this.VirtualModel);
         //}
 
-        if (freeze)
+        if (this.freeze)
         {
             this.SrvFreezeClientModel();
         }

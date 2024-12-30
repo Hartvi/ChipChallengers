@@ -21,6 +21,9 @@ public abstract class AngleChip : OptionChip
     protected float _brake = 0f;
     public float brake { get { return this._brake; } }
 
+    [SyncVar]
+    public float Omega = 0;
+
     public delegate bool ParseFuncDelegate<T>(string s, out T result);
 
     protected float GetBrake()
@@ -53,7 +56,7 @@ public abstract class AngleChip : OptionChip
         return this.GetProperty<float>(VChip.angleStr, float.TryParse, SetAngleDelegate);
     }
 
-    [Server]
+    //[Server]
     protected T GetProperty<T>(string propertyName, ParseFuncDelegate<T> ParseFunc, Action<float, VVar> VariableCallbackFunction)
     {
         //if (!this.IsCore)

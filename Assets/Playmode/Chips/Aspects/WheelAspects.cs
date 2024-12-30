@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Mirror;
 
 
 public class WheelAspects : BaseAspect
@@ -41,7 +42,7 @@ public class WheelAspects : BaseAspect
 
     int layerMask = ~((1 << 6) | (1 << 7));
 
-    float Omega;
+    bool isServer => this.myChip.isServer;
 
     Transform childTransform;
     public float totalSlip = 0f, totalSlip1 = 0f, totalSlip2 = 0f, totalSlip3 = 0f;
@@ -115,19 +116,19 @@ public class WheelAspects : BaseAspect
         // L = momentum, t = time
         // L = I * Omega
         // dOmega
-        float absOmega = Mathf.Abs(this.Omega);
-        float dOmega = T * WheelAspects.fixedTimeInvInertia - Mathf.Sign(this.Omega) * (this.brake * WheelAspects.fixedTimeInvInertia + k1 * absOmega + k2 * absOmega * absOmega);
+        float absOmega = Mathf.Abs(this.myChip.Omega);
+        float dOmega = T * WheelAspects.fixedTimeInvInertia - Mathf.Sign(this.myChip.Omega) * (this.brake * WheelAspects.fixedTimeInvInertia + k1 * absOmega + k2 * absOmega * absOmega);
 
-        //if (this.myChip.netIdentity != null && this.myChip.isServer)
+        // T * dt / I = dOmega
+        // T = dOmega * I / dt
+        Vector3 up = this.transform.up;
+        Vector3 newUp = up * this.myChip.Omega;
+        Vector3 torque = (newUp - oldUp) * WheelAspects.fixedTimeInvInertia;
+        this.rb.AddTorque(10f * torque + Time.fixedDeltaTime * (T * up), ForceMode.Impulse);
+        this.oldUp = newUp;
+        if (this.isServer)
         {
-            // T * dt / I = dOmega
-            // T = dOmega * I / dt
-            Vector3 up = this.transform.up;
-            Vector3 newUp = up * this.Omega;
-            Vector3 torque = (newUp - oldUp) * WheelAspects.fixedTimeInvInertia;
-            this.rb.AddTorque(10f * torque + Time.fixedDeltaTime * (T * up), ForceMode.Impulse);
-            this.oldUp = newUp;
-            this.Omega = this.Omega + dOmega;
+            this.myChip.Omega = this.myChip.Omega + dOmega;
         }
     }
 
@@ -160,7 +161,10 @@ public class WheelAspects : BaseAspect
         // impulse = S (F) dt => no need to multiply xImpulse * dt to get dOmega since dOmega = k * Force * dt
         float dOmega = -radius * xImpulse * InvPlanarMomentOfInertia;
 
-        this.Omega += dOmega;
+        if (this.isServer)
+        {
+            this.myChip.Omega += dOmega;
+        }
     }
 
     (float yImpulse, Vector3 yDir, float xImpulse, Vector3 xDir) PhysicsHandle()
@@ -191,7 +195,7 @@ public class WheelAspects : BaseAspect
         // change in deformation
         float impulseStrength = this.impulse.magnitude;
 
-        float VTX = this.radius * this.Omega;
+        float VTX = this.radius * this.myChip.Omega;
         float VX = xVelocity;
         float invVX = 1f / (1e-1f + Mathf.Abs(VX));
         this.xSlip = (VTX - VX) * invVX;
@@ -217,10 +221,12 @@ public class WheelAspects : BaseAspect
 
     public override void RuntimeFunction()
     {
-        if (this.childTransform == null) {
+        if (this.childTransform == null)
+        {
             print($"CHILD TRANSFORM OF WHEEL IS NONE");
-            return; }
-        this.childTransform.Rotate(Vector3.up, -this.Omega, Space.Self);
+            return;
+        }
+        this.childTransform.Rotate(Vector3.up, -this.myChip.Omega, Space.Self);
 
         //this.totalSlip = 0.5f * (Mathf.Abs(this.xSlip) + Mathf.Abs(this.ySlip) + this.totalSlip1);
         this.totalSlip = 0.25f * (Mathf.Abs(this.xSlip) + Mathf.Abs(this.ySlip) + this.totalSlip1 + this.totalSlip2 + this.totalSlip3);
