@@ -62,10 +62,6 @@ public abstract class BaseMenu : DeclaredProp
 
     public override void Setup()
     {
-        //Type MyType = GetType();
-        //Debug.Assert(MyType != typeof(MenuBase));
-        //if (allMenuTypes.Contains(MyType))
-        print($"Adding menu type: {this.GetType()}");
         BaseMenu.allMenus.Add(this);
         BaseMenu.allMenuTypes.Add(this.GetType());
     }
@@ -83,9 +79,7 @@ public abstract class BaseMenu : DeclaredProp
             GameObject newMenuObject = GameObject.Instantiate(UIUtils.Panel);
             newMenuObject.transform.SetParent(BaseMenu.MainMenu.transform.parent);
             newMenuObject.RT().anchoredPosition = Vector2.zero;
-            print($"Adding {menuType}");
             BaseMenu newMenu = newMenuObject.AddComponent(menuType) as BaseMenu;
-            print($"Added {menuType}");
             newMenu.gameObject.SetActive(false);
         }
         // switchingBack => true: remember this menu when switching back to last menu, or false: skip remembering this menu
@@ -94,7 +88,6 @@ public abstract class BaseMenu : DeclaredProp
             bool activation = menu.GetType() == menuType;
             if (menu.gameObject.activeSelf && switchingBack)
             {
-                //print("last menu: " + menu);
                 BaseMenu.lastMenu.Push(menu);
             }
             //menu.gameObject.SetActive(activation);

@@ -276,6 +276,8 @@ public class ChipPanel : BaseSidePanel, InputReceiver
                         //Debug.LogWarning($"TODO: make chip changed callback propagate to model changed callback for all properties.");
                         //print($"Setting value {x} for key {vc.keys[_i]} in chip {vc.ChipType}");
                         vc.vals[_i] = x;
+                        var ccc = CoreChip.ClientCoreChip;
+                        //ccc.CmdLoadString(ccc.VirtualModel.ToLuaString());
                     }
                 }
             );

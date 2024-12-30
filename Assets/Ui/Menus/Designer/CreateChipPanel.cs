@@ -94,11 +94,13 @@ public class CreateChipPanel : BasePanel
     {
         VChip newChip = new VChip(chipName, localDirection, parent);
         var core = CoreChip.ClientCoreChip;
+        Debug.Assert(core.isClient);
 
         VModel vm = core.VirtualModel;
         vm.chips = vm.chips.Concat(new VChip[] { newChip }).ToArray();
+        //core.CmdLoadString(vm.ToLuaString());
 
-        core.srvResetCounter += 1;
+        //core.srvResetCounter += 1;
 
         // TODO make this more secure:
         // HOW???

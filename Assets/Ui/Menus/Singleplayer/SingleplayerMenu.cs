@@ -108,8 +108,7 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
 
     void OnEnterMenu()
     {
-        string s = UIStrings.PhysicsRate;
-        Time.fixedDeltaTime = 1f / (float)(PlayerPrefs.GetInt(s));
+        Time.fixedDeltaTime = 1f / (float)(PlayerPrefs.GetInt(UIStrings.PhysicsRate));
         GameManager.RealTimeSettings.InMenu = false;
         GameManager.Instance.UpdateSettings();
 
@@ -161,7 +160,7 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
 
         if (this.core == null) { return; }
         Vector3 corePos = this.core.transform.position;
-        if ((camTransform.position - corePos).sqrMagnitude > 225)
+        if ((camTransform.position - corePos).sqrMagnitude > 1025)
         {
             camTransform.position = corePos;
         }

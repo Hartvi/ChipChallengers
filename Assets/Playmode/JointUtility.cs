@@ -9,6 +9,10 @@ public static class JointUtility
     public static ConfigurableJoint AttachWithConfigurableJoint(GameObject child, GameObject parent, Vector3 globalPoint, Vector3 globalAxis) {
         
         // NOT NECESSARY BUT GOOD TO HAVE SINCE IT'S SEARCHABLE
+        for(int i = 0; i < 2; ++i)
+        {
+            GameObject.Destroy(child.GetComponent<ConfigurableJoint>());
+        }
         ConfigurableJoint cj = child.AddComponent<ConfigurableJoint>();
 
         // Connect the joint to the child GameObject

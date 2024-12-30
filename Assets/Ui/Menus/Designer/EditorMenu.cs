@@ -7,19 +7,6 @@ using System.Linq;
 
 public class EditorMenu : BaseMenu, InputReceiver
 {
-    //private CommonChip _core;
-    //private CommonChip core
-    //{
-    //    get
-    //    {
-    //        if (this._core is null)
-    //        {
-    //            this._core = CommonChip.ClientCore;
-    //        }
-    //        return this._core;
-    //    }
-    //}
-
     public static EditorMenu Instance;
 
     private Camera _camera;
@@ -314,11 +301,13 @@ public class EditorMenu : BaseMenu, InputReceiver
             if (Input.GetKeyDown(KeyCode.Z))
             {
 #if UNITY_EDITOR
-                CoreChip.ClientCoreChip.CmdUndoHistory();
+                var ccc = CoreChip.ClientCoreChip;
+                ccc.CmdLoadString(ccc.history.Undo());
 #else
             try
             {
-                CoreChip.ClientCoreChip.CmdUndoHistory();
+                var ccc = CoreChip.ClientCoreChip;
+                ccc.CmdLoadString(ccc.history.Undo());
             }
             catch {}
 #endif
@@ -326,11 +315,13 @@ public class EditorMenu : BaseMenu, InputReceiver
             if (Input.GetKeyDown(KeyCode.Y))
             {
 #if UNITY_EDITOR
-                CoreChip.ClientCoreChip.CmdRedoHistory();
+                var ccc = CoreChip.ClientCoreChip;
+                ccc.CmdLoadString(ccc.history.Redo());
 #else
                 try
                 {
-                    CoreChip.ClientCoreChip.CmdRedoHistory();
+                    var ccc = CoreChip.ClientCoreChip;
+                    ccc.CmdLoadString(ccc.history.Redo());
                 }
                 catch {}
 #endif

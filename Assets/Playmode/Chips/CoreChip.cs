@@ -29,6 +29,7 @@ public class CoreChip : CommonChip
     char[] keysToCheck = new char[0];
     [SyncVar]
     public bool freeze = false;
+    bool frozen = false;
     public static CoreChip ClientCoreChip => NetworkClient.localPlayer.GetComponent<CoreChip>();
 
     Action[] _AfterBuildActions = new Action[] { };
@@ -83,36 +84,6 @@ public class CoreChip : CommonChip
     }
 
     public CommonChip[] AllChildren;
-    //public CommonChip[] AllChildren
-    //{
-    //    get
-    //    {
-    //        if (!this.equivalentVirtualChip.IsCore)
-    //        {
-    //            throw new MemberAccessException($"Get: Only chip designated as core can access all Children.");
-    //        }
-    //        return this._AllChildren;
-    //    }
-    //    set
-    //    {
-    //        if (!this.equivalentVirtualChip.IsCore)
-    //        {
-    //            throw new MemberAccessException($"Set: Only chip designated as core can access all Children.");
-    //        }
-    //        if (this._AllChildren is not null)
-    //        {
-    //            foreach (CommonChip child in this._AllChildren)
-    //            {
-    //                if (child && child.gameObject)
-    //                {
-    //                    GameObject.Destroy(child.gameObject);
-    //                }
-    //            }
-    //        }
-    //        //this._AllChildren.Clear();
-    //        this._AllChildren = value;
-    //    }
-    //}
 
     void Awake()
     {
@@ -126,7 +97,6 @@ public class CoreChip : CommonChip
         // THIS IS SO JOINTS WORK ON THE SERVER
         // THE CLIENT WILL SEND CONTROL COMMANDS TO THE SERVER WHICH WILL THEN ACT ON THEM
         base.OnStartClient();
-        //this.CmdTriggerSpawn();
     }
 
     [Server]
@@ -170,7 +140,15 @@ public class CoreChip : CommonChip
             {
                 print($"{this.netId}: triggering spawn: netids: {this.netIds.Length} oldnetids: {this.oldNetIds.Length} cltcounter: {this.cltResetCounter} srvcounter: {this.srvResetCounter} model strings equal: {this.loadedModelString == this.modelString}");
                 this.VirtualModel = VModel.FromLuaModel(this.modelString);
+                this.VirtualModel.AddModelChangedCallback(
+                    x => {
+                        var s = x.ToLuaString();
+                        this.CmdLoadString(s);
+                    }
+                );
                 this.TriggerSpawn();
+                this.SrvFreezeClientModel(true);
+                this.frozen = true;
                 this.oldNetIds = this.netIds;
                 this.loadedModelString = this.modelString;
                 this.cltResetCounter = this.srvResetCounter;
@@ -180,6 +158,11 @@ public class CoreChip : CommonChip
                 //}
                 print($"{this.netId}: finished spawn");
             }
+        }
+        else if (this.frozen)
+        {
+            this.SrvFreezeClientModel(this.freeze);
+            this.frozen = false;
         }
         //return;
         foreach (var rtf in this.RuntimeFunctions)
@@ -199,7 +182,6 @@ public class CoreChip : CommonChip
     [Command]
     public void CmdLoadString(string state)
     {
-        this.RuntimeFunctions.Clear();
         this.LoadString(state);
     }
 
@@ -223,16 +205,18 @@ public class CoreChip : CommonChip
         }
 
         this.VirtualModel = model;
+        this.history.SaveState(this.modelString);
         //this.TriggerSpawn(true);
-        this.VirtualModel.AddModelChangedCallback(x => {
-            this.srvResetCounter += 1;
-            this.history.SaveState(this.modelString);
-            //this.modelString = x.ToLuaString();
-        });
+        //this.VirtualModel.AddModelChangedCallback(x => {
+        //    //this.srvResetCounter += 1;
+        //    this.history.SaveState(this.modelString);
+        //    //this.modelString = x.ToLuaString();
+        //});
         //this.VirtualModel.AddModelChangedCallback(x => this.history.SaveState(this.VirtualModel.ToLuaString()));
 
         this.keysToCheck = this.GetInputCharactersFromModel(state);
 
+        StartCoroutine(this.GenerateChips());
         foreach (Action a in this.OnLoadedCallbacks)
         {
             a();
@@ -271,17 +255,17 @@ public class CoreChip : CommonChip
         return ks.ToArray();
     }
 
-    [Command]
-    public void CmdUndoHistory()
-    {
-        this.LoadString(this.history.Undo());
-    }
+    //[Command]
+    //public void CmdUndoHistory()
+    //{
+    //    this.LoadString(this.history.Undo());
+    //}
 
-    [Command]
-    public void CmdRedoHistory()
-    {
-        this.LoadString(this.history.Redo());
-    }
+    //[Command]
+    //public void CmdRedoHistory()
+    //{
+    //    this.LoadString(this.history.Redo());
+    //}
 
     [Command]
     public void CmdTriggerSpawn()
@@ -293,22 +277,20 @@ public class CoreChip : CommonChip
     public void CmdResetCore()
     {
         print($"clt=>srv: CmdResetCore");
-        // delete after build listeners
-        // sends to host as well
-        this.RpcResetRotationVelocity();
-        Action[] actions = new Action[] { };
-        this.SetAfterBuildListeners(actions);
-        this.RpcRetrigger();
+        this.rb.isKinematic = true;
+        this.transform.rotation = Quaternion.identity;
+        this.srvResetCounter += 1;
     }
 
     [Command]
     public void CmdResetToDefaultLocation()
     {
         print($"clt=>srv: CmdResetToDefaultLocation");
-        this.RpcResetLocation();
-        this.RpcResetRotationVelocity();
-        this.SetAfterBuildListeners(new Action[] { });
-        this.RpcRetrigger();
+        this.rb.isKinematic = true;
+        Vector3 spawnPosition = StaticChip.RaycastFromAbove();
+        this.transform.position = spawnPosition;
+        this.transform.rotation = Quaternion.identity;
+        this.srvResetCounter += 1;
     }
 
     [ClientRpc]
@@ -378,6 +360,7 @@ public class CoreChip : CommonChip
             CommonChip newChild = GeometricChip.InstantiateChip<CommonChip>(childType);
             newChild.myCoreNetId = this.netId;
             newChild.stringId = vc.id;
+            newChild.rb.isKinematic = true;
             allchildren.Add(newChild);
             NetworkServer.Spawn(newChild.gameObject);
         }
@@ -454,10 +437,6 @@ public class CoreChip : CommonChip
         this.scriptInstance.LinkSensors(this.VirtualModel);
         //}
 
-        if (this.freeze)
-        {
-            this.SrvFreezeClientModel();
-        }
         foreach (var a in this._AfterBuildActions)
         {
             a();
@@ -482,9 +461,8 @@ public class CoreChip : CommonChip
     }
 
     [Server]
-    public void SrvFreezeClientModel()
+    public void SrvFreezeClientModel(bool f)
     {
-        print($"srv: FreeClientModel");
         Debug.Assert(!this.isClientOnly);
         Debug.Assert(this.isServer);
         if (!this.IsCore)
@@ -500,7 +478,7 @@ public class CoreChip : CommonChip
             var r = chip.GetComponent<Rigidbody>();
             if (r != null)
             {
-                chip.GetComponent<Rigidbody>().isKinematic = true;
+                r.isKinematic = f;
             }
         }
     }
