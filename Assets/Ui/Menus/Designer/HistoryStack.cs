@@ -11,15 +11,20 @@ public class HistoryStack
     public void SaveState(string state)
     {
         //PRINT.IPrint($"Pushing new state");
-        this.pastEdits.Push(state);
-        this.futureEdits.Clear();  // clear future edits once a new state is saved
+        if (this.pastEdits.Count > 0 && this.pastEdits.Peek() != state)
+        {
+            this.pastEdits.Push(state);
+        }
+        else if (this.pastEdits.Count == 0)
+        {
+            this.pastEdits.Push(state);
+        }
     }
 
     public string Undo()
     {
         if (this.pastEdits.Count == 1)
             return this.pastEdits.Peek();
-        //throw new InvalidOperationException("No more states to undo.");
 
         if (this.pastEdits.Count == 0)
             return CoreChip.ClientCoreChip.VirtualModel.ToLuaString();
@@ -38,8 +43,6 @@ public class HistoryStack
             }
             return this.pastEdits.Peek();
         }
-        //throw new InvalidOperationException("No more states to redo.");
-
         var state = this.futureEdits.Pop();
         this.pastEdits.Push(state);
         return state;
