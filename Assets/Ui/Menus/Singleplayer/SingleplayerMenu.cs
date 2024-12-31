@@ -136,7 +136,7 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
             //    },
             () => this.Hud.LinkCore(this.core),
             () => {
-                Camera.main.transform.position = this.core.transform.position + Vector3.up * 10f;
+                //Camera.main.transform.position = this.core.transform.position + Vector3.up * 10f;
             }
         };
 
@@ -149,8 +149,9 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
         Debug.Log("TODO: add HUD");
         //this.Hud.LinkCore(this.core);
 
-        Camera.main.transform.position = (Camera.main.transform.position - core.transform.position).normalized * 5f + core.transform.position;
-        Camera.main.transform.LookAt(core.transform.position);
+        //Camera.main.transform.position = (Camera.main.transform.position - core.transform.position).normalized * 5f + core.transform.position;
+        //Camera.main.transform.LookAt(core.transform.position);
+        Camera.main.transform.position = this.core.transform.position;
     }
 
     void CameraFollowMove()
@@ -160,10 +161,10 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
 
         if (this.core == null) { return; }
         Vector3 corePos = this.core.transform.position;
-        if ((camTransform.position - corePos).sqrMagnitude > 1025)
-        {
-            camTransform.position = corePos;
-        }
+        //if ((camTransform.position - corePos).sqrMagnitude > 1025)
+        //{
+        //    camTransform.position = corePos;
+        //}
         //float predict = cs.predict;
         //Vector3 coreAcceleration = 0.01f * (this.core.rb.velocity - this.lastCoreVelocity) + 0.99f * this.lastCoreAcceleration;
         //Vector3 error = corePos - this.lastCorePos;
