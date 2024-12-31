@@ -6,8 +6,17 @@ using UnityEngine;
 
 public abstract class BaseMenu : DeclaredProp
 {
-    public static HashSet<BaseMenu> allMenus = new HashSet<BaseMenu>();
-    public static HashSet<Type> allMenuTypes = new HashSet<Type>();
+    public static HashSet<BaseMenu> _allMenus = new HashSet<BaseMenu>();
+    public static HashSet<BaseMenu> allMenus
+    {
+        get
+        {
+            // Going offline resets the scene and static variables persist
+            BaseMenu._allMenus = BaseMenu._allMenus.Where(x => x != null).ToHashSet();
+            return _allMenus;
+        }
+    }
+    public static IEnumerable<Type> allMenuTypes => BaseMenu.allMenus.Select(x => x.GetType());
     public static Stack<BaseMenu> lastMenu = new Stack<BaseMenu>();
 
     public CallbackArray selectedCallbacks = new CallbackArray(true);
@@ -54,7 +63,8 @@ public abstract class BaseMenu : DeclaredProp
         {
             if (BaseMenu.mainMenu is not null)
             {
-                throw new Exception("Cannot assign main menu item twice!!");
+                //throw new Exception("Cannot assign main menu item twice!!");
+                print("Cannot assign main menu item twice!!");
             }
             BaseMenu.mainMenu = value;
         }
@@ -63,7 +73,6 @@ public abstract class BaseMenu : DeclaredProp
     public override void Setup()
     {
         BaseMenu.allMenus.Add(this);
-        BaseMenu.allMenuTypes.Add(this.GetType());
     }
 
     protected virtual void Start()

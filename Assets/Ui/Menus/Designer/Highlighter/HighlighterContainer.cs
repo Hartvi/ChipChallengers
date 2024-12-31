@@ -11,16 +11,6 @@ public class HighlighterContainer : MonoBehaviour
     private GameObject HighlightingChip, NorthChip, SouthChip, EastChip, WestChip;
     private Action<VChip>[] HighlightCallbacks = new Action<VChip>[] { };
 
-    //void OnDisable()
-    //{
-    //    this.ParentHighlighter?.SetActive(false);
-    //}
-
-    //void OnEnable()
-    //{
-    //    this.ParentHighlighter?.SetActive(true);
-    //}
-
     public void InstantiateHighlighters()
     {
         this._ParentHighlighter = new GameObject("Highlighter");
@@ -32,7 +22,7 @@ public class HighlighterContainer : MonoBehaviour
         this.HighlightingChip.layer = 6;
         Renderer renderer = this.HighlightingChip.GetComponent<MeshRenderer>();
         Material m = renderer.material;
-        m.color = new Color(0.8f, 0.8f, 0.8f, 0.5f);
+        m.color = new Color(0.8f, 0.8f, 0.8f, 0.8f);
         m.SetTransparent();
 
         this.HighlightingChip.SetActive(false);
@@ -47,7 +37,7 @@ public class HighlighterContainer : MonoBehaviour
 
         renderer = this.NorthChip.GetComponent<MeshRenderer>();
         m = renderer.material;
-        m.color = new Color(0.0f, 0.0f, 0.8f, 0.5f);
+        m.color = new Color(0.0f, 0.0f, 0.8f, 0.8f);
         m.SetTransparent();
 
         this.NorthChip.SetActive(false);
@@ -60,7 +50,7 @@ public class HighlighterContainer : MonoBehaviour
 
         renderer = this.SouthChip.GetComponent<MeshRenderer>();
         m = renderer.material;
-        m.color = new Color(0.8f, 0.0f, 0.0f, 0.5f);
+        m.color = new Color(0.8f, 0.0f, 0.0f, 0.8f);
         m.SetTransparent();
 
         this.SouthChip.SetActive(false);
@@ -73,7 +63,7 @@ public class HighlighterContainer : MonoBehaviour
 
         renderer = this.EastChip.GetComponent<MeshRenderer>();
         m = renderer.material;
-        m.color = new Color(0.0f, 0.8f, 0.0f, 0.5f);
+        m.color = new Color(0.0f, 0.8f, 0.0f, 0.8f);
         m.SetTransparent();
 
         this.EastChip.SetActive(false);
@@ -86,7 +76,7 @@ public class HighlighterContainer : MonoBehaviour
 
         renderer = this.WestChip.GetComponent<MeshRenderer>();
         m = renderer.material;
-        m.color = new Color(0.8f, 0.8f, 0.0f, 0.5f);
+        m.color = new Color(0.8f, 0.8f, 0.0f, 0.8f);
         m.SetTransparent();
 
         this.WestChip.SetActive(false);
@@ -98,7 +88,8 @@ public class HighlighterContainer : MonoBehaviour
         this.EastChip.transform.SetParent(this.ParentHighlighter.transform);
     }
 
-    public void SetHighlightCallbacks(Action<VChip>[] vcs) {
+    public void SetHighlightCallbacks(Action<VChip>[] vcs)
+    {
         this.HighlightCallbacks = vcs;
     }
 
@@ -108,7 +99,7 @@ public class HighlighterContainer : MonoBehaviour
 
         CommonChip cc = CoreChip.ClientCoreChip.AllChips.FirstOrDefault(x => x.equivalentVirtualChip.id == chipId) as CommonChip;
 
-        if(cc is null)
+        if (cc is null)
         {
             //UnityEngine.Debug.LogWarning($"Clicked on a null object. ID: {chipId}, perhaps fix it to the second to last object");
             string parentId = chipId.Substring(0, chipId.Length - 1);
@@ -123,7 +114,7 @@ public class HighlighterContainer : MonoBehaviour
         //print($"Selected chip type: {cc.equivalentVirtualChip.ChipType}.");
         //print(cc.transform.rotation.eulerAngles);
 
-        Vector3 scalingVector = Vector3.one + Vector3.up * 0.1f;
+        Vector3 scalingVector = 0.5f * (Vector3.one + Vector3.up * 10f);
 
         var hc = this.HighlightingChip;
         hc.SetActive(true);
@@ -133,25 +124,25 @@ public class HighlighterContainer : MonoBehaviour
 
         hc = this.NorthChip;
         hc.SetActive(true);
-        hc.transform.position = cc.transform.position + GeometricChip.ChipSide*cc.transform.forward;
+        hc.transform.position = cc.transform.position + GeometricChip.ChipSide * cc.transform.forward;
         hc.transform.rotation = cc.transform.rotation;
         hc.transform.localScale = cc.transform.localScale.Multiply(scalingVector);
 
         hc = this.SouthChip;
         hc.SetActive(true);
-        hc.transform.position = cc.transform.position - GeometricChip.ChipSide*cc.transform.forward;
+        hc.transform.position = cc.transform.position - GeometricChip.ChipSide * cc.transform.forward;
         hc.transform.rotation = cc.transform.rotation;
         hc.transform.localScale = cc.transform.localScale.Multiply(scalingVector);
 
         hc = this.EastChip;
         hc.SetActive(true);
-        hc.transform.position = cc.transform.position + GeometricChip.ChipSide*cc.transform.right;
+        hc.transform.position = cc.transform.position + GeometricChip.ChipSide * cc.transform.right;
         hc.transform.rotation = cc.transform.rotation;
         hc.transform.localScale = cc.transform.localScale.Multiply(scalingVector);
 
         hc = this.WestChip;
         hc.SetActive(true);
-        hc.transform.position = cc.transform.position - GeometricChip.ChipSide*cc.transform.right;
+        hc.transform.position = cc.transform.position - GeometricChip.ChipSide * cc.transform.right;
         hc.transform.rotation = cc.transform.rotation;
         hc.transform.localScale = cc.transform.localScale.Multiply(scalingVector);
 

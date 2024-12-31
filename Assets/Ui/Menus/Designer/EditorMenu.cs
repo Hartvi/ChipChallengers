@@ -158,7 +158,7 @@ public class EditorMenu : BaseMenu, InputReceiver
         core.srvResetCounter += 1;
 
         // slow down physics to save power
-        Time.fixedDeltaTime = 0.1f;
+        //Time.fixedDeltaTime = 0.1f;
         // move the camera closer to be 5 meters away
         this._camera.transform.position = (this._camera.transform.position - core.transform.position).normalized * 5f + core.transform.position;
         this._camera.transform.LookAt(core.transform.position);
