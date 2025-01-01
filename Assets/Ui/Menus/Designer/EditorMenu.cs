@@ -291,7 +291,7 @@ public class EditorMenu : BaseMenu, InputReceiver
             }
             if (Input.GetKeyDown(KeyCode.O))
             {
-                this.LoadPanel.ActivatePanel(GameManager.Instance.GetModel());
+                this.LoadPanel.ActivatePanel(GameManager.Instance.GetModel
             }
             if (Input.GetKeyDown(KeyCode.P))
             {

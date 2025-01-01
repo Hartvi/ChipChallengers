@@ -1,8 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
 
 public class GoToSingleplayer : BaseTransition
 {
@@ -21,6 +16,7 @@ public class GoToSingleplayer : BaseTransition
 
     public static void Function()
     {
+        GameManager.isHost = true;
         BaseMenu.SwitchToMenu(typeof(SingleplayerMenu));
 
         BaseTransition.InvokeAfterClickedCallbacks(typeof(GoToSingleplayer));
