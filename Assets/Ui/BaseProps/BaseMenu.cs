@@ -32,25 +32,16 @@ public abstract class BaseMenu : DeclaredProp
         set
         {
             this._isSelected = value;
+            this.gameObject.SetActive(value);
 
             if (!value)
             {
                 this.deselectedCallbacks.Invoke();
-                //foreach (Action c in this.deselectedCallbacks)
-                //{
-                //    c();
-                //}
             }
             else
             {
-                //print($"{this.GetType()} is being selected");
                 this.selectedCallbacks.Invoke();
-                //foreach (Action c in this.selectedCallbacks)
-                //{
-                //    c();
-                //}
             }
-            this.gameObject.SetActive(value);
 
         }
     }
@@ -63,7 +54,7 @@ public abstract class BaseMenu : DeclaredProp
         {
             if (BaseMenu.mainMenu is not null)
             {
-                //throw new Exception("Cannot assign main menu item twice!!");
+                // This happens because static variables outlast the online->offline reset of the Mirror library
                 print("Cannot assign main menu item twice!!");
             }
             BaseMenu.mainMenu = value;
