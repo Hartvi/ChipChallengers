@@ -1,8 +1,6 @@
 
 ### TODO
-- find out why no chips get added in the editor
-- Somehow the modelstring isn't changed or the update triggerspawn isn't called or idk
-
+- test the multiplayer stuff
 
 - `+` in multiplayer: 
   - unspawn objects

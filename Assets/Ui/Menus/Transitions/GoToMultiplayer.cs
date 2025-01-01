@@ -1,25 +1,23 @@
 
-public class GoToSingleplayer : BaseTransition
+public class GoToMultiplayer : BaseTransition
 {
-
     public override void Setup()
     {
         base.Setup();
-        this.text.text = UIStrings.Singleplayer;
+        this.text.text = UIStrings.Multiplayer;
         this.text.fontSize = UIUtils.MediumFontSize;
     }
 
     protected override void Execute()
     {
-        GoToSingleplayer.Function();
+        GoToMultiplayer.Function();
     }
 
     public static void Function()
     {
-        GameManager.isHost = true;
+        GameManager.isHost = false;
         BaseMenu.SwitchToMenu(typeof(SingleplayerMenu));
 
-        BaseTransition.InvokeAfterClickedCallbacks(typeof(GoToSingleplayer));
+        BaseTransition.InvokeAfterClickedCallbacks(typeof(GoToMultiplayer));
     }
 }
-

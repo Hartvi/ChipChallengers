@@ -76,9 +76,7 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
     {
         base.Start();
         this.manager = GameObject.FindObjectOfType<NetworkManager>();
-        manager.StartHost();
 
-        //SingleplayerMenu.Instance = this;
         this.Hud = this.GetComponentInChildren<HUD>();
 
         this.mainCamera = Camera.main;
@@ -89,10 +87,6 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
 
         this.cameraFollowSettings = new CameraFollowSettings(posShift: Vector2.up * 3f + Vector2.right * 10f, predict: 0.05f, sensitivity: 1f, lowPass: 0f);
 
-        //Action[] deselectedChipCallbacks = new Action[] { () => UIManager.instance.TurnMeOff(this) };
-        //this.deselectedCallbacks.SetCallbacks(deselectedChipCallbacks);
-
-        //this.OnEnterMenu();
         this.selectedCallbacks.SetCallbacks(new Action[] { () => UIManager.instance.SwitchToMe(this), this.StartOnEnterMenu });
         this.selectedCallbacks.Invoke();
         this.deselectedCallbacks.SetCallbacks(new Action[] { this.OnLeaveMenu });
@@ -103,18 +97,17 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
     void OnLeaveMenu()
     {
         GameManager.RealTimeSettings.InMenu = true;
-        //Time.fixedDeltaTime = 0.1f;
     }
 
     void StartOnEnterMenu()
     {
         Debug.Assert(this.isActiveAndEnabled);
-        StartCoroutine(AsyncEnterMenu(true));
+        StartCoroutine(AsyncEnterMenu());
     }
 
-    private IEnumerator AsyncEnterMenu(bool host)
+    private IEnumerator AsyncEnterMenu()
     {
-        if (host)
+        if (GameManager.isHost)
         {
             manager.StartHost();
         }
