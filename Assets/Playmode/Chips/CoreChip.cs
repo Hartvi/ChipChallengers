@@ -141,7 +141,8 @@ public class CoreChip : CommonChip
                 print($"{this.netId}: triggering spawn: netids: {this.netIds.Length} oldnetids: {this.oldNetIds.Length} cltcounter: {this.cltResetCounter} srvcounter: {this.srvResetCounter} model strings equal: {this.loadedModelString == this.modelString}");
                 this.VirtualModel = VModel.FromLuaModel(this.modelString);
                 this.VirtualModel.AddModelChangedCallback(
-                    x => {
+                    x =>
+                    {
                         var s = x.ToLuaString();
                         this.CmdLoadString(s);
                     }

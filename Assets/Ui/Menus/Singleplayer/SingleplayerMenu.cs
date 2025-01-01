@@ -4,12 +4,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using System.Linq;
+using Mirror;
 
 public class SingleplayerMenu : BaseMenu, InputReceiver
 {
     //public static SingleplayerMenu Instance;
     public static VMap myVMap = new VMap();
     public static VScenario myVScenario = new VScenario();
+
+    NetworkManager manager;
 
     Camera mainCamera;
     //Vector3 oldLookAtPos = Vector3.zero;
@@ -72,6 +75,8 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
     protected override void Start()
     {
         base.Start();
+        this.manager = GameObject.FindObjectOfType<NetworkManager>();
+        manager.StartHost();
 
         //SingleplayerMenu.Instance = this;
         this.Hud = this.GetComponentInChildren<HUD>();
@@ -88,22 +93,40 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
         //this.deselectedCallbacks.SetCallbacks(deselectedChipCallbacks);
 
         //this.OnEnterMenu();
-        this.selectedCallbacks.SetCallbacks(new Action[] { this.OnEnterMenu, () => UIManager.instance.SwitchToMe(this) });
+        this.selectedCallbacks.SetCallbacks(new Action[] { () => UIManager.instance.SwitchToMe(this), this.StartOnEnterMenu });
         this.selectedCallbacks.Invoke();
         this.deselectedCallbacks.SetCallbacks(new Action[] { this.OnLeaveMenu });
 
         this.ControlsPanel = this.gameObject.GetComponentInChildren<ControlsPanel>(true);
-
-        this.core = CoreChip.ClientCoreChip;
-        //this.core.CmdResetToDefaultLocation();
-        // set the camera position, since it might not catch up fast enough
-        Camera.main.transform.position = this.core.transform.position + Vector3.up * 10f;
     }
 
     void OnLeaveMenu()
     {
         GameManager.RealTimeSettings.InMenu = true;
-        Time.fixedDeltaTime = 0.1f;
+        //Time.fixedDeltaTime = 0.1f;
+    }
+
+    void StartOnEnterMenu()
+    {
+        Debug.Assert(this.isActiveAndEnabled);
+        StartCoroutine(AsyncEnterMenu(true));
+    }
+
+    private IEnumerator AsyncEnterMenu(bool host)
+    {
+        if (host)
+        {
+            manager.StartHost();
+        }
+        else
+        {
+            manager.StartClient();
+        }
+        while (NetworkClient.localPlayer == null)
+        {
+            yield return null;
+        }
+        this.OnEnterMenu();
     }
 
     void OnEnterMenu()
@@ -134,24 +157,29 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
             //    this.core.TriggerSpawn(this.core.VirtualModel, false);
             //    this.core.transform.position += Vector3.up;
             //    },
-            () => this.Hud.LinkCore(this.core),
-            () => {
-                //Camera.main.transform.position = this.core.transform.position + Vector3.up * 10f;
-            }
+            //() => this.Hud.LinkCore(this.core),
+            //() => {
+            //    //Camera.main.transform.position = this.core.transform.position + Vector3.up * 10f;
+            //}
         };
 
         this.LoadPanel.SetOnLoadedCallbacks(onLoadedCallbacksTmp);
+        Action[] afterBuildListeners = new Action[] {
+            () =>
+            {
+                this.Hud.LinkCore(this.core);
+            }
+        };
+        this.core.SetAfterBuildListeners(afterBuildListeners);
 
         var mapLoadedCallbacks = onLoadedCallbacksTmp.Concat(new Action[] { this.core.CmdResetToDefaultLocation }).ToArray();
         this.MapPanel.SetOnLoadedCallbacks(mapLoadedCallbacks);
 
         //TODO: load model after entering playmode???
-        Debug.Log("TODO: add HUD");
-        //this.Hud.LinkCore(this.core);
+        //Debug.Log("TODO: add HUD");
+        //this.wud.LinkCore(this.core);
 
-        //Camera.main.transform.position = (Camera.main.transform.position - core.transform.position).normalized * 5f + core.transform.position;
-        //Camera.main.transform.LookAt(core.transform.position);
-        Camera.main.transform.position = this.core.transform.position;
+        Camera.main.transform.position = this.core.transform.position + 5f * Vector3.forward;
     }
 
     void CameraFollowMove()
@@ -161,34 +189,16 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
 
         if (this.core == null) { return; }
         Vector3 corePos = this.core.transform.position;
-        //if ((camTransform.position - corePos).sqrMagnitude > 1025)
-        //{
-        //    camTransform.position = corePos;
-        //}
-        //float predict = cs.predict;
-        //Vector3 coreAcceleration = 0.01f * (this.core.rb.velocity - this.lastCoreVelocity) + 0.99f * this.lastCoreAcceleration;
-        //Vector3 error = corePos - this.lastCorePos;
-        //Vector3 errorerror = error - this.lastCamError;
-        //Vector3 lookAtPos = Time.deltaTime * (10f * error + 10f * errorerror + 1f * this.camErrorSum) + this.lastCorePos;
-
         Vector3 lookAtPos = corePos;
 
         // the camera stays behind the object:
         Vector3 deltaPos = Mathf.Max(0f, (camTransform.position - corePos).magnitude - cs.posShift.x) * camTransform.forward;
 
         // camera stays above the object in world coordinates
-        //float deltaAltitude = (corePos.y + cs.posShift.y) - camTransform.position.y;
         Vector3 deltaPosY = 0.1f * (corePos.y + cs.posShift.y - camTransform.position.y) * camTransform.up;
-        //camTransform.position = camTransform.position + deltaPos + deltaAltitude * Vector3.up;
         camTransform.position = camTransform.position + deltaPos + deltaPosY;
 
         camTransform.LookAt(lookAtPos);
-        //this.lastCorePos = lookAtPos;
-        //this.lastCamError = error;
-        //this.camErrorSum += error;
-
-        //this.lastCoreVelocity = this.core.rb.velocity;
-        //this.lastCoreAcceleration = coreAcceleration;
     }
 
     void CameraCopyInside()
@@ -256,8 +266,8 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
 
     void InputReceiver.OnStartReceiving()
     {
-        return;
-        CoreChip.ClientCoreChip.CmdUnfreezeClientModel();
+        //return;
+        //CoreChip.ClientCoreChip.CmdUnfreezeClientModel();
     }
 
     void InputReceiver.OnStopReceiving()

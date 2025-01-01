@@ -2,10 +2,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Mirror;
 
 public class MainMenu : BaseMainMenu, InputReceiver
 {
     float numberOfButtons = 5f;
+    NetworkManager manager;
+
     public override void Setup()
     {
         base.Setup();
@@ -18,6 +21,7 @@ public class MainMenu : BaseMainMenu, InputReceiver
                     new VirtualProp(PropType.Panel, 0.2f),
                     new VirtualProp(PropType.Panel, 0.6f, Vector2Int.down,
                         new VirtualProp(PropType.Button, btnHeight, typeof(GoToSingleplayer)),
+                        //new VirtualProp(PropType.Button, btnHeight, typeof(GoToMultiplayer)),
                         new VirtualProp(PropType.Button, btnHeight, typeof(GoToEditor)),
                         new VirtualProp(PropType.Button, btnHeight, typeof(GoToSettings))
                     //new VirtualProp(PropType.Button, btnHeight, typeof(GoToSingleplayer)),
@@ -52,6 +56,8 @@ public class MainMenu : BaseMainMenu, InputReceiver
 
         // load default map so it show in singleplayer, settings, editor and all the other menus!!!
         SingleplayerMenu.myVMap.LoadNewMap(VMap.DefaultFileName);
+
+        this.manager = GameObject.FindObjectOfType<NetworkManager>();
     }
 
     void InputReceiver.OnStartReceiving() { }

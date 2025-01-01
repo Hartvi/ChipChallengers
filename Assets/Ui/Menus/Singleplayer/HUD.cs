@@ -42,12 +42,12 @@ public class HUD : TopProp
     void UpdateVariableDisplay()
     {
         VVar[] vars = this.variables;
-        if(vars is null)
+        if (vars is null)
         {
             return;
         }
         List<VVar> tmpDisplayVariables = new List<VVar>();
-        for(int i = 0; i < vars.Length; ++i)
+        for (int i = 0; i < vars.Length; ++i)
         {
             if (!string.IsNullOrWhiteSpace(vars[i].name))
             {
@@ -62,7 +62,7 @@ public class HUD : TopProp
         this.CurrentNameTxts = this.CurrentNames.Select(x => x.GetComponent<TMP_Text>()).ToArray();
         this.CurrentValueTxts = this.CurrentValues.Select(x => x.GetComponent<TMP_Text>()).ToArray();
 
-        for(int i = 0; i < this.CurrentNames.Length; ++i)
+        for (int i = 0; i < this.CurrentNames.Length; ++i)
         {
             TMP_Text nameTxt = this.CurrentNames[i].GetComponent<TMP_Text>();
             nameTxt.SetText(this.displayVariables[i].name);
@@ -79,11 +79,11 @@ public class HUD : TopProp
     void Update()
     {
         if (this.displayVariables == null) { return; }
-        for(int i = 0; i < this.displayVariables.Length; ++i)
+        for (int i = 0; i < this.displayVariables.Length; ++i)
         {
             // TODO: variable was outside of bounds
             var t = this.displayVariables[i].currentValue.ToString();
-            if(this.CurrentValues.Length == i) { break; }
+            if (this.CurrentValues.Length == i) { break; }
             this.CurrentValueTxts[i].SetText(t);
         }
     }
@@ -94,7 +94,7 @@ public class HUD : TopProp
         this.vModel = vModel;
         UpdateVariableDisplay();
     }
-    
+
     void LinkFocus(CommonChip f)
     {
         this.velocityHUD.SetFocus(f);
@@ -112,7 +112,7 @@ public class HUD : TopProp
     {
         var items = this.GetComponentsInChildren<ItemBase>(true);
 
-        foreach(var it in items)
+        foreach (var it in items)
         {
             it.GetComponent<TMP_Text>().fontSize = UIUtils.SmallFontSize;
         }
