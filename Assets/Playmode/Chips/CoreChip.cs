@@ -419,7 +419,6 @@ public class CoreChip : CommonChip
         this.myCore = this;
         // AllChildren on the client
         this.AllChildren = this.AddChildren(this);  // trigger the tsunami
-        //print($"all children: {this.AllChildren.Length}");
 
         // TODO: remove this and FIX Clipboard
         if (this.VirtualModel.chips.Length != this.AllChips.Length)
@@ -428,19 +427,46 @@ public class CoreChip : CommonChip
             // this is to register chips that haven't been added in
             this.VirtualModel.SetChipsWithoutNotify(this.AllChips.Select(x => x.equivalentVirtualChip).ToArray());
         }
-        //if (this.isLocalPlayer)
-        //{
         foreach (var rc in this.AllChildren)
         {
             Debug.Assert(rc.equivalentVirtualChip != null);
-            //print($"{this.netId}, {rc.netId}: {this.VirtualModel.chips.First(x => x == rc.equivalentVirtualChip)}");
         }
         this.scriptInstance.LinkSensors(this.VirtualModel);
-        //}
+        this.UncollideNeighbours((CommonChip[])this.AllChips);
 
         foreach (var a in this._AfterBuildActions)
         {
             a();
+        }
+    }
+
+    void UncollideNeighbours(CommonChip[] ccs)
+    {
+        foreach (var chip in ccs)
+        {
+            CommonChip parent = (CommonChip)chip.parentChip;
+            // Ignore collisions between parent and child
+            // Degree of separation = 1
+            if (parent != null)
+            {
+                Physics.IgnoreCollision(parent.GetComponent<Collider>(), chip.GetComponent<Collider>());
+            }
+            var childChips = ccs.Where(x => x.parentChip == chip);
+            foreach (var childChip in childChips)
+            {
+                // Degree of separation = 2
+                if (parent != null)
+                {
+                    Physics.IgnoreCollision(parent.GetComponent<Collider>(), childChip.GetComponent<Collider>());
+                }
+                foreach (var otherChildChip in childChips)
+                {
+                    if (otherChildChip != childChip)
+                    {
+                        Physics.IgnoreCollision(otherChildChip.GetComponent<Collider>(), childChip.GetComponent<Collider>());
+                    }
+                }
+            }
         }
     }
 
@@ -563,4 +589,21 @@ public class CoreChip : CommonChip
         this.inputMessage.MousePos = mouse;
     }
 
+    void OnDestroy()
+    {
+        if (!this.isServer) { return; }
+        foreach(var c in this.AllChildren)
+        {
+            NetworkServer.Destroy(c.gameObject);
+        }
+    }
+
+    public override void OnStopServer()
+    {
+        if (!this.isServer) { return; }
+        foreach(var c in this.AllChildren)
+        {
+            NetworkServer.Destroy(c.gameObject);
+        }
+    }
 }
