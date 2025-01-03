@@ -133,7 +133,7 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
         // ignore wheel to wheel collisions
         Physics.IgnoreLayerCollision(7, 7);
         // ignore player to player collisions
-        Physics.IgnoreLayerCollision(6, 6);
+        //Physics.IgnoreLayerCollision(6, 6);
         // ignore wheel to player collisions
         Physics.IgnoreLayerCollision(7, 6);
 
