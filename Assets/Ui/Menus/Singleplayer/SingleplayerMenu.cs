@@ -107,13 +107,20 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
 
     private IEnumerator AsyncEnterMenu()
     {
+        if (manager.isNetworkActive)
+        {
+            this.OnEnterMenu();
+            yield break;
+        }
         if (GameManager.isHost)
         {
             manager.StartHost();
+            print("Singleplayer start host");
         }
         else
         {
             manager.StartClient();
+            print("Singleplayer start client");
         }
         while (NetworkClient.localPlayer == null)
         {
@@ -266,6 +273,7 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
     void InputReceiver.OnStopReceiving()
     {
         //print($"Singleplayer menu stopping receiving");
+        if (NetworkClient.localPlayer == null) return;
         CoreChip.ClientCoreChip.CmdFreezeClientModel();
     }
 

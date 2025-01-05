@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using TMPro;
+using Mirror;
 
 public class VariablePanel : BaseSidePanel, InputReceiver
 {
@@ -36,6 +37,16 @@ public class VariablePanel : BaseSidePanel, InputReceiver
 
     void Start()
     {
+        StartCoroutine(AsyncStart());
+    }
+
+    IEnumerator AsyncStart()
+    {
+        while (true)
+        {
+            if (NetworkClient.localPlayer == null) { yield return null; }
+            else { break; }
+        }
         this.backgroundImage = this.GetComponentInChildren<BaseImage>();
         //this.backgroundImage.image.color = new Color(0.9f, 0.9f, 0.9f);
 

@@ -1,6 +1,10 @@
 
 ### TODO
+- done: order: multiplayer -> editor -> somewhere else -> core is null and we are still attempting to connect to a server... 
+- Fix when going directly from main menu to editor to wait for the core to spawn
 - test the multiplayer stuff
+  - show variable values in the HUD even on the client
+  - in multiplayer: add option to enter IP address
   - make sure that transitioning from playmode to editor makes the client disconnect and then reconnect to its own host for now
   - when a player disconnects as a client, delete all of his chips
   - when you disconnect as host - WHAT happens?

@@ -96,7 +96,6 @@ public class HighlighterContainer : MonoBehaviour
     public CommonChip SelectVChip(string chipId)
     {
         // TODO make the assignment from this function more secure, maybe `out CommonChip selectedChip`? and `bool` return
-
         CommonChip cc = CoreChip.ClientCoreChip.AllChips.FirstOrDefault(x => x.equivalentVirtualChip.id == chipId) as CommonChip;
 
         if (cc is null)

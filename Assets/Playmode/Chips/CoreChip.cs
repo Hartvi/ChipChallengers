@@ -83,7 +83,7 @@ public class CoreChip : CommonChip
         }
     }
 
-    public CommonChip[] AllChildren;
+    public CommonChip[] AllChildren = { };
 
     void Awake()
     {
@@ -432,11 +432,22 @@ public class CoreChip : CommonChip
             Debug.Assert(rc.equivalentVirtualChip != null);
         }
         this.scriptInstance.LinkSensors(this.VirtualModel);
-        this.UncollideNeighbours((CommonChip[])this.AllChips);
+        this.UncollideModel((CommonChip[])this.AllChips);
 
         foreach (var a in this._AfterBuildActions)
         {
             a();
+        }
+    }
+
+    void UncollideModel(CommonChip[] ccs)
+    {
+        foreach (var chip in ccs)
+        {
+            foreach (var otherChip in ccs)
+            {
+                Physics.IgnoreCollision(chip.GetComponent<Collider>(), otherChip.GetComponent<Collider>());
+            }
         }
     }
 
@@ -589,19 +600,10 @@ public class CoreChip : CommonChip
         this.inputMessage.MousePos = mouse;
     }
 
-    void OnDestroy()
-    {
-        if (!this.isServer) { return; }
-        foreach(var c in this.AllChildren)
-        {
-            NetworkServer.Destroy(c.gameObject);
-        }
-    }
-
     public override void OnStopServer()
     {
         if (!this.isServer) { return; }
-        foreach(var c in this.AllChildren)
+        foreach (var c in this.AllChildren)
         {
             NetworkServer.Destroy(c.gameObject);
         }

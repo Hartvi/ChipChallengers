@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    public static bool isHost = false;
+    public static bool isHost = true;
     public void SetModel(string m)
     {
         //print($"setting model to {m}");
