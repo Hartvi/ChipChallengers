@@ -1,14 +1,16 @@
 
 ### TODO
-- done: order: multiplayer -> editor -> somewhere else -> core is null and we are still attempting to connect to a server... 
-- Fix when going directly from main menu to editor to wait for the core to spawn
 - test the multiplayer stuff
-  - show variable values in the HUD even on the client
-  - in multiplayer: add option to enter IP address
-  - make sure that transitioning from playmode to editor makes the client disconnect and then reconnect to its own host for now
-  - when a player disconnects as a client, delete all of his chips
-  - when you disconnect as host - WHAT happens?
-  - Make collisions possible between models - only disable collisions between neighbouring chips - do this during triggerspawn
+  - done: show variable values in the hud even on the client
+  - when you disconnect as host - make clients go to main menu
+  - make sure that transitioning from playmode as a client to editor makes the client disconnect and then reconnect to its own host for now
+  - make bullets visible among clients
+  - make sound heard across clients
+  - done: in multiplayer: add option to enter ip address
+  - done: when a player disconnects as a client, delete all of his chips
+  - done: Make collisions possible between models - only disable collisions between neighbouring chips - do this during triggerspawn
+- done: order: multiplayer -> editor -> somewhere else -> core is null and we are still attempting to connect to a server... 
+- done: fix when going directly from main menu to editor to wait for the core to spawn
 
 - `+` in multiplayer: 
   - unspawn objects

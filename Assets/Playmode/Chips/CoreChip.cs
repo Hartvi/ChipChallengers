@@ -11,6 +11,9 @@ public class CoreChip : CommonChip
     public List<BaseAspect> RuntimeFunctions = new List<BaseAspect>();
 
     [SyncVar]
+    float[] variableValues = new float[0];
+
+    [SyncVar]
     public string modelString = null;
     public string loadedModelString = null;
     [SyncVar]
@@ -206,14 +209,8 @@ public class CoreChip : CommonChip
         }
 
         this.VirtualModel = model;
+        this.variableValues = new float[model.variables.Length];
         this.history.SaveState(this.modelString);
-        //this.TriggerSpawn(true);
-        //this.VirtualModel.AddModelChangedCallback(x => {
-        //    //this.srvResetCounter += 1;
-        //    this.history.SaveState(this.modelString);
-        //    //this.modelString = x.ToLuaString();
-        //});
-        //this.VirtualModel.AddModelChangedCallback(x => this.history.SaveState(this.VirtualModel.ToLuaString()));
 
         this.keysToCheck = this.GetInputCharactersFromModel(state);
 
@@ -547,44 +544,66 @@ public class CoreChip : CommonChip
         this._AfterBuildActions = actions;
     }
 
+    void SetVariablesSync()
+    {
+        float[] newVars = new float[this.VirtualModel.variables.Length];
+        for (int i = 0; i < this.VirtualModel.variables.Length; ++i)
+        {
+            newVars[i] = this.VirtualModel.variables[i].currentValue;
+        }
+        this.variableValues = newVars;
+    }
+
+    [Client]
+    void TransferControls()
+    {
+        List<char> ks = new List<char>();
+        List<char> kds = new List<char>();
+        List<char> kus = new List<char>();
+        foreach (var k in this.keysToCheck)
+        {
+            if (Input.GetKey(InputHelper.chartoKeycode[k]))
+            {
+                ks.Add(k);
+            }
+            if (Input.GetKeyDown(InputHelper.chartoKeycode[k]))
+            {
+                kds.Add(k);
+            }
+            if (Input.GetKeyUp(InputHelper.chartoKeycode[k]))
+            {
+                kus.Add(k);
+            }
+        }
+        bool[] bs = new bool[3] { Input.GetMouseButton(0), Input.GetMouseButton(1), Input.GetMouseButton(2) };
+        bool[] bds = new bool[3] { Input.GetMouseButtonDown(0), Input.GetMouseButtonDown(1), Input.GetMouseButtonDown(2) };
+        bool[] bus = new bool[3] { Input.GetMouseButtonUp(0), Input.GetMouseButtonUp(1), Input.GetMouseButtonUp(2) };
+        float[] mouse = new float[2] { Input.mousePosition.x, Input.mousePosition.y };
+        this.CmdSendInputsToServer(ks.ToArray(), kds.ToArray(), kus.ToArray(), bs, bds, bus, mouse);
+    }
+
+    [Client]
+    void SetSyncVariableValues()
+    {
+        for (int i = 0; i < this.variableValues.Length; ++i)
+        {
+            this.VirtualModel.variables[i].currentValue = this.variableValues[i];
+        }
+    }
+
     public void HandleInputs()
     {
         if (this.isServer)
         {
             this.loopScript?.HandleInputs();
+            this.SetVariablesSync();
         }
 
         if (this.isLocalPlayer)
         {
-            List<char> ks = new List<char>();
-            List<char> kds = new List<char>();
-            List<char> kus = new List<char>();
-            foreach (var k in this.keysToCheck)
-            {
-                if (Input.GetKey(InputHelper.chartoKeycode[k]))
-                {
-                    ks.Add(k);
-                }
-                if (Input.GetKeyDown(InputHelper.chartoKeycode[k]))
-                {
-                    kds.Add(k);
-                }
-                if (Input.GetKeyUp(InputHelper.chartoKeycode[k]))
-                {
-                    kus.Add(k);
-                }
-            }
-            bool[] bs = new bool[3] { Input.GetMouseButton(0), Input.GetMouseButton(1), Input.GetMouseButton(2) };
-            bool[] bds = new bool[3] { Input.GetMouseButtonDown(0), Input.GetMouseButtonDown(1), Input.GetMouseButtonDown(2) };
-            bool[] bus = new bool[3] { Input.GetMouseButtonUp(0), Input.GetMouseButtonUp(1), Input.GetMouseButtonUp(2) };
-            float[] mouse = new float[2] { Input.mousePosition.x, Input.mousePosition.y };
-            this.CmdSendInputsToServer(ks.ToArray(), kds.ToArray(), kus.ToArray(), bs, bds, bus, mouse);
-
+            this.TransferControls();
+            SetSyncVariableValues();
         }
-        //foreach (char c in this.inputMessage.Keys)
-        //{
-        //    print($"PRESSED KEY: {c}");
-        //}
     }
 
     [Command]

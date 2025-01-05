@@ -93,8 +93,6 @@ public class EditorMenu : BaseMenu, InputReceiver
         this.SavePanel = this.GetComponentInChildren<SavePanel>();
         this.LoadPanel = this.GetComponentInChildren<LoadPanel>();
 
-        //this.OnEnterMenu();
-
         Action[] selectedChipCallbacks = new Action[] {
             this.StartOnEnterMenu,
             () => UIManager.instance.SwitchToMe(this)
@@ -103,7 +101,6 @@ public class EditorMenu : BaseMenu, InputReceiver
         this.selectedCallbacks.Invoke();
 
         Action[] deselectedChipCallbacks = new Action[] { this.OnLeaveMenu };
-        //Action[] deselectedChipCallbacks = new Action[] { this.OnLeaveMenu, () => UIManager.instance.TurnMeOff(this) };
         this.deselectedCallbacks.SetCallbacks(deselectedChipCallbacks);
 
         this.ControlsPanel = this.gameObject.GetComponentInChildren<ControlsPanel>(true);
