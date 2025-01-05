@@ -21,6 +21,7 @@ public class GoToEditor : BaseTransition
 
     public static void Function()
     {
+        GameManager.isHost = true;
         BaseMenu.SwitchToMenu(typeof(EditorMenu));
 
         BaseTransition.InvokeAfterClickedCallbacks(typeof(GoToEditor));

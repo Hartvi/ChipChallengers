@@ -6,6 +6,7 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using Mirror;
 
 public class ChipPanel : BaseSidePanel, InputReceiver
 {
@@ -21,6 +22,17 @@ public class ChipPanel : BaseSidePanel, InputReceiver
 
     void Start()
     {
+        StartCoroutine(AsyncStart());
+    }
+
+
+    IEnumerator AsyncStart()
+    {
+        while (true)
+        {
+            if (NetworkClient.localPlayer == null) { yield return null; }
+            else { break; }
+        }
         this.backgroundImage = this.GetComponentInChildren<BaseImage>();
 
         var items = GetComponentsInChildren<ItemBase>();

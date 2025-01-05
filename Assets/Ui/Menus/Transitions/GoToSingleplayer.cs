@@ -17,6 +17,7 @@ public class GoToSingleplayer : BaseTransition
     public static void Function()
     {
         GameManager.isHost = true;
+        // inherit is host from other menus
         BaseMenu.SwitchToMenu(typeof(SingleplayerMenu));
 
         BaseTransition.InvokeAfterClickedCallbacks(typeof(GoToSingleplayer));

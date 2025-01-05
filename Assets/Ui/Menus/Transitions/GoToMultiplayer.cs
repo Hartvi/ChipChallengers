@@ -1,3 +1,4 @@
+using Mirror;
 
 public class GoToMultiplayer : BaseTransition
 {
@@ -15,9 +16,23 @@ public class GoToMultiplayer : BaseTransition
 
     public static void Function()
     {
-        GameManager.isHost = false;
-        BaseMenu.SwitchToMenu(typeof(SingleplayerMenu));
+        global::MainMenu.goToMultiplayerMenu = true;
+        BaseMenu.SwitchToMenu(typeof(MultiplayerMenu));
 
         BaseTransition.InvokeAfterClickedCallbacks(typeof(GoToMultiplayer));
+        GameManager.isHost = false;
+        if (NetworkClient.isConnected)
+        {
+            if (NetworkServer.activeHost)
+            {
+                print($"ConnectToHost: Stopping host");
+                NetworkManager.singleton.StopHost();
+            }
+            else if (NetworkClient.active)
+            {
+                print($"ConnectToHost: Stopping client");
+                NetworkManager.singleton.StopClient();
+            }
+        }
     }
 }

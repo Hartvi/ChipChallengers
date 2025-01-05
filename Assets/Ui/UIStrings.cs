@@ -51,6 +51,7 @@ public static class UIStrings
     public const string MainMenu = "Main menu";
     public const string Editor = "Editor";
     public const string Singleplayer = "Singleplayer";
+    public const string ConnectToServer = "Connect";
     public const string Multiplayer = "Multiplayer";
     public const string Settings = "Settings";
 

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Mirror;
 
 public class ScriptPanel : BaseSidePanel, InputReceiver
 {
@@ -20,6 +21,18 @@ public class ScriptPanel : BaseSidePanel, InputReceiver
 
     void Start()
     {
+        StartCoroutine(AsyncStart());
+    }
+
+    IEnumerator AsyncStart()
+    {
+        while (true)
+        {
+            if (NetworkClient.localPlayer == null) { yield return null; }
+            else { break; }
+        }
+
+        // asdfsd
         CoreChip core = CoreChip.ClientCoreChip;
         this.input = this.GetComponentInChildren<BaseInput>();
         this.btn = this.GetComponentInChildren<DragButton>();
@@ -48,13 +61,13 @@ public class ScriptPanel : BaseSidePanel, InputReceiver
         t.position = new Vector2(mousePos.x, t.position.y);
 
         // position offset between the two = half of input field + half of button
-        float btnHalfWidth = t.gameObject.RT().sizeDelta.x*0.5f;
-        
+        float btnHalfWidth = t.gameObject.RT().sizeDelta.x * 0.5f;
+
         // center of field without button is avg(screen width, mouse pos)
 
         this.input.transform.position = new Vector2((Screen.width + mousePos.x + btnHalfWidth) * 0.5f, this.input.transform.position.y);
         this.input.RT.sizeDelta = new Vector2(Screen.width - mousePos.x - btnHalfWidth, this.input.RT.sizeDelta.y);
-         //+ mousePos.x*0.5f
+        //+ mousePos.x*0.5f
     }
 
     void OnEnable()
@@ -65,7 +78,14 @@ public class ScriptPanel : BaseSidePanel, InputReceiver
         this.input.input.SetTextWithoutNotify(CoreChip.ClientCoreChip.VirtualModel.script);
     }
 
-    public bool IsSelected => this.input.input.isFocused;
+    public bool IsSelected
+    {
+        get
+        {
+            if (this.input == null) { return false; }
+            return this.input.input.isFocused;
+        }
+    }
 
 
     void Update()

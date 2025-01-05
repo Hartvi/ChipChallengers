@@ -3,11 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using Mirror;
 
 
 public class EditorMenu : BaseMenu, InputReceiver
 {
     public static EditorMenu Instance;
+
+    NetworkManager manager;
 
     private Camera _camera;
     public CommonChip _selectedChip;
@@ -71,6 +74,7 @@ public class EditorMenu : BaseMenu, InputReceiver
     protected override void Start()
     {
         base.Start();
+        this.manager = GameObject.FindObjectOfType<NetworkManager>();
 
         // persistent object/variables
         EditorMenu.Instance = this;
@@ -92,8 +96,7 @@ public class EditorMenu : BaseMenu, InputReceiver
         //this.OnEnterMenu();
 
         Action[] selectedChipCallbacks = new Action[] {
-            CoreChip.ClientCoreChip.CmdFreezeClientModel,
-            this.OnEnterMenu,
+            this.StartOnEnterMenu,
             () => UIManager.instance.SwitchToMe(this)
         };
         this.selectedCallbacks.SetCallbacks(selectedChipCallbacks);
@@ -106,8 +109,52 @@ public class EditorMenu : BaseMenu, InputReceiver
         this.ControlsPanel = this.gameObject.GetComponentInChildren<ControlsPanel>(true);
     }
 
+    void StartOnEnterMenu()
+    {
+        Debug.Assert(this.isActiveAndEnabled);
+        StartCoroutine(AsyncEnterMenu());
+    }
+
+    private IEnumerator AsyncEnterMenu()
+    {
+        if (manager.isNetworkActive)
+        {
+            this.OnEnterMenu();
+            yield break;
+        }
+        if (GameManager.isHost)
+        {
+            manager.StartHost();
+        }
+        else
+        {
+            manager.StartClient();
+        }
+        while (NetworkClient.localPlayer == null)
+        {
+            yield return null;
+        }
+        while (true)
+        {
+            bool areChipsLoadedAndBuilt = true;
+            foreach (var c in CoreChip.ClientCoreChip.AllChips)
+            {
+                if (c.equivalentVirtualChip == null)
+                {
+                    areChipsLoadedAndBuilt = false;
+                }
+            }
+            if (!areChipsLoadedAndBuilt)
+            {
+                yield return null;
+            }
+            else { break; }
+        }
+        this.OnEnterMenu();
+    }
     void OnEnterMenu()
     {
+        CoreChip.ClientCoreChip.CmdFreezeClientModel();
         GameManager.cameraMoveMode = CameraMoveMode.Follow;
         // TODO: options: set framerate, sound level
         Application.targetFrameRate = 24;
@@ -167,7 +214,9 @@ public class EditorMenu : BaseMenu, InputReceiver
     void OnLeaveMenu()
     {
         this.highlighter.ParentHighlighter.SetActive(false);
-        CoreChip.ClientCoreChip.VirtualModel.SaveThisModelToFile(UIStrings.Backup + UIStrings.ModelExtension);
+        var core = CoreChip.ClientCoreChip;
+        core.VirtualModel.SaveThisModelToFile(UIStrings.Backup + UIStrings.ModelExtension);
+        core.freeze = false;
         GameManager.cameraMoveMode = CameraMoveMode.Follow;
     }
 

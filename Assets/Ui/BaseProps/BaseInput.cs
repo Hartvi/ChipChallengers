@@ -9,11 +9,11 @@ public class BaseInput : TopProp
     public TMP_InputField input;
     public TMP_Text placeholder;
     public Image image;
-public override void Setup()
+    public override void Setup()
     {
-        this.input = GetComponent<TMP_InputField>();
-        this.image = GetComponent<Image>();
-        this.placeholder = GetComponentInChildren<TMP_Text>();
+        this.input = this.GetComponent<TMP_InputField>();
+        this.image = this.GetComponent<Image>();
+        this.placeholder = this.GetComponentInChildren<TMP_Text>();
     }
 
     // Update is called once per frame

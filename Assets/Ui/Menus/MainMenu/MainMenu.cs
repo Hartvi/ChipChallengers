@@ -6,8 +6,9 @@ using Mirror;
 
 public class MainMenu : BaseMainMenu, InputReceiver
 {
+    public static bool goToMultiplayerMenu = false;
+
     float numberOfButtons = 5f;
-    NetworkManager manager;
 
     public override void Setup()
     {
@@ -23,14 +24,10 @@ public class MainMenu : BaseMainMenu, InputReceiver
                         new VirtualProp(PropType.Button, btnHeight, typeof(GoToSingleplayer)),
                         new VirtualProp(PropType.Button, btnHeight, typeof(GoToMultiplayer)),
                         new VirtualProp(PropType.Button, btnHeight, typeof(GoToEditor)),
-                        new VirtualProp(PropType.Button, btnHeight, typeof(GoToSettings))
-                    //new VirtualProp(PropType.Button, btnHeight, typeof(GoToSingleplayer)),
-                    //new VirtualProp(PropType.Button, btnHeight, typeof(GoToSingleplayer))
+                        new VirtualProp(PropType.Button, btnHeight, typeof(GoToSettings)),
+                        new VirtualProp(PropType.Button, btnHeight, typeof(QuitGame))
                     )
                 )
-            //new VirtualProp(PropType.Button, 0.2f, typeof(GoToMultiplayer)),
-            //new VirtualProp(PropType.Button, 0.2f, typeof(GoToEditor)),
-            //new VirtualProp(PropType.Button, 0.2f, typeof(GoToOptions)),
             //new VirtualProp(PropType.Button, 0.2f, typeof(Quit)),
             )
         );
@@ -56,8 +53,11 @@ public class MainMenu : BaseMainMenu, InputReceiver
 
         // load default map so it show in singleplayer, settings, editor and all the other menus!!!
         SingleplayerMenu.myVMap.LoadNewMap(VMap.DefaultFileName);
-
-        this.manager = GameObject.FindObjectOfType<NetworkManager>();
+        if (global::MainMenu.goToMultiplayerMenu)
+        {
+            global::MainMenu.goToMultiplayerMenu = false;
+            GoToMultiplayer.Function();
+        }
     }
 
     void InputReceiver.OnStartReceiving() { }
