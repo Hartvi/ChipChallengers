@@ -37,7 +37,7 @@ public class ConnectToHost : BaseTransition
             if (NetworkClient.localPlayer == null)
             {
                 this.stopConnection = !NetworkClient.isConnecting;
-                if (this.stopConnection)
+                if (this.stopConnection && !NetworkClient.isConnected)
                 {
                     this.connecting = false;
                     this.stopConnection = false;
