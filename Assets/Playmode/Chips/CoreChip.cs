@@ -22,7 +22,7 @@ public class CoreChip : CommonChip
     public uint[] netIds = new uint[0];
     public uint[] oldNetIds = new uint[0];
 
-    [SyncVar]
+    [SyncVar(hook = nameof(PrintSrvCounter))]
     public uint srvResetCounter = 0;
     public uint cltResetCounter = 0;
 
@@ -109,27 +109,23 @@ public class CoreChip : CommonChip
 
         TextAsset textFile = Resources.Load<TextAsset>("aguncar");
         this.LoadString(textFile.text);
-
-        //Action[] onLoadedCallbacksTmp = new Action[] {
-        //    () => {
-        //        this.TriggerSpawn(false);
-        //        this.transform.position += Vector3.up;
-        //        }
-        //    //() => this.Hud.LinkCore(this),
-        //    //() => {
-        //    //    Camera.main.transform.position = this.transform.position + Vector3.up * 10f;
-        //    //}
-        //};
-        //this.OnLoadedCallbacks = onLoadedCallbacksTmp;
     }
 
     [Client]
     void Update()
     {
-        // Wait until we can check that all netids exist and that their length is equal to numberofchips
-        if (this.netIds.Length == this.numberOfChips && (this.srvResetCounter != this.cltResetCounter))
+
+        if (this.srvResetCounter != this.cltResetCounter)
         {
-            //print($"{this.netId}: netId: {this.netIds.Last()}  len: {this.netIds.Length}");
+            print($"CLT!=SRV: {this.netId}: netIds: {this.netIds.Length}  srv reset: {this.srvResetCounter} clt reset: {this.cltResetCounter}");
+        }
+        if (this.netIds.Length != this.numberOfChips)
+        {
+            print($"Netids!=number of chips {this.netIds.Length} != {this.numberOfChips}");
+        }
+        // Wait until we can check that all netids exist and that their length is equal to numberofchips
+        if (this.netIds.Length == this.numberOfChips && (this.srvResetCounter != this.cltResetCounter) || this.modelString != this.loadedModelString)
+        {
             bool ready = true;
             foreach (var netId in this.netIds)
             {
@@ -148,45 +144,62 @@ public class CoreChip : CommonChip
                     {
                         var s = x.ToLuaString();
                         this.CmdLoadString(s);
+                        print("Model changed");
                     }
                 );
                 this.TriggerSpawn();
-                this.SrvFreezeClientModel(true);
+                print($"NetId: {this.netId}: hasAuthority: {this.authority}");
+                if (this == CoreChip.ClientCoreChip)
+                {
+                    print($"Core netId: {this.netId} freeze: {this.freeze}");
+                    this.CmdFreezeClientModel(true);
+                }
                 this.frozen = true;
                 this.oldNetIds = this.netIds;
                 this.loadedModelString = this.modelString;
                 this.cltResetCounter = this.srvResetCounter;
-                //if(this == CoreChip.ClientCoreChip)
-                //{
-                //    SingleplayerMenu.Hud.LinkCore(this.core);
-                //}
                 print($"{this.netId}: finished spawn");
             }
         }
         else if (this.frozen)
         {
-            this.SrvFreezeClientModel(this.freeze);
+            print($"NetId: {this.netId}: hasAuthority: {this.authority}");
+            if (this == CoreChip.ClientCoreChip)
+            {
+                print($"Core netId: {this.netId} FREEZE: {this.freeze}");
+                this.CmdFreezeClientModel(this.freeze);
+            }
+            if (this.isClientOnly) { CltFreezeLocally(); }
             this.frozen = false;
         }
-        //return;
         foreach (var rtf in this.RuntimeFunctions)
         {
             if (rtf != null)
             {
                 rtf.RuntimeFunction();
             }
-            else
-            {
-                //print($"{this.netId}: RTF: {rtf}");
-            }
         }
         this.HandleInputs();
+    }
+
+    [Client]
+    void CltFreezeLocally()
+    {
+        foreach (var c in this.AllChips)
+        {
+            c.GetComponent<Rigidbody>().isKinematic = true;
+        }
     }
 
     [Command]
     public void CmdLoadString(string state)
     {
         this.LoadString(state);
+    }
+
+    void PrintSrvCounter(uint oldVal, uint newVal)
+    {
+        print($"Core: {this.netId} SERVER: {this.isServer} old: {oldVal} new {newVal}");
     }
 
     [Server]
@@ -365,8 +378,8 @@ public class CoreChip : CommonChip
         this.AllChildren = allchildren.ToArray();
         this.numberOfChips = this.AllChildren.Length + 1;
         yield return StartCoroutine(WaitForChipsToBeOnline(allchildren));
-        print($"GENERATED CHIPS: {this.netId}: netids: {this.netIds.Length}");
         this.srvResetCounter += 1;
+        print($"GENERATED CHIPS: {this.netId}: netids: {this.netIds.Length} clt: {this.cltResetCounter} srv: {this.srvResetCounter}");
         yield break;
     }
 
@@ -479,27 +492,9 @@ public class CoreChip : CommonChip
     }
 
     [Command]
-    public void CmdUnfreezeClientModel()
+    public void CmdFreezeClientModel(bool f)
     {
-        if (!this.IsCore)
-        {
-            DisplaySingleton.Instance.DisplayText(x =>
-            {
-                x.SetText($"UnfreezeClientModel: {this.name} isn't a core!");
-            }, 3f);
-        }
-
-        foreach (GeometricChip chip in this.AllChips)
-        {
-            chip.GetComponent<Rigidbody>().isKinematic = false;
-        }
-    }
-
-    [Server]
-    public void SrvFreezeClientModel(bool f)
-    {
-        Debug.Assert(!this.isClientOnly);
-        Debug.Assert(this.isServer);
+        print($"Freezing model: {f}");
         if (!this.IsCore)
         {
             DisplaySingleton.Instance.DisplayText(x =>
@@ -626,5 +621,10 @@ public class CoreChip : CommonChip
         {
             NetworkServer.Destroy(c.gameObject);
         }
+    }
+
+    public override void OnStopClient()
+    {
+        BaseMenu.SwitchToMenu(typeof(MainMenu));
     }
 }

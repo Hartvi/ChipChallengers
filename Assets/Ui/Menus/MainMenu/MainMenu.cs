@@ -28,7 +28,6 @@ public class MainMenu : BaseMainMenu, InputReceiver
                         new VirtualProp(PropType.Button, btnHeight, typeof(QuitGame))
                     )
                 )
-            //new VirtualProp(PropType.Button, 0.2f, typeof(Quit)),
             )
         );
     }
@@ -36,20 +35,13 @@ public class MainMenu : BaseMainMenu, InputReceiver
     override protected void Start()
     {
         base.Start();
+        print("ENTER MAIN MENU");
 
         UIManager uiManager = Camera.main.GetComponent<UIManager>();
         uiManager.SwitchToMe(this);
         Action[] onSelectedCallbacks = new Action[] { () => UIManager.instance.SwitchToMe(this), () => GameManager.Instance.UpdateSettings() };
         this.selectedCallbacks.SetCallbacks(onSelectedCallbacks);
         this.selectedCallbacks.Invoke();
-
-        //string error = "MAIN MENU STARTING.";
-        //DisplaySingleton.Instance.DisplayText(x =>
-        //{
-        //    DisplaySingleton.ErrorMsgModification(x);
-        //    x.SetText(error);
-        //},
-        //3f);
 
         // load default map so it show in singleplayer, settings, editor and all the other menus!!!
         SingleplayerMenu.myVMap.LoadNewMap(VMap.DefaultFileName);
@@ -69,7 +61,6 @@ public class MainMenu : BaseMainMenu, InputReceiver
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             // TODO: somehow this is being triggered along with the settings menu KeyDown(KeyCode.Escape)
-            //print($"MainMenu KEYCODE ESCAPE DOWN: Switching to previous menu");
             SwitchToPreviousMenu();
         }
     }

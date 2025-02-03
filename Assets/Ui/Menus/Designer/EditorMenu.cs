@@ -211,10 +211,12 @@ public class EditorMenu : BaseMenu, InputReceiver
     void OnLeaveMenu()
     {
         this.highlighter.ParentHighlighter.SetActive(false);
+
+        // leaving online mode back to unspawned core
+        if(NetworkClient.localPlayer == null) { return; }
         var core = CoreChip.ClientCoreChip;
         core.VirtualModel.SaveThisModelToFile(UIStrings.Backup + UIStrings.ModelExtension);
         core.freeze = false;
-        GameManager.cameraMoveMode = CameraMoveMode.Follow;
     }
 
     public VChip selectedVChip

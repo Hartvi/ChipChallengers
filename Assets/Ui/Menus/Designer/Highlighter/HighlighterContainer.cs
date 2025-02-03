@@ -105,7 +105,7 @@ public class HighlighterContainer : MonoBehaviour
             cc = CoreChip.ClientCoreChip.AllChips.FirstOrDefault(x => x.equivalentVirtualChip.id == parentId) as CommonChip;
             if (cc is null)
             {
-                UnityEngine.Debug.LogError($"Not even the parent of id {chipId}, {parentId} exists");
+                UnityEngine.Debug.LogWarning($"Not even the parent of id {chipId}, {parentId} exists");
                 cc = CoreChip.ClientCoreChip;
             }
             //throw new NullReferenceException($"Chip with id {chipId} does not exist.");
