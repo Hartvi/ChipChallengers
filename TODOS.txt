@@ -1,27 +1,35 @@
 
 ### TODO
 - test the multiplayer stuff
-  - done: show variable values in the hud even on the client
   - when you disconnect as host - make clients go to main menu
   - make sure that transitioning from playmode as a client to editor makes the client disconnect and then reconnect to its own host for now
   - make bullets visible among clients
   - make sound heard across clients
+
+  - done: show variable values in the hud even on the client
   - done: in multiplayer: add option to enter ip address
   - done: when a player disconnects as a client, delete all of his chips
   - done: Make collisions possible between models - only disable collisions between neighbouring chips - do this during triggerspawn
 - done: order: multiplayer -> editor -> somewhere else -> core is null and we are still attempting to connect to a server... 
 - done: fix when going directly from main menu to editor to wait for the core to spawn
 
-- `+` in multiplayer: 
-  - unspawn objects
-  - add joints to objects on client
-  - basically rebuild the model also on client so the core of the client also follows joint constraints
-  - rebuild model on clients
-- `+` multiplayer - 1. make it so the models load on other instances
-- `+` just add maps and races on them
-- `+` stop camera from clipping through surfaces
-- `+` fix camera shaking
-- `+` increase aerodynamic efficiency
+GAMEPLAY
+- `+` obstacle courses, ski-jumping, hill-climbing, etc.
+- `+` intro tutorial
+ - create a nice controls menu
+ - show introductory screenshots(?) that depict how to find out the controls for a given model
+- `+` done: rotate the camera around the currently selected object or add an option for it
+- `+` fix the gun having different recoil values at different times in the game
+- `+` find out why the physics timing makes wheels speed up cars differently 
+ `+` autofill available functions??
+- `+` provide documentation for available lua functions
+
+MP:
+- `+` TODO: just add maps and races on them
+- `+` maybe: stop camera from clipping through surfaces
+- `+` ye wtf: fix camera shaking
+
+SCENARIOS:
 - `+` scenarios;
   - lua file: it should have a map
   - `+` in LUA make objs loadable, which can then give them positions and make the move like obstacles
@@ -41,26 +49,26 @@
 - `+` add lua functions
   - `+` to draw lines on the screen
   - `+` to print stuff to screen as text
-  - DONE: `+` to read mouse position
-- `+` add option to create balls/capsules/cubes in playmode
-- `+` add lua scripts that can add checkpoint gates, objects and other things into playmode
-- `+` fix lua throwing an exception when the code is incomplete
-  - `+` autofill available functions??
-  - `+` provide documentation for available lua functions
-- `+++` implement multiplayer
-- `+` fix cosmetics
-  - `+` cowls should have one inverse transform parent
----------------------------------------------------------------------------------------------------------------
-- `+` add backgrounds to all menus:
-  - settings menu, load panel, map panel, save panel
-- `+` intro tutorial
- - create a nice controls menu
- - show introductory screenshots(?) that depict how to find out the controls for a given model
-- `+` rotate the camera around the currently selected object or add an option for it
-- `+` fix the gun having different recoil values at different times in the game
-- `+` find out why the physics timing makes wheels speed up cars differently 
 
 ### Done
+ `+` in multiplayer: 
+  - done :unspawn objects
+  - done: add joints to objects on client
+  - done: basically rebuild the model also on client so the core of the client also follows joint constraints
+  - done: rebuild model on clients
+- `+` done: multiplayer - 1. make it so the models load on other instances
+- `+` ???: increase aerodynamic efficiency
+  - DONE: `+` to read mouse position
+- `+` done: add option to create balls/capsules/cubes in playmode
+- `+` done: add lua scripts that can add checkpoint gates, objects and other things into playmode
+- `+` done: fix lua throwing an exception when the code is incomplete
+- `+++` implement multiplayer
+- `+` ye idk: fix cosmetics
+  - `+` ye idk:cowls should have one inverse transform parent
+---------------------------------------------------------------------------------------------------------------
+- `+` done: add backgrounds to all menus:
+  - done: settings menu, load panel, map panel, save panel
+
 - `+` option selecting doesnt work in build mode
 - `+` setup masses for chip options
 - `+` fix that variable, script panels can delete chips - make them like chippanel

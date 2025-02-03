@@ -33,47 +33,18 @@ public class Aerodynamics : BaseAspect
         Transform t = this.transform;
         Vector3 velocity = this.rb.velocity;
         int underwater = this.transform.position.y < 0f ? 1 : 0;
-        //if (underwater == 1)
-        //{
-        //    velocity *= Mathf.Max(80f / (1f + velocity.magnitude), 2f);
-        //}
 
-        // drag
         Vector3 up = t.up;
-        float DragAndLiftProportion = Vector3.Dot(up, velocity);
-        // extra drag is needed because lift is roughly proportional to 1 whereas drag is roughly proportional to 2
-        // direction of extra drag
+        float vDotN = Vector3.Dot(up, velocity);
 
-        //Vector3 ExtraDrag = Vector3.Project(up, velocity) * velocity.sqrMagnitude;
+        float commonConstant = -Mathf.Sign(vDotN) * ConstantPartOfDragAndLift;
 
-        float commonConstant = -Mathf.Sign(DragAndLiftProportion) * ConstantPartOfDragAndLift;
-
-        // nothing is an airfoil:
-        //this.rb.AddForce(commonConstant * (up * DragAndLiftProportion * DragAndLiftProportion + ExtraDrag));
-
-        // everything is an aerofoil with infinite stall speed:
-        //this.rb.AddForce(invDeltaTime * (commonConstant * (up * DragAndLiftProportion * DragAndLiftProportion) - 0.05f * velocity));
-        Vector3 finalForce = (commonConstant * (up * DragAndLiftProportion * DragAndLiftProportion) - 0.05f * velocity);
+        // C * UP VECTOR * VELOCITY * VELOCITY - some drag
+        Vector3 finalForce = (commonConstant * (up * vDotN * vDotN) - 0.05f * velocity);
         if (underwater == 1)
         {
-            finalForce += -(PhysicsData.seaLevelDensity * 6.28f * velocity + 25f * up * DragAndLiftProportion + Vector3.up);
-            // experimentally verified that this does not crash
-            //this.rb.AddForce(-Time.deltaTime* (PhysicsData.seaLevelDensity * velocity + 25f * up * DragAndLiftProportion + Vector3.up), ForceMode.Impulse);
+            finalForce += -(PhysicsData.seaLevelDensity * 6.28f * velocity + 25f * up * vDotN + Vector3.up);
         }
         this.rb.AddForce(Time.deltaTime * finalForce, ForceMode.Impulse);
     }
-
-    //void FixedUpdate()
-    //{
-    //    Transform t = this.transform;
-    //    Vector3 velocity = this.rb.velocity;
-
-    //    // drag
-    //    Vector3 up = t.up;
-    //    Vector3 DragDirection = Vector3.Project(up, velocity);
-    //    Vector3 LiftDirection = up - DragDirection;
-    //    // how to find the +- multiplication constant?
-    //    float commonConstant = -Mathf.Sign(DragAndLiftProportion) * ConstantPartOfDragAndLift;
-    //    this.rb.AddForce(commonConstant*(up*DragAndLiftProportion*DragAndLiftProportion + DragDirection));
-    //}
 }

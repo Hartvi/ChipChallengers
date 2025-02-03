@@ -51,8 +51,6 @@ public class ControlsPanel : BasePanel, InputReceiver
         this.Key1.text.fontSize = (UIUtils.MediumFontSize + UIUtils.SmallFontSize) / 2;
         this.Action1 = txts[1];
         this.Action1.text.fontSize = (UIUtils.MediumFontSize + UIUtils.SmallFontSize) / 2;
-        //this.Key2 = txts[2];
-        //this.Action2 = txts[3];
 
         int numTxts = UIStrings.ControlsKeys.Length;
         this.Keys1 = new BaseText[numTxts];

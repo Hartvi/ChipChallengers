@@ -434,6 +434,11 @@ public class GameScript : MonoBehaviour
                     GameObject.Destroy(o.GetComponent<Collider>());
                     break;
                 }
+            case "booster":
+                // Booster is also basically a sphere, but we keep its collider
+                // (We'll set isTrigger in Booster.Setup)
+                o = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                break;
             default: { return ""; }
         }
         Vector3 positionVector = GameScript.GetVector3("position", properties);
@@ -461,7 +466,9 @@ public class GameScript : MonoBehaviour
         o.transform.position = positionVector;
         o.transform.rotation = Quaternion.Euler(rotationVector);
         float radius = 0.5f * Mathf.Max(sizeVector.x, sizeVector.y, sizeVector.z);
-        if (objectType.ToLower() == "sphere" || objectType.ToLower() == "gate")
+        if (objectType.ToLower() == "sphere"
+            || objectType.ToLower() == "gate"
+            || objectType.ToLower() == "booster")
         {
             o.transform.localScale = Vector3.one * 2f * radius;
         }
@@ -516,6 +523,30 @@ public class GameScript : MonoBehaviour
                 }
             }
         }
+        if (objectType.ToLower() == "booster")
+        {
+            // Check if there's an options table
+            var options = properties.Get("options");
+            Vector3 forceVector = Vector3.zero;
+            float customRadius = radius;           // default to the sphere size above
+
+            if (!options.IsNil())
+            {
+                Table optionsTable = options.Table;
+
+                // 'force' can be a {x=..., y=..., z=...} or {1,2,3} table
+                var forceDynVal = optionsTable.Get("force");
+                if (!forceDynVal.IsNil())
+                {
+                    forceVector = GameScript.GetVector3FromTable(forceDynVal.Table);
+                }
+            }
+
+            // Add the Booster component and set it up
+            Booster booster = o.AddComponent<Booster>();
+            booster.Setup(forceVector);
+        }
+
         for (int i = 1; ; ++i)
         {
             string k = objectType + i.ToString();
@@ -733,6 +764,51 @@ public class GameScript : MonoBehaviour
         return tableVector;
     }
 
+    public static Vector3 GetVector3FromTable(Table table)
+    {
+        Vector3 v = Vector3.zero;
+        var xVal = table.Get("x"); if (!xVal.IsNil()) v.x = (float)xVal.Number; else if (!table.Get(1).IsNil()) v.x = (float)table.Get(1).Number;
+        var yVal = table.Get("y"); if (!yVal.IsNil()) v.y = (float)yVal.Number; else if (!table.Get(2).IsNil()) v.y = (float)table.Get(2).Number;
+        var zVal = table.Get("z"); if (!zVal.IsNil()) v.z = (float)zVal.Number; else if (!table.Get(3).IsNil()) v.z = (float)table.Get(3).Number;
+        return v;
+    }
+}
+
+public class Booster : MonoBehaviour
+{
+    private Vector3 force;
+    bool isCustomForce = false;
+
+    public void Setup(Vector3 force)
+    {
+        this.force = force;
+        this.isCustomForce = force != Vector3.zero;
+
+        // Ensure we have a SphereCollider
+        var sc = GetComponent<SphereCollider>();
+        if (sc == null)
+        {
+            sc = gameObject.AddComponent<SphereCollider>();
+        }
+        sc.isTrigger = true;
+        this.gameObject.layer = 6;
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+        if (other.attachedRigidbody != null)
+        {
+            if (this.isCustomForce)
+            {
+                other.attachedRigidbody.AddForce(this.force, ForceMode.Force);
+            }
+            else
+            {
+                // Apply force continuously as long as the object stays in the trigger
+                other.attachedRigidbody.AddForce(other.attachedRigidbody.velocity.normalized * 100, ForceMode.Force);
+            }
+        }
+    }
 }
 
 

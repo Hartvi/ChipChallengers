@@ -266,15 +266,11 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
 
     void InputReceiver.OnStartReceiving()
     {
-        //return;
-        //CoreChip.ClientCoreChip.CmdUnfreezeClientModel();
     }
 
     void InputReceiver.OnStopReceiving()
     {
-        //print($"Singleplayer menu stopping receiving");
         if (NetworkClient.localPlayer == null) return;
-        CoreChip.ClientCoreChip.CmdFreezeClientModel();
     }
 
     bool InputReceiver.IsActive() => this.gameObject.activeSelf;

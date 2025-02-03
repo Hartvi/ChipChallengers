@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class ObjectPool<T>
 {
+    public Dictionary<string, int> id2idx = new Dictionary<string, int>();
     public T[] objects;
     public int currentIndex = 0;
     Action<T> deleteObject;
