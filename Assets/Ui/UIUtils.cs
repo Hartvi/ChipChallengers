@@ -59,7 +59,7 @@ public static class UIUtils
             foreach (var txt in tbui.GetComponentsInChildren<TMP_Text>())
             {
                 UIUtils.SetFont(txt, mediumFontName);
-                txt.color = Color.black;
+                txt.color = Color.white;
             }
         }
 

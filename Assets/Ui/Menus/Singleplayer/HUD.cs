@@ -13,6 +13,7 @@ public class HUD : TopProp
     {
         base.Setup();
         this.vProp = new VirtualProp(PropType.Panel, 1f, right,
+            new VirtualProp(PropType.Panel, 0.05f),
             new VirtualProp(PropType.Panel, 0.1f, up,
                 new VirtualProp(PropType.Text, 0.05f, typeof(ItemBaseLeft))
             ),
