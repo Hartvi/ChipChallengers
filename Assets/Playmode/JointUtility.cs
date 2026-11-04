@@ -9,9 +9,12 @@ public static class JointUtility
     public static ConfigurableJoint AttachWithConfigurableJoint(GameObject child, GameObject parent, Vector3 globalPoint, Vector3 globalAxis) {
         
         // NOT NECESSARY BUT GOOD TO HAVE SINCE IT'S SEARCHABLE
-        for(int i = 0; i < 2; ++i)
+        foreach (var oldJoint in child.GetComponents<ConfigurableJoint>())
         {
-            GameObject.Destroy(child.GetComponent<ConfigurableJoint>());
+            // Destroy is deferred: disconnect old constraints immediately so
+            // only the rebuilt joint can act when simulation resumes.
+            oldJoint.connectedBody = null;
+            GameObject.Destroy(oldJoint);
         }
         ConfigurableJoint cj = child.AddComponent<ConfigurableJoint>();
 

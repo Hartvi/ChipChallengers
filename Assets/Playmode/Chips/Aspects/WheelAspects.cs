@@ -255,6 +255,7 @@ public class WheelAspects : BaseAspect
 
     void FixedUpdate()
     {
+        if (this.rb.isKinematic || this.myChip.myCore.IsRebuilding) { return; }
         if (this.RaycastFromBase(out this.point, out this.contactVector, out this.normal))
         {
             Vector3 n = this.normal;

@@ -128,6 +128,9 @@ public static class MonoExtension
         Component c = go.GetComponent<T>();
         if (c is not null)
         {
+            // Destruction happens at the end of the frame. Stop the old aspect
+            // now so it cannot apply forces while its replacement is built.
+            if (c is Behaviour behaviour) { behaviour.enabled = false; }
             GameObject.Destroy(c);
         }
         //int k = 0;

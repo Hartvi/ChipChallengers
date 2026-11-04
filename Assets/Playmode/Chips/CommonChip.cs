@@ -392,9 +392,21 @@ public class CommonChip : AngleChip
             throw new NullReferenceException($"To add Rigidbody you need an equivalent virtual chip.");
         }
         this.rb.mass = this.mass;
-        this.rb.isKinematic = false;
+        this.ResetMotion();
         this.rb.drag = 0f;
         this.rb.angularDrag = 0f;
+    }
+
+    // Networked chips survive reset; clear their motion before rebuilding joints.
+    public void ResetMotion()
+    {
+        // Velocity changes require a dynamic body. Freeze it again until the
+        // entire model has finished rebuilding.
+        this.rb.isKinematic = false;
+        this.rb.velocity = Vector3.zero;
+        this.rb.angularVelocity = Vector3.zero;
+        this.rb.isKinematic = true;
+        this.Omega = 0f;
     }
 
     private CommonChip GetHighestRealChip()
