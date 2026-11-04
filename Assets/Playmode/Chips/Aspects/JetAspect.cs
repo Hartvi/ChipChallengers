@@ -6,6 +6,7 @@ public class JetAspect : BaseAspect
 {
     void FixedUpdate()
     {
+        if (this.rb.isKinematic || this.myChip.myCore.IsRebuilding) { return; }
         //print($"adding force: {this.value}");
         this.rb.AddForce(this.transform.up * this.value);
     }

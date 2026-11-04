@@ -33,6 +33,7 @@ public class CoreChip : CommonChip
     [SyncVar]
     public bool freeze = false;
     bool frozen = false;
+    public bool IsRebuilding { get; private set; }
     public static CoreChip ClientCoreChip => NetworkClient.localPlayer.GetComponent<CoreChip>();
 
     Action[] _AfterBuildActions = new Action[] { };
@@ -124,7 +125,8 @@ public class CoreChip : CommonChip
             print($"Netids!=number of chips {this.netIds.Length} != {this.numberOfChips}");
         }
         // Wait until we can check that all netids exist and that their length is equal to numberofchips
-        if (this.netIds.Length == this.numberOfChips && (this.srvResetCounter != this.cltResetCounter) || this.modelString != this.loadedModelString)
+        if (this.netIds.Length == this.numberOfChips &&
+            (this.srvResetCounter != this.cltResetCounter || this.modelString != this.loadedModelString))
         {
             bool ready = true;
             foreach (var netId in this.netIds)
@@ -171,6 +173,14 @@ public class CoreChip : CommonChip
             }
             if (this.isClientOnly) { CltFreezeLocally(); }
             this.frozen = false;
+            this.IsRebuilding = false;
+        }
+        // Allow deferred destruction and aspect Start() to finish before running
+        // the new runtime functions or Lua loop.
+        if (this.IsRebuilding || this.frozen ||
+            this.srvResetCounter != this.cltResetCounter || this.modelString != this.loadedModelString)
+        {
+            return;
         }
         foreach (var rtf in this.RuntimeFunctions)
         {
@@ -288,7 +298,7 @@ public class CoreChip : CommonChip
     public void CmdResetCore()
     {
         print($"clt=>srv: CmdResetCore");
-        this.rb.isKinematic = true;
+        this.PrepareReset();
         this.transform.rotation = Quaternion.identity;
         this.srvResetCounter += 1;
     }
@@ -297,11 +307,22 @@ public class CoreChip : CommonChip
     public void CmdResetToDefaultLocation()
     {
         print($"clt=>srv: CmdResetToDefaultLocation");
-        this.rb.isKinematic = true;
+        this.PrepareReset();
         Vector3 spawnPosition = StaticChip.RaycastFromAbove();
         this.transform.position = spawnPosition;
         this.transform.rotation = Quaternion.identity;
         this.srvResetCounter += 1;
+    }
+
+    [Server]
+    void PrepareReset()
+    {
+        this.IsRebuilding = true;
+        this.inputMessage = new InputMessage();
+        foreach (var chip in this.AllChips)
+        {
+            if (chip != null) { ((CommonChip)chip).ResetMotion(); }
+        }
     }
 
     [ClientRpc]
@@ -386,6 +407,16 @@ public class CoreChip : CommonChip
     [Client]
     public void TriggerSpawn()
     {
+        this.IsRebuilding = true;
+        this.inputMessage = new InputMessage();
+        // Freeze every body before repositioning the first chip.
+        foreach (var id in this.netIds)
+        {
+            if (NetworkClient.spawned.TryGetValue(id, out var identity))
+            {
+                identity.GetComponent<CommonChip>().ResetMotion();
+            }
+        }
         // Trigger spawn only later on when all the chips are visible on the client
         this.RuntimeFunctions.Clear();
 
@@ -393,6 +424,7 @@ public class CoreChip : CommonChip
         {
             v.valueChangedCallbacks = new Action<float, VVar>[] { };
             v.currentValue = v.defaultValue;
+            v.hasChanged = false;
         }
 
         //this.transform.localScale = StaticChip.ChipSize;
