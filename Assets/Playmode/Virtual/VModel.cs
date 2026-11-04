@@ -360,6 +360,21 @@ end
         this.DeleteActions = this.DeleteActions.Concat(new Action<string>[] { action }).ToArray();
     }
 
+    public void RemoveAddedVariableListener(Action<string> action)
+    {
+        this.AddedActions = this.AddedActions.Where(x => x != action).ToArray();
+    }
+
+    public void RemoveDeleteVariableListener(Action<string> action)
+    {
+        this.DeleteActions = this.DeleteActions.Where(x => x != action).ToArray();
+    }
+
+    public void RemoveSetSelectedVariableListener(Action<string> action)
+    {
+        this.SelectedActions = this.SelectedActions.Where(x => x != action).ToArray();
+    }
+
     [Client]
     public string SaveThisModelToFile(string modelName)
     {

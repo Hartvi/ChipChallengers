@@ -9,6 +9,9 @@ public class ScriptPanel : BaseSidePanel, InputReceiver
 {
     DragButton btn;
     BaseInput input;
+    bool initialized;
+    Coroutine pendingRefresh;
+    VModel boundModel;
 
     public override void Setup()
     {
@@ -21,37 +24,54 @@ public class ScriptPanel : BaseSidePanel, InputReceiver
 
     void Start()
     {
-        StartCoroutine(AsyncStart());
-    }
-
-    IEnumerator AsyncStart()
-    {
-        while (true)
-        {
-            if (NetworkClient.localPlayer == null) { yield return null; }
-            else { break; }
-        }
-
-        // asdfsd
-        CoreChip core = CoreChip.ClientCoreChip;
-        this.input = this.GetComponentInChildren<BaseInput>();
-        this.btn = this.GetComponentInChildren<DragButton>();
-
-        this.btn.text.text = "<";
-        this.btn.image.sprite = Resources.Load<Sprite>("UI/art/tall_button");
-
+        // Children have been built by now; appearance must not wait for networking.
+        this.input = this.GetComponentInChildren<BaseInput>(true);
+        this.btn = this.GetComponentInChildren<DragButton>(true);
+        this.btn.text.SetText("<");
+        this.btn.image.sprite = Resources.Load<Sprite>("UI/Art/tall_button");
         this.input.input.image.sprite = Resources.Load<Sprite>("UI/Art/white_square");
-
         this.input.placeholder.text = "Lua code...";
         this.input.placeholder.fontSize = UIUtils.SmallFontSize;
-
         this.input.input.onEndEdit.RemoveAllListeners();
-        this.input.input.onEndEdit.AddListener(x => core.VirtualModel.script = x);
+        // Resolve the current core on edit; the player may have reconnected.
+        this.input.input.onEndEdit.AddListener(this.SaveScript);
         this.input.input.textComponent.fontSize = UIUtils.SmallFontSize;
         this.input.input.lineType = TMPro.TMP_InputField.LineType.MultiLineNewline;
-
-
         this.btn.AddBtnHoldActions(new Action[] { this.DragBtn });
+        this.initialized = true;
+        this.pendingRefresh = StartCoroutine(this.RefreshWhenReady());
+    }
+
+    IEnumerator RefreshWhenReady()
+    {
+        // Always yield once so the coroutine handle can be assigned and child
+        // Start methods can finish before binding.
+        yield return null;
+        while (NetworkClient.localPlayer == null ||
+               CoreChip.ClientCoreChip.IsRebuilding ||
+               CoreChip.ClientCoreChip.loadedModelString == null)
+        {
+            yield return null;
+        }
+        this.RefreshModel();
+        this.pendingRefresh = null;
+    }
+
+    public void RefreshModel()
+    {
+        if (!this.initialized || NetworkClient.localPlayer == null) { return; }
+        var core = CoreChip.ClientCoreChip;
+        // An after-build callback also reaches here before loadedModelString is set.
+        this.boundModel = core.VirtualModel;
+        this.input.input.SetTextWithoutNotify(this.boundModel.script);
+    }
+
+    void SaveScript(string script)
+    {
+        if (NetworkClient.localPlayer == null) { return; }
+        var core = CoreChip.ClientCoreChip;
+        if (core.IsRebuilding) { return; }
+        core.VirtualModel.script = script;
     }
 
     void DragBtn()
@@ -72,10 +92,18 @@ public class ScriptPanel : BaseSidePanel, InputReceiver
 
     void OnEnable()
     {
-        if (this.input is null) return;
-        //if (this.input.input is null) return;
-        //if (this.input.input is null) return;
-        this.input.input.SetTextWithoutNotify(CoreChip.ClientCoreChip.VirtualModel.script);
+        if (this.initialized && this.pendingRefresh == null)
+        {
+            this.pendingRefresh = StartCoroutine(this.RefreshWhenReady());
+        }
+    }
+
+    protected override void OnDisable()
+    {
+        base.OnDisable();
+        if (this.pendingRefresh != null) { StopCoroutine(this.pendingRefresh); }
+        this.pendingRefresh = null;
+        this.boundModel = null;
     }
 
     public bool IsSelected
@@ -90,6 +118,16 @@ public class ScriptPanel : BaseSidePanel, InputReceiver
 
     void Update()
     {
+        if (this.initialized && NetworkClient.localPlayer != null)
+        {
+            var core = CoreChip.ClientCoreChip;
+            if (!core.IsRebuilding && core.loadedModelString != null &&
+                !ReferenceEquals(this.boundModel, core.VirtualModel))
+            {
+                this.RefreshModel();
+            }
+        }
+
 
         if (Input.GetMouseButtonDown(0))
         {

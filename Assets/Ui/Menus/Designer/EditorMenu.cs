@@ -87,8 +87,8 @@ public class EditorMenu : BaseMenu, InputReceiver
         this.CreateChipPanel = this.GetComponentInChildren<CreateChipPanel>();
 
         this.VariablePanel = this.GetComponentInChildren<VariablePanel>(includeInactive: true);
-        this.ChipPanel = this.GetComponentInChildren<ChipPanel>();
-        this.ScriptPanel = this.GetComponentInChildren<ScriptPanel>();
+        this.ChipPanel = this.GetComponentInChildren<ChipPanel>(true);
+        this.ScriptPanel = this.GetComponentInChildren<ScriptPanel>(true);
 
         this.SavePanel = this.GetComponentInChildren<SavePanel>();
         this.LoadPanel = this.GetComponentInChildren<LoadPanel>();
@@ -114,20 +114,17 @@ public class EditorMenu : BaseMenu, InputReceiver
 
     private IEnumerator AsyncEnterMenu()
     {
-        if (manager.isNetworkActive)
+        if (!manager.isNetworkActive)
         {
-            this.OnEnterMenu();
-            yield break;
-        }
-        if (GameManager.isHost)
-        {
-            manager.StartHost();
-        }
-        else
-        {
-            manager.StartClient();
+            if (GameManager.isHost) { manager.StartHost(); }
+            else { manager.StartClient(); }
         }
         while (NetworkClient.localPlayer == null)
+        {
+            yield return null;
+        }
+        while (CoreChip.ClientCoreChip.IsRebuilding ||
+               CoreChip.ClientCoreChip.loadedModelString == null)
         {
             yield return null;
         }
@@ -160,8 +157,7 @@ public class EditorMenu : BaseMenu, InputReceiver
 
         //print($"Varpanel: {VariablePanel}, ");
         Action[] onLoadedCallbacks = new Action[] {
-            this.VariablePanel.ReloadVariables,
-            this.VariablePanel.AddListenersToModel
+            // Model-dependent refresh runs in afterBuildListeners instead.
         };
         this.LoadPanel.SetOnLoadedCallbacks(onLoadedCallbacks);
 
@@ -170,16 +166,8 @@ public class EditorMenu : BaseMenu, InputReceiver
             () => {
                 this.selectedChip = this.highlighter.SelectVChip(this.selectedChip.equivalentVirtualChip.id);
             },
-            () => {
-                try
-                {
-                    VariablePanel.ReloadVariables();
-                }
-                catch
-                {
-                    Debug.LogWarning($"THIS warning should only appear at startup");
-                }
-            }
+            this.VariablePanel.RefreshModel,
+            this.ScriptPanel.RefreshModel
 
         };
 

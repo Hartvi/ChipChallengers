@@ -29,7 +29,7 @@ public class TopUI : MonoBehaviour, IPointerExitHandler, IPointerMoveHandler
     {
         return Input.GetAxis("Mouse X") != 0 || Input.GetAxis("Mouse Y") != 0;
     }
-    void OnDisable()
+    protected virtual void OnDisable()
     {
         TopUI.OnUI = false;
     }

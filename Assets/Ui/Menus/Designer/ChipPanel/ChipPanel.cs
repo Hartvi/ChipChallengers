@@ -19,19 +19,40 @@ public class ChipPanel : BaseSidePanel, InputReceiver
 
     BaseImage backgroundImage;
     int deselectTimer = -1;
+    bool started;
+    bool initialized;
+    Coroutine pendingInitialization;
 
     void Start()
     {
-        StartCoroutine(AsyncStart());
+        this.started = true;
+        this.pendingInitialization = StartCoroutine(AsyncStart());
     }
 
+    void OnEnable()
+    {
+        if (this.started && !this.initialized && this.pendingInitialization == null)
+        {
+            this.pendingInitialization = StartCoroutine(AsyncStart());
+        }
+    }
+
+    protected override void OnDisable()
+    {
+        base.OnDisable();
+        if (this.pendingInitialization != null) { StopCoroutine(this.pendingInitialization); }
+        this.pendingInitialization = null;
+    }
 
     IEnumerator AsyncStart()
     {
-        while (true)
+        yield return null;
+        var editor = this.GetComponentInParent<EditorMenu>();
+        while (NetworkClient.localPlayer == null || editor.highlighter == null ||
+               CoreChip.ClientCoreChip.IsRebuilding ||
+               CoreChip.ClientCoreChip.loadedModelString == null)
         {
-            if (NetworkClient.localPlayer == null) { yield return null; }
-            else { break; }
+            yield return null;
         }
         this.backgroundImage = this.GetComponentInChildren<BaseImage>();
 
@@ -59,6 +80,8 @@ public class ChipPanel : BaseSidePanel, InputReceiver
 
         // add default values so it renders fine at the start
         this.DisplayChip(CoreChip.ClientCoreChip.equivalentVirtualChip);
+        this.initialized = true;
+        this.pendingInitialization = null;
     }
 
     public override void Setup()
