@@ -10,6 +10,7 @@ public class VariableFields : BaseImage
     BaseText[] texts = new BaseText[5];
     BaseInput[] inputs = new BaseInput[5];
     BaseButton[] buttons = new BaseButton[2];
+    bool initialized;
 
     public override void Setup()
     {
@@ -34,7 +35,11 @@ public class VariableFields : BaseImage
         );
     }
 
-    void Start() {
+    void Start() => this.InitializeControls();
+
+    void InitializeControls()
+    {
+        if (this.initialized) { return; }
         this.inputs = this.gameObject.GetComponentsInChildren<BaseInput>();
         this.texts = this.gameObject.GetComponentsInChildren<BaseText>();
         this.buttons = this.gameObject.GetComponentsInChildren<BaseButton>();
@@ -72,10 +77,12 @@ public class VariableFields : BaseImage
         this.SetTextSizesOf(this.inputs, UIUtils.SmallFontSize);
         this.SetTextSizesOf(this.texts, UIUtils.SmallFontSize);
         this.SetTextSizesOf(this.buttons, UIUtils.SmallFontSize);
+        this.initialized = true;
     }
 
     public void PopulateFields(VVar virtualVariable)
     {
+        this.InitializeControls();
         string[] variableStrings = virtualVariable.ToStringArray();
         for (int i = 0; i < this.inputs.Length; ++i) {
             this.inputs[i].input.SetTextWithoutNotify(variableStrings[i]);

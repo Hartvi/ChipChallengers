@@ -61,6 +61,7 @@ public class BaseItemScroll : BasePanel
                 this.items[i] = newItem;
             }
             this._NumberOfDisplayItems = value;
+            this.hasSetDisplayItems = true;
         }
     }
 

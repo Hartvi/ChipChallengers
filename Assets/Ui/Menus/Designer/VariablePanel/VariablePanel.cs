@@ -18,6 +18,9 @@ public class VariablePanel : BaseSidePanel, InputReceiver
     private string[] myLabels = new string[] { };
 
     BaseImage backgroundImage;
+    bool initialized;
+    Coroutine pendingRefresh;
+    VModel boundModel;
 
     public override void Setup()
     {
@@ -37,47 +40,89 @@ public class VariablePanel : BaseSidePanel, InputReceiver
 
     void Start()
     {
-        StartCoroutine(AsyncStart());
-    }
-
-    IEnumerator AsyncStart()
-    {
-        while (true)
-        {
-            if (NetworkClient.localPlayer == null) { yield return null; }
-            else { break; }
-        }
-        this.backgroundImage = this.GetComponentInChildren<BaseImage>();
-        //this.backgroundImage.image.color = new Color(0.9f, 0.9f, 0.9f);
-
-        this.itemScroll = this.GetComponentInChildren<BaseItemScroll>();
-
-        this.itemScroll.SetupItemList(this.SelectVariable, VariablePanel.NUMDISPLAYITEMS, this.myLabels);
-
-        this.bScrollbar = this.itemScroll.Siblings<BaseScrollbar>(false)[0];
-
+        this.backgroundImage = this.GetComponentInChildren<BaseImage>(true);
+        this.itemScroll = this.GetComponentInChildren<BaseItemScroll>(true);
+        this.itemScroll.SetupItemList(this.SelectVariable, NUMDISPLAYITEMS, this.myLabels);
+        this.bScrollbar = this.GetComponentInChildren<BaseScrollbar>(true);
         this.bScrollbar.scrollbar.onValueChanged.AddListener(this.itemScroll.Scroll);
-        this.itemScroll.Scroll(0f);
-        this.bScrollbar.scrollbar.value = 0f;
-
-        this.variableFields = this.GetComponentInChildren<VariableFields>();
-
-        this.AddListenersToModel();
+        this.bScrollbar.scrollbar.SetValueWithoutNotify(0f);
+        this.variableFields = this.GetComponentInChildren<VariableFields>(true);
+        this.initialized = true;
+        this.pendingRefresh = StartCoroutine(this.RefreshWhenReady());
     }
 
-    public void AddListenersToModel()
+    void OnEnable()
     {
-        VModel vModel = CoreChip.ClientCoreChip.VirtualModel;
-        BaseScrollbar bscb = this.bScrollbar;
+        if (this.initialized && this.pendingRefresh == null)
+        {
+            this.pendingRefresh = StartCoroutine(this.RefreshWhenReady());
+        }
+    }
 
-        vModel.AddAddedVariableListener(x => this.ReloadVariables());
-        vModel.AddAddedVariableListener(x => this.itemScroll.Scroll(bscb.scrollbar.value));
+    protected override void OnDisable()
+    {
+        base.OnDisable();
+        if (this.pendingRefresh != null) { StopCoroutine(this.pendingRefresh); }
+        this.pendingRefresh = null;
+        this.UnbindModel();
+    }
 
-        vModel.AddDeleteVariableListener(x => this.ReloadVariables());
-        vModel.AddDeleteVariableListener(x => this.itemScroll.Scroll(bscb.scrollbar.value));
+    void OnDestroy()
+    {
+        this.UnbindModel();
+    }
 
-        // The button handle selectin of variables, and since we don't have any buttons in this component, it's not possible
-        vModel.AddSetSelectedVariableListener(x => this.itemScroll.Scroll(bscb.scrollbar.value));
+    IEnumerator RefreshWhenReady()
+    {
+        yield return null;
+        while (NetworkClient.localPlayer == null ||
+               CoreChip.ClientCoreChip.IsRebuilding ||
+               CoreChip.ClientCoreChip.loadedModelString == null)
+        {
+            yield return null;
+        }
+        this.RefreshModel();
+        this.pendingRefresh = null;
+    }
+
+    public void RefreshModel()
+    {
+        // Inactive panels bind when next shown, after their controls have started.
+        if (!this.initialized || !this.isActiveAndEnabled ||
+            NetworkClient.localPlayer == null) { return; }
+        var model = CoreChip.ClientCoreChip.VirtualModel;
+        if (!ReferenceEquals(this.boundModel, model))
+        {
+            this.UnbindModel();
+            this.boundModel = model;
+            model.AddAddedVariableListener(this.OnVariablesChanged);
+            model.AddDeleteVariableListener(this.OnVariablesChanged);
+            model.AddSetSelectedVariableListener(this.OnVariableSelected);
+        }
+        this.ReloadVariables();
+    }
+
+    // Retained for existing callers; binding is idempotent for a given model.
+    public void AddListenersToModel() => this.RefreshModel();
+
+    void UnbindModel()
+    {
+        if (this.boundModel == null) { return; }
+        this.boundModel.RemoveAddedVariableListener(this.OnVariablesChanged);
+        this.boundModel.RemoveDeleteVariableListener(this.OnVariablesChanged);
+        this.boundModel.RemoveSetSelectedVariableListener(this.OnVariableSelected);
+        this.boundModel = null;
+    }
+
+    void OnVariablesChanged(string name)
+    {
+        this.ReloadVariables();
+    }
+
+    void OnVariableSelected(string name)
+    {
+        this.variableFields.PopulateFields(this.boundModel.GetSelectedVariable());
+        this.itemScroll.Scroll(this.bScrollbar.scrollbar.value);
     }
 
     public void SelectVariable(string variableName)
@@ -110,6 +155,7 @@ public class VariablePanel : BaseSidePanel, InputReceiver
 
     public void ReloadVariables()
     {
+        if (!this.initialized || NetworkClient.localPlayer == null) { return; }
         var clientCore = CoreChip.ClientCoreChip;
         string[] vs = clientCore.VirtualModel.variables.Select(x => x.name).Where(x => x.IsVariableName()).ToArray();
         this.myLabels = vs;
@@ -121,6 +167,16 @@ public class VariablePanel : BaseSidePanel, InputReceiver
 
     void Update()
     {
+        if (this.initialized && NetworkClient.localPlayer != null)
+        {
+            var core = CoreChip.ClientCoreChip;
+            if (!core.IsRebuilding && core.loadedModelString != null &&
+                !ReferenceEquals(this.boundModel, core.VirtualModel))
+            {
+                this.RefreshModel();
+            }
+        }
+
 
         if (Input.GetMouseButtonDown(0))
         {
