@@ -23,14 +23,25 @@ public class EditorMenu : BaseMenu, InputReceiver
         set
         {
             this._selectedChip = value;
-            if (value is not null)
+            if (value != null)
             {
                 this.lastSelectedPosition = value.transform.position;
-                //this._camera.transform.LookAt(value.transform.position);
+                this.FocusSelectedChip();
             }
         }
     }
     Vector3 lastSelectedPosition = Vector3.zero;
+
+    // FocusSelectedChip immediately aims the orbit camera at the selected chip without moving the camera.
+    void FocusSelectedChip()
+    {
+        if (this._camera != null && this.selectedChip != null &&
+            GameManager.cameraMoveMode == CameraMoveMode.Follow &&
+            (this._camera.transform.position - this.lastSelectedPosition).sqrMagnitude > 0.0001f)
+        {
+            this._camera.transform.LookAt(this.lastSelectedPosition);
+        }
+    }
 
     public HighlighterContainer highlighter;
 
@@ -420,6 +431,7 @@ public class EditorMenu : BaseMenu, InputReceiver
         if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1))
         {
             GameManager.cameraMoveMode = CameraMoveMode.Follow;
+            this.FocusSelectedChip();
         }
         if (Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Keypad2))
         {
