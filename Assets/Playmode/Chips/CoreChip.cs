@@ -9,6 +9,7 @@ using Mirror;
 public class CoreChip : CommonChip
 {
     public List<BaseAspect> RuntimeFunctions = new List<BaseAspect>();
+    public event Action ResetCompleted;
 
     [SyncVar]
     float[] variableValues = new float[0];
@@ -177,6 +178,7 @@ public class CoreChip : CommonChip
             if (this.isClientOnly) { CltFreezeLocally(); }
             this.frozen = false;
             this.IsRebuilding = false;
+            this.ResetCompleted?.Invoke();
         }
         // Allow deferred destruction and aspect Start() to finish before running
         // the new runtime functions or Lua loop.
