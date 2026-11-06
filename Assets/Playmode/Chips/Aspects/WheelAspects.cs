@@ -46,7 +46,6 @@ public class WheelAspects : BaseAspect
 
     bool isServer => this.myChip.isServer;
 
-    Transform childTransform;
     public float totalSlip = 0f, totalSlip1 = 0f, totalSlip2 = 0f, totalSlip3 = 0f;
 
     Func<Vector3>[] vectors;
@@ -59,7 +58,6 @@ public class WheelAspects : BaseAspect
     {
         base.Start();
         this.gameObject.layer = 7;
-        this.childTransform = this.transform.GetChild(0);
 
         this.particles = Instantiate(Resources.Load<ParticleSystem>(UIStrings.Dust));
 
@@ -224,12 +222,13 @@ public class WheelAspects : BaseAspect
 
     public override void RuntimeFunction()
     {
-        if (this.childTransform == null)
+        var wheelVisual = this.myChip.SelectedOptionTransform;
+        if (wheelVisual == null)
         {
             print($"CHILD TRANSFORM OF WHEEL IS NONE");
             return;
         }
-        this.childTransform.Rotate(Vector3.up, -this.myChip.Omega, Space.Self);
+        wheelVisual.Rotate(Vector3.up, -this.myChip.Omega, Space.Self);
 
         //this.totalSlip = 0.5f * (Mathf.Abs(this.xSlip) + Mathf.Abs(this.ySlip) + this.totalSlip1);
         this.totalSlip = 0.25f * (Mathf.Abs(this.xSlip) + Mathf.Abs(this.ySlip) + this.totalSlip1 + this.totalSlip2 + this.totalSlip3);
