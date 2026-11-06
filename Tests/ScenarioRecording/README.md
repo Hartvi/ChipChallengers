@@ -15,3 +15,5 @@ Race checks also exercise the named and original Lua forms, callback arguments, 
 Gameplay context checks cover regular/scenario selection, repeated reads across editor returns, replacement selections, explicit clearing, and rejection of stale queued loads.
 
 Physics callback checks cover before/write/after ordering, unchanged-setting suppression, snapshot isolation, target/reason propagation, restoration, unsubscribe, validation, exception isolation, reentrancy prevention, and invalidation before writing.
+
+Race-start timing checks cover the full one-second settling hold, 3-2-1 boundaries, GO release, and post-countdown values. Rigidbody freezing and countdown cancellation still require Play-mode verification.

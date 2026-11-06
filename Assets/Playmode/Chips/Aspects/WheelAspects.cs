@@ -104,6 +104,12 @@ public class WheelAspects : BaseAspect
         }
     }
 
+    // ResetSpinHistory clears the previous wheel momentum sample so a staged race cannot resume with a torque kick.
+    public void ResetSpinHistory()
+    {
+        this.oldUp = Vector3.zero;
+    }
+
     void ApplyTorque(float T)
     {
         // T = dL / dt

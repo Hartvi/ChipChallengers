@@ -32,7 +32,7 @@ Race({
 
 `Race` supplies green spherical gates with radius 5 by default. `radius` and `color` optionally set the shared appearance. `checkpoints` is optional, so a two-gate race only needs `start` and `finish`. Each position accepts either `{x,y,z}` values or `{x=...,y=...,z=...}` named coordinates. Gate positions and physics settings use world units.
 
-The first gate starts timing when the vehicle enters it from outside; spawning inside does not immediately start the attempt. The author should place the vehicle outside the start gate or expect the player to leave and re-enter. Intermediate checkpoints must be crossed in their declared order, and the final gate finishes and saves automatically. Gates remain spherical and nondirectional; the engine checks the swept movement segment between physics samples to avoid missing a gate at high speed. A newly active gate that already contains the vehicle requires leaving and re-entering, so intermediate gates should be spaced apart.
+The first gate stops the whole vehicle when it enters from outside, holds it for one second, and then displays 3-2-1 while keeping the vehicle frozen. GO releases the vehicle, captures the attempt and starts timing; the hold and countdown are excluded from the result. Spawning inside does not immediately start staging. The author should place the vehicle outside the start gate or expect the player to leave and re-enter. Intermediate checkpoints must be crossed in their declared order, and the final gate finishes and saves automatically. Gates remain spherical and nondirectional; the engine checks the swept movement segment between physics samples to avoid missing a gate at high speed. A newly active gate that already contains the vehicle requires leaving and re-entering, so intermediate gates should be spaced apart.
 
 The author does not need to call `BeginScenarioAttempt`, `CompleteScenario`, or define `Loop` for an ordinary race. Advanced scripts can attach callbacks inside the same table:
 
@@ -105,3 +105,7 @@ PhysicsSettingsManager.Changed -= OnPhysicsChanged;
 ```
 
 Player preferences, scenario rules, scenario restoration and rebuilt body solver writes now use this API. Active attempts subscribe to `Changing` and invalidate before any actual configuration write; completing, cancelling or unloading an attempt removes that subscription. Forces, steering, Lua variable updates, and ordinary physics ticks do not send configuration notifications. Direct external writes to Unity properties bypass this API; the existing validity checks remain a fallback.
+
+## Race start staging
+
+The start gate clears linear/angular velocities, wheel spin and cached wheel momentum before the settling hold. Core runtime forces and Lua vehicle controls pause during staging; the scenario Lua loop remains available. `onStarted()` runs at GO, not at the initial gate crossing. Gate progression remains blocked until GO. Restarting, replacing or unloading a scenario cancels its pending countdown and releases the held vehicle; resets and menu transitions during countdown cancel the start. The editor freeze flag remains separate from the temporary race-start hold.

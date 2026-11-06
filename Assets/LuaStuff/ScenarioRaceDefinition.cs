@@ -176,3 +176,17 @@ public class ScenarioRaceProgress
         return t >= 0 && t <= 1 ? t : (double?)null;
     }
 }
+
+// ScenarioRaceStartTiming defines the one-second settling hold followed by a three-second countdown.
+public static class ScenarioRaceStartTiming
+{
+    public const double HoldSeconds = 1;
+    public const int CountdownSeconds = 3;
+
+    // Ready reports when both the settling hold and countdown have elapsed.
+    public static bool Ready(double elapsed) => elapsed >= HoldSeconds + CountdownSeconds;
+
+    // CountdownAt returns the visible countdown number or zero during the hold and after GO.
+    public static int CountdownAt(double elapsed) => elapsed < HoldSeconds || Ready(elapsed)
+        ? 0 : CountdownSeconds - (int)Math.Floor(elapsed - HoldSeconds);
+}

@@ -228,6 +228,7 @@ public partial class GameScript
     // OnDisable stops the scenario's attempt and gates and restores the player's physics settings.
     void OnDisable()
     {
+        this.CancelRaceStart();
         this.activeAttempt = null;
         this.isRace = false;
         if (this.pendingRaceRestart != null) { StopCoroutine(this.pendingRaceRestart); }
