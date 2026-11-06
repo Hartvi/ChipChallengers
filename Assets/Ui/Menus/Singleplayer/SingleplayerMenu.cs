@@ -11,29 +11,44 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
     //public static SingleplayerMenu Instance;
     public static VMap myVMap = new VMap();
     public static VScenario myVScenario = new VScenario();
-    private static string pendingScenario;
+    bool reloadScenarioAfterBuild;
+    int playEntry;
+    Coroutine scenarioLoading;
 
-    // PlayScenario queues the selected scenario and enters singleplayer mode.
+    // PlayScenario remembers the selected scenario and enters play mode without clearing its context.
     public static void PlayScenario(string name)
     {
-        pendingScenario = name;
+        GameManager.PlayContext.SelectScenario(name);
         GoToSingleplayer.Function();
     }
 
-    // LoadPendingScenario consumes a queued scenario and schedules loading after the current rebuild.
+    // LoadPendingScenario schedules one fresh scenario load after the player model is built for this play entry.
     void LoadPendingScenario()
     {
-        if (pendingScenario == null) { return; }
-        string name = pendingScenario;
-        pendingScenario = null;
-        StartCoroutine(this.LoadScenarioAfterBuild(name));
+        if (!this.reloadScenarioAfterBuild) { return; }
+        this.reloadScenarioAfterBuild = false;
+        var context = GameManager.PlayContext;
+        if (!context.IsScenario) { return; }
+        this.scenarioLoading = StartCoroutine(this.LoadScenarioAfterBuild(context.ScenarioName, context.Revision, this.playEntry));
     }
 
-    // LoadScenarioAfterBuild waits one frame for reset bookkeeping to finish before executing scenario logic.
-    IEnumerator LoadScenarioAfterBuild(string name)
+    // CanLoadScenario rejects queued loads after leaving play mode or changing the selected scenario.
+    bool CanLoadScenario(string name, int revision, int entry) => this.isActiveAndEnabled &&
+        entry == this.playEntry && GameManager.PlayContext.MatchesScenario(name, revision);
+
+    // LoadScenarioAfterBuild waits for reset bookkeeping and model readiness before restarting the selected scenario.
+    IEnumerator LoadScenarioAfterBuild(string name, int revision, int entry)
     {
-        // LoadScenarioAfterBuild resumes after the current rebuild finalizes its reset counters.
         yield return null;
+        while (this.CanLoadScenario(name, revision, entry) && NetworkClient.localPlayer != null &&
+               (CoreChip.ClientCoreChip.IsRebuilding ||
+                CoreChip.ClientCoreChip.srvResetCounter != CoreChip.ClientCoreChip.cltResetCounter ||
+                CoreChip.ClientCoreChip.loadedModelString != CoreChip.ClientCoreChip.modelString))
+        {
+            yield return null;
+        }
+        this.scenarioLoading = null;
+        if (!this.CanLoadScenario(name, revision, entry) || NetworkClient.localPlayer == null) { yield break; }
         myVScenario.LoadNewScenario(name + UIStrings.ScenarioExtension);
     }
 
@@ -118,6 +133,10 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
 
     void OnLeaveMenu()
     {
+        this.playEntry++;
+        this.reloadScenarioAfterBuild = false;
+        if (this.scenarioLoading != null) { StopCoroutine(this.scenarioLoading); }
+        this.scenarioLoading = null;
         myVScenario.UnloadScenario();
         GameManager.RealTimeSettings.InMenu = true;
     }
@@ -149,6 +168,8 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
 
     void OnEnterMenu()
     {
+        this.playEntry++;
+        this.reloadScenarioAfterBuild = GameManager.PlayContext.IsScenario;
         Time.fixedDeltaTime = 1f / (float)(PlayerPrefs.GetInt(UIStrings.PhysicsRate));
         GameManager.RealTimeSettings.InMenu = false;
         GameManager.Instance.UpdateSettings();

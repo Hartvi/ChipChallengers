@@ -199,6 +199,25 @@ class Program
                 Check(exampleRace != null && exampleRace.gates.Count >= 2, "Bundled example failed to declare a race: " + file);
                 Check(exampleRace.gates.All(g => g.radius == 2.5f), "Example gate size changed during migration: " + file);
             }
+            var playContext = new GameplayContext();
+            Check(!playContext.IsScenario && playContext.ScenarioName == null, "New gameplay context was not regular singleplayer");
+            playContext.SelectScenario("circuit1_race");
+            int firstSelection = playContext.Revision;
+            Check(playContext.IsScenario && playContext.MatchesScenario("circuit1_race", firstSelection), "Scenario selection was not retained");
+            Check(playContext.ScenarioName == "circuit1_race" && playContext.MatchesScenario("circuit1_race", firstSelection),
+                "Reading the context consumed the scenario before a later editor return");
+            Check(!playContext.MatchesScenario("load_race", firstSelection), "Load accepted the wrong scenario");
+            playContext.SelectScenario("load_race");
+            Check(!playContext.MatchesScenario("circuit1_race", firstSelection) && playContext.ScenarioName == "load_race",
+                "New scenario selection kept an old queued load valid");
+            int oldSelection = playContext.Revision;
+            playContext.SelectScenario("load_race");
+            Check(!playContext.MatchesScenario("load_race", oldSelection), "Reselecting a scenario did not invalidate earlier queued loads");
+            playContext.SelectSingleplayer();
+            Check(!playContext.IsScenario && playContext.ScenarioName == null && !playContext.MatchesScenario("load_race", oldSelection),
+                "Explicit singleplayer selection kept scenario context");
+            Reject(() => playContext.SelectScenario(" "), "Empty scenario selection accepted");
+            Check(!playContext.IsScenario, "Invalid selection changed regular singleplayer context");
             Console.WriteLine("PASS: " + checks + " scenario metadata and persistent-record checks.");
         }
         finally { Directory.Delete(directory, true); }

@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../Assets/Common/ScenarioProgress.cs" Link="ScenarioProgress.cs" />
+    <Compile Include="../../Assets/Common/ScenarioMetadata.cs" Link="ScenarioMetadata.cs" />
+    <Compile Include="../../Assets/Common/ScenarioProgressStore.cs" Link="ScenarioProgressStore.cs" />
+    <Compile Include="../../Assets/LuaStuff/ScenarioLuaMetadata.cs" Link="ScenarioLuaMetadata.cs" />
+    <Compile Include="../../Assets/LuaStuff/ScenarioLuaCallbacks.cs" Link="ScenarioLuaCallbacks.cs" />
+    <Compile Include="../../Assets/LuaStuff/ScenarioRaceDefinition.cs" Link="ScenarioRaceDefinition.cs" />
+    <Compile Include="../../Assets/Common/GameplayContext.cs" Link="GameplayContext.cs" />
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>../../Library/PackageCache/com.unity.nuget.newtonsoft-json@3.2.1/Runtime/Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>../../Library/ScriptAssemblies/Assembly-CSharp-firstpass.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>

@@ -11,11 +11,13 @@ public class GoToSingleplayer : BaseTransition
 
     protected override void Execute()
     {
-        GoToSingleplayer.Function();
+        GoToSingleplayer.Function(regularSingleplayer: true);
     }
 
-    public static void Function()
+    // Function resumes the current play context unless an explicit singleplayer selection clears it.
+    public static void Function(bool regularSingleplayer = false)
     {
+        if (regularSingleplayer) { GameManager.PlayContext.SelectSingleplayer(); }
         GameManager.isHost = true;
         // inherit is host from other menus
         BaseMenu.SwitchToMenu(typeof(SingleplayerMenu));

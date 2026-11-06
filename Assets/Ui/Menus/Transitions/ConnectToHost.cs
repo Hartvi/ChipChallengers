@@ -23,6 +23,7 @@ public class ConnectToHost : BaseTransition
 
     public void Function()
     {
+        GameManager.PlayContext.SelectSingleplayer();
         GameManager.isHost = false;
         NetworkManager.singleton.StartClient();
         this.text.text = "Connecting...";
