@@ -297,20 +297,31 @@ public class CoreChip : CommonChip
     [Command]
     public void CmdResetCore()
     {
-        print($"clt=>srv: CmdResetCore");
-        this.PrepareReset();
-        this.transform.rotation = Quaternion.identity;
-        this.srvResetCounter += 1;
+        this.ResetPose(this.transform.position, Quaternion.identity);
+    }
+
+    // CmdResetPose moves the rebuilt model through the server after clearing every chip's motion.
+    [Command]
+    public void CmdResetPose(Vector3 position, Quaternion rotation)
+    {
+        this.ResetPose(position, rotation);
     }
 
     [Command]
     public void CmdResetToDefaultLocation()
     {
-        print($"clt=>srv: CmdResetToDefaultLocation");
+        Physics.SyncTransforms();
+        this.ResetPose(StaticChip.RaycastFromAbove(), Quaternion.identity);
+    }
+
+    // ResetPose freezes the complete model before teleporting its core and requesting reconstruction.
+    [Server]
+    void ResetPose(Vector3 position, Quaternion rotation)
+    {
         this.PrepareReset();
-        Vector3 spawnPosition = StaticChip.RaycastFromAbove();
-        this.transform.position = spawnPosition;
-        this.transform.rotation = Quaternion.identity;
+        this.rb.position = position;
+        this.rb.rotation = rotation;
+        this.transform.SetPositionAndRotation(position, rotation);
         this.srvResetCounter += 1;
     }
 

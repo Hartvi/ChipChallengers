@@ -107,8 +107,7 @@ public partial class GameScript
         var core = CoreChip.ClientCoreChip;
         this.AllObjects["player1"] = core.gameObject;
         this.ApplyScenarioPhysics();
-        core.CmdResetCore();
-        core.transform.SetPositionAndRotation(this.raceSpawnPosition, this.raceSpawnRotation);
+        core.CmdResetPose(this.raceSpawnPosition, this.raceSpawnRotation);
         this.pendingRaceRestart = StartCoroutine(this.RearmRaceAfterReset(core));
     }
 
