@@ -6,6 +6,7 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
     public static bool isHost = true;
+    public static GameplayContext PlayContext { get; } = new GameplayContext();
     public void SetModel(string m)
     {
         //print($"setting model to {m}");
