@@ -145,6 +145,7 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
 
     void OnLeaveMenu()
     {
+        if (this.core != null) { this.core.ResetCompleted -= this.PositionCameraAfterReset; }
         this.playEntry++;
         this.reloadScenarioAfterBuild = false;
         if (this.scenarioLoading != null) { StopCoroutine(this.scenarioLoading); }
@@ -194,7 +195,10 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
         // ignore wheel to player collisions
         Physics.IgnoreLayerCollision(7, 6);
 
+        if (this.core != null) { this.core.ResetCompleted -= this.PositionCameraAfterReset; }
         this.core = CoreChip.ClientCoreChip;
+        this.core.ResetCompleted += this.PositionCameraAfterReset;
+        GameManager.cameraMoveMode = CameraMoveMode.Follow;
         //print("SET NEW CORE");
         this.core.freeze = false;
 
@@ -230,7 +234,14 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
         //Debug.Log("TODO: add HUD");
         //this.wud.LinkCore(this.core);
 
-        Camera.main.transform.position = this.core.transform.position + 5f * Vector3.forward;
+    }
+
+    // PositionCameraAfterReset places the play camera at the final spawn after model rebuilding and scenario initialization.
+    void PositionCameraAfterReset()
+    {
+        if (!this.isActiveAndEnabled || this.core == null || this.reloadScenarioAfterBuild || this.scenarioLoading != null) { return; }
+        CoreCameraPlacement.Place(this.mainCamera, this.core.transform,
+            Mathf.Max(3f, this.cameraFollowSettings.posShift.x), Mathf.Max(2f, this.cameraFollowSettings.posShift.y));
     }
 
     void CameraFollowMove()
@@ -366,8 +377,6 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
             if (Input.GetKeyDown(KeyCode.T))
             {
                 this.core.CmdResetToDefaultLocation();
-                // set the camera position, since it might not catch up fast enough
-                Camera.main.transform.position = this.core.transform.position + Vector3.up * 10f;
             }
             if (Input.GetKeyDown(KeyCode.L))
             {
@@ -382,8 +391,6 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
             if (Input.GetKeyDown(KeyCode.U))
             {
                 this.core.CmdResetToDefaultLocation();
-                // set the camera position, since it might not catch up fast enough
-                Camera.main.transform.position = this.core.transform.position + Vector3.up*10f;
             }
 #endif
         }

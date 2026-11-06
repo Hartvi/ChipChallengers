@@ -13,6 +13,7 @@ public class EditorMenu : BaseMenu, InputReceiver
     NetworkManager manager;
 
     private Camera _camera;
+    CoreChip entryCameraCore;
     public CommonChip _selectedChip;
     public CommonChip selectedChip
     {
@@ -212,6 +213,9 @@ public class EditorMenu : BaseMenu, InputReceiver
         //core.rb.isKinematic = true;
         // TODO: clean up callbacks, etc after leacing this menu
         core.SetAfterBuildListeners(afterBuildListeners);
+        if (this.entryCameraCore != null) { this.entryCameraCore.ResetCompleted -= this.PositionCameraOnEntry; }
+        this.entryCameraCore = core;
+        core.ResetCompleted += this.PositionCameraOnEntry;
         // TODO: update value, option, etc in the editor to how it should look like.
         // atm it's only angle and colour that is visibly changed after rebuilding
 
@@ -226,13 +230,24 @@ public class EditorMenu : BaseMenu, InputReceiver
 
         // slow down physics to save power
         //Time.fixedDeltaTime = 0.1f;
-        // move the camera closer to be 5 meters away
-        this._camera.transform.position = (this._camera.transform.position - core.transform.position).normalized * 5f + core.transform.position;
-        this._camera.transform.LookAt(core.transform.position);
+    }
+
+    // PositionCameraOnEntry frames the core once after entering the editor without repositioning later selections or edits.
+    void PositionCameraOnEntry()
+    {
+        if (this.entryCameraCore == null) { return; }
+        var core = this.entryCameraCore;
+        core.ResetCompleted -= this.PositionCameraOnEntry;
+        this.entryCameraCore = null;
+        if (!this.isActiveAndEnabled) { return; }
+        this.focusPending = false;
+        CoreCameraPlacement.Place(this._camera, core.transform, 6f, 3f);
     }
 
     void OnLeaveMenu()
     {
+        if (this.entryCameraCore != null) { this.entryCameraCore.ResetCompleted -= this.PositionCameraOnEntry; }
+        this.entryCameraCore = null;
         this.highlighter.ParentHighlighter.SetActive(false);
 
         // leaving online mode back to unspawned core
