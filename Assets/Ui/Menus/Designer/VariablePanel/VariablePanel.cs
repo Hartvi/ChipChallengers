@@ -51,6 +51,7 @@ public class VariablePanel : BaseSidePanel, InputReceiver
         this.pendingRefresh = StartCoroutine(this.RefreshWhenReady());
     }
 
+    // OnEnable restarts model refresh when an initialized variable panel is shown.
     void OnEnable()
     {
         if (this.initialized && this.pendingRefresh == null)
@@ -59,6 +60,7 @@ public class VariablePanel : BaseSidePanel, InputReceiver
         }
     }
 
+    // OnDisable cancels pending refresh and detaches listeners when the panel is hidden.
     protected override void OnDisable()
     {
         base.OnDisable();
@@ -67,11 +69,13 @@ public class VariablePanel : BaseSidePanel, InputReceiver
         this.UnbindModel();
     }
 
+    // OnDestroy detaches model listeners before the variable panel is destroyed.
     void OnDestroy()
     {
         this.UnbindModel();
     }
 
+    // RefreshWhenReady waits for the current player model before binding the variable panel.
     IEnumerator RefreshWhenReady()
     {
         yield return null;
@@ -85,9 +89,10 @@ public class VariablePanel : BaseSidePanel, InputReceiver
         this.pendingRefresh = null;
     }
 
+    // RefreshModel binds listeners to the current model once and reloads its variable list.
     public void RefreshModel()
     {
-        // Inactive panels bind when next shown, after their controls have started.
+        // RefreshModel binds only active panels whose controls have initialized.
         if (!this.initialized || !this.isActiveAndEnabled ||
             NetworkClient.localPlayer == null) { return; }
         var model = CoreChip.ClientCoreChip.VirtualModel;
@@ -102,9 +107,10 @@ public class VariablePanel : BaseSidePanel, InputReceiver
         this.ReloadVariables();
     }
 
-    // Retained for existing callers; binding is idempotent for a given model.
+    // AddListenersToModel refreshes the current model binding without adding duplicate listeners.
     public void AddListenersToModel() => this.RefreshModel();
 
+    // UnbindModel removes variable listeners from the previously bound model.
     void UnbindModel()
     {
         if (this.boundModel == null) { return; }
@@ -114,11 +120,13 @@ public class VariablePanel : BaseSidePanel, InputReceiver
         this.boundModel = null;
     }
 
+    // OnVariablesChanged refreshes the displayed variable list after a variable is added or deleted.
     void OnVariablesChanged(string name)
     {
         this.ReloadVariables();
     }
 
+    // OnVariableSelected populates editable fields for the selected variable and refreshes scrolling.
     void OnVariableSelected(string name)
     {
         this.variableFields.PopulateFields(this.boundModel.GetSelectedVariable());

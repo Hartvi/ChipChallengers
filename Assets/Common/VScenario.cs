@@ -43,17 +43,30 @@ public class VScenario
         else
         {
             if (this.loadedObject != null)
+            {
+                this.loadedObject.SetActive(false);
                 GameObject.Destroy(this.loadedObject);
+            }
 
             this.loadedObject = new GameObject(UIStrings.ScenarioString);
             var gs = this.loadedObject.AddComponent<GameScript>();
 
             string fileContents = File.ReadAllText(scenarioPath);
-            gs.Activate(fileContents);
+            gs.Activate(fileContents, name);
 
             this.loadedObject.SetActive(true);
 
             error = string.Empty;
         }
     }
+
+    // UnloadScenario stops scenario logic and releases its temporary physics settings before destroying its objects.
+    public void UnloadScenario()
+    {
+        if (this.loadedObject == null) { return; }
+        this.loadedObject.SetActive(false);
+        GameObject.Destroy(this.loadedObject);
+        this.loadedObject = null;
+    }
+
 }

@@ -315,6 +315,7 @@ public class CoreChip : CommonChip
     }
 
     [Server]
+    // PrepareReset pauses the model and clears retained input and motion before resetting.
     void PrepareReset()
     {
         this.IsRebuilding = true;

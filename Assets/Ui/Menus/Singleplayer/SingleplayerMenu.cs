@@ -11,6 +11,31 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
     //public static SingleplayerMenu Instance;
     public static VMap myVMap = new VMap();
     public static VScenario myVScenario = new VScenario();
+    private static string pendingScenario;
+
+    // PlayScenario queues the selected scenario and enters singleplayer mode.
+    public static void PlayScenario(string name)
+    {
+        pendingScenario = name;
+        GoToSingleplayer.Function();
+    }
+
+    // LoadPendingScenario consumes a queued scenario and schedules loading after the current rebuild.
+    void LoadPendingScenario()
+    {
+        if (pendingScenario == null) { return; }
+        string name = pendingScenario;
+        pendingScenario = null;
+        StartCoroutine(this.LoadScenarioAfterBuild(name));
+    }
+
+    // LoadScenarioAfterBuild waits one frame for reset bookkeeping to finish before executing scenario logic.
+    IEnumerator LoadScenarioAfterBuild(string name)
+    {
+        // LoadScenarioAfterBuild resumes after the current rebuild finalizes its reset counters.
+        yield return null;
+        myVScenario.LoadNewScenario(name + UIStrings.ScenarioExtension);
+    }
 
     NetworkManager manager;
 
@@ -96,6 +121,7 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
 
     void OnLeaveMenu()
     {
+        myVScenario.UnloadScenario();
         GameManager.RealTimeSettings.InMenu = true;
     }
 
@@ -107,22 +133,17 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
 
     private IEnumerator AsyncEnterMenu()
     {
-        if (manager.isNetworkActive)
+        if (!manager.isNetworkActive)
         {
-            this.OnEnterMenu();
-            yield break;
-        }
-        if (GameManager.isHost)
-        {
-            manager.StartHost();
-            print("Singleplayer start host");
-        }
-        else
-        {
-            manager.StartClient();
-            print("Singleplayer start client");
+            if (GameManager.isHost) { manager.StartHost(); }
+            else { manager.StartClient(); }
         }
         while (NetworkClient.localPlayer == null)
+        {
+            yield return null;
+        }
+        while (CoreChip.ClientCoreChip.IsRebuilding ||
+               CoreChip.ClientCoreChip.loadedModelString == null)
         {
             yield return null;
         }
@@ -168,7 +189,8 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
             () =>
             {
                 this.Hud.LinkCore(this.core);
-            }
+            },
+            this.LoadPendingScenario
         };
         this.core.SetAfterBuildListeners(afterBuildListeners);
 
@@ -310,15 +332,7 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
             }
             if (Input.GetKeyDown(KeyCode.R))
             {
-                //this.core.rb.velocity = Vector3.zero;
-                if (!shiftPressed)
-                {
-                    Quaternion newRot = Quaternion.Euler(0f, this.core.transform.rotation.eulerAngles.y, 0f);
-                    //this.core.transform.rotation = newRot;
-                }
-                //this.core.transform.position += Vector3.up * 2f;
-                //this.core.TriggerSpawn(this.core.VirtualModel, false);
-                this.core.CmdResetCore();
+                if (!GameScript.TryRestartActiveRace()) { this.core.CmdResetCore(); }
             }
 #if UNITY_EDITOR
             if (Input.GetKeyDown(KeyCode.T))
