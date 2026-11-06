@@ -51,7 +51,6 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
 
     private LoadPanel LoadPanel;
     private MapPanel MapPanel;
-    private ScenarioPanel ScenarioPanel;
     private ControlsPanel ControlsPanel;
 
     private CoreChip core;
@@ -92,8 +91,7 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
             //    )
             //),
             new VirtualProp(PropType.Panel, 1f, typeof(LoadPanel)),
-            new VirtualProp(PropType.Panel, 1f, typeof(MapPanel)),
-            new VirtualProp(PropType.Panel, 1f, typeof(ScenarioPanel))
+            new VirtualProp(PropType.Panel, 1f, typeof(MapPanel))
         );
     }
 
@@ -108,7 +106,6 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
 
         this.LoadPanel = this.GetComponentInChildren<LoadPanel>();
         this.MapPanel = this.GetComponentInChildren<MapPanel>();
-        this.ScenarioPanel = this.GetComponentInChildren<ScenarioPanel>();
 
         this.cameraFollowSettings = new CameraFollowSettings(posShift: Vector2.up * 3f + Vector2.right * 10f, predict: 0.05f, sensitivity: 1f, lowPass: 0f);
 
@@ -322,10 +319,6 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
             {
                 this.MapPanel.ActivatePanel(SingleplayerMenu.myVMap.FileName);
             }
-            if (Input.GetKeyDown(KeyCode.C))
-            {
-                this.ScenarioPanel.ActivatePanel(SingleplayerMenu.myVScenario.FileName);
-            }
             if (Input.GetKeyDown(KeyCode.E))
             {
                 GoToEditor.Function();
@@ -350,10 +343,6 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
             if (Input.GetKeyDown(KeyCode.O))
             {
                 this.LoadPanel.ActivatePanel(GameManager.Instance.GetModel());
-            }
-            if (Input.GetKeyDown(KeyCode.K))
-            {
-                this.ScenarioPanel.ActivatePanel(SingleplayerMenu.myVScenario.FileName);
             }
             if (Input.GetKeyDown(KeyCode.U))
             {
