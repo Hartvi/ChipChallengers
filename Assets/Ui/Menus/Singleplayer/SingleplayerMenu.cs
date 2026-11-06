@@ -182,7 +182,6 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
     {
         this.playEntry++;
         this.reloadScenarioAfterBuild = GameManager.PlayContext.IsScenario;
-        Time.fixedDeltaTime = 1f / (float)(PlayerPrefs.GetInt(UIStrings.PhysicsRate));
         GameManager.RealTimeSettings.InMenu = false;
         GameManager.Instance.UpdateSettings();
 

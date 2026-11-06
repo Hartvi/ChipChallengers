@@ -145,7 +145,7 @@ public class GameManager : MonoBehaviour
         int newf = SaturateIntSetting(s, i);
         //Debug.Log($"Setting physics rate to {f}");
 
-        Time.fixedDeltaTime = 1f / (float)newf;
+        PhysicsSettingsManager.SetFixedDeltaTime(1f / (float)newf, "Player physics rate");
 
         PlayerPrefs.SetInt(s, newf);
         PlayerPrefs.Save();
