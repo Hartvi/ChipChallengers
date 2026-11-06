@@ -155,26 +155,6 @@ public class ScenarioRaceProgress
 
     // Fail prevents a stopped attempt from accepting further gate crossings.
     public void Fail() => this.Failed = true;
-
-    // CrossesGate reports whether the sampled movement enters or passes through the gate sphere.
-    public static bool CrossesGate(ScenarioRacePoint from, ScenarioRacePoint to, ScenarioRacePoint center, float radius) =>
-        CrossingFraction(from, to, center, radius).HasValue;
-
-    // CrossingFraction returns the first entry fraction along a movement segment and ignores starts inside the gate.
-    public static double? CrossingFraction(ScenarioRacePoint from, ScenarioRacePoint to, ScenarioRacePoint center, float radius)
-    {
-        double x = from.x - (double)center.x, y = from.y - (double)center.y, z = from.z - (double)center.z;
-        double dx = to.x - (double)from.x, dy = to.y - (double)from.y, dz = to.z - (double)from.z;
-        double c = x * x + y * y + z * z - (double)radius * radius;
-        if (c <= 0) { return null; }
-        double a = dx * dx + dy * dy + dz * dz;
-        if (a == 0) { return null; }
-        double b = x * dx + y * dy + z * dz;
-        double discriminant = b * b - a * c;
-        if (discriminant < 0) { return null; }
-        double t = (-b - Math.Sqrt(discriminant)) / a;
-        return t >= 0 && t <= 1 ? t : (double?)null;
-    }
 }
 
 // ScenarioRaceStartTiming defines the one-second settling hold followed by a three-second countdown.

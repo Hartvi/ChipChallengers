@@ -166,24 +166,10 @@ class Program
             Check(retry.NextGate == 0 && !retry.Finished, "Retry kept old progress");
             retry.Fail();
             Check(!retry.Pass(0), "Invalidated attempt accepted a gate");
-            var center = new ScenarioRacePoint(0,0,0);
-            Check(ScenarioRaceProgress.CrossesGate(new ScenarioRacePoint(-10,0,0),new ScenarioRacePoint(10,0,0),center,1), "Fast movement skipped the gate");
-            Check(!ScenarioRaceProgress.CrossesGate(center,new ScenarioRacePoint(0.5f,0,0),center,1), "Spawning inside started the timer");
-            Check(!ScenarioRaceProgress.CrossesGate(new ScenarioRacePoint(-10,2,0),new ScenarioRacePoint(10,2,0),center,1), "Near miss triggered a gate");
-            Check(!ScenarioRaceProgress.CrossesGate(new ScenarioRacePoint(10,0,0),new ScenarioRacePoint(20,0,0),center,1), "Moving away triggered a gate");
-            Check(Math.Abs(ScenarioRaceProgress.CrossingFraction(new ScenarioRacePoint(-10,0,0),new ScenarioRacePoint(10,0,0),center,1).Value - 0.45) < 0.000001, "Gate entry time interpolation incorrect");
             int restarts = 0;
             ScenarioLuaCallbacks.Register(lua, _ => {}, () => {}, _ => {}, () => null, (_,__) => {}, () => restarts++);
             lua.DoString("RestartRace()");
             Check(restarts == 1, "Lua retry callback not forwarded");
-            var fastEnd = new ScenarioRacePoint(30,0,0);
-            var fastFrom = new ScenarioRacePoint(-10,0,0);
-            double firstEntry = ScenarioRaceProgress.CrossingFraction(fastFrom, fastEnd, center, 1).Value;
-            var firstCrossing = new ScenarioRacePoint((float)(fastFrom.x + (fastEnd.x-fastFrom.x)*firstEntry), 0, 0);
-            Check(ScenarioRaceProgress.CrossingFraction(firstCrossing, fastEnd, new ScenarioRacePoint(20,0,0), 1).HasValue,
-                "A second forward gate could not be processed in the same movement segment");
-            Check(!ScenarioRaceProgress.CrossingFraction(firstCrossing, fastEnd, new ScenarioRacePoint(-5,0,0), 1).HasValue,
-                "A gate behind an already passed gate was accepted out of physical order");
             string scenarioDirectory = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../Assets/StreamingAssets/Scenarios"));
             foreach (string file in new[] { "circuit1_race.lua", "load_race.lua" })
             {
