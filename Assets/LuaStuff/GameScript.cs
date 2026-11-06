@@ -54,6 +54,7 @@ public partial class GameScript : MonoBehaviour
 
         try
         {
+            CoreChip.ClientCoreChip.CmdResetToDefaultLocation();
             this.script.DoString(this.scriptString);
         }
         catch (Exception e)
@@ -205,14 +206,18 @@ public partial class GameScript : MonoBehaviour
     }
 
     // SPECIALIZED FUNCTIONS
-    public static void LoadMap(string mapName)
+    // LoadMap places the model at the new map's default spawn before Lua optionally supplies a specific pose.
+    public void LoadMap(string mapName)
     {
         string m = mapName;
         if (mapName.Contains(UIStrings.MapExtension))
         {
             m = mapName.Substring(0, mapName.Length - UIStrings.MapExtension.Length);
         }
-        SingleplayerMenu.myVMap.LoadNewMap(m + UIStrings.MapExtension);
+        if (SingleplayerMenu.myVMap.LoadNewMap(m + UIStrings.MapExtension))
+        {
+            CoreChip.ClientCoreChip.CmdResetToDefaultLocation();
+        }
     }
 
     public float[] GetPosition(string name)
@@ -231,9 +236,7 @@ public partial class GameScript : MonoBehaviour
         if (this.PlayerObjects.Contains(name))
         {
             var core = this.AllObjects[name].GetComponent<CoreChip>();
-            core.transform.rotation = Quaternion.Euler(p.x, p.y, p.z);
-            core.rb.velocity = Vector3.zero;
-            core.srvResetCounter += 1;
+            core.CmdResetPose(core.transform.position, Quaternion.Euler(p.x, p.y, p.z));
         }
         else
         {
@@ -265,10 +268,7 @@ public partial class GameScript : MonoBehaviour
         if (this.PlayerObjects.Contains(name))
         {
             var core = this.AllObjects[name].GetComponent<CoreChip>();
-            core.transform.position = p;
-            //core.transform.rotation = Quaternion.identity;
-            core.rb.velocity = Vector3.zero;
-            core.srvResetCounter += 1;
+            core.CmdResetPose(p, core.transform.rotation);
         }
         else
         {

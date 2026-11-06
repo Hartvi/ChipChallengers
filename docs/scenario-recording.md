@@ -88,3 +88,7 @@ Leaving singleplayer unloads the active scenario and restores the prior timestep
 The main menu's Scenarios screen selects and launches a scenario. Regular Singleplayer no longer contains a scenario picker or scenario-loading shortcuts. Choosing Singleplayer explicitly clears the scenario selection; joining a multiplayer server clears it too.
 
 The shared `GameManager.PlayContext` remembers the chosen scenario while the editor is open. Leaving play mode unloads the scenario runtime and restores player physics settings, but does not erase the selection. Returning from the editor through Play/Ctrl+P rebuilds the edited vehicle and reloads the complete selected scenario with fresh gates, timers, objects and attempt state. Regular singleplayer returns to regular singleplayer. Queued scenario loads are cancelled when leaving play mode or selecting a different context, and a scenario reload happens only once per play entry.
+
+## Scenario spawn positioning
+
+Scenario loading resets the vehicle to the current map's default spawn before Lua initialization. `LoadMap(...)` resets it again after the new map's colliders are synchronized; the old map is disabled before destruction so spawn raycasts cannot hit it. A subsequent `SetPosition("player1", {...})` or `SetRotation(...)` supplies the authored scenario pose. Those operations and race retries freeze and clear motion across the complete vehicle before moving the core and rebuilding its children.

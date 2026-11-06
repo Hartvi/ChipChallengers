@@ -13,7 +13,8 @@ public class VMap
 
     GameObject loadedObject;
 
-    public void LoadNewMap(string name)
+    // LoadNewMap replaces the active map and synchronizes its colliders before spawn queries run.
+    public bool LoadNewMap(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -24,9 +25,9 @@ public class VMap
                 x.SetText(msg);
             },
             3f);
-            return;
+            return false;
         }
-        this.mapName = name.Substring(0, name.Length - UIStrings.MapExtension.Length);;
+        string loadedMapName = name.Substring(0, name.Length - UIStrings.MapExtension.Length);
 
         string error = "";
         string objPath = Path.Join(IOHelpers.GetMapsDirectory(), name).Replace("\\", "/");
@@ -44,7 +45,10 @@ public class VMap
         else
         {
             if (this.loadedObject != null)
+            {
+                this.loadedObject.SetActive(false);
                 GameObject.Destroy(this.loadedObject);
+            }
 
             this.loadedObject = new OBJLoader().Load(objPath);
 
@@ -55,8 +59,11 @@ public class VMap
                 m.gameObject.SetActive(true);
             }
             this.loadedObject.SetActive(true);
-            error = string.Empty;
+            Physics.SyncTransforms();
+            this.mapName = loadedMapName;
+            return true;
         }
+        return false;
     }
 }
 
