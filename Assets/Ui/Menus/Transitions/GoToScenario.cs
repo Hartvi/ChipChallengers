@@ -1,26 +1,26 @@
 
-public class GoToCampaign : BaseTransition
+public class GoToScenario : BaseTransition
 {
 
     public override void Setup()
     {
         base.Setup();
-        this.text.text = UIStrings.Campaign;
+        this.text.text = UIStrings.Scenarios;
         this.text.fontSize = UIUtils.MediumFontSize;
     }
 
     protected override void Execute()
     {
-        GoToCampaign.Function();
+        GoToScenario.Function();
     }
 
     public static void Function()
     {
         GameManager.isHost = true;
         // inherit is host from other menus
-        BaseMenu.SwitchToMenu(typeof(CampaignMenu));
+        BaseMenu.SwitchToMenu(typeof(ScenarioMenu));
 
-        BaseTransition.InvokeAfterClickedCallbacks(typeof(GoToCampaign));
+        BaseTransition.InvokeAfterClickedCallbacks(typeof(GoToScenario));
     }
 }
 
