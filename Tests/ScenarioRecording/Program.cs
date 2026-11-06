@@ -29,7 +29,7 @@ class Program
             modelSnapshot = "{script=[[line one\nline two]]}",
             chipCounts = { new ScenarioChipCount { chipType = "Wheel", count = 4 } },
             rules = { maxChips = 30, forbiddenChipTypes = { "Jet" } },
-            physics = { fixedDeltaTime = 0.001f, solverIterations = 1, solverVelocityIterations = 1 }
+            physics = { fixedDeltaTime = 0.001f, solverIterations = 1, solverVelocityIterations = 3 }
         };
     }
     // Main exercises Lua callback contracts and persistent records using disposable test saves.
@@ -85,7 +85,7 @@ class Program
             Reject(() => ScenarioLuaMetadata.Parse(lua.DoString("return {}").Table, ""), "Missing identity accepted");
             var standard = ScenarioLuaMetadata.Parse(lua.DoString("return {id='standard'}").Table, "");
             Check(standard.rules.physics.fixedDeltaTime == 0.001f && standard.rules.physics.solverIterations == 1 &&
-                standard.rules.physics.solverVelocityIterations == 1, "Missing physics rules did not use the shared preset");
+                standard.rules.physics.solverVelocityIterations == 3, "Missing physics rules did not use the shared preset");
             var custom = ScenarioLuaMetadata.Parse(lua.DoString("return {id='custom',rules={physics={fixedDeltaTime=0.01,solverIterations=12,solverVelocityIterations=4}}}").Table, "");
             Check(custom.rules.physics.fixedDeltaTime == 0.01f && custom.rules.physics.solverIterations == 12 &&
                 custom.rules.physics.solverVelocityIterations == 4, "Explicit physics rules were not parsed");
