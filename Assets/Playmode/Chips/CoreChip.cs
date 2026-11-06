@@ -32,6 +32,9 @@ public class CoreChip : CommonChip
     char[] keysToCheck = new char[0];
     [SyncVar]
     public bool freeze = false;
+    [SyncVar]
+    bool raceStartHeld;
+    public bool IsRaceStartHeld => this.raceStartHeld;
     bool frozen = false;
     public bool IsRebuilding { get; private set; }
     public static CoreChip ClientCoreChip => NetworkClient.localPlayer.GetComponent<CoreChip>();
@@ -182,6 +185,7 @@ public class CoreChip : CommonChip
         {
             return;
         }
+        if (this.raceStartHeld) { return; }
         foreach (var rtf in this.RuntimeFunctions)
         {
             if (rtf != null)
@@ -535,6 +539,27 @@ public class CoreChip : CommonChip
         }
     }
 
+    // CmdSetRaceStartHeld stops every chip during race staging and releases it without changing editor freeze state.
+    [Command]
+    public void CmdSetRaceStartHeld(bool held)
+    {
+        this.raceStartHeld = held;
+        foreach (var chip in this.AllChips)
+        {
+            if (chip == null) { continue; }
+            var body = chip.GetComponent<Rigidbody>();
+            if (held)
+            {
+                var common = (CommonChip)chip;
+                common.Omega = 0f;
+                if (body != null) { common.ResetMotion(); }
+                var wheel = chip.GetComponent<WheelAspects>();
+                if (wheel != null) { wheel.ResetSpinHistory(); }
+            }
+            else if (body != null) { body.isKinematic = this.freeze || this.IsRebuilding; }
+        }
+    }
+
     [Command]
     public void CmdFreezeClientModel(bool f)
     {
@@ -552,7 +577,7 @@ public class CoreChip : CommonChip
             var r = chip.GetComponent<Rigidbody>();
             if (r != null)
             {
-                r.isKinematic = f;
+                r.isKinematic = f || this.raceStartHeld;
             }
         }
     }

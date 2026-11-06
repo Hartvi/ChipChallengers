@@ -295,6 +295,22 @@ class Program
                 currentPhysics = next;
             }, requestedPhysics, "attempt invalidation");
             invalidationEvents.Changing -= invalidate;
+            Check(!ScenarioRaceStartTiming.Ready(0) && ScenarioRaceStartTiming.CountdownAt(0) == 0,
+                "Race started immediately at gate entry");
+            Check(!ScenarioRaceStartTiming.Ready(0.999) && ScenarioRaceStartTiming.CountdownAt(0.999) == 0,
+                "Countdown started before the one-second settling hold");
+            Check(ScenarioRaceStartTiming.CountdownAt(1) == 3 && !ScenarioRaceStartTiming.Ready(1),
+                "Settling hold did not transition to countdown 3");
+            Check(ScenarioRaceStartTiming.CountdownAt(2) == 2 && !ScenarioRaceStartTiming.Ready(2),
+                "Countdown 2 timing incorrect");
+            Check(ScenarioRaceStartTiming.CountdownAt(3) == 1 && !ScenarioRaceStartTiming.Ready(3),
+                "Countdown 1 timing incorrect");
+            Check(ScenarioRaceStartTiming.CountdownAt(3.999) == 1 && !ScenarioRaceStartTiming.Ready(3.999),
+                "Race released before countdown completion");
+            Check(ScenarioRaceStartTiming.Ready(4) && ScenarioRaceStartTiming.CountdownAt(4) == 0,
+                "Race did not release at GO");
+            Check(ScenarioRaceStartTiming.CountdownAt(5) == 0 && ScenarioRaceStartTiming.Ready(5),
+                "Completed countdown produced an invalid negative number");
             Console.WriteLine("PASS: " + checks + " scenario metadata and persistent-record checks.");
         }
         finally { Directory.Delete(directory, true); }

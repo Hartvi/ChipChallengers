@@ -16,6 +16,8 @@ public partial class GameScript
     double previousRaceSampleTime;
     int raceGeneration;
     UnityEngine.Coroutine pendingRaceRestart;
+    UnityEngine.Coroutine pendingRaceStart;
+    CoreChip heldRaceCore;
 
     // Race creates a race from named start/checkpoint/finish positions and shared gate appearance.
     public void Race(Table configuration) => this.Race(configuration, DynValue.Nil);
@@ -55,6 +57,7 @@ public partial class GameScript
     // ClearRace stops pending retries and immediately disables old gates before their deferred destruction.
     void ClearRace()
     {
+        this.CancelRaceStart();
         this.raceGeneration++;
         if (this.pendingRaceRestart != null) { StopCoroutine(this.pendingRaceRestart); }
         this.pendingRaceRestart = null;
@@ -97,6 +100,7 @@ public partial class GameScript
     public void RestartRace()
     {
         if (this.raceDefinition == null) { throw new InvalidOperationException("Call Race before RestartRace."); }
+        this.CancelRaceStart();
         if (NetworkClient.localPlayer == null) { throw new InvalidOperationException("Player is not ready."); }
         if (this.pendingRaceRestart != null) { StopCoroutine(this.pendingRaceRestart); }
         this.raceGeneration++;
@@ -124,7 +128,7 @@ public partial class GameScript
     // FixedUpdate samples ordered gate crossings along vehicle motion instead of polling rendered-frame proximity.
     void FixedUpdate()
     {
-        if (!this.isRace || this.raceDefinition == null || NetworkClient.localPlayer == null) { return; }
+        if (!this.isRace || this.raceDefinition == null || this.pendingRaceStart != null || NetworkClient.localPlayer == null) { return; }
         var core = CoreChip.ClientCoreChip;
         var from = this.previousRacePosition;
         double fromTime = this.previousRaceSampleTime;
@@ -146,6 +150,7 @@ public partial class GameScript
                 (float)(from.z + (to.z - from.z) * fraction.Value));
             double crossingTime = fromTime + (toTime - fromTime) * fraction.Value;
             this.PassRaceGate(crossingTime);
+            if (this.pendingRaceStart != null) { break; }
             from = crossing;
             fromTime = crossingTime;
         }
@@ -161,8 +166,8 @@ public partial class GameScript
         {
             if (index == 0)
             {
-                this.BeginScenarioAttempt();
-                this.times["race"] = crossingTime;
+                this.pendingRaceStart = StartCoroutine(this.StartRaceCountdown(CoreChip.ClientCoreChip, generation));
+                return;
             }
             double seconds = crossingTime - this.times["race"];
             if (index == this.raceGates.Count - 1) { this.CompleteAttempt(seconds); }
@@ -180,7 +185,6 @@ public partial class GameScript
             else
             {
                 this.Show(this.raceGates[this.raceProgress.NextGate]);
-                if (index == 0 && !definition.onStarted.IsNil()) { this.script.Call(definition.onStarted); }
                 if (index > 0 && !definition.onCheckpoint.IsNil())
                     this.script.Call(definition.onCheckpoint, index, seconds);
             }
@@ -194,6 +198,81 @@ public partial class GameScript
             }
             this.ReportScenarioError(error.Message + " Press Ctrl+R to retry.");
         }
+    }
+
+    // StartRaceCountdown stops the vehicle for one second and holds it through 3-2-1 before starting the timed attempt.
+    IEnumerator StartRaceCountdown(CoreChip core, int generation)
+    {
+        this.heldRaceCore = core;
+        core.CmdSetRaceStartHeld(true);
+        double startedAt = Time.timeAsDouble;
+        uint resetCounter = core.srvResetCounter;
+        yield return null;
+        while (!ScenarioRaceStartTiming.Ready(Time.timeAsDouble - startedAt))
+        {
+            if (!this.CanFinishRaceStart(core, generation, resetCounter))
+            {
+                this.pendingRaceStart = null;
+                this.CancelRaceStart();
+                this.isRace = false;
+                this.raceProgress?.Fail();
+                this.ReportScenarioError("Race start cancelled. Press Ctrl+R to retry.");
+                yield break;
+            }
+            int number = ScenarioRaceStartTiming.CountdownAt(Time.timeAsDouble - startedAt);
+            this.DisplayRaceStart(number == 0 ? "Get ready..." : number.ToString());
+            yield return null;
+        }
+        this.pendingRaceStart = null;
+        bool valid = this.CanFinishRaceStart(core, generation, resetCounter);
+        this.CancelRaceStart();
+        if (!valid) { this.isRace = false; yield break; }
+        try
+        {
+            this.BeginScenarioAttempt();
+            this.times["race"] = Time.timeAsDouble;
+            this.raceProgress.Pass(0);
+            this.Hide(this.raceGates[0]);
+            this.Show(this.raceGates[1]);
+            this.previousRacePosition = Point(core.transform.position);
+            this.previousRaceSampleTime = Time.timeAsDouble;
+            this.DisplayRaceStart("GO!");
+            var callback = this.raceDefinition.onStarted;
+            if (!callback.IsNil()) { this.script.Call(callback); }
+        }
+        catch (Exception error)
+        {
+            if (generation == this.raceGeneration)
+            {
+                this.raceProgress.Fail();
+                this.isRace = false;
+            }
+            this.ReportScenarioError(error.Message + " Press Ctrl+R to retry.");
+        }
+    }
+
+    // CanFinishRaceStart rejects a staged start after a reset, player replacement, menu transition or race replacement.
+    bool CanFinishRaceStart(CoreChip core, int generation, uint resetCounter) => core != null &&
+        NetworkClient.localPlayer != null && CoreChip.ClientCoreChip == core &&
+        this.isActiveAndEnabled && this.isRace && generation == this.raceGeneration &&
+        !core.freeze && !GameManager.RealTimeSettings.InMenu && core.srvResetCounter == resetCounter;
+
+    // CancelRaceStart stops pending staging and releases its vehicle without leaving a cancelled scenario frozen.
+    void CancelRaceStart()
+    {
+        if (this.pendingRaceStart != null) { StopCoroutine(this.pendingRaceStart); }
+        this.pendingRaceStart = null;
+        if (this.heldRaceCore != null && NetworkClient.active) { this.heldRaceCore.CmdSetRaceStartHeld(false); }
+        this.heldRaceCore = null;
+    }
+
+    // DisplayRaceStart displays a short-lived staging or countdown message above the race timer.
+    void DisplayRaceStart(string message)
+    {
+        DisplaySingleton.Instance.DisplayText(text => {
+            DisplaySingleton.BasicLargeModification(text);
+            text.SetText(message);
+        }, 0.25f, "race-start-countdown");
     }
 
     // DisplayRaceTime shows elapsed time and intermediate checkpoint progress for a running attempt.
