@@ -22,6 +22,13 @@ public class GameplayContext
         this.Revision++;
     }
 
+    // Retry restarts the selected scenario or resets the model in regular singleplayer without changing modes.
+    public void Retry(Action<string> restartScenario, Action resetSingleplayer)
+    {
+        if (this.IsScenario) { restartScenario(this.ScenarioName); }
+        else { resetSingleplayer(); }
+    }
+
     // MatchesScenario identifies queued loads that still belong to the current scenario selection.
     public bool MatchesScenario(string name, int revision) => this.IsScenario &&
         this.Revision == revision && string.Equals(this.ScenarioName, name, StringComparison.Ordinal);

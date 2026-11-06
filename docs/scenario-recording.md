@@ -55,7 +55,7 @@ Race({
 })
 ```
 
-`GetRaceResult()` returns nil before finishing and the frozen final seconds afterward. Ctrl+R or Lua's `RestartRace()` returns the model to its original race spawn, clears motion and progress, waits for model rebuilding, and rearms the start gate. A retry uses the current model after checking the scenario rules again at the start. Repeating `Race(...)` replaces the old course and disables its gates before creating new ones. The original `Race(gateList, optionalFinishCallback)` format remains supported.
+`GetRaceResult()` returns nil before finishing and the frozen final seconds afterward. Ctrl+R unloads and reloads the entire selected scenario, recreating its Lua state, map, objects, timers and gates after the player model is reset. Lua's `RestartRace()` is a narrower operation that returns the model to its race spawn, clears race motion and progress, waits for rebuilding, and rearms the start gate without rerunning the scenario script. A retry uses the current model after checking the scenario rules again at the start. Repeating `Race(...)` replaces the old course and disables its gates before creating new ones. The original `Race(gateList, optionalFinishCallback)` format remains supported.
 
 Metadata-free older scenarios still load and record under `legacy:<filename>`; explicit IDs preserve records when files are renamed or shared.
 
@@ -69,7 +69,7 @@ CompleteScenario(GetTime("custom"))
 -- For an untimed objective, use CompleteScenario() instead.
 ```
 
-The built-in race saves automatically; do not also begin a custom attempt for the same race. Duplicate completion calls after a successful finish are ignored. A reset, changed model/physics settings, or leaving play mode invalidates an attempt. Ctrl+R restarts a built-in race; custom objectives can call BeginScenarioAttempt again when ready. Forbidden chip types and the total chip limit are checked at attempt start; menu-side previews and rejecting invalid model loads are not implemented here.
+The built-in race saves automatically; do not also begin a custom attempt for the same race. Duplicate completion calls after a successful finish are ignored. A reset, changed model/physics settings, or leaving play mode invalidates an attempt. Ctrl+R restarts the whole scenario for both races and custom objectives; custom Lua logic can also call BeginScenarioAttempt again when ready. Forbidden chip types and the total chip limit are checked at attempt start; menu-side previews and rejecting invalid model loads are not implemented here.
 
 Records are written to `Path.Combine(Application.persistentDataPath, "scenario-progress.json")` with a `.bak` of the prior save and temporary-file replacement. Unreadable saves are reported instead of overwritten. Records are grouped by scenario ID, course/rules record version, and actual processor version. A slower finish updates the last run without replacing the best run or its vehicle. Untimed completions never become zero-time bests.
 

@@ -22,6 +22,18 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
         GoToSingleplayer.Function();
     }
 
+    // RestartScenario unloads all scenario state and queues a fresh Lua load after resetting the player model.
+    void RestartScenario(string name)
+    {
+        if (!GameManager.PlayContext.IsScenario || GameManager.PlayContext.ScenarioName != name) { return; }
+        this.playEntry++;
+        if (this.scenarioLoading != null) { StopCoroutine(this.scenarioLoading); }
+        this.scenarioLoading = null;
+        myVScenario.UnloadScenario();
+        this.reloadScenarioAfterBuild = true;
+        this.core.CmdResetCore();
+    }
+
     // LoadPendingScenario schedules one fresh scenario load after the player model is built for this play entry.
     void LoadPendingScenario()
     {
@@ -346,7 +358,10 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
             }
             if (Input.GetKeyDown(KeyCode.R))
             {
-                if (!GameScript.TryRestartActiveRace()) { this.core.CmdResetCore(); }
+                if (this.core != null)
+                {
+                    GameManager.PlayContext.Retry(this.RestartScenario, this.core.CmdResetCore);
+                }
             }
 #if UNITY_EDITOR
             if (Input.GetKeyDown(KeyCode.T))
