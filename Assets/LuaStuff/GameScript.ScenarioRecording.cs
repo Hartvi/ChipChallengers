@@ -100,21 +100,22 @@ public partial class GameScript
             throw new InvalidOperationException("Scenario forbids chip types: " + string.Join(", ", forbidden));
     }
 
-    // AttemptIsValid checks that the same vehicle, reset state, play mode and physics settings remain active.
-    bool AttemptIsValid()
+    // AttemptIsValid checks live attempt state and optionally verifies the full model and body settings before saving.
+    bool AttemptIsValid(bool verifySnapshot = false)
     {
         if (this.activeAttempt == null || NetworkClient.localPlayer == null || this.attemptCore == null)
             return false;
         var core = CoreChip.ClientCoreChip;
         var physics = this.activeAttempt.physics;
-        return core == this.attemptCore && !core.freeze && !GameManager.RealTimeSettings.InMenu &&
+        bool stateIsValid = core == this.attemptCore && !core.freeze && !GameManager.RealTimeSettings.InMenu &&
             core.srvResetCounter == this.attemptResetCounter &&
-            core.VirtualModel.ToLuaString() == this.activeAttempt.modelSnapshot &&
             Time.fixedDeltaTime == physics.fixedDeltaTime &&
             Physics.defaultSolverIterations == physics.solverIterations &&
-            Physics.defaultSolverVelocityIterations == physics.solverVelocityIterations &&
-            this.previousBodySolvers.Keys.All(body => body == null ||
-                (body.solverIterations == physics.solverIterations && body.solverVelocityIterations == physics.solverVelocityIterations));
+            Physics.defaultSolverVelocityIterations == physics.solverVelocityIterations;
+        return stateIsValid && (!verifySnapshot ||
+            (core.VirtualModel.ToLuaString() == this.activeAttempt.modelSnapshot &&
+             this.previousBodySolvers.Keys.All(body => body == null ||
+                 (body.solverIterations == physics.solverIterations && body.solverVelocityIterations == physics.solverVelocityIterations))));
     }
 
     // CompleteAttempt persists the completed attempt once and notifies listeners after saving succeeds.
@@ -126,7 +127,7 @@ public partial class GameScript
             if (this.attemptCompleted) { return; }
             throw new InvalidOperationException("Call BeginScenarioAttempt before completing a scenario.");
         }
-        if (!this.AttemptIsValid())
+        if (!this.AttemptIsValid(verifySnapshot: true))
         {
             this.activeAttempt = null;
             throw new InvalidOperationException("Attempt invalidated by a reset, model/settings change or leaving play mode.");
