@@ -31,15 +31,39 @@ public class EditorMenu : BaseMenu, InputReceiver
         }
     }
     Vector3 lastSelectedPosition = Vector3.zero;
+    [SerializeField, Min(0.1f)] float focusSharpness = 10f;
+    bool focusPending;
 
-    // FocusSelectedChip immediately aims the orbit camera at the selected chip without moving the camera.
+    // FocusSelectedChip requests a smooth orbit-camera rotation toward the selected chip.
     void FocusSelectedChip()
     {
         if (this._camera != null && this.selectedChip != null &&
             GameManager.cameraMoveMode == CameraMoveMode.Follow &&
             (this._camera.transform.position - this.lastSelectedPosition).sqrMagnitude > 0.0001f)
         {
-            this._camera.transform.LookAt(this.lastSelectedPosition);
+            this.focusPending = true;
+        }
+    }
+
+    // LateUpdate eases the camera toward the focus target with frame-rate-independent quaternion interpolation.
+    void LateUpdate()
+    {
+        if (!this.focusPending) { return; }
+        if (this._camera == null || this.selectedChip == null || GameManager.cameraMoveMode != CameraMoveMode.Follow)
+        {
+            this.focusPending = false;
+            return;
+        }
+        this.lastSelectedPosition = this.selectedChip.transform.position;
+        Vector3 direction = this.lastSelectedPosition - this._camera.transform.position;
+        if (direction.sqrMagnitude <= 0.0001f) { this.focusPending = false; return; }
+        Quaternion target = Quaternion.LookRotation(direction, Vector3.up);
+        float blend = 1f - Mathf.Exp(-this.focusSharpness * Time.unscaledDeltaTime);
+        this._camera.transform.rotation = Quaternion.Slerp(this._camera.transform.rotation, target, blend);
+        if (Quaternion.Angle(this._camera.transform.rotation, target) < 0.1f)
+        {
+            this._camera.transform.rotation = target;
+            this.focusPending = false;
         }
     }
 
@@ -299,7 +323,7 @@ public class EditorMenu : BaseMenu, InputReceiver
                 float sensitivity2 = 5f;
                 cam.transform.RotateAround(this.lastSelectedPosition, Vector3.up, moveX * sensitivity2);
                 cam.transform.RotateAround(this.lastSelectedPosition, cam.transform.right, -moveY * sensitivity2);
-                cam.transform.LookAt(this.lastSelectedPosition);
+                this.FocusSelectedChip();
             }
         }
 
