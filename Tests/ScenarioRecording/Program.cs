@@ -218,6 +218,22 @@ class Program
                 "Explicit singleplayer selection kept scenario context");
             Reject(() => playContext.SelectScenario(" "), "Empty scenario selection accepted");
             Check(!playContext.IsScenario, "Invalid selection changed regular singleplayer context");
+            int scenarioRetries = 0, modelResets = 0;
+            string retriedScenario = null;
+            playContext.Retry(name => { scenarioRetries++; retriedScenario = name; }, () => modelResets++);
+            Check(modelResets == 1 && scenarioRetries == 0, "Regular retry did not reset only the model");
+            playContext.SelectScenario("circuit1_race");
+            int retryRevision = playContext.Revision;
+            playContext.Retry(name => { scenarioRetries++; retriedScenario = name; }, () => modelResets++);
+            Check(scenarioRetries == 1 && retriedScenario == "circuit1_race" && modelResets == 1,
+                "Scenario retry fell back to a model-only reset");
+            playContext.Retry(name => { scenarioRetries++; retriedScenario = name; }, () => modelResets++);
+            Check(scenarioRetries == 2 && playContext.MatchesScenario("circuit1_race", retryRevision),
+                "Repeated retries lost scenario selection");
+            playContext.SelectScenario("custom_survival");
+            playContext.Retry(name => retriedScenario = name, () => modelResets++);
+            Check(retriedScenario == "custom_survival" && modelResets == 1,
+                "Non-race scenario retry depended on an active race");
             Console.WriteLine("PASS: " + checks + " scenario metadata and persistent-record checks.");
         }
         finally { Directory.Delete(directory, true); }

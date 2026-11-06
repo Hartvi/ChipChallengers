@@ -121,14 +121,6 @@ public partial class GameScript
         if (core != null && this.raceDefinition != null) { this.PrepareRaceStart(); }
     }
 
-    // TryRestartActiveRace routes the player's retry shortcut to the active scenario when it contains a race.
-    public static bool TryRestartActiveRace()
-    {
-        if (physicsOwner == null || physicsOwner.raceDefinition == null) { return false; }
-        physicsOwner.RestartRace();
-        return true;
-    }
-
     // FixedUpdate samples ordered gate crossings along vehicle motion instead of polling rendered-frame proximity.
     void FixedUpdate()
     {
