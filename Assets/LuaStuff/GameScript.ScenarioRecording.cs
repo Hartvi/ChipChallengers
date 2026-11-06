@@ -10,7 +10,17 @@ public partial class GameScript
 {
     public ScenarioMetadata Metadata { get; private set; }
     public event Action<ScenarioRunRecord> ScenarioCompleted;
-    ScenarioRunRecord activeAttempt;
+    ScenarioRunRecord activeAttemptRecord;
+    // activeAttempt owns the physics-change subscription for the currently recorded run.
+    ScenarioRunRecord activeAttempt {
+        get { return this.activeAttemptRecord; }
+        set {
+            if (ReferenceEquals(this.activeAttemptRecord, value)) { return; }
+            if (this.activeAttemptRecord != null) { PhysicsSettingsManager.Changing -= this.OnPhysicsSettingsChanging; }
+            this.activeAttemptRecord = value;
+            if (value != null) { PhysicsSettingsManager.Changing += this.OnPhysicsSettingsChanging; }
+        }
+    }
     CoreChip attemptCore;
     uint attemptResetCounter;
     double? finalRaceTime;
@@ -65,11 +75,7 @@ public partial class GameScript
             modelName = string.IsNullOrWhiteSpace(model.ModelName) ? GameManager.Instance.GetModel() : model.ModelName,
             modelSnapshot = model.ToLuaString(),
             chipCounts = counts,
-            physics = new ScenarioPhysicsSettings {
-                fixedDeltaTime = Time.fixedDeltaTime,
-                solverIterations = Physics.defaultSolverIterations,
-                solverVelocityIterations = Physics.defaultSolverVelocityIterations
-            },
+            physics = PhysicsSettingsManager.Capture(),
             rules = new ScenarioRuleSnapshot {
                 maxChips = this.Metadata.rules.maxChips,
                 forbiddenChipTypes = new List<string>(this.Metadata.rules.forbiddenChipTypes),
@@ -143,13 +149,24 @@ public partial class GameScript
     // CheckAttemptValidity invalidates an active attempt when its vehicle, settings or play mode changes.
     void CheckAttemptValidity()
     {
-        if (this.activeAttempt != null && !this.AttemptIsValid())
-        {
-            this.activeAttempt = null;
-            this.isRace = false;
-            this.raceProgress?.Fail();
-            this.ReportScenarioError(this.raceDefinition == null ? "Attempt invalidated. Start a new attempt to retry." : "Attempt invalidated. Press Ctrl+R to retry.");
-        }
+        if (this.activeAttempt != null && !this.AttemptIsValid()) { this.InvalidateAttempt("model or play state changed"); }
+    }
+
+    // OnPhysicsSettingsChanging invalidates an active run before a global or per-body physics configuration changes.
+    void OnPhysicsSettingsChanging(PhysicsSettingsChange change)
+    {
+        this.InvalidateAttempt("physics settings changed: " + change.Reason);
+    }
+
+    // InvalidateAttempt stops recording and race progression once and releases the attempt's physics subscription.
+    void InvalidateAttempt(string reason)
+    {
+        if (this.activeAttempt == null) { return; }
+        this.activeAttempt = null;
+        this.isRace = false;
+        this.raceProgress?.Fail();
+        this.ReportScenarioError("Attempt invalidated (" + reason + "). " +
+            (this.raceDefinition == null ? "Start a new attempt to retry." : "Press Ctrl+R to retry."));
     }
 
     // ReportScenarioError logs a scenario error and displays it briefly on screen.
@@ -168,19 +185,13 @@ public partial class GameScript
         if (physicsOwner != null && physicsOwner != this) { physicsOwner.RestorePhysics(); }
         if (this.previousPhysics == null)
         {
-            this.previousPhysics = new ScenarioPhysicsSettings {
-                fixedDeltaTime = Time.fixedDeltaTime,
-                solverIterations = Physics.defaultSolverIterations,
-                solverVelocityIterations = Physics.defaultSolverVelocityIterations
-            };
+            this.previousPhysics = PhysicsSettingsManager.Capture();
             foreach (var body in FindObjectsOfType<Rigidbody>())
                 this.previousBodySolvers[body] = new Vector2Int(body.solverIterations, body.solverVelocityIterations);
         }
         physicsOwner = this;
         var required = this.Metadata.rules.physics;
-        Time.fixedDeltaTime = required.fixedDeltaTime;
-        Physics.defaultSolverIterations = required.solverIterations;
-        Physics.defaultSolverVelocityIterations = required.solverVelocityIterations;
+        PhysicsSettingsManager.Apply(required, "Scenario physics rules");
         foreach (var body in FindObjectsOfType<Rigidbody>()) { ApplyScenarioPhysicsToBody(body); }
     }
 
@@ -192,8 +203,7 @@ public partial class GameScript
         if (!owner.previousBodySolvers.ContainsKey(body))
             owner.previousBodySolvers[body] = new Vector2Int(owner.previousPhysics.solverIterations, owner.previousPhysics.solverVelocityIterations);
         var required = owner.Metadata.rules.physics;
-        body.solverIterations = required.solverIterations;
-        body.solverVelocityIterations = required.solverVelocityIterations;
+        PhysicsSettingsManager.ApplyBody(body, required.solverIterations, required.solverVelocityIterations, "Scenario body solvers");
     }
 
     // RestorePhysics restores player settings and the original solver settings of surviving bodies once.
@@ -203,15 +213,12 @@ public partial class GameScript
         if (physicsOwner == this)
         {
             physicsOwner = null;
-            Time.fixedDeltaTime = this.previousPhysics.fixedDeltaTime;
-            Physics.defaultSolverIterations = this.previousPhysics.solverIterations;
-            Physics.defaultSolverVelocityIterations = this.previousPhysics.solverVelocityIterations;
+            PhysicsSettingsManager.Apply(this.previousPhysics, "Restore player physics");
             foreach (var body in FindObjectsOfType<Rigidbody>())
             {
                 var original = this.previousBodySolvers.TryGetValue(body, out var saved) ? saved :
                     new Vector2Int(this.previousPhysics.solverIterations, this.previousPhysics.solverVelocityIterations);
-                body.solverIterations = original.x;
-                body.solverVelocityIterations = original.y;
+                PhysicsSettingsManager.ApplyBody(body, original.x, original.y, "Restore body solvers");
             }
         }
         this.previousPhysics = null;

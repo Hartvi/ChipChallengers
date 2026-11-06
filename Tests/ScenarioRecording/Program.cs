@@ -234,6 +234,67 @@ class Program
             playContext.Retry(name => retriedScenario = name, () => modelResets++);
             Check(retriedScenario == "custom_survival" && modelResets == 1,
                 "Non-race scenario retry depended on an active race");
+            var currentPhysics = ScenarioPhysicsSettings.CreateStandard();
+            var notifications = new System.Collections.Generic.List<string>();
+            var physicsEvents = new PhysicsSettingsDispatcher();
+            object bodyTarget = new object();
+            int writes = 0;
+            Action<PhysicsSettingsChange> beforeChange = change => {
+                Check(currentPhysics.fixedDeltaTime == 0.002f && change.Previous.fixedDeltaTime == 0.002f &&
+                    change.Next.fixedDeltaTime == 0.01f, "Before callback saw already changed physics");
+                Check(ReferenceEquals(change.Target, bodyTarget) && change.Reason == "test", "Change lost target or reason");
+                change.Next.fixedDeltaTime = 99;
+                notifications.Add("before");
+            };
+            Action<PhysicsSettingsChange> afterChange = change => {
+                Check(currentPhysics.fixedDeltaTime == 0.01f && change.Next.fixedDeltaTime == 0.01f,
+                    "After callback did not see applied settings or listener changed the snapshot");
+                notifications.Add("after");
+            };
+            physicsEvents.Changing += beforeChange;
+            physicsEvents.Changed += afterChange;
+            var requestedPhysics = currentPhysics.Copy();
+            requestedPhysics.fixedDeltaTime = 0.01f;
+            Check(physicsEvents.Apply(() => currentPhysics, next => {
+                notifications.Add("write"); currentPhysics = next; writes++;
+            }, requestedPhysics, "test", bodyTarget), "Changed settings were ignored");
+            Check(string.Join(",", notifications) == "before,write,after" && writes == 1,
+                "Settings notification order or write count was incorrect");
+            Check(!physicsEvents.Apply(() => currentPhysics, _ => writes++, requestedPhysics, "unchanged"),
+                "Identical settings fired callbacks");
+            Check(writes == 1 && notifications.Count == 3, "Identical settings caused extra notifications or writes");
+            physicsEvents.Changing -= beforeChange;
+            physicsEvents.Changed -= afterChange;
+            var originalPhysics = ScenarioPhysicsSettings.CreateStandard();
+            physicsEvents.Apply(() => currentPhysics, next => currentPhysics = next, originalPhysics, "restore");
+            Check(currentPhysics.Matches(originalPhysics) && notifications.Count == 3,
+                "Restoration failed or unsubscribed listeners were retained");
+            var invalidPhysics = originalPhysics.Copy(); invalidPhysics.fixedDeltaTime = float.NaN;
+            Reject(() => physicsEvents.Apply(() => currentPhysics, _ => writes++, invalidPhysics, "invalid"),
+                "Invalid physics configuration reached the writer");
+            Check(writes == 1, "Validation failure wrote physics settings");
+            int reportedErrors = 0, survivingListeners = 0;
+            var robustEvents = new PhysicsSettingsDispatcher(_ => reportedErrors++);
+            robustEvents.Changing += _ => throw new InvalidOperationException("bad listener");
+            robustEvents.Changing += _ => survivingListeners++;
+            robustEvents.Changed += _ => survivingListeners++;
+            robustEvents.Apply(() => currentPhysics, next => currentPhysics = next, requestedPhysics, "listener test");
+            Check(reportedErrors == 1 && survivingListeners == 2 && currentPhysics.Matches(requestedPhysics),
+                "One failing listener prevented other callbacks or the settings change");
+            var guardedEvents = new PhysicsSettingsDispatcher(_ => reportedErrors++);
+            guardedEvents.Changing += _ => guardedEvents.Apply(() => currentPhysics, __ => writes++, originalPhysics, "nested");
+            guardedEvents.Apply(() => currentPhysics, next => currentPhysics = next, originalPhysics, "outer");
+            Check(reportedErrors == 2 && currentPhysics.Matches(originalPhysics) && writes == 1,
+                "Reentrant listener changed physics during an in-progress update");
+            bool subscribedAttempt = true;
+            var invalidationEvents = new PhysicsSettingsDispatcher();
+            Action<PhysicsSettingsChange> invalidate = _ => subscribedAttempt = false;
+            invalidationEvents.Changing += invalidate;
+            invalidationEvents.Apply(() => currentPhysics, next => {
+                Check(!subscribedAttempt, "Attempt invalidation happened after the settings write");
+                currentPhysics = next;
+            }, requestedPhysics, "attempt invalidation");
+            invalidationEvents.Changing -= invalidate;
             Console.WriteLine("PASS: " + checks + " scenario metadata and persistent-record checks.");
         }
         finally { Directory.Delete(directory, true); }

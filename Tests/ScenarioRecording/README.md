@@ -13,3 +13,5 @@ Exercises the actual metadata parser and file store with temporary saves. Checks
 Race checks also exercise the named and original Lua forms, callback arguments, swept gate crossings, ordered one-shot progress, and both bundled time-trial scripts with scene operations stubbed out.
 
 Gameplay context checks cover regular/scenario selection, repeated reads across editor returns, replacement selections, explicit clearing, and rejection of stale queued loads.
+
+Physics callback checks cover before/write/after ordering, unchanged-setting suppression, snapshot isolation, target/reason propagation, restoration, unsubscribe, validation, exception isolation, reentrancy prevention, and invalidation before writing.

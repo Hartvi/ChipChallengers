@@ -92,3 +92,16 @@ The shared `GameManager.PlayContext` remembers the chosen scenario while the edi
 ## Scenario spawn positioning
 
 Scenario loading resets the vehicle to the current map's default spawn before Lua initialization. `LoadMap(...)` resets it again after the new map's colliders are synchronized; the old map is disabled before destruction so spawn raycasts cannot hit it. A subsequent `SetPosition("player1", {...})` or `SetRotation(...)` supplies the authored scenario pose. Those operations and race retries freeze and clear motion across the complete vehicle before moving the core and rebuilding its children.
+
+## Physics configuration callbacks
+
+`PhysicsSettingsManager` is the central API for timestep/default solver changes and individual rigidbody solver changes. `Changing` runs before the write and `Changed` runs afterward. Both events provide `PhysicsSettingsChange` with independent `Previous`/`Next` snapshots, a `Reason`, and a `Target` (`null` for global settings or the affected Rigidbody). Reapplying identical settings sends no event. Invalid configurations are rejected before notifications; listener exceptions are logged without preventing the other listeners from running. Callbacks cannot recursively apply more physics settings.
+
+```csharp
+PhysicsSettingsManager.Changed += OnPhysicsChanged;
+// OnPhysicsChanged recalculates any cached configuration-dependent values.
+// The subscriber removes the same handler when disabled or destroyed.
+PhysicsSettingsManager.Changed -= OnPhysicsChanged;
+```
+
+Player preferences, scenario rules, scenario restoration and rebuilt body solver writes now use this API. Active attempts subscribe to `Changing` and invalidate before any actual configuration write; completing, cancelling or unloading an attempt removes that subscription. Forces, steering, Lua variable updates, and ordinary physics ticks do not send configuration notifications. Direct external writes to Unity properties bypass this API; the existing validity checks remain a fallback.
