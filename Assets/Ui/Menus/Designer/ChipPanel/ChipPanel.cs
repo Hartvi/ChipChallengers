@@ -29,6 +29,7 @@ public class ChipPanel : BaseSidePanel, InputReceiver
         this.pendingInitialization = StartCoroutine(AsyncStart());
     }
 
+    // OnEnable resumes interrupted chip-panel initialization when the panel is shown.
     void OnEnable()
     {
         if (this.started && !this.initialized && this.pendingInitialization == null)
@@ -37,6 +38,7 @@ public class ChipPanel : BaseSidePanel, InputReceiver
         }
     }
 
+    // OnDisable cancels pending chip-panel initialization when the panel is hidden.
     protected override void OnDisable()
     {
         base.OnDisable();

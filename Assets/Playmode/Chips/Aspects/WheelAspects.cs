@@ -14,7 +14,9 @@ public class WheelAspects : BaseAspect
 
     public static readonly float PlanarMomentOfInertia = WheelAspects.MomentOfInertia[1];
     public static readonly float InvPlanarMomentOfInertia = 1f / WheelAspects.MomentOfInertia[1];
-    public static float fixedTimeInvInertia = 0f;
+    // fixedTimeInvInertia derives each wheel's coefficient from its current timestep and option.
+    float fixedTimeInvInertia => Time.fixedDeltaTime * InvPlanarMomentOfInertia *
+        (this.myChip.option > 0 ? 1 + 0.5f * this.myChip.option : 1);
     //public static float inertiaInvFixedTime = 0f;
 
     public const float carTyreStiffness = 200 * 1e3f;  // N/mm * 1e3
@@ -57,11 +59,6 @@ public class WheelAspects : BaseAspect
     {
         base.Start();
         this.gameObject.layer = 7;
-        if (WheelAspects.fixedTimeInvInertia == 0f)
-        {
-            WheelAspects.fixedTimeInvInertia = Time.fixedDeltaTime * InvPlanarMomentOfInertia * (this.myChip.option > 0 ? (1 + 0.5f * this.myChip.option) : 1);
-            //WheelAspects.inertiaInvFixedTime = 1f / WheelAspects.fixedTimeInvInertia;
-        }
         this.childTransform = this.transform.GetChild(0);
 
         this.particles = Instantiate(Resources.Load<ParticleSystem>(UIStrings.Dust));
@@ -117,13 +114,13 @@ public class WheelAspects : BaseAspect
         // L = I * Omega
         // dOmega
         float absOmega = Mathf.Abs(this.myChip.Omega);
-        float dOmega = T * WheelAspects.fixedTimeInvInertia - Mathf.Sign(this.myChip.Omega) * (this.brake * WheelAspects.fixedTimeInvInertia + k1 * absOmega + k2 * absOmega * absOmega);
+        float dOmega = T * this.fixedTimeInvInertia - Mathf.Sign(this.myChip.Omega) * (this.brake * this.fixedTimeInvInertia + k1 * absOmega + k2 * absOmega * absOmega);
 
         // T * dt / I = dOmega
         // T = dOmega * I / dt
         Vector3 up = this.transform.up;
         Vector3 newUp = up * this.myChip.Omega;
-        Vector3 torque = (newUp - oldUp) * WheelAspects.fixedTimeInvInertia;
+        Vector3 torque = (newUp - oldUp) * this.fixedTimeInvInertia;
         this.rb.AddTorque(10f * torque + Time.fixedDeltaTime * (T * up), ForceMode.Impulse);
         this.oldUp = newUp;
         if (this.isServer)

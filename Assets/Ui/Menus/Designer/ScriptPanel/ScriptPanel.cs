@@ -24,7 +24,7 @@ public class ScriptPanel : BaseSidePanel, InputReceiver
 
     void Start()
     {
-        // Children have been built by now; appearance must not wait for networking.
+        // Start configures the built controls independently of player readiness.
         this.input = this.GetComponentInChildren<BaseInput>(true);
         this.btn = this.GetComponentInChildren<DragButton>(true);
         this.btn.text.SetText("<");
@@ -33,7 +33,7 @@ public class ScriptPanel : BaseSidePanel, InputReceiver
         this.input.placeholder.text = "Lua code...";
         this.input.placeholder.fontSize = UIUtils.SmallFontSize;
         this.input.input.onEndEdit.RemoveAllListeners();
-        // Resolve the current core on edit; the player may have reconnected.
+        // SaveScript resolves the current player model instead of retaining a disconnected core.
         this.input.input.onEndEdit.AddListener(this.SaveScript);
         this.input.input.textComponent.fontSize = UIUtils.SmallFontSize;
         this.input.input.lineType = TMPro.TMP_InputField.LineType.MultiLineNewline;
@@ -42,10 +42,10 @@ public class ScriptPanel : BaseSidePanel, InputReceiver
         this.pendingRefresh = StartCoroutine(this.RefreshWhenReady());
     }
 
+    // RefreshWhenReady waits for the current player model before refreshing the scripting controls.
     IEnumerator RefreshWhenReady()
     {
-        // Always yield once so the coroutine handle can be assigned and child
-        // Start methods can finish before binding.
+        // RefreshWhenReady yields once so its handle and child controls initialize before model binding.
         yield return null;
         while (NetworkClient.localPlayer == null ||
                CoreChip.ClientCoreChip.IsRebuilding ||
@@ -57,15 +57,17 @@ public class ScriptPanel : BaseSidePanel, InputReceiver
         this.pendingRefresh = null;
     }
 
+    // RefreshModel populates the script field from the current model without triggering edit callbacks.
     public void RefreshModel()
     {
         if (!this.initialized || NetworkClient.localPlayer == null) { return; }
         var core = CoreChip.ClientCoreChip;
-        // An after-build callback also reaches here before loadedModelString is set.
+        // RefreshModel can run from an after-build callback before loadedModelString is updated.
         this.boundModel = core.VirtualModel;
         this.input.input.SetTextWithoutNotify(this.boundModel.script);
     }
 
+    // SaveScript writes edited Lua to the current player model when it is not rebuilding.
     void SaveScript(string script)
     {
         if (NetworkClient.localPlayer == null) { return; }
@@ -90,6 +92,7 @@ public class ScriptPanel : BaseSidePanel, InputReceiver
         //+ mousePos.x*0.5f
     }
 
+    // OnEnable restarts model refresh when an initialized scripting panel is shown.
     void OnEnable()
     {
         if (this.initialized && this.pendingRefresh == null)
@@ -98,6 +101,7 @@ public class ScriptPanel : BaseSidePanel, InputReceiver
         }
     }
 
+    // OnDisable cancels pending refresh and releases the scripting panel model reference.
     protected override void OnDisable()
     {
         base.OnDisable();

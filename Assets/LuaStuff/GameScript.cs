@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using MoonSharp.Interpreter;
 
-public class GameScript : MonoBehaviour
+public partial class GameScript : MonoBehaviour
 {
     Script script;
     string scriptString;
@@ -14,10 +14,10 @@ public class GameScript : MonoBehaviour
     Dictionary<string, GameObject> SceneObjects = new Dictionary<string, GameObject>();
     Dictionary<string, GameObject> AllObjects = new Dictionary<string, GameObject>();
     HashSet<string> PlayerObjects = new HashSet<string>();
-    Dictionary<string, float> times = new Dictionary<string, float>();
+    Dictionary<string, double> times = new Dictionary<string, double>();
     bool isRace = false;
 
-    public void Activate(string scriptString)
+    public void Activate(string scriptString, string scenarioFileName = "")
     {
         // add owner player
         string player1 = UIStrings.Player + "1";
@@ -46,7 +46,7 @@ public class GameScript : MonoBehaviour
         this.script.Globals["Show"] = (Action<string>)Show;
         this.script.Globals["StartTimer"] = (Action<string>)StartTimer;
         this.script.Globals["GetTime"] = (Func<string, double>)GetTime;
-        this.script.Globals["Race"] = (Action<Table>)Race;
+        this.RegisterScenarioCallbacks(scenarioFileName);
         this.script.Globals["Freeze"] = (Action<string>)Freeze;
         this.script.Globals["Unfreeze"] = (Action<string>)Unfreeze;
         // place holder, user can rewrite it later
@@ -58,6 +58,7 @@ public class GameScript : MonoBehaviour
         }
         catch (Exception e)
         {
+            this.enabled = false;
             DisplaySingleton.Instance.DisplayText(
                 x =>
                 {
@@ -71,7 +72,7 @@ public class GameScript : MonoBehaviour
 
     public void StartTimer(string timerName)
     {
-        this.times[timerName] = Time.time;
+        this.times[timerName] = Time.timeAsDouble;
     }
 
     public void Freeze(string objectName)
@@ -106,7 +107,7 @@ public class GameScript : MonoBehaviour
     {
         //int milliseconds = (int)(1000f * (Time.time - this.times[timerName]));
         //return (float)(milliseconds) * 0.001f;
-        return Time.time - this.times[timerName];
+        return Time.timeAsDouble - this.times[timerName];
     }
 
     public static bool Key(char k)
@@ -306,103 +307,6 @@ public class GameScript : MonoBehaviour
         }
     }
 
-    public void Race(Table properties)
-    {
-        /*
-        Race({
-         {position={1,1,1},    size={10}, color={0, 150, 0, 100}},
-         {position={10,10,10}, size={10}, color={0, 150, 0, 100}},
-         {position={10,50,10}, size={10}, color={0, 150, 0, 100}},
-        })
-        */
-
-        string previousGateName = "";
-        for (int i = 1; i <= properties.Length; ++i)
-        {
-            var g = properties.Get(i);
-            if (g == DynValue.Nil)
-            {
-                throw new Exception($"Cannot get {i}-th element in Race");
-            }
-            Table gate = properties.Get(i).Table;
-            // spawn gate at position, size, color
-            // add options here
-            var opt = gate.Get("options");
-            if (!opt.IsNil())
-            {
-                gate["options"] = DynValue.Nil;
-            }
-            // Spawn("gate", {position={10, 0, 10}, size={20, 10, 10}, color={150, 150, 250, 120}, options={triggerObjects={"player1"}, func=PrintSomething }});
-            string gateName = Spawn("gate", gate);  // (float)gate[i];
-            Checkpoint chk = this.AllObjects[gateName].AddComponent<Checkpoint>();
-            // action does this: turns on the next checkpoint, turns off the current one
-            if (i > 1)
-            {
-                Checkpoint oldCheckpoint = this.AllObjects[previousGateName].GetComponent<Checkpoint>();
-                Vector3 sizeVector = oldCheckpoint.transform.localScale;
-                float radius = 0.5f * Mathf.Max(sizeVector.x, sizeVector.y, sizeVector.z);
-                string prevgate = previousGateName;
-                // Make the first gate start the timer
-                // Set 
-                void RaceLoop()
-                {
-                    if (this.times.TryGetValue("race", out float val))
-                    {
-                        float currentTime = Time.time - val;
-                        DynValue tb = DynValue.FromObject(this.script, new Dictionary<string, double>() { { "r", 0.2 }, { "g", 0.2 }, { "b", 0.2 }, { "x", -0.7 }, { "y", 0.7 }, { "t", 0.1 } });
-                        Print($"TIME: {(int)currentTime} SECONDS", tb.Table);
-                    }
-                }
-                this.script.Globals["RaceLoop"] = (Action)RaceLoop;
-                this.isRace = true;
-                if (i == 2)
-                {
-                    void a()
-                    {
-                        Show(gateName);
-                        Hide(prevgate);
-
-                        StartTimer("race");
-                        SetPosition("player1", DynValue.FromObject(this.script, GetPosition("player1")).Table);
-                        //Freeze("player1");
-                        //Unfreeze("player1");
-                    }
-                    oldCheckpoint.Setup(radius, new GameObject[] { AllObjects["player1"] }, a);
-                }
-                else
-                {
-                    void a()
-                    {
-                        Show(gateName);
-                        Hide(prevgate);
-                    }
-                    oldCheckpoint.Setup(radius, new GameObject[] { AllObjects["player1"] }, a);
-                }
-                Hide(gateName);
-            }
-            else
-            {
-                // for the first gate
-            }
-            if (i == properties.Length)
-            {
-                Vector3 sizeVector = chk.transform.localScale;
-                float radius = 0.5f * Mathf.Max(sizeVector.x, sizeVector.y, sizeVector.z);
-                DynValue tb = DynValue.FromObject(this.script, new Dictionary<string, double>() { { "r", 0.2 }, { "g", 0.2 }, { "b", 0.2 }, { "y", 0.33 }, { "t", 3.0 } });
-                void a()
-                {
-                    double timetaken = GetTime("race");
-
-                    Print($"FINISHED IN {(int)timetaken}.{(int)((timetaken - (int)timetaken) * 100)} SECONDS", tb.Table);
-                    Hide(gateName);
-                    this.isRace = false;
-                }
-                chk.Setup(radius, new GameObject[] { AllObjects["player1"] }, a);
-            }
-            previousGateName = gateName;
-        }
-    }
-
     public string Spawn(string objectType, Table properties)
     {
         var _mass = properties.Get("mass");
@@ -560,6 +464,8 @@ public class GameScript : MonoBehaviour
     }
     void Update()
     {
+        if (this.script == null) { return; }
+        this.CheckAttemptValidity();
         this.CallLoop();
 
         if (this.isRace)
@@ -588,6 +494,7 @@ public class GameScript : MonoBehaviour
 
     void OnDestroy()
     {
+        this.RestorePhysics();
         foreach (var gkv in SceneObjects)
         {
             // destroy is done asynchronously

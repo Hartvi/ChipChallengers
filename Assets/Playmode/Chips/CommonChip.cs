@@ -392,16 +392,16 @@ public class CommonChip : AngleChip
             throw new NullReferenceException($"To add Rigidbody you need an equivalent virtual chip.");
         }
         this.rb.mass = this.mass;
+        GameScript.ApplyScenarioPhysicsToBody(this.rb);
         this.ResetMotion();
         this.rb.drag = 0f;
         this.rb.angularDrag = 0f;
     }
 
-    // Networked chips survive reset; clear their motion before rebuilding joints.
+    // ResetMotion clears rigidbody motion and wheel spin, then freezes the chip for rebuilding.
     public void ResetMotion()
     {
-        // Velocity changes require a dynamic body. Freeze it again until the
-        // entire model has finished rebuilding.
+        // ResetMotion briefly enables dynamics to clear velocity, then freezes the body until rebuilding finishes.
         this.rb.isKinematic = false;
         this.rb.velocity = Vector3.zero;
         this.rb.angularVelocity = Vector3.zero;

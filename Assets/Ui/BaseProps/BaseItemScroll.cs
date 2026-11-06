@@ -210,7 +210,7 @@ public class VirtualContainer
         // labels.Length = T = M+N elements. M displayed. N not displayed.
         // Maximum position shift is the last not-displayed element to the last displayed position.
         // Total*interval - displayed*interval
-        this.MaxMoveDelta = (this.NumberOfItems - this.NumberToDisplay) * this.DefaultInterval;
+        this.MaxMoveDelta = Mathf.Max(0f, (this.NumberOfItems - this.NumberToDisplay) * this.DefaultInterval);
     }
 
     public VirtualItem[] MoveItems(float x)

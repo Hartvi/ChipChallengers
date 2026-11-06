@@ -37,6 +37,7 @@ public class VariableFields : BaseImage
 
     void Start() => this.InitializeControls();
 
+    // InitializeControls configures variable fields, labels and button listeners once.
     void InitializeControls()
     {
         if (this.initialized) { return; }

@@ -8,7 +8,7 @@ public class MainMenu : BaseMainMenu, InputReceiver
 {
     public static bool goToMultiplayerMenu = false;
 
-    float numberOfButtons = 5f;
+    float numberOfButtons = 6f;
 
     public override void Setup()
     {
@@ -22,6 +22,7 @@ public class MainMenu : BaseMainMenu, InputReceiver
                     new VirtualProp(PropType.Panel, 0.2f),
                     new VirtualProp(PropType.Panel, 0.6f, Vector2Int.down,
                         new VirtualProp(PropType.Button, btnHeight, typeof(GoToSingleplayer)),
+                        new VirtualProp(PropType.Button, btnHeight, typeof(GoToCampaign)),
                         new VirtualProp(PropType.Button, btnHeight, typeof(GoToMultiplayer)),
                         new VirtualProp(PropType.Button, btnHeight, typeof(GoToEditor)),
                         new VirtualProp(PropType.Button, btnHeight, typeof(GoToSettings)),
