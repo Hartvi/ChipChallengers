@@ -29,7 +29,7 @@ class Program
             modelSnapshot = "{script=[[line one\nline two]]}",
             chipCounts = { new ScenarioChipCount { chipType = "Wheel", count = 4 } },
             rules = { maxChips = 30, forbiddenChipTypes = { "Jet" } },
-            physics = { fixedDeltaTime = 0.002f, solverIterations = 6, solverVelocityIterations = 1 }
+            physics = { fixedDeltaTime = 0.001f, solverIterations = 1, solverVelocityIterations = 1 }
         };
     }
     // Main exercises Lua callback contracts and persistent records using disposable test saves.
@@ -51,7 +51,7 @@ class Program
             Check(progress.bestRun.modelName == "First car" && progress.lastRun.modelName == "Slower car", "Slower finish overwrote best vehicle");
             Check(progress.bestRun.timeSeconds == 42.731234, "Timing precision lost");
             Check(progress.bestRun.modelSnapshot.Contains("\n") && progress.bestRun.chipCounts[0].count == 4, "Vehicle snapshot lost");
-            Check(progress.bestRun.rules.forbiddenChipTypes[0] == "Jet" && progress.bestRun.physics.fixedDeltaTime == 0.002f, "Rules/settings lost");
+            Check(progress.bestRun.rules.forbiddenChipTypes[0] == "Jet" && progress.bestRun.physics.fixedDeltaTime == 0.001f, "Rules/settings lost");
             Check(progress.bestRun.playerName == "Driver" && progress.bestRun.finishedAtUtc.EndsWith("Z"), "Player/date lost");
             Check(File.Exists(path + ".bak") && !File.Exists(path + ".tmp"), "Atomic save/backup failed");
             store.Record(metadata, Run("c", 40, "Faster car"));
@@ -84,13 +84,13 @@ class Program
             Reject(() => ScenarioLuaMetadata.Parse(lua.DoString("return {id='x',rules={maxChips=-2}}").Table, ""), "Invalid restriction accepted");
             Reject(() => ScenarioLuaMetadata.Parse(lua.DoString("return {}").Table, ""), "Missing identity accepted");
             var standard = ScenarioLuaMetadata.Parse(lua.DoString("return {id='standard'}").Table, "");
-            Check(standard.rules.physics.fixedDeltaTime == 0.002f && standard.rules.physics.solverIterations == 6 &&
+            Check(standard.rules.physics.fixedDeltaTime == 0.001f && standard.rules.physics.solverIterations == 1 &&
                 standard.rules.physics.solverVelocityIterations == 1, "Missing physics rules did not use the shared preset");
             var custom = ScenarioLuaMetadata.Parse(lua.DoString("return {id='custom',rules={physics={fixedDeltaTime=0.01,solverIterations=12,solverVelocityIterations=4}}}").Table, "");
             Check(custom.rules.physics.fixedDeltaTime == 0.01f && custom.rules.physics.solverIterations == 12 &&
                 custom.rules.physics.solverVelocityIterations == 4, "Explicit physics rules were not parsed");
             var partial = ScenarioLuaMetadata.Parse(lua.DoString("return {id='partial',rules={physics={solverIterations=8}}}").Table, "");
-            Check(partial.rules.physics.fixedDeltaTime == 0.002f && partial.rules.physics.solverIterations == 8,
+            Check(partial.rules.physics.fixedDeltaTime == 0.001f && partial.rules.physics.solverIterations == 8,
                 "Partial physics rules inherited user settings instead of the standard preset");
             Reject(() => ScenarioLuaMetadata.Parse(lua.DoString("return {id='x',rules={physics='invalid'}}").Table, ""), "Non-table physics accepted");
             Reject(() => ScenarioLuaMetadata.Parse(lua.DoString("return {id='x',rules={physics={fixedDeltaTime=0}}}").Table, ""), "Zero timestep accepted");
@@ -226,7 +226,7 @@ class Program
             object bodyTarget = new object();
             int writes = 0;
             Action<PhysicsSettingsChange> beforeChange = change => {
-                Check(currentPhysics.fixedDeltaTime == 0.002f && change.Previous.fixedDeltaTime == 0.002f &&
+                Check(currentPhysics.fixedDeltaTime == 0.001f && change.Previous.fixedDeltaTime == 0.001f &&
                     change.Next.fixedDeltaTime == 0.01f, "Before callback saw already changed physics");
                 Check(ReferenceEquals(change.Target, bodyTarget) && change.Reason == "test", "Change lost target or reason");
                 change.Next.fixedDeltaTime = 99;

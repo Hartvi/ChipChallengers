@@ -13,7 +13,7 @@ Scenario({
     rules = {
         forbiddenChipTypes = { "Jet" },
         maxChips = 30,
-        physics = { fixedDeltaTime = 0.002, solverIterations = 6, solverVelocityIterations = 1 }
+        physics = { fixedDeltaTime = 0.001, solverIterations = 1, solverVelocityIterations = 1 }
     }
 })
 
@@ -79,7 +79,7 @@ Attempt validity checks in `Update` compare only live player, reset, play-mode a
 
 ## Required physics
 
-`rules.physics` defines required simulation settings, not player-selectable preferences. Omitted fields use a shared preset: `fixedDeltaTime = 0.002` (500 Hz), `solverIterations = 6`, `solverVelocityIterations = 1`. Steps must be between 0.0005 and 0.02 seconds (2000 to 50 Hz); solver counts must be integers from 1 to 255.
+`rules.physics` defines required simulation settings, not player-selectable preferences. Omitted fields use a shared preset: `fixedDeltaTime = 0.001` (1000 Hz), `solverIterations = 1`, `solverVelocityIterations = 1`. Steps must be between 0.0005 and 0.02 seconds (2000 to 50 Hz); solver counts must be integers from 1 to 255.
 
 Scenario loading applies the rules to the global timestep/default solvers and existing rigidbodies. Rebuilt chip bodies receive the same solvers. Each run stores both the required rule snapshot and actual physics snapshot. Changing physics during an attempt invalidates it; the store rejects mismatched required/actual settings and keeps results from different physics presets separate.
 

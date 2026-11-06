@@ -33,8 +33,8 @@ public class GameManager : MonoBehaviour
     {
 
         { UIStrings.Framerate, 50 },
-        { UIStrings.PhysicsRate, 500 },
-        { UIStrings.SolverIterations, 6 },
+        { UIStrings.PhysicsRate, 1000 },
+        { UIStrings.SolverIterations, 1 },
         { UIStrings.SolverVelocityIterations, 1 },
         { UIStrings.Volume, 20 },
         { UIStrings.PhysicsParticles, 100 }
