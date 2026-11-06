@@ -137,7 +137,6 @@ public partial class GameScript
         this.previousRacePosition = to;
         this.previousRaceSampleTime = toTime;
         if (core.IsRebuilding || core.srvResetCounter != core.cltResetCounter) { return; }
-        if (this.activeAttempt != null && !this.AttemptIsValid()) { this.CheckAttemptValidity(); return; }
         int generation = this.raceGeneration;
         while (this.isRace && generation == this.raceGeneration && !this.raceProgress.Finished)
         {

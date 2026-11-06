@@ -75,6 +75,8 @@ Records are written to `Path.Combine(Application.persistentDataPath, "scenario-p
 
 Vehicle Lua snapshots, chip counts and physics settings are captured at the start. The finish captures UTC time and `PlayerPrefs.GetString("PlayerName", "Player")`; a player-name entry screen is not yet implemented. Game version comes from `Application.version`. The C# `GameScript.ScenarioCompleted` event fires after persistence succeeds. Scenario result rendering is a separate integration.
 
+Attempt validity checks in `Update` compare only live player, reset, play-mode and global physics state. Physics ticks do not poll attempt validity. Full model serialization and per-body solver verification happen once before saving a finish; model edits that do not reset the vehicle are therefore detected at completion.
+
 ## Required physics
 
 `rules.physics` defines required simulation settings, not player-selectable preferences. Omitted fields use a shared preset: `fixedDeltaTime = 0.002` (500 Hz), `solverIterations = 6`, `solverVelocityIterations = 1`. Steps must be between 0.0005 and 0.02 seconds (2000 to 50 Hz); solver counts must be integers from 1 to 255.
