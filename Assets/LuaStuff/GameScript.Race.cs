@@ -125,7 +125,7 @@ public partial class GameScript
         if (core != null && this.raceDefinition != null) { this.PrepareRaceStart(); }
     }
 
-    // FixedUpdate samples ordered gate crossings along vehicle motion instead of polling rendered-frame proximity.
+    // FixedUpdate checks the next race gate once per physics tick.
     void FixedUpdate()
     {
         if (!this.isRace || this.raceDefinition == null || this.pendingRaceStart != null || NetworkClient.localPlayer == null) { return; }
@@ -137,22 +137,12 @@ public partial class GameScript
         this.previousRacePosition = to;
         this.previousRaceSampleTime = toTime;
         if (core.IsRebuilding || core.srvResetCounter != core.cltResetCounter) { return; }
-        int generation = this.raceGeneration;
-        while (this.isRace && generation == this.raceGeneration && !this.raceProgress.Finished)
-        {
-            var gate = this.raceDefinition.gates[this.raceProgress.NextGate];
-            double? fraction = ScenarioRaceProgress.CrossingFraction(from, to, gate.position, gate.radius);
-            if (!fraction.HasValue) { break; }
-            var crossing = new ScenarioRacePoint(
-                (float)(from.x + (to.x - from.x) * fraction.Value),
-                (float)(from.y + (to.y - from.y) * fraction.Value),
-                (float)(from.z + (to.z - from.z) * fraction.Value));
-            double crossingTime = fromTime + (toTime - fromTime) * fraction.Value;
-            this.PassRaceGate(crossingTime);
-            if (this.pendingRaceStart != null) { break; }
-            from = crossing;
-            fromTime = crossingTime;
-        }
+        if (this.raceProgress.Finished) { return; }
+        var gate = this.raceDefinition.gates[this.raceProgress.NextGate];
+        double? fraction = ScenarioRaceProgress.CrossingFraction(from, to, gate.position, gate.radius);
+        if (!fraction.HasValue) { return; }
+        double crossingTime = fromTime + (toTime - fromTime) * fraction.Value;
+        this.PassRaceGate(crossingTime);
     }
 
     // PassRaceGate records a valid crossing and invokes optional Lua callbacks after updating race state.
