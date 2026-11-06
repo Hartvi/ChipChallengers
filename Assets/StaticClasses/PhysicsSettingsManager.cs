@@ -36,6 +36,17 @@ public static class PhysicsSettingsManager
         return Apply(settings, reason);
     }
 
+    // SetSolverIterations updates default solver counts and existing bodies through physics-change notifications.
+    public static void SetSolverIterations(int iterations, int velocityIterations, string reason)
+    {
+        var settings = Capture();
+        settings.solverIterations = iterations;
+        settings.solverVelocityIterations = velocityIterations;
+        Apply(settings, reason);
+        foreach (var body in UnityEngine.Object.FindObjectsOfType<Rigidbody>())
+            ApplyBody(body, iterations, velocityIterations, reason);
+    }
+
     // ApplyBody notifies subscribers before and after changing one rigidbody's solver configuration.
     public static bool ApplyBody(Rigidbody body, int iterations, int velocityIterations, string reason)
     {

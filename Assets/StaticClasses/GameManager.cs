@@ -23,6 +23,8 @@ public class GameManager : MonoBehaviour
     {
         { UIStrings.Framerate, new Tuple<int, int>(5, 100) },
         { UIStrings.PhysicsRate, new Tuple<int, int>(50, 2000) },
+        { UIStrings.SolverIterations, new Tuple<int, int>(1, 255) },
+        { UIStrings.SolverVelocityIterations, new Tuple<int, int>(1, 255) },
         { UIStrings.Volume, new Tuple<int, int>(0, 100) },
         { UIStrings.PhysicsParticles, new Tuple<int, int>(0, 100) }
     };
@@ -32,6 +34,8 @@ public class GameManager : MonoBehaviour
 
         { UIStrings.Framerate, 50 },
         { UIStrings.PhysicsRate, 500 },
+        { UIStrings.SolverIterations, 6 },
+        { UIStrings.SolverVelocityIterations, 1 },
         { UIStrings.Volume, 20 },
         { UIStrings.PhysicsParticles, 100 }
     };
@@ -58,11 +62,15 @@ public class GameManager : MonoBehaviour
     {
         SettingUpdateFunctions[UIStrings.Framerate] = this.SetFrameRate;
         SettingUpdateFunctions[UIStrings.PhysicsRate] = this.SetPhysicsRate;
+        SettingUpdateFunctions[UIStrings.SolverIterations] = i => this.SetSolverSetting(UIStrings.SolverIterations, i);
+        SettingUpdateFunctions[UIStrings.SolverVelocityIterations] = i => this.SetSolverSetting(UIStrings.SolverVelocityIterations, i);
         SettingUpdateFunctions[UIStrings.PhysicsParticles] = this.SetPhysicsParticles;
         SettingUpdateFunctions[UIStrings.Volume] = this.SetVolume;
 
         GettingUpdateFunctions[UIStrings.Framerate] = this.GetFrameRate;
         GettingUpdateFunctions[UIStrings.PhysicsRate] = this.GetPhysicsRate;
+        GettingUpdateFunctions[UIStrings.SolverIterations] = () => this.GetSolverSetting(UIStrings.SolverIterations);
+        GettingUpdateFunctions[UIStrings.SolverVelocityIterations] = () => this.GetSolverSetting(UIStrings.SolverVelocityIterations);
         GettingUpdateFunctions[UIStrings.PhysicsParticles] = this.GetPhysicsParticles;
         GettingUpdateFunctions[UIStrings.Volume] = this.GetVolume;
     }
@@ -96,6 +104,27 @@ public class GameManager : MonoBehaviour
             i = defaultIntSettings[s];
         }
         return i;
+    }
+
+    // GetSolverSetting reads a saved solver count or supplies its default when missing or out of range.
+    int GetSolverSetting(string settingName)
+    {
+        int value = PlayerPrefs.GetInt(settingName, defaultIntSettings[settingName]);
+        var range = minMaxIntSettings[settingName];
+        return value < range.Item1 || value > range.Item2 ? defaultIntSettings[settingName] : value;
+    }
+
+    // SetSolverSetting applies and saves one solver count while retaining the other current count.
+    int SetSolverSetting(string settingName, int value)
+    {
+        int count = this.SaturateIntSetting(settingName, value);
+        var settings = PhysicsSettingsManager.Capture();
+        if (settingName == UIStrings.SolverIterations) { settings.solverIterations = count; }
+        else { settings.solverVelocityIterations = count; }
+        PhysicsSettingsManager.SetSolverIterations(settings.solverIterations, settings.solverVelocityIterations, "Player " + settingName);
+        PlayerPrefs.SetInt(settingName, count);
+        PlayerPrefs.Save();
+        return count;
     }
 
     int GetPhysicsParticles()

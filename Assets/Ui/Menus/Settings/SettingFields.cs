@@ -15,32 +15,17 @@ public class SettingFields : BasePanel
     public override void Setup()
     {
         base.Setup();
+        float rowSize = 1f / UIStrings.SettingsAllProperties.Length;
+        var descriptions = UIStrings.SettingsAllProperties.Select(_ =>
+            new VirtualProp(PropType.Text, rowSize)).ToArray();
+        var fields = UIStrings.SettingsAllProperties.Select(_ =>
+            new VirtualProp(PropType.Panel, rowSize, right,
+                new VirtualProp(PropType.Input, 0.5f),
+                new VirtualProp(PropType.Slider, 0.5f))).ToArray();
         this.vProp = new VirtualProp(PropType.Panel, 1f, down,
-            new VirtualProp(PropType.Panel, 0.3f, right,
-                new VirtualProp(PropType.Panel, 0.5f, down, // column for descriptions of property
-                    new VirtualProp(PropType.Text, 0.33f),
-                    new VirtualProp(PropType.Text, 0.33f),
-                    new VirtualProp(PropType.Text, 0.33f),
-                    new VirtualProp(PropType.Text, 0.33f)
-                ),
-                new VirtualProp(PropType.Panel, 0.5f, down, // column for input fields for each property
-                    new VirtualProp(PropType.Panel, 0.33f, right,
-                        new VirtualProp(PropType.Input, 0.5f),
-                        new VirtualProp(PropType.Slider, 0.5f)
-                    ),
-                    new VirtualProp(PropType.Panel, 0.33f, right,
-                        new VirtualProp(PropType.Input, 0.5f),
-                        new VirtualProp(PropType.Slider, 0.5f)
-                    ),
-                    new VirtualProp(PropType.Panel, 0.33f, right,
-                        new VirtualProp(PropType.Input, 0.5f),
-                        new VirtualProp(PropType.Slider, 0.5f)
-                    ),
-                    new VirtualProp(PropType.Panel, 0.33f, right,
-                        new VirtualProp(PropType.Input, 0.5f),
-                        new VirtualProp(PropType.Slider, 0.5f)
-                    )
-                )
+            new VirtualProp(PropType.Panel, 0.7f, right,
+                new VirtualProp(PropType.Panel, 0.5f, down, descriptions),
+                new VirtualProp(PropType.Panel, 0.5f, down, fields)
             ),
             new VirtualProp(PropType.Panel, 0.1f),
             new VirtualProp(PropType.Button, 0.1f, typeof(GoToMainMenu))
@@ -127,7 +112,7 @@ public class SettingFields : BasePanel
     {
         if (UIStrings.SettingsIntProperties.Contains(settingName))
         {
-            return PlayerPrefs.GetInt(settingName).ToString();
+            return this.GetIntSetting(settingName).ToString();
         }
         else
         {
