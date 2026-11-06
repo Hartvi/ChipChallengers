@@ -12,8 +12,6 @@ public partial class GameScript
     readonly List<string> raceGates = new List<string>();
     Vector3 raceSpawnPosition;
     Quaternion raceSpawnRotation;
-    ScenarioRacePoint previousRacePosition;
-    double previousRaceSampleTime;
     int raceGeneration;
     UnityEngine.Coroutine pendingRaceRestart;
     UnityEngine.Coroutine pendingRaceStart;
@@ -38,7 +36,14 @@ public partial class GameScript
             var color = new Table(this.script);
             for (int i = 0; i < gate.color.Length; ++i) { color.Set(i + 1, DynValue.NewNumber(gate.color[i])); }
             table.Set("color", DynValue.NewTable(color));
-            this.raceGates.Add(this.Spawn("gate", table));
+            int index = this.raceGates.Count;
+            string name = this.Spawn("gate", table);
+            this.raceGates.Add(name);
+            var gateObject = this.SceneObjects[name];
+            var trigger = gateObject.AddComponent<SphereCollider>();
+            trigger.isTrigger = true;
+            trigger.radius = 0.5f;
+            gateObject.AddComponent<RaceGateTrigger>().Entered = other => this.EnterRaceGate(index, other);
         }
         this.PrepareRaceStart();
         this.script.Globals["RaceLoop"] = (Action)this.DisplayRaceTime;
@@ -91,8 +96,6 @@ public partial class GameScript
             if (i == 0) { this.Show(this.raceGates[i]); }
             else { this.Hide(this.raceGates[i]); }
         }
-        this.previousRacePosition = Point(this.AllObjects["player1"].transform.position);
-        this.previousRaceSampleTime = Time.fixedTimeAsDouble;
         this.isRace = true;
     }
 
@@ -125,24 +128,16 @@ public partial class GameScript
         if (core != null && this.raceDefinition != null) { this.PrepareRaceStart(); }
     }
 
-    // FixedUpdate checks the next race gate once per physics tick.
-    void FixedUpdate()
+    // EnterRaceGate accepts the next gate when Unity reports the local core entering its trigger.
+    void EnterRaceGate(int index, Collider other)
     {
-        if (!this.isRace || this.raceDefinition == null || this.pendingRaceStart != null || NetworkClient.localPlayer == null) { return; }
+        if (!this.isActiveAndEnabled || !this.isRace || this.raceDefinition == null ||
+            this.pendingRaceStart != null || NetworkClient.localPlayer == null ||
+            this.raceProgress.Finished || index != this.raceProgress.NextGate) { return; }
         var core = CoreChip.ClientCoreChip;
-        var from = this.previousRacePosition;
-        double fromTime = this.previousRaceSampleTime;
-        var to = Point(core.transform.position);
-        double toTime = Time.fixedTimeAsDouble;
-        this.previousRacePosition = to;
-        this.previousRaceSampleTime = toTime;
-        if (core.IsRebuilding || core.srvResetCounter != core.cltResetCounter) { return; }
-        if (this.raceProgress.Finished) { return; }
-        var gate = this.raceDefinition.gates[this.raceProgress.NextGate];
-        double? fraction = ScenarioRaceProgress.CrossingFraction(from, to, gate.position, gate.radius);
-        if (!fraction.HasValue) { return; }
-        double crossingTime = fromTime + (toTime - fromTime) * fraction.Value;
-        this.PassRaceGate(crossingTime);
+        if (other.attachedRigidbody != core.GetComponent<Rigidbody>() ||
+            core.IsRebuilding || core.srvResetCounter != core.cltResetCounter) { return; }
+        this.PassRaceGate(Time.timeAsDouble);
     }
 
     // PassRaceGate records a valid crossing and invokes optional Lua callbacks after updating race state.
@@ -223,8 +218,6 @@ public partial class GameScript
             this.raceProgress.Pass(0);
             this.Hide(this.raceGates[0]);
             this.Show(this.raceGates[1]);
-            this.previousRacePosition = Point(core.transform.position);
-            this.previousRaceSampleTime = Time.timeAsDouble;
             this.DisplayRaceStart("GO!");
             var callback = this.raceDefinition.onStarted;
             if (!callback.IsNil()) { this.script.Call(callback); }
@@ -275,7 +268,4 @@ public partial class GameScript
         int checkpoints = Math.Max(0, this.raceProgress.NextGate - 1);
         this.Print($"TIME: {this.GetTime("race"):F2} SECONDS - CHECKPOINTS: {checkpoints}/{this.raceGates.Count - 2}", style);
     }
-
-    // Point converts a Unity position into the race geometry representation.
-    static ScenarioRacePoint Point(Vector3 position) => new ScenarioRacePoint(position.x, position.y, position.z);
 }
