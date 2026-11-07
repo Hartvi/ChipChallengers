@@ -14,8 +14,8 @@ public class WheelAspects : BaseAspect
 
     public static readonly float PlanarMomentOfInertia = WheelAspects.MomentOfInertia[1];
     public static readonly float InvPlanarMomentOfInertia = 1f / WheelAspects.MomentOfInertia[1];
-    // fixedTimeInvInertia derives each wheel's coefficient from its current timestep and option.
-    float fixedTimeInvInertia => Time.fixedDeltaTime * InvPlanarMomentOfInertia *
+    // inverseInertia retains the selected option's spin response for both drive and tire forces.
+    float inverseInertia => InvPlanarMomentOfInertia *
         (this.myChip.option > 0 ? 1 + 0.5f * this.myChip.option : 1);
     //public static float inertiaInvFixedTime = 0f;
 
@@ -30,8 +30,7 @@ public class WheelAspects : BaseAspect
     public const float C = 1.9f;
     public const float D = 0.9f;
     public const float E = 0.97f;
-    public const float k1 = 1e-4f;
-    public const float k2 = 1e-8f;
+    const float ContactForceScale = 1000f;
 
     Vector3 point, contactVector, normal, impulse, v1;
     Vector3 xForce;
@@ -102,65 +101,43 @@ public class WheelAspects : BaseAspect
         }
     }
 
-    // ResetSpinHistory clears the previous wheel momentum sample so a staged race cannot resume with a torque kick.
+    // ResetSpinHistory clears the previous axle direction so a staged race cannot resume with a torque kick.
     public void ResetSpinHistory()
     {
         this.oldUp = Vector3.zero;
     }
 
-    void ApplyTorque(float T)
+    // ApplyTorque integrates wheel spin and applies motor and axle-turning reaction impulses to its body.
+    void ApplyTorque(float torque)
     {
-        // T = dL / dt
-        // dL = T * dt
-        // dL = I * dOmega
-        // d Omega = dL / I = T * dt / I
-        // L = momentum, t = time
-        // L = I * Omega
-        // dOmega
-        float absOmega = Mathf.Abs(this.myChip.Omega);
-        float dOmega = T * this.fixedTimeInvInertia - Mathf.Sign(this.myChip.Omega) * (this.brake * this.fixedTimeInvInertia + k1 * absOmega + k2 * absOmega * absOmega);
-
-        // T * dt / I = dOmega
-        // T = dOmega * I / dt
         Vector3 up = this.transform.up;
-        Vector3 newUp = up * this.myChip.Omega;
-        Vector3 torque = (newUp - oldUp) * this.fixedTimeInvInertia;
-        this.rb.AddTorque(10f * torque + Time.fixedDeltaTime * (T * up), ForceMode.Impulse);
-        this.oldUp = newUp;
+        Vector3 turningImpulse = this.oldUp == Vector3.zero ? Vector3.zero :
+            this.myChip.Omega / this.inverseInertia * (up - this.oldUp);
+        this.rb.AddTorque(turningImpulse + Time.fixedDeltaTime * torque * up, ForceMode.Impulse);
+        this.oldUp = up;
         if (this.isServer)
         {
-            this.myChip.Omega = this.myChip.Omega + dOmega;
+            this.myChip.Omega = WheelPhysics.IntegrateSpin(this.myChip.Omega, torque, this.brake,
+                this.inverseInertia, Time.fixedDeltaTime);
         }
     }
 
+    // ApplyForce applies the same tire force to the vehicle, contacted body and opposing wheel spin.
     void ApplyForce()
     {
-        // T = r x F
-        // T = dL / dt
-        // L = I * Omega => dL = I * dOmega
-        // T = T => r x F = dL / dt
-        // r x F = I * dOmega / dt
-        // slip = Omega * r - surface velocity
-        // Pacejka(slip) * Fn = F
-        // dOmega = r x F / I * dt = Pacejka(slip) * r * Fn.magnitude / I * dt
-
         (float yImpulse, Vector3 yDir, float xImpulse, Vector3 xDir) = this.PhysicsHandle();
 
         this.xForce = xImpulse * xDir;
         this.yForce = yImpulse * yDir;
-        //if (this.upsideDownContact)
-        //{
-        //    this.xForce = -this.xForce;
-        //}
-        Vector3 totalForce = 1000f * Time.fixedDeltaTime * (this.yForce + this.xForce);
-        this.rb.AddForceAtPosition(totalForce, this.point, ForceMode.Impulse);
+        Vector3 totalForce = ContactForceScale * (this.yForce + this.xForce);
+        this.rb.AddForceAtPosition(totalForce, this.point, ForceMode.Force);
         if (this.collidingRigidbody != null)
         {
-            this.collidingRigidbody.AddForceAtPosition(-totalForce, this.point, ForceMode.Impulse);
+            this.collidingRigidbody.AddForceAtPosition(-totalForce, this.point, ForceMode.Force);
         }
 
-        // impulse = S (F) dt => no need to multiply xImpulse * dt to get dOmega since dOmega = k * Force * dt
-        float dOmega = -radius * xImpulse * InvPlanarMomentOfInertia;
+        float dOmega = WheelPhysics.ContactSpinDelta(ContactForceScale * xImpulse, this.radius,
+            this.inverseInertia, Time.fixedDeltaTime);
 
         if (this.isServer)
         {
@@ -228,7 +205,7 @@ public class WheelAspects : BaseAspect
             print($"CHILD TRANSFORM OF WHEEL IS NONE");
             return;
         }
-        wheelVisual.Rotate(Vector3.up, -this.myChip.Omega, Space.Self);
+        wheelVisual.Rotate(Vector3.up, -WheelPhysics.SpinDegrees(this.myChip.Omega, Time.deltaTime), Space.Self);
 
         //this.totalSlip = 0.5f * (Mathf.Abs(this.xSlip) + Mathf.Abs(this.ySlip) + this.totalSlip1);
         this.totalSlip = 0.25f * (Mathf.Abs(this.xSlip) + Mathf.Abs(this.ySlip) + this.totalSlip1 + this.totalSlip2 + this.totalSlip3);
@@ -285,7 +262,7 @@ public class WheelAspects : BaseAspect
             Vector3 FinalImpulse = (ImpulseDifference > 0f) ? NaiveImpulse : J;
 
             this.impulse = FinalImpulse + targetVelocity;
-            this.rb.AddForceAtPosition(1000f * this.impulse * Time.fixedDeltaTime, this.point, ForceMode.Impulse);
+            this.rb.AddForceAtPosition(ContactForceScale * this.impulse, this.point, ForceMode.Force);
             this.ApplyForce();
         }
         else

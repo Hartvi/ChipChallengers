@@ -34,13 +34,49 @@ class Program
             physics = { fixedDeltaTime = 0.001f, solverIterations = 1, solverVelocityIterations = 3 }
         };
     }
-    // Main exercises Lua callback contracts and persistent records using disposable test saves.
+    // SimulateWheelSpin integrates one second of driven wheel motion under constant tire load across two physics rates.
+    static float SimulateWheelSpin(int firstRate, int secondRate, float inverseInertia)
+    {
+        float omega = 20f;
+        foreach (int rate in new[] { firstRate, secondRate })
+        {
+            float seconds = 1f / rate;
+            for (int tick = 0; tick < rate / 2; ++tick)
+            {
+                omega += WheelPhysics.ContactSpinDelta(10f, 0.5f, inverseInertia, seconds);
+                omega = WheelPhysics.IntegrateSpin(omega, 40f, 2f, inverseInertia, seconds);
+            }
+        }
+        return omega;
+    }
+
+    // Main exercises wheel timing, Lua callback contracts and persistent records using disposable test saves.
     static void Main()
     {
         string directory = Path.Combine(Path.GetTempPath(), "chipchallengers-record-test-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(directory);
         try
         {
+            foreach (float inverseInertia in new[] { 0.5f, 1f, 1.5f })
+            {
+                float at500 = SimulateWheelSpin(500, 500, inverseInertia);
+                float at1000 = SimulateWheelSpin(1000, 1000, inverseInertia);
+                float switched = SimulateWheelSpin(500, 1000, inverseInertia);
+                Check(Math.Abs(at500 - at1000) < 0.005f, "Wheel spin changed substantially between 500 and 1000 Hz");
+                Check(Math.Abs(switched - at1000) < 0.005f, "Runtime physics-rate change altered wheel spin integration");
+            }
+            float coasting500 = 100f, coasting1000 = 100f;
+            for (int i = 0; i < 500; ++i) coasting500 = WheelPhysics.IntegrateSpin(coasting500, 0, 0, 1, 1f / 500);
+            for (int i = 0; i < 1000; ++i) coasting1000 = WheelPhysics.IntegrateSpin(coasting1000, 0, 0, 1, 1f / 1000);
+            Check(Math.Abs(coasting500 - coasting1000) < 0.005f, "Wheel resistance doubled with tick frequency");
+            Check(WheelPhysics.IntegrateSpin(1, 0, 1000, 1, 0.01f) == 0 &&
+                WheelPhysics.IntegrateSpin(-1, 0, 1000, 1, 0.01f) == 0, "Braking reversed wheel direction");
+            foreach (int fps in new[] { 30, 60, 120 })
+            {
+                float angle = 0f;
+                for (int frame = 0; frame < fps; ++frame) angle += WheelPhysics.SpinDegrees(2f * (float)Math.PI, 1f / fps);
+                Check(Math.Abs(angle - 360f) < 0.001f, "Wheel animation depends on rendering frame rate");
+            }
             byte[] luaBytes = System.Text.Encoding.UTF8.GetBytes("return 1");
             byte[] mapBytes = System.Text.Encoding.UTF8.GetBytes("v 0 0 0");
             string contentHash = ScenarioContentHash.Compute(luaBytes, mapBytes);
