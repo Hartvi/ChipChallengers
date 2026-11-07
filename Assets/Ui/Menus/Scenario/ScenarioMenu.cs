@@ -14,7 +14,7 @@ public class ScenarioMenu : BaseMenu, InputReceiver
     BaseButton playButton;
     string[] scenarios = new string[0];
     string selectedScenario;
-    readonly Dictionary<string, double> bestTimes = new Dictionary<string, double>();
+    readonly Dictionary<string, ScenarioRunRecord> bestRuns = new Dictionary<string, ScenarioRunRecord>();
 
     // Setup declares the scenario list, selection text and navigation layout.
     public override void Setup()
@@ -76,7 +76,7 @@ public class ScenarioMenu : BaseMenu, InputReceiver
         // OnEnterMenu discovers scenario files through IOHelpers.GetAllScenarios without loading gameplay.
         this.scenarios = IOHelpers.GetAllScenarios()
             .OrderBy(name => name, StringComparer.OrdinalIgnoreCase).ToArray();
-        this.RefreshBestTimes();
+        this.RefreshBestRuns();
         this.scenarioList.virtualContainer.UpdateLabels(this.scenarios);
         this.scrollbar.scrollbar.SetValueWithoutNotify(0f);
         this.scenarioList.Scroll(0f);
@@ -89,10 +89,10 @@ public class ScenarioMenu : BaseMenu, InputReceiver
         UIManager.instance.SwitchToMe(this);
     }
 
-    // RefreshBestTimes matches available Lua contents to saved timed results without executing scenario logic.
-    void RefreshBestTimes()
+    // RefreshBestRuns matches available Lua contents to the fastest saved runs without executing scenario logic.
+    void RefreshBestRuns()
     {
-        this.bestTimes.Clear();
+        this.bestRuns.Clear();
         ScenarioProgressSave save;
         try
         {
@@ -109,13 +109,13 @@ public class ScenarioMenu : BaseMenu, InputReceiver
             {
                 byte[] contents = File.ReadAllBytes(Path.Combine(IOHelpers.GetScenariosDirectory(), name + UIStrings.ScenarioExtension));
                 string hash = ScenarioContentHash.Compute(contents, Array.Empty<byte>());
-                double? best = save.scenarios
+                var best = save.scenarios
                     .Where(progress => progress.scenarioHash == hash && progress.scenarioLogicVersion == ScenarioLuaMetadata.CurrentLogicVersion)
                     .Select(progress => progress.bestRun)
                     .Where(run => run != null && run.hasTime && !double.IsNaN(run.timeSeconds) &&
                         !double.IsInfinity(run.timeSeconds) && run.timeSeconds >= 0)
-                    .Select(run => (double?)run.timeSeconds).Min();
-                if (best.HasValue) { this.bestTimes[name] = best.Value; }
+                    .OrderBy(run => run.timeSeconds).FirstOrDefault();
+                if (best != null) { this.bestRuns[name] = best; }
             }
             catch (Exception error) when (error is IOException || error is UnauthorizedAccessException)
             {
@@ -124,9 +124,15 @@ public class ScenarioMenu : BaseMenu, InputReceiver
         }
     }
 
-    // FormatScenarioLabel adds the saved best time to a scenario name while its selection key remains unchanged.
-    string FormatScenarioLabel(string name) => name + "  |  Best: " +
-        (this.bestTimes.TryGetValue(name, out double seconds) ? seconds.ToString("F2", CultureInfo.InvariantCulture) + " s" : "--");
+    // FormatScenarioLabel displays the best time and its model name and total chip count beside the scenario name.
+    string FormatScenarioLabel(string name)
+    {
+        if (!this.bestRuns.TryGetValue(name, out var run)) { return name + "  |  Best: --"; }
+        string modelName = string.IsNullOrWhiteSpace(run.modelName) ? "Unnamed model" : run.modelName;
+        string chips = run.chipCounts == null ? "--" : run.chipCounts.Sum(chip => chip.count).ToString(CultureInfo.InvariantCulture);
+        return name + "  |  Best: " + run.timeSeconds.ToString("F2", CultureInfo.InvariantCulture) +
+            " s  |  Model: " + modelName + "  |  Chips: " + chips;
+    }
 
     // SelectScenario selects a listed scenario and refreshes the selection display.
     void SelectScenario(string name)
