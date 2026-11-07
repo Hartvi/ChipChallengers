@@ -4,6 +4,7 @@
     <TargetFramework>net9.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="../../Assets/Common/ScenarioContentHash.cs" Link="ScenarioContentHash.cs" />
     <Compile Include="../../Assets/Common/ScenarioProgress.cs" Link="ScenarioProgress.cs" />
     <Compile Include="../../Assets/Common/ScenarioMetadata.cs" Link="ScenarioMetadata.cs" />
     <Compile Include="../../Assets/Common/ScenarioProgressStore.cs" Link="ScenarioProgressStore.cs" />
