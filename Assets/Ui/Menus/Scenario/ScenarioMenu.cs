@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using UnityEngine;
 
@@ -11,6 +14,7 @@ public class ScenarioMenu : BaseMenu, InputReceiver
     BaseButton playButton;
     string[] scenarios = new string[0];
     string selectedScenario;
+    readonly Dictionary<string, double> bestTimes = new Dictionary<string, double>();
 
     // Setup declares the scenario list, selection text and navigation layout.
     public override void Setup()
@@ -57,7 +61,7 @@ public class ScenarioMenu : BaseMenu, InputReceiver
         this.playButton.text.fontSize = UIUtils.MediumFontSize;
         this.playButton.btn.onClick.AddListener(this.PlaySelectedScenario);
 
-        this.scenarioList.SetupItemList(this.SelectScenario, VisibleScenarios, this.scenarios);
+        this.scenarioList.SetupItemList(this.SelectScenario, VisibleScenarios, this.scenarios, this.FormatScenarioLabel);
         this.scrollbar.scrollbar.onValueChanged.AddListener(this.scenarioList.Scroll);
         this.selectedCallbacks.SetCallbacks(new Action[] { this.OnEnterMenu });
         this.deselectedCallbacks.SetCallbacks(new Action[] {
@@ -72,6 +76,7 @@ public class ScenarioMenu : BaseMenu, InputReceiver
         // OnEnterMenu discovers scenario files through IOHelpers.GetAllScenarios without loading gameplay.
         this.scenarios = IOHelpers.GetAllScenarios()
             .OrderBy(name => name, StringComparer.OrdinalIgnoreCase).ToArray();
+        this.RefreshBestTimes();
         this.scenarioList.virtualContainer.UpdateLabels(this.scenarios);
         this.scrollbar.scrollbar.SetValueWithoutNotify(0f);
         this.scenarioList.Scroll(0f);
@@ -83,6 +88,45 @@ public class ScenarioMenu : BaseMenu, InputReceiver
         this.UpdateSelection();
         UIManager.instance.SwitchToMe(this);
     }
+
+    // RefreshBestTimes matches available Lua contents to saved timed results without executing scenario logic.
+    void RefreshBestTimes()
+    {
+        this.bestTimes.Clear();
+        ScenarioProgressSave save;
+        try
+        {
+            save = new ScenarioProgressStore(Path.Combine(Application.persistentDataPath, "scenario-progress.json")).Load();
+        }
+        catch (Exception error) when (error is IOException || error is UnauthorizedAccessException || error is Newtonsoft.Json.JsonException)
+        {
+            Debug.LogWarning("Could not load scenario best times: " + error.Message);
+            return;
+        }
+        foreach (string name in this.scenarios)
+        {
+            try
+            {
+                byte[] contents = File.ReadAllBytes(Path.Combine(IOHelpers.GetScenariosDirectory(), name + UIStrings.ScenarioExtension));
+                string hash = ScenarioContentHash.Compute(contents, Array.Empty<byte>());
+                double? best = save.scenarios
+                    .Where(progress => progress.scenarioHash == hash && progress.scenarioLogicVersion == ScenarioLuaMetadata.CurrentLogicVersion)
+                    .Select(progress => progress.bestRun)
+                    .Where(run => run != null && run.hasTime && !double.IsNaN(run.timeSeconds) &&
+                        !double.IsInfinity(run.timeSeconds) && run.timeSeconds >= 0)
+                    .Select(run => (double?)run.timeSeconds).Min();
+                if (best.HasValue) { this.bestTimes[name] = best.Value; }
+            }
+            catch (Exception error) when (error is IOException || error is UnauthorizedAccessException)
+            {
+                Debug.LogWarning("Could not read scenario " + name + ": " + error.Message);
+            }
+        }
+    }
+
+    // FormatScenarioLabel adds the saved best time to a scenario name while its selection key remains unchanged.
+    string FormatScenarioLabel(string name) => name + "  |  Best: " +
+        (this.bestTimes.TryGetValue(name, out double seconds) ? seconds.ToString("F2", CultureInfo.InvariantCulture) + " s" : "--");
 
     // SelectScenario selects a listed scenario and refreshes the selection display.
     void SelectScenario(string name)
