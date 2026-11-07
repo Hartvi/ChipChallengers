@@ -39,6 +39,21 @@ class Program
         Directory.CreateDirectory(directory);
         try
         {
+            byte[] luaBytes = System.Text.Encoding.UTF8.GetBytes("return 1");
+            byte[] mapBytes = System.Text.Encoding.UTF8.GetBytes("v 0 0 0");
+            string contentHash = ScenarioContentHash.Compute(luaBytes, mapBytes);
+            Check(contentHash.Length == 64 && contentHash == ScenarioContentHash.Compute(luaBytes, mapBytes),
+                "Scenario content hash was not a deterministic SHA-256 digest");
+            Check(contentHash != ScenarioContentHash.Compute(System.Text.Encoding.UTF8.GetBytes("return 2"), mapBytes),
+                "Lua changes did not affect the scenario hash");
+            Check(contentHash != ScenarioContentHash.Compute(luaBytes, System.Text.Encoding.UTF8.GetBytes("v 1 0 0")),
+                "Map changes did not affect the scenario hash");
+            Check(ScenarioContentHash.Compute(new byte[] { 1 }, new byte[] { 2, 3 }) !=
+                ScenarioContentHash.Compute(new byte[] { 1, 2 }, new byte[] { 3 }),
+                "Lua/map boundaries were ambiguous in the scenario hash");
+            Check(contentHash != ScenarioContentHash.Compute(mapBytes, luaBytes), "Lua/map order did not affect the hash");
+            Reject(() => ScenarioContentHash.Compute(null, mapBytes), "Null Lua contents accepted");
+            Reject(() => ScenarioContentHash.Compute(luaBytes, null), "Null map contents accepted");
             string path = Path.Combine(directory, "progress.json");
             var store = new ScenarioProgressStore(path);
             var metadata = new ScenarioMetadata { scenarioId = "permanent-id" };
