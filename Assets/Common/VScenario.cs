@@ -51,8 +51,9 @@ public class VScenario
             this.loadedObject = new GameObject(UIStrings.ScenarioString);
             var gs = this.loadedObject.AddComponent<GameScript>();
 
-            string fileContents = File.ReadAllText(scenarioPath);
-            gs.Activate(fileContents, name);
+            byte[] scenarioContents = File.ReadAllBytes(scenarioPath);
+            using (var reader = new StreamReader(new MemoryStream(scenarioContents)))
+                gs.Activate(reader.ReadToEnd(), name, scenarioContents);
 
             this.loadedObject.SetActive(true);
 

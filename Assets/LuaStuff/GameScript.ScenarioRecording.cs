@@ -9,6 +9,8 @@ using Mirror;
 public partial class GameScript
 {
     public ScenarioMetadata Metadata { get; private set; }
+    public string ScenarioHash { get; private set; }
+    public string ScenarioFileName { get; private set; }
     public event Action<ScenarioRunRecord> ScenarioCompleted;
     ScenarioRunRecord activeAttemptRecord;
     // activeAttempt owns the physics-change subscription for the currently recorded run.
@@ -30,9 +32,11 @@ public partial class GameScript
     ScenarioPhysicsSettings previousPhysics;
     readonly Dictionary<Rigidbody, Vector2Int> previousBodySolvers = new Dictionary<Rigidbody, Vector2Int>();
 
-    // RegisterScenarioCallbacks sets a filename-based fallback ID and registers the Lua recording functions.
-    void RegisterScenarioCallbacks(string scenarioFileName)
+    // RegisterScenarioCallbacks hashes the Lua bytes with empty map contents and registers the Lua recording functions.
+    void RegisterScenarioCallbacks(string scenarioFileName, byte[] scenarioContents)
     {
+        this.ScenarioHash = ScenarioContentHash.Compute(scenarioContents, Array.Empty<byte>());
+        this.ScenarioFileName = Path.GetFileName(scenarioFileName);
         // fallbackScenarioId identifies files without explicit metadata by filename; Scenario({id=...}) supplies a permanent ID.
         this.fallbackScenarioId = string.IsNullOrWhiteSpace(scenarioFileName)
             ? "" : "legacy:" + Path.GetFileNameWithoutExtension(scenarioFileName);
@@ -68,6 +72,8 @@ public partial class GameScript
             throw new InvalidOperationException("Start the attempt in play mode.");
         this.ApplyScenarioPhysics();
         this.activeAttempt = new ScenarioRunRecord {
+            scenarioHash = this.ScenarioHash,
+            scenarioFileName = this.ScenarioFileName,
             runId = Guid.NewGuid().ToString("N"),
             gameVersion = Application.version,
             scenarioLogicVersion = ScenarioLuaMetadata.CurrentLogicVersion,

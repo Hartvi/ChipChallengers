@@ -17,7 +17,7 @@ public partial class GameScript : MonoBehaviour
     Dictionary<string, double> times = new Dictionary<string, double>();
     bool isRace = false;
 
-    public void Activate(string scriptString, string scenarioFileName = "")
+    public void Activate(string scriptString, string scenarioFileName = "", byte[] scenarioContents = null)
     {
         // add owner player
         string player1 = UIStrings.Player + "1";
@@ -46,7 +46,7 @@ public partial class GameScript : MonoBehaviour
         this.script.Globals["Show"] = (Action<string>)Show;
         this.script.Globals["StartTimer"] = (Action<string>)StartTimer;
         this.script.Globals["GetTime"] = (Func<string, double>)GetTime;
-        this.RegisterScenarioCallbacks(scenarioFileName);
+        this.RegisterScenarioCallbacks(scenarioFileName, scenarioContents ?? System.Text.Encoding.UTF8.GetBytes(scriptString));
         this.script.Globals["Freeze"] = (Action<string>)Freeze;
         this.script.Globals["Unfreeze"] = (Action<string>)Unfreeze;
         // place holder, user can rewrite it later

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 [Serializable]
 public class ScenarioProgressSave
 {
-    public int saveVersion = 1;
+    public int saveVersion = 2;
     public List<ScenarioProgress> scenarios = new List<ScenarioProgress>();
 }
 
@@ -13,8 +13,10 @@ public class ScenarioProgressSave
 [Serializable]
 public class ScenarioProgress
 {
-    // scenarioId identifies the scenario independently of its display title or filename.
-    public string scenarioId = "";
+    // scenarioHash identifies the Lua contents with empty map contents until map hashing is enabled.
+    public string scenarioHash = "";
+    // scenarioFileName records the filename, including its extension, of the most recent completed run.
+    public string scenarioFileName = "";
     public int recordVersion = 1;
     // scenarioLogicVersion separates personal bests produced by different processor versions.
     public int scenarioLogicVersion;
@@ -31,6 +33,8 @@ public class ScenarioProgress
 [Serializable]
 public class ScenarioRunRecord
 {
+    public string scenarioHash = "";
+    public string scenarioFileName = "";
     // runId identifies an attempt so repeated finish callbacks do not count it twice.
     public string runId = "";
     public string playerName = "";
