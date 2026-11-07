@@ -26,6 +26,7 @@ public class BaseItemScroll : BasePanel
         }
     }
     protected Action<string> action;
+    Func<string, string> formatLabel;
     public VirtualContainer virtualContainer;
 
     protected TopProp[] items;
@@ -67,12 +68,13 @@ public class BaseItemScroll : BasePanel
 
     protected VirtualItem[] virtualItems;
 
-    public void SetupItemList(Action<string> action, int numberOfDisplayItems, string[] labels)
+    public void SetupItemList(Action<string> action, int numberOfDisplayItems, string[] labels, Func<string, string> formatLabel = null)
     {
         TopProp child = this.GetComponentsInChildren<TopProp>()[1];
 
         this.displayItem = child;
         this.action = action;
+        this.formatLabel = formatLabel;
         this.virtualContainer = new VirtualContainer(numberOfDisplayItems, labels);
         this.NumberOfDisplayItems = numberOfDisplayItems;
 
@@ -124,11 +126,12 @@ public class BaseItemScroll : BasePanel
             }
             // set label of visible item
             var btn = (this.items[i] as BaseButton);
-            btn.text.text = visibleItems[i].label;
+            string label = visibleItems[i].label;
+            btn.text.text = this.formatLabel == null ? label : this.formatLabel(label);
             btn.text.fontSize = UIUtils.MediumFontSize;
 
             btn.btn.onClick.RemoveAllListeners();
-            btn.btn.onClick.AddListener(() => action(btn.text.text));
+            btn.btn.onClick.AddListener(() => action(label));
 
             this.items[i].gameObject.SetActive(true);
             this.items[i].RT.anchoredPosition = realPositions[i];
