@@ -57,7 +57,7 @@ Race({
 
 `GetRaceResult()` returns nil before finishing and the frozen final seconds afterward. Ctrl+R unloads and reloads the entire selected scenario, recreating its Lua state, map, objects, timers and gates after the player model is reset. Lua's `RestartRace()` is a narrower operation that returns the model to its race spawn, clears race motion and progress, waits for rebuilding, and rearms the start gate without rerunning the scenario script. A retry uses the current model after checking the scenario rules again at the start. Repeating `Race(...)` replaces the old course and disables its gates before creating new ones. The original `Race(gateList, optionalFinishCallback)` format remains supported.
 
-Metadata-free older scenarios still load and record under `legacy:<filename>`; explicit IDs preserve records when files are renamed or shared.
+Metadata-free older scenarios still receive a `legacy:<filename>` metadata ID; saved progress uses the content hash instead of this ID.
 
 For a custom objective, explicitly call the begin and complete bindings from your own start/finish logic:
 
@@ -71,7 +71,9 @@ CompleteScenario(GetTime("custom"))
 
 The built-in race saves automatically; do not also begin a custom attempt for the same race. Duplicate completion calls after a successful finish are ignored. A reset, changed model/physics settings, or leaving play mode invalidates an attempt. Ctrl+R restarts the whole scenario for both races and custom objectives; custom Lua logic can also call BeginScenarioAttempt again when ready. Forbidden chip types and the total chip limit are checked at attempt start; menu-side previews and rejecting invalid model loads are not implemented here.
 
-Records are written to `Path.Combine(Application.persistentDataPath, "scenario-progress.json")` with a `.bak` of the prior save and temporary-file replacement. Unreadable saves are reported instead of overwritten. Records are grouped by scenario ID, course/rules record version, and actual processor version. A slower finish updates the last run without replacing the best run or its vehicle. Untimed completions never become zero-time bests.
+Records are written to `Path.Combine(Application.persistentDataPath, "scenario-progress.json")` with a `.bak` of the prior save and temporary-file replacement. Unreadable saves are reported instead of overwritten. Records are grouped by `scenarioHash`, course/rules record version, actual processor version and physics settings. Each group stores `scenarioFileName` from its most recent run; each best/last run retains its own hash and filename including `.lua`. A slower finish updates the last run without replacing the best run or its vehicle. Untimed completions never become zero-time bests.
+
+The loader computes `scenarioHash` once from the original Lua file bytes and empty map bytes using `ScenarioContentHash.Compute`; map contents are not hashed yet. Renaming a file preserves its hash, while any Lua byte change creates a separate identity. Save format 2 replaces the stored `scenarioId` with `scenarioHash` and `scenarioFileName`. Format-1 records remain readable with empty hash/filename fields and are not matched to new runs; their historical contents cannot be inferred. The first write upgrading a format-1 save preserves its original JSON in `.v1.bak`.
 
 Vehicle Lua snapshots, chip counts and physics settings are captured at the start. The finish captures UTC time and `PlayerPrefs.GetString("PlayerName", "Player")`; a player-name entry screen is not yet implemented. Game version comes from `Application.version`. The C# `GameScript.ScenarioCompleted` event fires after persistence succeeds. Scenario result rendering is a separate integration.
 

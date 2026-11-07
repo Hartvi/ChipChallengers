@@ -19,7 +19,7 @@ public class ScenarioProgressStore
     {
         if (!File.Exists(this.path)) { return new ScenarioProgressSave(); }
         var save = JsonConvert.DeserializeObject<ScenarioProgressSave>(File.ReadAllText(this.path));
-        if (save == null || save.saveVersion != 1 || save.scenarios == null ||
+        if (save == null || (save.saveVersion != 1 && save.saveVersion != 2) || save.scenarios == null ||
             save.scenarios.Any(x => x == null))
         {
             throw new InvalidDataException("Unsupported or invalid scenario progress file.");
@@ -30,8 +30,9 @@ public class ScenarioProgressStore
     // Record saves a valid finish once and updates its scenario completion and personal best.
     public bool Record(ScenarioMetadata metadata, ScenarioRunRecord run)
     {
-        if (metadata == null || string.IsNullOrWhiteSpace(metadata.scenarioId) ||
-            metadata.recordVersion < 1 || run == null || string.IsNullOrWhiteSpace(run.runId) ||
+        if (metadata == null || metadata.recordVersion < 1 || run == null ||
+            string.IsNullOrWhiteSpace(run.scenarioHash) || string.IsNullOrWhiteSpace(run.scenarioFileName) ||
+            string.IsNullOrWhiteSpace(run.runId) ||
             run.scenarioLogicVersion < 1 || (run.hasTime &&
             (double.IsNaN(run.timeSeconds) || double.IsInfinity(run.timeSeconds) || run.timeSeconds < 0)))
         {
@@ -44,13 +45,14 @@ public class ScenarioProgressStore
             throw new ArgumentException("Recorded physics must match the scenario's required physics rules.");
         }
         var save = this.Load();
-        var progress = save.scenarios.FirstOrDefault(x => x.scenarioId == metadata.scenarioId &&
+        var progress = save.scenarios.FirstOrDefault(x => x.scenarioHash == run.scenarioHash &&
             x.recordVersion == metadata.recordVersion && x.scenarioLogicVersion == run.scenarioLogicVersion &&
             x.lastRun != null && run.physics.Matches(x.lastRun.physics));
         if (progress == null)
         {
             progress = new ScenarioProgress {
-                scenarioId = metadata.scenarioId, recordVersion = metadata.recordVersion,
+                scenarioHash = run.scenarioHash, scenarioFileName = run.scenarioFileName,
+                recordVersion = metadata.recordVersion,
                 scenarioLogicVersion = run.scenarioLogicVersion
             };
             save.scenarios.Add(progress);
@@ -58,6 +60,7 @@ public class ScenarioProgressStore
         // Record ignores finish callbacks whose run ID matches the stored last or best run.
         if (progress.lastRun != null && progress.lastRun.runId == run.runId) { return false; }
         if (progress.bestRun != null && progress.bestRun.runId == run.runId) { return false; }
+        progress.scenarioFileName = run.scenarioFileName;
         progress.completed = true;
         progress.completionCount++;
         progress.lastRun = run;
@@ -70,6 +73,10 @@ public class ScenarioProgressStore
         // Record writes a temporary file before replacing the previous save and retaining a backup.
         string directory = Path.GetDirectoryName(Path.GetFullPath(this.path));
         Directory.CreateDirectory(directory);
+        // Record preserves the original ID-based save because historical Lua contents cannot be recovered from its runs.
+        if (save.saveVersion == 1 && !File.Exists(this.path + ".v1.bak"))
+            File.Copy(this.path, this.path + ".v1.bak");
+        save.saveVersion = 2;
         string temporary = this.path + ".tmp";
         File.WriteAllText(temporary, JsonConvert.SerializeObject(save, Formatting.Indented));
         if (File.Exists(this.path)) { File.Replace(temporary, this.path, this.path + ".bak"); }

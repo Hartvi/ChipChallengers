@@ -23,6 +23,8 @@ class Program
     static ScenarioRunRecord Run(string id, double time, string model, int version = 1)
     {
         return new ScenarioRunRecord {
+            scenarioHash = ScenarioContentHash.Compute(System.Text.Encoding.UTF8.GetBytes("test scenario"), Array.Empty<byte>()),
+            scenarioFileName = "test_scenario.lua",
             runId = id, hasTime = true, timeSeconds = time, modelName = model,
             playerName = "Driver", finishedAtUtc = "2026-11-04T15:32:18Z",
             gameVersion = "test", scenarioLogicVersion = version,
@@ -76,7 +78,10 @@ class Program
             metadata.recordVersion++;
             store.Record(metadata, Run("e", 55, "New course"));
             Check(store.Load().scenarios.Count == 3, "Course versions mixed");
-            store.Record(metadata, new ScenarioRunRecord { runId = "untimed", scenarioLogicVersion = 1, completionType = "survival", physics = ScenarioPhysicsSettings.CreateStandard() });
+            var untimed = Run("untimed", 0, "Survival car");
+            untimed.hasTime = false;
+            untimed.completionType = "survival";
+            store.Record(metadata, untimed);
             progress = store.Load().scenarios.Last();
             Check(!progress.lastRun.hasTime && progress.bestRun.runId == "e", "Untimed finish became a zero-time best");
             string before = File.ReadAllText(path);
@@ -87,6 +92,42 @@ class Program
             bool failed = false;
             try { store.Record(metadata, Run("f", 20, "Car")); } catch (Newtonsoft.Json.JsonException) { failed = true; }
             Check(failed && File.ReadAllText(path) == "{not valid JSON", "Corrupt save overwritten");
+
+            var hashStore = new ScenarioProgressStore(Path.Combine(directory, "hash-progress.json"));
+            var identityMetadata = new ScenarioMetadata();
+            var originalRun = Run("original", 10, "Car");
+            hashStore.Record(identityMetadata, originalRun);
+            var renamedRun = Run("renamed", 11, "Car");
+            renamedRun.scenarioFileName = "renamed.lua";
+            hashStore.Record(identityMetadata, renamedRun);
+            var hashProgress = hashStore.Load().scenarios.Single();
+            Check(hashProgress.completionCount == 2 && hashProgress.scenarioHash == originalRun.scenarioHash &&
+                hashProgress.scenarioFileName == "renamed.lua", "Renaming split identical scenario contents or lost filename");
+            Check(hashProgress.bestRun.scenarioFileName == "test_scenario.lua" &&
+                hashProgress.lastRun.scenarioFileName == "renamed.lua", "Run filenames were overwritten by a rename");
+            var editedRun = Run("edited", 9, "Car");
+            editedRun.scenarioHash = ScenarioContentHash.Compute(System.Text.Encoding.UTF8.GetBytes("changed Lua"), Array.Empty<byte>());
+            hashStore.Record(identityMetadata, editedRun);
+            Check(hashStore.Load().scenarios.Count == 2, "Changed Lua contents shared progress with the original");
+            var missingHash = Run("missing-hash", 1, "Car");
+            missingHash.scenarioHash = "";
+            Reject(() => hashStore.Record(identityMetadata, missingHash), "Missing scenario hash accepted");
+            var missingFileName = Run("missing-filename", 1, "Car");
+            missingFileName.scenarioFileName = "";
+            Reject(() => hashStore.Record(identityMetadata, missingFileName), "Missing scenario filename accepted");
+            string hashJson = File.ReadAllText(Path.Combine(directory, "hash-progress.json"));
+            Check(hashJson.Contains("\"scenarioHash\"") && hashJson.Contains("\"scenarioFileName\"") &&
+                !hashJson.Contains("\"scenarioId\""), "Saved identity fields were not replaced");
+            string oldPath = Path.Combine(directory, "old-progress.json");
+            string oldJson = "{\"saveVersion\":1,\"scenarios\":[{\"scenarioId\":\"old-id\",\"completed\":true,\"completionCount\":2}]}";
+            File.WriteAllText(oldPath, oldJson);
+            var oldStore = new ScenarioProgressStore(oldPath);
+            oldStore.Record(identityMetadata, originalRun);
+            var upgraded = oldStore.Load();
+            Check(upgraded.saveVersion == 2 && upgraded.scenarios.Count == 2 &&
+                upgraded.scenarios[0].scenarioHash == "" && upgraded.scenarios[0].completionCount == 2,
+                "Old records were lost or assigned an unverified hash");
+            Check(File.ReadAllText(oldPath + ".v1.bak") == oldJson, "Original ID-based save was not preserved");
 
             var lua = new Script();
             var table = lua.DoString("return {id='community-level', title='Hill', recordVersion=3, scenarioLogicVersion=1, rules={maxChips=30, forbiddenChipTypes={'Jet'}}}").Table;
