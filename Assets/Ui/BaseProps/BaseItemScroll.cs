@@ -27,6 +27,7 @@ public class BaseItemScroll : BasePanel
     }
     protected Action<string> action;
     Func<string, string> formatLabel;
+    public float? ItemFontSize { get; set; }
     public VirtualContainer virtualContainer;
 
     protected TopProp[] items;
@@ -128,7 +129,7 @@ public class BaseItemScroll : BasePanel
             var btn = (this.items[i] as BaseButton);
             string label = visibleItems[i].label;
             btn.text.text = this.formatLabel == null ? label : this.formatLabel(label);
-            btn.text.fontSize = UIUtils.MediumFontSize;
+            btn.text.fontSize = this.ItemFontSize ?? UIUtils.MediumFontSize;
 
             btn.btn.onClick.RemoveAllListeners();
             btn.btn.onClick.AddListener(() => action(label));
