@@ -28,8 +28,13 @@ public class Aerodynamics : BaseAspect
         }
     }
 
-    public override void RuntimeFunction()
+    // RuntimeFunction leaves aerodynamic forces to the physics tick.
+    public override void RuntimeFunction() { }
+
+    // FixedUpdate applies aerodynamic forces once per physics tick while the model is active.
+    void FixedUpdate()
     {
+        if (this.rb.isKinematic || this.myChip.myCore.IsRebuilding) { return; }
         Transform t = this.transform;
         Vector3 velocity = this.rb.velocity;
         int underwater = this.transform.position.y < 0f ? 1 : 0;
@@ -45,6 +50,6 @@ public class Aerodynamics : BaseAspect
         {
             finalForce += -(PhysicsData.seaLevelDensity * 6.28f * velocity + 25f * up * vDotN + Vector3.up);
         }
-        this.rb.AddForce(Time.deltaTime * finalForce, ForceMode.Impulse);
+        this.rb.AddForce(finalForce, ForceMode.Force);
     }
 }
