@@ -1,6 +1,6 @@
 # Scenario recording checks
 
-Wheel timing checks also integrate driven and coasting spin at 500 Hz, 1000 Hz and across a runtime rate switch, verify braking does not reverse spin, and compare a full visual revolution at 30/60/120 FPS. Ground contacts, axle-turning reactions and full vehicle handling require Unity Play-mode testing.
+Wheel timing checks also integrate driven and coasting spin at 500 Hz, 1000 Hz and across a runtime rate switch, verify braking does not reverse spin, and compare a full visual revolution at 30/60/120 FPS. Driven-spin comparisons allow 0.1 percent for first-order timestep integration. Inertia checks use solid-disk mass/radius values, and free-spin resistance halves moderate spin in about two seconds. Ground contacts, axle-turning reactions and full vehicle handling require Unity Play-mode testing.
 
 Requires .NET 9 and the project's Unity-generated `Library/ScriptAssemblies/Assembly-CSharp-firstpass.dll` plus restored Newtonsoft package.
 
