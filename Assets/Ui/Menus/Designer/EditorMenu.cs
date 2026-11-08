@@ -219,14 +219,10 @@ public class EditorMenu : BaseMenu, InputReceiver
         // TODO: update value, option, etc in the editor to how it should look like.
         // atm it's only angle and colour that is visibly changed after rebuilding
 
-        // set core to correct orientation
-        core.transform.rotation = Quaternion.identity;
-        core.transform.position += Vector3.up;
-
         this.selectedChip = this.highlighter.SelectVChip("a");
 
-        // rebuild the model so it's not flat when entering designer mode
-        core.srvResetCounter += 1;
+        // OnEnterMenu levels both the physics body and Transform after clearing motion before rebuilding.
+        core.CmdResetPose(core.rb.position + Vector3.up, Quaternion.identity);
 
         // slow down physics to save power
         //Time.fixedDeltaTime = 0.1f;
