@@ -3,12 +3,11 @@ using System;
 // WheelPhysics integrates wheel spin in seconds and radians independently of update frequency.
 public static class WheelPhysics
 {
-    const float LinearResistancePerSecond = 1e-4f * 500f;
+    const float LinearResistancePerSecond = 0.35f;
     const float QuadraticResistancePerSecond = 1e-8f * 500f;
 
-    // ScaleInverseInertia preserves base-wheel tuning while inertia grows with mass and squared radius.
-    public static float ScaleInverseInertia(float baseInverseInertia, float massScale, float radiusScale) =>
-        baseInverseInertia / (massScale * radiusScale * radiusScale);
+    // DiskInverseInertia calculates inverse spin inertia for a solid disk using its actual mass and radius.
+    public static float DiskInverseInertia(float mass, float radius) => 2f / (mass * radius * radius);
 
     // IntegrateSpin applies drive torque and elapsed-time resistance without braking past zero.
     public static float IntegrateSpin(float omega, float torque, float brake, float inverseInertia, float seconds)

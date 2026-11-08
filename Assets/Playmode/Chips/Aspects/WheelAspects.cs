@@ -10,7 +10,8 @@ public class WheelAspects : BaseAspect
     ParticleSystem particles;
 
     float radius = StaticChip.ChipSide * 0.5f;
-    public static readonly Vector3 MomentOfInertia = PhysicsData.mediumMass * new Vector3(1 / 4f, 1 / 2f, 1 / 4f) * StaticChip.ChipSide * StaticChip.ChipSide;
+    // MomentOfInertia models the default wheel as a thin disk using radius rather than diameter.
+    public static readonly Vector3 MomentOfInertia = PhysicsData.mediumMass * new Vector3(1 / 4f, 1 / 2f, 1 / 4f) * (StaticChip.ChipSide * 0.5f) * (StaticChip.ChipSide * 0.5f);
 
     public static readonly float PlanarMomentOfInertia = WheelAspects.MomentOfInertia[1];
     public static readonly float InvPlanarMomentOfInertia = 1f / WheelAspects.MomentOfInertia[1];
@@ -98,8 +99,7 @@ public class WheelAspects : BaseAspect
             this.vectorsDists[1] = 1f / 1.414f * GeometricChip.ChipSide;
             this.vectorsDists[2] = 1f / 1.414f * GeometricChip.ChipSide;
         }
-        this.inverseInertia = WheelPhysics.ScaleInverseInertia(InvPlanarMomentOfInertia,
-            this.rb.mass / PhysicsData.mediumMass, this.radius / (StaticChip.ChipSide * 0.5f));
+        this.inverseInertia = WheelPhysics.DiskInverseInertia(this.rb.mass, this.radius);
     }
 
     // ResetSpinHistory clears the previous axle direction so a staged race cannot resume with a torque kick.

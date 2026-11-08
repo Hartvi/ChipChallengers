@@ -57,11 +57,11 @@ class Program
         Directory.CreateDirectory(directory);
         try
         {
-            float baseWheelInertia = WheelPhysics.ScaleInverseInertia(0.5f, 1f, 1f);
-            float doubleRadiusInertia = WheelPhysics.ScaleInverseInertia(0.5f, 1f, 2f);
-            float doubleMassInertia = WheelPhysics.ScaleInverseInertia(0.5f, 2f, 1f);
+            float baseWheelInertia = WheelPhysics.DiskInverseInertia(2f, 0.25f);
+            float doubleRadiusInertia = WheelPhysics.DiskInverseInertia(2f, 0.5f);
+            float doubleMassInertia = WheelPhysics.DiskInverseInertia(4f, 0.25f);
             float baseDrivenSpin = WheelPhysics.IntegrateSpin(0, 40, 0, baseWheelInertia, 0.001f);
-            Check(baseWheelInertia == 0.5f, "Default wheel inertia tuning changed");
+            Check(Math.Abs(1f / baseWheelInertia - 0.0625f) < 1e-6f, "Default wheel did not use solid-disk inertia");
             Check(Math.Abs(WheelPhysics.IntegrateSpin(0, 40, 0, doubleRadiusInertia, 0.001f) * 4 - baseDrivenSpin) < 1e-6f,
                 "Doubling wheel radius did not quadruple inertia under drive torque");
             Check(Math.Abs(WheelPhysics.IntegrateSpin(0, 40, 0, doubleMassInertia, 0.001f) * 2 - baseDrivenSpin) < 1e-6f,
@@ -69,18 +69,23 @@ class Program
             Check(Math.Abs(WheelPhysics.ContactSpinDelta(10, 1f, doubleRadiusInertia, 0.001f) * 2 -
                 WheelPhysics.ContactSpinDelta(10, 0.5f, baseWheelInertia, 0.001f)) < 1e-6f,
                 "Larger wheel contact response did not account for both lever arm and inertia");
-            foreach (float inverseInertia in new[] { 0.5f, 1f, 1.5f })
+            foreach (float inverseInertia in new[] { baseWheelInertia, doubleRadiusInertia, doubleMassInertia })
             {
                 float at500 = SimulateWheelSpin(500, 500, inverseInertia);
                 float at1000 = SimulateWheelSpin(1000, 1000, inverseInertia);
                 float switched = SimulateWheelSpin(500, 1000, inverseInertia);
-                Check(Math.Abs(at500 - at1000) < 0.005f, "Wheel spin changed substantially between 500 and 1000 Hz");
-                Check(Math.Abs(switched - at1000) < 0.005f, "Runtime physics-rate change altered wheel spin integration");
+                float tolerance = 0.001f * Math.Max(1f, Math.Abs(at1000));
+                Check(Math.Abs(at500 - at1000) < tolerance, "Wheel spin differed by more than 0.1 percent between 500 and 1000 Hz");
+                Check(Math.Abs(switched - at1000) < tolerance, "Runtime physics-rate change altered wheel spin by more than 0.1 percent");
             }
             float coasting500 = 100f, coasting1000 = 100f;
             for (int i = 0; i < 500; ++i) coasting500 = WheelPhysics.IntegrateSpin(coasting500, 0, 0, 1, 1f / 500);
             for (int i = 0; i < 1000; ++i) coasting1000 = WheelPhysics.IntegrateSpin(coasting1000, 0, 0, 1, 1f / 1000);
             Check(Math.Abs(coasting500 - coasting1000) < 0.005f, "Wheel resistance doubled with tick frequency");
+            float coastingTwoSeconds = 100f;
+            for (int i = 0; i < 2000; ++i)
+                coastingTwoSeconds = WheelPhysics.IntegrateSpin(coastingTwoSeconds, 0, 0, 16f, 0.001f);
+            Check(coastingTwoSeconds > 48f && coastingTwoSeconds < 51f, "Free wheel spin did not halve in about two seconds");
             Check(WheelPhysics.IntegrateSpin(1, 0, 1000, 1, 0.01f) == 0 &&
                 WheelPhysics.IntegrateSpin(-1, 0, 1000, 1, 0.01f) == 0, "Braking reversed wheel direction");
             foreach (int fps in new[] { 30, 60, 120 })
