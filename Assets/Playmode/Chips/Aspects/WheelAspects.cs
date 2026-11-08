@@ -285,7 +285,7 @@ public class WheelAspects : BaseAspect
         {
             Vector3 rayDirection = this.vectors[i]();
             //Debug.DrawRay(basePosition + t.up, rayDirection.normalized * this.vectorsDists[i], Color.red);
-            if (Physics.Raycast(basePosition, rayDirection, out RaycastHit h, this.vectorsDists[i], this.layerMask))
+            if (Physics.Raycast(basePosition, rayDirection, out RaycastHit h, this.vectorsDists[i], this.layerMask, QueryTriggerInteraction.Ignore))
             {
                 point = h.point;
                 normal = h.normal;
