@@ -161,9 +161,7 @@ public partial class GameScript
             if (this.raceProgress.Finished)
             {
                 this.isRace = false;
-                var style = new Table(this.script);
-                style.Set("t", DynValue.NewNumber(3));
-                this.Print($"FINISHED IN {seconds:F2} SECONDS - Ctrl+R to retry", style);
+                this.DisplayRaceText($"FINISHED IN {seconds:F2} SECONDS - Ctrl+R to retry", 3f, "race-result", false, 0.5f);
                 if (!definition.onFinished.IsNil()) { this.script.Call(definition.onFinished, seconds); }
             }
             else
@@ -251,21 +249,33 @@ public partial class GameScript
     // DisplayRaceStart displays a short-lived staging or countdown message above the race timer.
     void DisplayRaceStart(string message)
     {
+        this.DisplayRaceText(message, 0.25f, "race-start-countdown", true, 0.5f);
+    }
+
+    // DisplayRaceText gives scenario messages a centered box spanning 90 percent of the canvas width.
+    void DisplayRaceText(string message, float duration, string id, bool large, float height)
+    {
         DisplaySingleton.Instance.DisplayText(text => {
-            DisplaySingleton.BasicLargeModification(text);
+            if (large) { DisplaySingleton.BasicLargeModification(text); }
+            else { DisplaySingleton.BasicMediumModification(text); text.color = Color.black; }
+            var rect = text.rectTransform;
+            var parent = (RectTransform)rect.parent;
+            rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.sizeDelta = new Vector2(parent.rect.width * 0.9f, parent.rect.height * 0.2f);
+            rect.anchoredPosition = new Vector2(0f, parent.rect.height * (height - 0.5f));
+            text.enableWordWrapping = true;
+            text.alignment = TMPro.TextAlignmentOptions.Center;
             text.SetText(message);
-        }, 0.25f, "race-start-countdown");
+        }, duration, id);
     }
 
     // DisplayRaceTime shows elapsed time and intermediate checkpoint progress for a running attempt.
     void DisplayRaceTime()
     {
         if (!this.times.ContainsKey("race")) { return; }
-        var style = new Table(this.script);
-        style.Set("x", DynValue.NewNumber(-0.7));
-        style.Set("y", DynValue.NewNumber(0.7));
-        style.Set("t", DynValue.NewNumber(0.1));
         int checkpoints = Math.Max(0, this.raceProgress.NextGate - 1);
-        this.Print($"TIME: {this.GetTime("race"):F2} SECONDS - CHECKPOINTS: {checkpoints}/{this.raceGates.Count - 2}", style);
+        this.DisplayRaceText($"TIME: {this.GetTime("race"):F2} SECONDS - CHECKPOINTS: {checkpoints}/{this.raceGates.Count - 2}",
+            0.1f, "race-timer", false, 0.85f);
     }
 }
