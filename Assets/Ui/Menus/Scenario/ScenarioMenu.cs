@@ -61,6 +61,7 @@ public class ScenarioMenu : BaseMenu, InputReceiver
         this.playButton.text.fontSize = UIUtils.MediumFontSize;
         this.playButton.btn.onClick.AddListener(this.PlaySelectedScenario);
 
+        this.scenarioList.ItemFontSize = UIUtils.SmallFontSize;
         this.scenarioList.SetupItemList(this.SelectScenario, VisibleScenarios, this.scenarios, this.FormatScenarioLabel);
         this.scrollbar.scrollbar.onValueChanged.AddListener(this.scenarioList.Scroll);
         this.selectedCallbacks.SetCallbacks(new Action[] { this.OnEnterMenu });
