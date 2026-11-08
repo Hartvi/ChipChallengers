@@ -57,6 +57,18 @@ class Program
         Directory.CreateDirectory(directory);
         try
         {
+            float baseWheelInertia = WheelPhysics.ScaleInverseInertia(0.5f, 1f, 1f);
+            float doubleRadiusInertia = WheelPhysics.ScaleInverseInertia(0.5f, 1f, 2f);
+            float doubleMassInertia = WheelPhysics.ScaleInverseInertia(0.5f, 2f, 1f);
+            float baseDrivenSpin = WheelPhysics.IntegrateSpin(0, 40, 0, baseWheelInertia, 0.001f);
+            Check(baseWheelInertia == 0.5f, "Default wheel inertia tuning changed");
+            Check(Math.Abs(WheelPhysics.IntegrateSpin(0, 40, 0, doubleRadiusInertia, 0.001f) * 4 - baseDrivenSpin) < 1e-6f,
+                "Doubling wheel radius did not quadruple inertia under drive torque");
+            Check(Math.Abs(WheelPhysics.IntegrateSpin(0, 40, 0, doubleMassInertia, 0.001f) * 2 - baseDrivenSpin) < 1e-6f,
+                "Doubling wheel mass did not double inertia under drive torque");
+            Check(Math.Abs(WheelPhysics.ContactSpinDelta(10, 1f, doubleRadiusInertia, 0.001f) * 2 -
+                WheelPhysics.ContactSpinDelta(10, 0.5f, baseWheelInertia, 0.001f)) < 1e-6f,
+                "Larger wheel contact response did not account for both lever arm and inertia");
             foreach (float inverseInertia in new[] { 0.5f, 1f, 1.5f })
             {
                 float at500 = SimulateWheelSpin(500, 500, inverseInertia);

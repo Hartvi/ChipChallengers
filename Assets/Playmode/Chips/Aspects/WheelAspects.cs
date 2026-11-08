@@ -14,9 +14,8 @@ public class WheelAspects : BaseAspect
 
     public static readonly float PlanarMomentOfInertia = WheelAspects.MomentOfInertia[1];
     public static readonly float InvPlanarMomentOfInertia = 1f / WheelAspects.MomentOfInertia[1];
-    // inverseInertia retains the selected option's spin response for both drive and tire forces.
-    float inverseInertia => InvPlanarMomentOfInertia *
-        (this.myChip.option > 0 ? 1 + 0.5f * this.myChip.option : 1);
+    // inverseInertia caches the wheel's mass-and-radius-scaled spin response for drive and tire forces.
+    float inverseInertia = InvPlanarMomentOfInertia;
     //public static float inertiaInvFixedTime = 0f;
 
     public const float carTyreStiffness = 200 * 1e3f;  // N/mm * 1e3
@@ -99,6 +98,8 @@ public class WheelAspects : BaseAspect
             this.vectorsDists[1] = 1f / 1.414f * GeometricChip.ChipSide;
             this.vectorsDists[2] = 1f / 1.414f * GeometricChip.ChipSide;
         }
+        this.inverseInertia = WheelPhysics.ScaleInverseInertia(InvPlanarMomentOfInertia,
+            this.rb.mass / PhysicsData.mediumMass, this.radius / (StaticChip.ChipSide * 0.5f));
     }
 
     // ResetSpinHistory clears the previous axle direction so a staged race cannot resume with a torque kick.
