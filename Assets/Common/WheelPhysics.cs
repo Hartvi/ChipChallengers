@@ -6,6 +6,10 @@ public static class WheelPhysics
     const float LinearResistancePerSecond = 1e-4f * 500f;
     const float QuadraticResistancePerSecond = 1e-8f * 500f;
 
+    // ScaleInverseInertia preserves base-wheel tuning while inertia grows with mass and squared radius.
+    public static float ScaleInverseInertia(float baseInverseInertia, float massScale, float radiusScale) =>
+        baseInverseInertia / (massScale * radiusScale * radiusScale);
+
     // IntegrateSpin applies drive torque and elapsed-time resistance without braking past zero.
     public static float IntegrateSpin(float omega, float torque, float brake, float inverseInertia, float seconds)
     {
