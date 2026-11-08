@@ -28,9 +28,10 @@ public class MapPanel : BaseScrollMenu
         this.input.placeholder.SetText(UIStrings.EnterMapName);
     }
 
+    // LoadMap notifies listeners and closes the panel only after the requested map loads successfully.
     void LoadMap()
     {
-        SingleplayerMenu.myVMap.LoadNewMap(this.input.input.text + UIStrings.MapExtension);
+        if (!SingleplayerMenu.myVMap.LoadNewMap(this.input.input.text + UIStrings.MapExtension)) { return; }
 
         this.DeactivatePanel();
 

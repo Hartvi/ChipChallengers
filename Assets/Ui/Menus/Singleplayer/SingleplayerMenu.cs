@@ -34,6 +34,17 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
         this.core.CmdResetCore();
     }
 
+    // LeaveScenario cancels queued scenario loads and removes scenario runtime and context after a manual map load.
+    void LeaveScenario()
+    {
+        this.playEntry++;
+        this.reloadScenarioAfterBuild = false;
+        if (this.scenarioLoading != null) { StopCoroutine(this.scenarioLoading); }
+        this.scenarioLoading = null;
+        GameManager.PlayContext.SelectSingleplayer();
+        myVScenario.UnloadScenario();
+    }
+
     // LoadPendingScenario schedules one fresh scenario load after the player model is built for this play entry.
     void LoadPendingScenario()
     {
@@ -227,7 +238,7 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
         };
         this.core.SetAfterBuildListeners(afterBuildListeners);
 
-        var mapLoadedCallbacks = onLoadedCallbacksTmp.Concat(new Action[] { this.core.CmdResetToDefaultLocation }).ToArray();
+        var mapLoadedCallbacks = onLoadedCallbacksTmp.Concat(new Action[] { this.LeaveScenario, this.core.CmdResetToDefaultLocation }).ToArray();
         this.MapPanel.SetOnLoadedCallbacks(mapLoadedCallbacks);
 
         //TODO: load model after entering playmode???
