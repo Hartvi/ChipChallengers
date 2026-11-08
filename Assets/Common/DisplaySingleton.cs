@@ -83,7 +83,7 @@ public class DisplaySingleton : MonoBehaviour
         }
 
         DisplayedTextInfo info;
-        if (!displayedTexts.TryGetValue(id, out info))
+        if (!displayedTexts.TryGetValue(id, out info) || info.TextComponent == null)
         {
             // Create a new text object
             TMP_Text txt = InitTxt();
@@ -104,11 +104,13 @@ public class DisplaySingleton : MonoBehaviour
             info.LastDisplayTime = Time.time;
         }
 
-        // Apply user-defined modifications (color, font size, alignment, etc.)
-        modification(info.TextComponent);
-
-        // Make sure it’s active and visible
+        bool wasHidden = !info.TextComponent.gameObject.activeSelf;
         info.TextComponent.gameObject.SetActive(true);
+        info.TextComponent.transform.SetAsLastSibling();
+
+        // DisplayText updates active text so reused labels rebuild correctly after their timeout.
+        modification(info.TextComponent);
+        if (wasHidden) { info.TextComponent.ForceMeshUpdate(); }
     }
 
     private void Update()
