@@ -264,8 +264,9 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
         Vector3 corePos = this.core.transform.position;
         Vector3 lookAtPos = corePos;
 
-        // the camera stays behind the object:
-        Vector3 deltaPos = Mathf.Max(0f, (camTransform.position - corePos).magnitude - cs.posShift.x) * camTransform.forward;
+        // Correct distance toward the current target, rather than the previous frame's viewing direction.
+        Vector3 toCore = corePos - camTransform.position;
+        Vector3 deltaPos = Mathf.Max(0f, toCore.magnitude - cs.posShift.x) * toCore.normalized;
 
         // camera stays above the object in world coordinates
         Vector3 deltaPosY = 0.1f * (corePos.y + cs.posShift.y - camTransform.position.y) * camTransform.up;
