@@ -32,7 +32,6 @@ public class MapPanel : BaseScrollMenu
         base.Start();
         this.scenarioWarning = this.GetComponentInChildren<BaseText>(true);
         UIUtils.SetFontSize(this.scenarioWarning.text, UIUtils.SmallFontSize);
-        UIUtils.SetFontSize(this.btns[0].text, UIUtils.SmallFontSize);
         this.UpdateScenarioWarning();
 
         this.itemScroll.SetupItemList(FillInput, Screen.height / 70, IOHelpers.GetAllMaps());
