@@ -18,7 +18,7 @@ public class ChipPanel : BaseSidePanel, InputReceiver
     ItemBase PopUpItem;
 
     BaseImage backgroundImage;
-    int deselectTimer = -1;
+    TMP_InputField popUpInput;
     bool started;
     bool initialized;
     Coroutine pendingInitialization;
@@ -42,6 +42,7 @@ public class ChipPanel : BaseSidePanel, InputReceiver
     protected override void OnDisable()
     {
         base.OnDisable();
+        this.HidePopUp();
         if (this.pendingInitialization != null) { StopCoroutine(this.pendingInitialization); }
         this.pendingInitialization = null;
     }
@@ -148,6 +149,7 @@ public class ChipPanel : BaseSidePanel, InputReceiver
 
     public void DisplayChip(VChip vc)
     {
+        this.HidePopUp();
         string chipType = vc.ChipType;
         string[] newKeys = ArrayExtensions.AccessLikeDict(chipType, VChip.chipData.keys, VChip.chipData.values);
         string[] newValues = new string[newKeys.Length];
@@ -224,6 +226,7 @@ public class ChipPanel : BaseSidePanel, InputReceiver
                 inputs[_i].onSelect.AddListener(
                     x =>
                     {
+                        this.popUpInput = inputs[_i];
                         ItemBase[] popUpItems = this.PopUpItem.DisplayNItems<ItemBase>(VChip.chipNames.Length);
                         for (int k = 0; k < popUpItems.Length; ++k)
                         {
@@ -235,11 +238,7 @@ public class ChipPanel : BaseSidePanel, InputReceiver
                                 () =>
                                 {
                                     inputs[_i].text = VChip.chipNames[_k];
-                                    ItemBase[] popUpItems = this.PopUpItem.DisplayNItems<ItemBase>(VChip.chipNames.Length);
-                                    for (int k = 0; k < popUpItems.Length; ++k)
-                                    {
-                                        popUpItems[k].gameObject.SetActive(false);
-                                    }
+                                    this.HidePopUp();
                                     inputs[_i].onEndEdit.Invoke(inputs[_i].text);
                                 }
                             );
@@ -251,18 +250,13 @@ public class ChipPanel : BaseSidePanel, InputReceiver
                         TopProp.StackFrom(this.PopUpItem.Siblings<ItemBase>(takeInactive: false));
                     }
                 );
-                inputs[_i].onDeselect.AddListener(
-                    x =>
-                    {
-                        this.deselectTimer = 30;
-                    }
-                );
             }
             if (texts[_i].text == VChip.optionStr)
             {
                 inputs[_i].onSelect.AddListener(
                     x =>
                     {
+                        this.popUpInput = inputs[_i];
                         string[] optionNames = ArrayExtensions.AccessLikeDict(vc.ChipType, VChip.optionNames.keys, VChip.optionNames.values);
                         ItemBase[] popUpItems = this.PopUpItem.DisplayNItems<ItemBase>(optionNames.Length);
                         for (int k = 0; k < popUpItems.Length; ++k)
@@ -275,11 +269,7 @@ public class ChipPanel : BaseSidePanel, InputReceiver
                                 () =>
                                 {
                                     inputs[_i].text = _k.ToString();
-                                    ItemBase[] popUpItems = this.PopUpItem.DisplayNItems<ItemBase>(optionNames.Length);
-                                    for (int k = 0; k < popUpItems.Length; ++k)
-                                    {
-                                        popUpItems[k].gameObject.SetActive(false);
-                                    }
+                                    this.HidePopUp();
                                     inputs[_i].onEndEdit.Invoke(inputs[_i].text);
                                 }
                             );
@@ -291,16 +281,14 @@ public class ChipPanel : BaseSidePanel, InputReceiver
                         TopProp.StackFrom(this.PopUpItem.Siblings<ItemBase>(takeInactive: false));
                     }
                 );
-                inputs[_i].onDeselect.AddListener(
-                    x =>
-                    {
-                        this.deselectTimer = 5;
-                    }
-                );
             }
             inputs[_i].onEndEdit.AddListener(
                 x =>
                 {
+                    // Clicking a popup button ends editing before its click fires.
+                    // An unchanged value must not rebuild the model and close the popup.
+                    if (vc.vals[_i] == x) { return; }
+
                     string validityMsg = vc.CheckValidityOfPropertyForThisChip(texts[_i].text, x);
                     if (validityMsg is not null)
                     {
@@ -309,12 +297,7 @@ public class ChipPanel : BaseSidePanel, InputReceiver
                     }
                     else
                     {
-                        // TODO CALL BACK FOR CHIP CHANGED TO PROPAGATE TO MODEL CHANGED for all properties
-                        //Debug.LogWarning($"TODO: make chip changed callback propagate to model changed callback for all properties.");
-                        //print($"Setting value {x} for key {vc.keys[_i]} in chip {vc.ChipType}");
                         vc.vals[_i] = x;
-                        var ccc = CoreChip.ClientCoreChip;
-                        //ccc.CmdLoadString(ccc.VirtualModel.ToLuaString());
                     }
                 }
             );
@@ -353,21 +336,32 @@ public class ChipPanel : BaseSidePanel, InputReceiver
         }
     }
 
+    void HidePopUp()
+    {
+        this.popUpInput = null;
+        if (this.PopUpItem == null) { return; }
+        foreach (var item in this.PopUpItem.Siblings<ItemBase>(takeInactive: false))
+        {
+            item.gameObject.SetActive(false);
+        }
+    }
+
+    void LateUpdate()
+    {
+        if (this.popUpInput == null) { return; }
+
+        // Check after UI events: buttons receive focus on press, but click on release.
+        var selected = EventSystem.current == null ? null : EventSystem.current.currentSelectedGameObject;
+        if (selected != null &&
+            (selected == this.popUpInput.gameObject || selected.transform.IsChildOf(this.PopUpItem.transform.parent)))
+        {
+            return;
+        }
+        this.HidePopUp();
+    }
+
     void Update()
     {
-        if (this.deselectTimer > 0)
-        {
-            this.deselectTimer = this.deselectTimer - 1;
-            if (this.deselectTimer == 0)
-            {
-                var ps = this.PopUpItem.Siblings<ItemBase>(takeInactive: false);
-                foreach (var p in ps)
-                {
-                    p.gameObject.SetActive(false);
-                }
-            }
-        }
-
         if (Input.GetMouseButtonDown(0))
         {
             if (this.insideChipPanel)
