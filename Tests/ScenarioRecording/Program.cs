@@ -31,7 +31,7 @@ class Program
             modelSnapshot = "{script=[[line one\nline two]]}",
             chipCounts = { new ScenarioChipCount { chipType = "Wheel", count = 4 } },
             rules = { maxChips = 30, forbiddenChipTypes = { "Jet" } },
-            physics = { fixedDeltaTime = 0.001f, solverIterations = 1, solverVelocityIterations = 3 }
+            physics = { fixedDeltaTime = 0.001f, solverIterations = 6, solverVelocityIterations = 1 }
         };
     }
     // SimulateWheelSpin integrates one second of driven wheel motion under constant tire load across two physics rates.
@@ -236,8 +236,8 @@ class Program
             Reject(() => ScenarioLuaMetadata.Parse(lua.DoString("return {id='x',rules={maxChips=-2}}").Table, ""), "Invalid restriction accepted");
             Reject(() => ScenarioLuaMetadata.Parse(lua.DoString("return {}").Table, ""), "Missing identity accepted");
             var standard = ScenarioLuaMetadata.Parse(lua.DoString("return {id='standard'}").Table, "");
-            Check(standard.rules.physics.fixedDeltaTime == 0.001f && standard.rules.physics.solverIterations == 1 &&
-                standard.rules.physics.solverVelocityIterations == 3, "Missing physics rules did not use the shared preset");
+            Check(standard.rules.physics.fixedDeltaTime == 0.001f && standard.rules.physics.solverIterations == 6 &&
+                standard.rules.physics.solverVelocityIterations == 1, "Missing physics rules did not use the shared preset");
             var custom = ScenarioLuaMetadata.Parse(lua.DoString("return {id='custom',rules={physics={fixedDeltaTime=0.01,solverIterations=12,solverVelocityIterations=4}}}").Table, "");
             Check(custom.rules.physics.fixedDeltaTime == 0.01f && custom.rules.physics.solverIterations == 12 &&
                 custom.rules.physics.solverVelocityIterations == 4, "Explicit physics rules were not parsed");
