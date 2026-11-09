@@ -36,6 +36,8 @@ Twenty-one main limestone-style sea cliffs, smaller outcrops and vegetated summi
 
 Load `quarry_climb` from the map panel for a free-driving off-road test. The 12 m wide easy route climbs roughly 36 m through a terraced quarry, ending at two summit posts. Return by the same route. Three orange-edged alternative lanes provide a steep shortcut, 18 cm step risers and a sideways incline reaching 20 degrees. The longer yellow-edged route bypasses the technical sections. Workshops and orange pillars mark the starting area at world origin.
 
+Both sides of each route have retaining skirts extending from the road edge down below the local terrain, closing the visual gap without adding barriers above the driving surface.
+
 Generate it with `build_quarry_climb.py` using the Blender command above. The script exports `quarry_climb.obj` and `.mtl`, validates upward-facing road surfaces and checks terrain does not intrude through route centrelines. It saves the editable `.blend`, annotated overview, driving-height views and `summary.json` under `C:/Users/Acer/BlenderTests/quarry-climb`. Annotation labels are render-only. Map generation does not place race triggers or change vehicle mechanics; steep-lane traction and step difficulty need in-game testing.
 
 Select `quarry_climb_race` in Scenarios for a summit time trial. Its two checkpoints sit at shared route merges, allowing the easy road or technical shortcuts. Enter the start gate for the existing hold/countdown, then finish between the summit posts. The scenario uses the existing result saving and retry flow, with 1000 Hz physics and solver counts 1/3. No model restrictions are imposed.

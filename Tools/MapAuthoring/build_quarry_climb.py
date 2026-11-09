@@ -64,6 +64,7 @@ steep=curve([(0,0,2.35),(8,4,2.35),(32,16,20),(40,20,20)])
 steps=curve([(110,30,20),(70,70,23),(25,90,25),(-10,75,26)])
 side=curve([(-10,75,26),(-55,45,31),(-95,25,35),(-125,10,38)])
 road_samples=[]
+road_edges=[]
 
 # road builds a continuous ribbon, with optional true vertical step risers or a banked middle section.
 def road(name,points,width,technical=False,stairs=False,bank=False):
@@ -94,6 +95,7 @@ def road(name,points,width,technical=False,stairs=False,bank=False):
         for j in range(len(offsets)-1):
             a=i*len(offsets)+j;b=(i+1)*len(offsets)+j
             faces.append((a,a+1,b+1,b));indices.append(1 if j in (1,3) else (2 if j in (0,4) else 0))
+    road_edges.append((name, [Vector(vertices[i*6]) for i in range(len(rows))], [Vector(vertices[i*6+5]) for i in range(len(rows))]))
     obj=mesh_object(name,vertices,faces,[gravel,orange if technical else yellow,sand],indices)
     assert all(p.normal.z>=-0.0001 for p in obj.data.polygons),'Folded road surface: '+name
     return lengths[-1]
@@ -135,6 +137,21 @@ for point,right,roll,width in road_samples:
     hit=terrain_tree.ray_cast(point+Vector((0,0,100)),Vector((0,0,-1)),200)[0]
     assert hit is None or hit.z <= point.z+0.03, 'Terrain obstructs a route centreline'
 
+# Retaining skirts start exactly at the outer road edges and extend below the local terrain.
+for name,left,right in road_edges:
+    for side,edge in enumerate((left,right)):
+        skirt_vertices=[];skirt_faces=[]
+        for point in edge:
+            hit=terrain_tree.ray_cast(point+Vector((0,0,100)),Vector((0,0,-1)),200)[0]
+            ground=hit.z if hit is not None else point.z-2
+            bottom=min(point.z-0.3,ground-0.3)
+            skirt_vertices.extend((tuple(point),(point.x,point.y,bottom)))
+        for i in range(len(edge)-1):
+            if (edge[i+1].xy-edge[i].xy).length < 1e-6: continue
+            face=(i*2,(i+1)*2,(i+1)*2+1,i*2+1)
+            skirt_faces.append(tuple(reversed(face)) if side else face)
+        mesh_object(name+' retaining wall '+str(side+1),skirt_vertices,skirt_faces,[soil])
+
 for y in (15,-10):
     box('Workshop',(-30,y,6.1),(17,16,8),concrete)
     box('Workshop roof',(-30,y,10.35),(18,17,0.5),roof)
@@ -170,13 +187,13 @@ def camera(name,location,target,ortho=None):
     return obj
 cameras=[camera('overview',(350,-460,390),(25,-25,14),535),camera('start',(0,32,7),(5,-65,7)),camera('steps',(95,12,35),(55,75,25))]
 for cam in cameras:
-    scene.camera=cam;scene.render.filepath=str(OUT/(cam.name+'_v2.png'));bpy.ops.render.render(write_still=True)
+    scene.camera=cam;scene.render.filepath=str(OUT/(cam.name+'_v3.png'));bpy.ops.render.render(write_still=True)
 scene.camera=cameras[0];bpy.ops.wm.save_as_mainfile(filepath=str(OUT/'quarry_climb.blend'))
 # Render-only labels identify alternative routes without adding collision geometry.
 for text,position in [('EASY ROUTE',(150,-60,29)),('A: STEEP',(22,10,22)),('B: STEPS',(58,75,32)),('C: SIDE SLOPE',(-60,30,42)),('SUMMIT',(-90,-60,47))]:
     bpy.ops.object.text_add(location=position);obj=bpy.context.object;obj.name='PREVIEW '+text;obj.data.body=text
     obj.data.align_x='CENTER';obj.data.size=5;obj.rotation_euler=cameras[0].rotation_euler;obj.data.materials.append(steel)
-scene.render.filepath=str(OUT/'annotated_overview_v2.png');bpy.ops.render.render(write_still=True)
+scene.render.filepath=str(OUT/'annotated_overview_v3.png');bpy.ops.render.render(write_still=True)
 summary={'map':'quarry_climb','easy_route_length':round(main_length,1),'climb_metres':35.65,'easy_road_width':12,'technical_lane_width':7,'step_rise_metres':0.18,'maximum_side_bank_degrees':20,'triangles':sum(len(p.vertices)-2 for obj in geometry for p in obj.data.polygons),'spawn_ground_height':2.35}
 (OUT/'summary.json').write_text(json.dumps(summary,indent=2))
 print('QUARRY_OUTPUT',MAPS/'quarry_climb.obj');print('SUMMARY',summary)
