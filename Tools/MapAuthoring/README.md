@@ -32,4 +32,10 @@ The airfield has a 36 m runway, hangars beside the start, and two orange start p
 
 Twenty-one main limestone-style sea cliffs, smaller outcrops and vegetated summits surround the course. Their horizontal footprints are checked against the flight corridors, and every straight flight leg is raycast against the actual generated meshes. The blue sea surface has been removed completely, including its collider; the cliffs now stand in open space. This map does not introduce water dynamics or crash rules.
 
+## Quarry Climb
+
+Load `quarry_climb` from the map panel for a free-driving off-road test. The 12 m wide easy route climbs roughly 36 m through a terraced quarry, ending at two summit posts. Return by the same route. Three orange-edged alternative lanes provide a steep shortcut, 18 cm step risers and a sideways incline reaching 20 degrees. The longer yellow-edged route bypasses the technical sections. Workshops and orange pillars mark the starting area at world origin.
+
+Generate it with `build_quarry_climb.py` using the Blender command above. The script exports `quarry_climb.obj` and `.mtl`, validates upward-facing road surfaces and checks terrain does not intrude through route centrelines. It saves the editable `.blend`, annotated overview, driving-height views and `summary.json` under `C:/Users/Acer/BlenderTests/quarry-climb`. Annotation labels are render-only. No scenario, gates or new vehicle mechanics are included; steep-lane traction and step difficulty need in-game testing.
+
 Run `build_karst_flight.py` using the Blender command above to generate `karst_coast.obj`, `.mtl`, and `karst_flight_race.lua`. It saves `karst_coast.blend`, `karst_flight_preview.blend`, the numbered route overview, runway/flight renders and `summary.json` to `C:/Users/Acer/BlenderTests/karst-flight`. Preview route lines and labels are excluded from the gameplay OBJ. The scenario uses 1000 Hz physics, 1 regular solver iteration and 3 velocity solver iterations. In-game takeoff, aircraft clearance and trigger behavior still need flight testing.
