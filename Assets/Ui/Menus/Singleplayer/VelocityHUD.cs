@@ -68,7 +68,7 @@ public class VelocityHUD : BasePanel
 
     void SetPosition()
     {
-        this.positionText.SetText(this.position.ToString() + " m");
+        this.positionText.SetText(this.position.ToString().Trim('(', ')'));
     }
 
     void SetVelocity()
