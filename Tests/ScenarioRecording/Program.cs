@@ -54,7 +54,7 @@ class Program
     static void CheckBundledScenarios()
     {
         string scenarioDirectory = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../Assets/StreamingAssets/Scenarios"));
-        foreach (string file in new[] { "circuit1_race.lua", "load_race.lua", "industrial_test_track_race.lua", "karst_flight_race.lua" })
+        foreach (string file in new[] { "circuit1_race.lua", "load_race.lua", "industrial_test_track_race.lua", "karst_flight_race.lua", "quarry_climb_race.lua" })
         {
             var example = new Script();
             ScenarioRaceDefinition exampleRace = null;
@@ -67,7 +67,8 @@ class Program
             example.Globals["Spawn"] = (Func<string,Table,string>)((_,__) => "test-object");
             example.DoString(File.ReadAllText(Path.Combine(scenarioDirectory, file)));
             Check(exampleRace != null && exampleRace.gates.Count >= 2, "Bundled example failed to declare a race: " + file);
-            float expectedRadius = file == "karst_flight_race.lua" ? 27f : file == "industrial_test_track_race.lua" ? 8f : 2.5f;
+            float expectedRadius = file == "karst_flight_race.lua" ? 27f :
+                file == "industrial_test_track_race.lua" || file == "quarry_climb_race.lua" ? 8f : 2.5f;
             Check(exampleRace.gates.All(g => g.radius == expectedRadius), "Bundled scenario gate size incorrect: " + file);
             if (file == "industrial_test_track_race.lua")
             {
@@ -83,6 +84,12 @@ class Program
                 Check(exampleRace.gates.All(gate => gate.color[3] == 180f), "Flight gate opacity was not increased");
                 Check(exampleRace.gates.Skip(1).All(gate => gate.position.y - gate.radius > 0),
                     "An airborne flight gate intersects sea level");
+            }
+            if (file == "quarry_climb_race.lua")
+            {
+                Check(exampleRace.gates.Count == 4, "Quarry course should have two route-merge checkpoints");
+                Check(exampleRace.gates.Last().position.y > exampleRace.gates.First().position.y + 30,
+                    "Quarry finish was not at the summit");
             }
         }
     }
