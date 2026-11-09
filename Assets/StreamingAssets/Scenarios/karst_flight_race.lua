@@ -2,7 +2,7 @@
 Scenario({
     id = "05473a7b-5769-541c-ae57-cb3bb1354a09",
     title = "Karst Coast Flight",
-    recordVersion = 2,
+    recordVersion = 3,
     scenarioLogicVersion = 1,
     completionType = "timeTrial",
     rules = {
@@ -14,8 +14,8 @@ LoadMap("karst_coast")
 SetPosition("player1", {-0.000, 15.975, -52.500})
 SetRotation("player1", {0, 0, 0})
 Race({
-    radius = 18,
-    color = {80, 210, 130, 35},
+    radius = 27,
+    color = {80, 210, 130, 180},
     start = {-0.000, 15.225, -0.000},
     checkpoints = {
         {-0.000, 48.000, 285.000},
@@ -32,5 +32,5 @@ Race({
         {97.500, 82.500, 217.500},
         {-0.000, 52.500, 97.500},
     },
-    finish = {-0.000, 39.000, -52.500}
+    finish = {-0.000, 49.200, -52.500}
 })

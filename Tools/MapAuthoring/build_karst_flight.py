@@ -107,11 +107,12 @@ checkpoints=[Vector(p) for p in [
     (0,-190,32),(20,-310,60),(150,-400,95),(310,-325,110),
     (395,-150,90),(350,50,75),(230,225,65),(40,300,50),
     (-140,240,45),(-190,70,55),(-150,-100,70),(-65,-145,55),(0,-65,35)]]
-finish=Vector((0,35,26))
+finish=Vector((0,35,32.8))
 flight_path=[start]+checkpoints+[finish]
 assert (spawn-start).length > 14, 'Spawn must stay outside the countdown trigger'
 assert all((b-a).length > 28 for a,b in zip(flight_path,flight_path[1:])), 'Race gates overlap'
-inner_radius=12.0
+inner_radius=18.0
+hoop_tube_radius=1.2
 
 # segment_distance measures the horizontal corridor clearance conservatively.
 def segment_distance(point,a,b):
@@ -147,7 +148,7 @@ for y in (28,-12,-52):
     box('Hangar door',(-24.94,y,runway_height+4.5),(0.12,17,8),steel)
     box('Hangar lintel',(-24.7,y,runway_height+9),(0.25,18,0.6),orange)
     for part in geometry[first_part:]: fixed_buildings[part.name]=Vector((-36,y,runway_height))
-for x in (-16,16):
+for x in (-24,24):
     box('Start pillar',(x,0,runway_height+4.5),(1,1,9),orange)
     box('Pillar cap',(x,0,runway_height+9.5),(1.5,1.5,1),white)
 first_part=len(geometry)
@@ -169,7 +170,7 @@ accepted=[]
 for x,y,rx,ry,height in tower_specs:
     clearance=min(segment_distance(Vector((x,y)),a,b) for a,b in zip(flight_path,flight_path[1:]))
     bound=max(rx,ry)*1.18+6
-    if clearance < bound+inner_radius+16: continue
+    if clearance < bound+28: continue
     karst(f'Sea karst {len(accepted)+1:02d}',x,y,rx,ry,height)
     accepted.append({'center':[x,y],'height':height,'footprint_bound':bound,'flight_corridor_clearance':round(clearance-bound,2)})
     # Small outcrops cluster around the foot of the main pillars.
@@ -177,13 +178,13 @@ for x,y,rx,ry,height in tower_specs:
         sx=x+offset*rx*0.55;sy=y+ry*0.45
         karst('Cliff outcrop',sx,sy,rx*0.30,ry*0.30,height*0.26)
 
-# Hoop normals follow the incoming/outgoing course direction; world scaling widens their opening to 36 m.
+# Hoop normals follow the incoming/outgoing course direction; world scaling widens their opening to 54 m.
 for index,point in enumerate(checkpoints+[finish]):
     previous=start if index==0 else checkpoints[index-1]
     following=(checkpoints+[finish])[index+1] if index<len(checkpoints) else point+(point-previous)
     normal=(following-previous).normalized()
     bpy.ops.mesh.primitive_torus_add(major_segments=48,minor_segments=8,location=point,
-        major_radius=inner_radius+0.8,minor_radius=0.8)
+        major_radius=inner_radius+hoop_tube_radius,minor_radius=hoop_tube_radius)
     hoop=bpy.context.object
     hoop.name=f'Flight hoop {index+1:02d}'
     hoop.rotation_euler=normal.to_track_quat('Z','Y').to_euler()
@@ -215,7 +216,7 @@ checkpoint_lua='\n'.join('        '+lua_vector(p)+',' for p in checkpoints)
 Scenario({
     id = "%s",
     title = "Karst Coast Flight",
-    recordVersion = 2,
+    recordVersion = 3,
     scenarioLogicVersion = 1,
     completionType = "timeTrial",
     rules = {
@@ -227,8 +228,8 @@ LoadMap("karst_coast")
 SetPosition("player1", %s)
 SetRotation("player1", {0, 0, 0})
 Race({
-    radius = 18,
-    color = {80, 210, 130, 35},
+    radius = 27,
+    color = {80, 210, 130, 180},
     start = %s,
     checkpoints = {
 %s
@@ -282,11 +283,31 @@ cameras=[camera('overview',(1050,-1250,1050),(90,-55,35),1550),
     camera('runway',(0,100,20),(0,-170,18)),
     camera('cliff_flight',(210,-375,118),(330,-300,105))]
 for cam in cameras:
-    scene.camera=cam;scene.render.filepath=str(OUT/(cam.name+'_v3.png'))
+    scene.camera=cam;scene.render.filepath=str(OUT/(cam.name+'_v4.png'))
     bpy.ops.render.render(write_still=True)
 scene.camera=cameras[0]
 bpy.ops.wm.save_as_mainfile(filepath=str(OUT/'karst_coast.blend'))
 # Numbered route markers are authoring-only and are added after the map export and clean blend save.
+# The preview sphere illustrates the first active gate's increased opacity without entering the map OBJ.
+preview_gate=bpy.data.materials.new('Preview active gate opacity')
+preview_gate.use_nodes=True
+nodes=preview_gate.node_tree.nodes
+nodes.clear()
+output=nodes.new('ShaderNodeOutputMaterial')
+transparent=nodes.new('ShaderNodeBsdfTransparent')
+face=nodes.new('ShaderNodeBsdfDiffuse')
+face.inputs['Color'].default_value=(80/255,210/255,130/255,1)
+mix=nodes.new('ShaderNodeMixShader')
+mix.inputs[0].default_value=180/255
+links=preview_gate.node_tree.links
+links.new(transparent.outputs[0],mix.inputs[1]);links.new(face.outputs[0],mix.inputs[2]);links.new(mix.outputs[0],output.inputs[0])
+bpy.ops.mesh.primitive_uv_sphere_add(segments=32,ring_count=16,radius=inner_radius,location=checkpoints[0])
+bpy.context.object.name='PREVIEW active gate'
+bpy.context.object.data.materials.append(preview_gate)
+active_camera=camera('active_gate',(0,-110,35),(0,-190,32))
+scene.camera=active_camera;scene.render.filepath=str(OUT/'active_gate_v4.png')
+bpy.ops.render.render(write_still=True)
+
 labelmat=material('Preview route labels',(0.015,0.025,0.025))
 for index,point in enumerate(flight_path):
     bpy.ops.object.text_add(location=point+Vector((0,0,18)))
@@ -307,11 +328,11 @@ for a,b in zip(flight_path,flight_path[1:]):
         line=bpy.context.object;line.name='PREVIEW route guide'
         line.rotation_euler=delta.to_track_quat('Z','Y').to_euler()
         line.data.materials.append(route_mat)
-scene.camera=cameras[0];scene.render.filepath=str(OUT/'race_overview_v3.png')
+scene.camera=cameras[0];scene.render.filepath=str(OUT/'race_overview_v4.png')
 bpy.ops.render.render(write_still=True)
 bpy.ops.wm.save_as_mainfile(filepath=str(OUT/'karst_flight_preview.blend'))
 summary={'map':'karst_coast','scenario':'karst_flight_race','road_reference_width':12,
-    'world_scale':WORLD_SCALE,'sea_surface':False,'buildings_scaled':False,'hoop_clear_diameter':36,'trigger_diameter':36,'airborne_hoops':14,'checkpoints':13,
+    'world_scale':WORLD_SCALE,'sea_surface':False,'buildings_scaled':False,'hoop_clear_diameter':54,'trigger_diameter':54,'gate_alpha':180,'airborne_hoops':14,'checkpoints':13,
     'course_length':round(sum((b-a).length for a,b in zip(flight_path,flight_path[1:])),1),
     'triangles':sum(len(p.vertices)-2 for obj in geometry for p in obj.data.polygons),
     'cliffs':accepted,'spawn':game_point(spawn),'start':game_point(start),

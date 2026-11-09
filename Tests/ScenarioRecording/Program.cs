@@ -67,7 +67,7 @@ class Program
             example.Globals["Spawn"] = (Func<string,Table,string>)((_,__) => "test-object");
             example.DoString(File.ReadAllText(Path.Combine(scenarioDirectory, file)));
             Check(exampleRace != null && exampleRace.gates.Count >= 2, "Bundled example failed to declare a race: " + file);
-            float expectedRadius = file == "karst_flight_race.lua" ? 18f : file == "industrial_test_track_race.lua" ? 8f : 2.5f;
+            float expectedRadius = file == "karst_flight_race.lua" ? 27f : file == "industrial_test_track_race.lua" ? 8f : 2.5f;
             Check(exampleRace.gates.All(g => g.radius == expectedRadius), "Bundled scenario gate size incorrect: " + file);
             if (file == "industrial_test_track_race.lua")
             {
@@ -80,6 +80,7 @@ class Program
             if (file == "karst_flight_race.lua")
             {
                 Check(exampleRace.gates.Count == 15, "Flight course did not declare 13 checkpoints plus start and finish");
+                Check(exampleRace.gates.All(gate => gate.color[3] == 180f), "Flight gate opacity was not increased");
                 Check(exampleRace.gates.Skip(1).All(gate => gate.position.y - gate.radius > 0),
                     "An airborne flight gate intersects sea level");
             }
