@@ -50,9 +50,45 @@ class Program
         return omega;
     }
 
-    // Main exercises wheel timing, Lua callback contracts and persistent records using disposable test saves.
-    static void Main()
+    // CheckBundledScenarios executes bundled Lua declarations against the real metadata and race parsers.
+    static void CheckBundledScenarios()
     {
+    string scenarioDirectory = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../Assets/StreamingAssets/Scenarios"));
+    foreach (string file in new[] { "circuit1_race.lua", "load_race.lua", "industrial_test_track_race.lua" })
+    {
+        var example = new Script();
+        ScenarioRaceDefinition exampleRace = null;
+        ScenarioLuaCallbacks.Register(example, value => ScenarioLuaMetadata.Parse(value, ""),
+            () => {}, _ => {}, () => null,
+            (configuration, callback) => exampleRace = ScenarioRaceDefinition.Parse(configuration, callback));
+        example.Globals["LoadMap"] = (Action<string>)(_ => {});
+        example.Globals["SetPosition"] = (Action<string,Table>)((_,__) => {});
+        example.Globals["SetRotation"] = (Action<string,Table>)((_,__) => {});
+        example.Globals["Spawn"] = (Func<string,Table,string>)((_,__) => "test-object");
+        example.DoString(File.ReadAllText(Path.Combine(scenarioDirectory, file)));
+        Check(exampleRace != null && exampleRace.gates.Count >= 2, "Bundled example failed to declare a race: " + file);
+        float expectedRadius = file == "industrial_test_track_race.lua" ? 8f : 2.5f;
+        Check(exampleRace.gates.All(g => g.radius == expectedRadius), "Bundled scenario gate size incorrect: " + file);
+        if (file == "industrial_test_track_race.lua")
+        {
+            Check(exampleRace.gates.Count == 15, "Industrial circuit checkpoint count incorrect");
+            var start = exampleRace.gates.First().position;
+            var finish = exampleRace.gates.Last().position;
+            Check(start.x == finish.x && start.y == finish.y && start.z == finish.z,
+                "Industrial lap did not finish at its start line");
+        }
+    }
+    }
+
+    // Main exercises wheel timing, Lua callback contracts and persistent records using disposable test saves.
+    static void Main(string[] args)
+    {
+        if (args.Contains("--scenarios-only"))
+        {
+            CheckBundledScenarios();
+            Console.WriteLine("PASS: " + checks + " bundled scenario checks.");
+            return;
+        }
         string directory = Path.Combine(Path.GetTempPath(), "chipchallengers-record-test-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(directory);
         try
@@ -279,21 +315,7 @@ class Program
             ScenarioLuaCallbacks.Register(lua, _ => {}, () => {}, _ => {}, () => null, (_,__) => {}, () => restarts++);
             lua.DoString("RestartRace()");
             Check(restarts == 1, "Lua retry callback not forwarded");
-            string scenarioDirectory = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../Assets/StreamingAssets/Scenarios"));
-            foreach (string file in new[] { "circuit1_race.lua", "load_race.lua" })
-            {
-                var example = new Script();
-                ScenarioRaceDefinition exampleRace = null;
-                ScenarioLuaCallbacks.Register(example, value => ScenarioLuaMetadata.Parse(value, ""),
-                    () => {}, _ => {}, () => null,
-                    (configuration, callback) => exampleRace = ScenarioRaceDefinition.Parse(configuration, callback));
-                example.Globals["LoadMap"] = (Action<string>)(_ => {});
-                example.Globals["SetPosition"] = (Action<string,Table>)((_,__) => {});
-                example.Globals["Spawn"] = (Func<string,Table,string>)((_,__) => "test-object");
-                example.DoString(File.ReadAllText(Path.Combine(scenarioDirectory, file)));
-                Check(exampleRace != null && exampleRace.gates.Count >= 2, "Bundled example failed to declare a race: " + file);
-                Check(exampleRace.gates.All(g => g.radius == 2.5f), "Example gate size changed during migration: " + file);
-            }
+            CheckBundledScenarios();
             var playContext = new GameplayContext();
             Check(!playContext.IsScenario && playContext.ScenarioName == null, "New gameplay context was not regular singleplayer");
             playContext.SelectScenario("circuit1_race");
