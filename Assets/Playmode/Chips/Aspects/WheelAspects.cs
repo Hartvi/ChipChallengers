@@ -25,7 +25,8 @@ public class WheelAspects : BaseAspect
     public static readonly float DepenetrationVelocitySqr = DepenetrationVelocity * DepenetrationVelocity;
 
     // tire parameters:
-    public const float stiffness = 5;  // =20 means that a deformation of 0.05 yields a depenetration velocity of 1
+    // Support spring strength: higher values reduce tire penetration under load.
+    public const float stiffness = 20;
     public const float B = 10f;
     public const float C = 1.9f;
     public const float D = 0.9f;
