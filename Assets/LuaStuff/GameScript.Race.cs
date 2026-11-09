@@ -26,8 +26,6 @@ public partial class GameScript
         var definition = ScenarioRaceDefinition.Parse(configuration, legacyFinished);
         this.ClearRace();
         this.raceDefinition = definition;
-        this.raceSpawnPosition = this.AllObjects["player1"].transform.position;
-        this.raceSpawnRotation = this.AllObjects["player1"].transform.rotation;
         foreach (var gate in definition.gates)
         {
             var table = new Table(this.script);
@@ -44,8 +42,9 @@ public partial class GameScript
             trigger.isTrigger = true;
             trigger.radius = 0.5f;
             gateObject.AddComponent<RaceGateTrigger>().Entered = other => this.EnterRaceGate(index, other);
+            gateObject.SetActive(false);
         }
-        this.PrepareRaceStart();
+        this.pendingRaceRestart = StartCoroutine(this.RearmRaceAfterReset(CoreChip.ClientCoreChip, true));
         this.script.Globals["RaceLoop"] = (Action)this.DisplayRaceTime;
     }
 
@@ -118,14 +117,22 @@ public partial class GameScript
         this.pendingRaceRestart = StartCoroutine(this.RearmRaceAfterReset(core));
     }
 
-    // RearmRaceAfterReset waits for reset acknowledgement and model rebuilding before accepting gate crossings.
-    IEnumerator RearmRaceAfterReset(CoreChip core)
+    // RearmRaceAfterReset waits for applied pose requests and rebuilding before capturing the initial spawn and enabling gates.
+    IEnumerator RearmRaceAfterReset(CoreChip core, bool captureSpawn = false)
     {
         yield return null;
-        while (core != null && (core.IsRebuilding || core.srvResetCounter != core.cltResetCounter ||
+        while (core != null && (core.HasPendingPoseReset || core.IsRebuilding || core.srvResetCounter != core.cltResetCounter ||
                core.loadedModelString != core.modelString)) { yield return null; }
         this.pendingRaceRestart = null;
-        if (core != null && this.raceDefinition != null) { this.PrepareRaceStart(); }
+        if (core != null && this.raceDefinition != null)
+        {
+            if (captureSpawn)
+            {
+                this.raceSpawnPosition = core.rb.position;
+                this.raceSpawnRotation = core.rb.rotation;
+            }
+            this.PrepareRaceStart();
+        }
     }
 
     // EnterRaceGate accepts the next gate when Unity reports the local core entering its trigger.
@@ -136,7 +143,7 @@ public partial class GameScript
             this.raceProgress.Finished || index != this.raceProgress.NextGate) { return; }
         var core = CoreChip.ClientCoreChip;
         if (other.attachedRigidbody != core.GetComponent<Rigidbody>() ||
-            core.IsRebuilding || core.srvResetCounter != core.cltResetCounter) { return; }
+            core.HasPendingPoseReset || core.IsRebuilding || core.srvResetCounter != core.cltResetCounter) { return; }
         this.PassRaceGate(Time.timeAsDouble);
     }
 

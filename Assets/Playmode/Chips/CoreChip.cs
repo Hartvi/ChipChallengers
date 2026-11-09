@@ -10,6 +10,10 @@ public class CoreChip : CommonChip
 {
     public List<BaseAspect> RuntimeFunctions = new List<BaseAspect>();
     public event Action ResetCompleted;
+    internal enum PoseResetMode { Pose, Position, Rotation, DefaultLocation, Upright }
+    uint requestedPoseReset;
+    [SyncVar] uint appliedPoseReset;
+    public bool HasPendingPoseReset => this.requestedPoseReset != this.appliedPoseReset;
 
     [SyncVar]
     float[] variableValues = new float[0];
@@ -300,24 +304,41 @@ public class CoreChip : CommonChip
         StartCoroutine(this.GenerateChips());
     }
 
-    [Command]
-    public void CmdResetCore()
+    // CmdResetCore queues an upright reset preserving the server's current position.
+    public void CmdResetCore() => this.QueuePoseReset(Vector3.zero, Quaternion.identity, PoseResetMode.Upright);
+
+    // CmdResetPose queues an acknowledged reset of the complete model pose.
+    public void CmdResetPose(Vector3 position, Quaternion rotation) => this.QueuePoseReset(position, rotation, PoseResetMode.Pose);
+
+    // CmdResetPosition preserves rotation when the server executes the queued position change.
+    public void CmdResetPosition(Vector3 position) => this.QueuePoseReset(position, Quaternion.identity, PoseResetMode.Position);
+
+    // CmdResetRotation preserves position when the server executes the queued rotation change.
+    public void CmdResetRotation(Quaternion rotation) => this.QueuePoseReset(Vector3.zero, rotation, PoseResetMode.Rotation);
+
+    // CmdResetToDefaultLocation queues a reset to the map surface with the standard clearance.
+    public void CmdResetToDefaultLocation() => this.QueuePoseReset(Vector3.zero, Quaternion.identity, PoseResetMode.DefaultLocation);
+
+    // QueuePoseReset marks a request pending before Mirror sends it to the server.
+    void QueuePoseReset(Vector3 position, Quaternion rotation, PoseResetMode mode)
     {
-        this.ResetPose(this.transform.position, Quaternion.identity);
+        this.requestedPoseReset++;
+        this.CmdApplyPoseReset(position, rotation, mode, this.requestedPoseReset);
     }
 
-    // CmdResetPose moves the rebuilt model through the server after clearing every chip's motion.
+    // CmdApplyPoseReset resolves unchanged coordinates on the server and acknowledges the applied request.
     [Command]
-    public void CmdResetPose(Vector3 position, Quaternion rotation)
+    void CmdApplyPoseReset(Vector3 position, Quaternion rotation, PoseResetMode mode, uint request)
     {
+        if (mode == PoseResetMode.Rotation || mode == PoseResetMode.Upright) { position = this.rb.position; }
+        if (mode == PoseResetMode.Position) { rotation = this.rb.rotation; }
+        if (mode == PoseResetMode.DefaultLocation)
+        {
+            Physics.SyncTransforms();
+            position = StaticChip.RaycastFromAbove();
+        }
         this.ResetPose(position, rotation);
-    }
-
-    [Command]
-    public void CmdResetToDefaultLocation()
-    {
-        Physics.SyncTransforms();
-        this.ResetPose(StaticChip.RaycastFromAbove(), Quaternion.identity);
+        this.appliedPoseReset = request;
     }
 
     // ResetPose freezes the complete model before teleporting its core and requesting reconstruction.

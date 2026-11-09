@@ -123,7 +123,7 @@ public abstract class StaticChip : NetworkBehaviour
 
         // Perform the raycast
         RaycastHit hit;
-        if (Physics.Raycast(startPosition, direction, out hit, Mathf.Infinity, layerMask))
+        if (Physics.Raycast(startPosition, direction, out hit, Mathf.Infinity, layerMask, QueryTriggerInteraction.Ignore))
         {
             // If hit, return the position of the hit point
             return hit.point + Vector3.up*5f;
