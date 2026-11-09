@@ -10,6 +10,8 @@ Run from the repository root:
 dotnet run --project Tests/ScenarioRecording/ScenarioRecording.Tests.csproj
 ```
 
+Use `-- --scenarios-only` after that command to validate just the bundled Lua scenarios with scene operations stubbed out, including the industrial track's 13 checkpoints and matching start/finish.
+
 Exercises the actual metadata parser and file store with temporary saves. Checks duplicate finishes, best/last vehicle retention, timing precision, nested snapshots, atomic replacement, corrupt-save preservation, untimed results, record/processor version separation, required physics parsing, preset defaults, physics snapshot copying, and rejection/separation of incompatible physics results. Unity gate triggering and UI still require Play-mode verification.
 
 Race checks also exercise the named and original Lua forms, callback arguments, ordered one-shot progress, and both bundled time-trial scripts with scene operations stubbed out.
