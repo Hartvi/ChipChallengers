@@ -1,10 +1,22 @@
 using System;
 
-// WheelPhysics integrates wheel spin in seconds and radians independently of update frequency.
+// WheelPhysics calculates tire support and integrates spin independently of update frequency.
 public static class WheelPhysics
 {
     const float LinearResistancePerSecond = 0.35f;
     const float QuadraticResistancePerSecond = 1e-8f * 500f;
+
+    // NormalCompression projects the normalized ray's remaining travel onto the ground normal.
+    public static float NormalCompression(float rayLength, float hitDistance, float directionDotNormal) =>
+        Math.Max(0f, (hitDistance - rayLength) * directionDotNormal);
+
+    // LimitSupportForce keeps contact repulsive and bounds its separating velocity change per tick.
+    public static float LimitSupportForce(float desiredForce, float mass, float normalVelocity,
+        float maxDepenetrationVelocity, float seconds)
+    {
+        float maxForce = mass * Math.Max(0f, maxDepenetrationVelocity - normalVelocity) / seconds;
+        return Math.Max(0f, Math.Min(desiredForce, maxForce));
+    }
 
     // DiskInverseInertia calculates inverse spin inertia for a solid disk using its actual mass and radius.
     public static float DiskInverseInertia(float mass, float radius) => 2f / (mass * radius * radius);

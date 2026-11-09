@@ -33,7 +33,8 @@ public class WheelAspects : BaseAspect
     public const float E = 0.97f;
     const float ContactForceScale = 1000f;
 
-    Vector3 point, contactVector, normal, impulse, v1;
+    Vector3 point, normal, impulse, v1;
+    float compression;
     Vector3 xForce;
     Vector3 yForce;
     Vector3 oldUp;
@@ -237,34 +238,24 @@ public class WheelAspects : BaseAspect
     void FixedUpdate()
     {
         if (this.rb.isKinematic || this.myChip.myCore.IsRebuilding) { return; }
-        if (this.RaycastFromBase(out this.point, out this.contactVector, out this.normal))
+        if (this.RaycastFromBase(out this.point, out this.compression, out this.normal))
         {
             Vector3 n = this.normal;
-            // tire deformation
-            Vector3 err = (this.point - this.contactVector).magnitude * n;
-            // J = p2 - p1
-            // s.t. ||p2|| <= m ||v_const||
-            // p2 = J + p1 <= m ||v_const||
-            // p1 = m * v1
             float m = this.rb.mass;
-            Vector3 up = this.transform.up;
+            // Dampen motion at the contact, including rocking around the wheel attachment.
+            this.v1 = this.rb.GetPointVelocity(this.point);
+            if (this.collidingRigidbody != null)
+            {
+                this.v1 -= this.collidingRigidbody.GetPointVelocity(this.point);
+            }
+            float normalVelocity = Vector3.Dot(this.v1, n);
+            float desiredForce = ContactForceScale * (m * stiffness * this.compression - 0.5f * normalVelocity);
+            float supportForce = WheelPhysics.LimitSupportForce(desiredForce, m, normalVelocity,
+                DepenetrationVelocity, Time.fixedDeltaTime);
 
-            this.v1 = this.rb.velocity;
-            // project incoming velocity on normalized vector perpendicular to ground
-            Vector3 n1 = Vector3.Dot(v1, n) * n;
-            // project incoming velocity on normalized vector perpendicular to wheel to stop lateral sliding
-
-            Vector3 targetVelocity = -0.5f * n1;
-
-            Vector3 NaiveImpulse = m * (WheelAspects.stiffness * err);
-            Vector3 J = m * (n * WheelAspects.DepenetrationVelocity);
-
-            float ImpulseDifference = (J - NaiveImpulse).sqrMagnitude;
-
-            Vector3 FinalImpulse = (ImpulseDifference > 0f) ? NaiveImpulse : J;
-
-            this.impulse = FinalImpulse + targetVelocity;
-            this.rb.AddForceAtPosition(ContactForceScale * this.impulse, this.point, ForceMode.Force);
+            // Keep the existing tire-friction load units consistent with the bounded support force.
+            this.impulse = (supportForce / ContactForceScale) * n;
+            this.rb.AddForceAtPosition(supportForce * n, this.point, ForceMode.Force);
             this.ApplyForce();
         }
         else
@@ -275,7 +266,7 @@ public class WheelAspects : BaseAspect
         this.ApplyTorque(this.value);
     }
 
-    bool RaycastFromBase(out Vector3 point, out Vector3 contactVector, out Vector3 normal)
+    bool RaycastFromBase(out Vector3 point, out float compression, out Vector3 normal)
     {
         this.upsideDownContact = false;
         Transform t = this.transform;
@@ -284,14 +275,15 @@ public class WheelAspects : BaseAspect
 
         for (int i = 0; i < this.vectors.Length; ++i)
         {
-            Vector3 rayDirection = this.vectors[i]();
+            Vector3 rayDirection = this.vectors[i]().normalized;
             //Debug.DrawRay(basePosition + t.up, rayDirection.normalized * this.vectorsDists[i], Color.red);
             if (Physics.Raycast(basePosition, rayDirection, out RaycastHit h, this.vectorsDists[i], this.layerMask, QueryTriggerInteraction.Ignore))
             {
                 point = h.point;
                 normal = h.normal;
-                contactVector = basePosition + rayDirection * this.vectorsDists[i];
-                this.collidingRigidbody = h.collider.GetComponent<Rigidbody>();
+                compression = WheelPhysics.NormalCompression(this.vectorsDists[i], h.distance,
+                    Vector3.Dot(rayDirection, normal));
+                this.collidingRigidbody = h.rigidbody;
                 if (i >= 3)
                 {
                     this.upsideDownContact = true;
@@ -301,7 +293,7 @@ public class WheelAspects : BaseAspect
         }
         point = Vector3.zero;
         normal = Vector3.zero;
-        contactVector = Vector3.zero;
+        compression = 0f;
         return false;
     }
 

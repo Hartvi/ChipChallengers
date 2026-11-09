@@ -50,6 +50,57 @@ class Program
         return omega;
     }
 
+    // CheckWheelSupport checks first contact, oblique short rays, rebound and force limits at both physics rates.
+    static void CheckWheelSupport()
+    {
+        foreach (float length in new[] { 0.125f, 0.25f, 0.3125f, 0.5f, 0.5625f, 0.75f })
+        {
+            foreach (float normalAlignment in new[] { 1f, 0.4472136f, 0.1f })
+            {
+                Check(WheelPhysics.NormalCompression(length, length, -normalAlignment) == 0,
+                    "Wheel produced compression at first contact");
+                float depth = 0.005f;
+                float hitDistance = length - depth / normalAlignment;
+                float compression = WheelPhysics.NormalCompression(length, hitDistance, -normalAlignment);
+                Check(Math.Abs(compression - depth) < 1e-6f,
+                    "Short or oblique wheel ray exaggerated normal penetration");
+                float support = WheelPhysics.LimitSupportForce(1000f * 4f * 20f * compression,
+                    4f, 0f, 10f, 0.001f);
+                Check(Math.Abs(support - 400f) < 0.1f,
+                    "Equal normal penetration produced different wheel support forces");
+            }
+            Check(WheelPhysics.NormalCompression(length, length + 0.01f, -1f) == 0,
+                "A surface beyond the ray produced support compression");
+            Check(WheelPhysics.NormalCompression(length, length * 0.5f, 0f) == 0,
+                "A grazing ray produced normal compression");
+        }
+
+        foreach (float seconds in new[] { 0.001f, 0.002f })
+        {
+            foreach (float mass in new[] { 2f, 3f, 4f })
+            {
+                foreach (float normalVelocity in new[] { -5f, 0f, 9.9f, 10f, 12f })
+                {
+                    float force = WheelPhysics.LimitSupportForce(1e9f, mass, normalVelocity, 10f, seconds);
+                    Check(force >= 0f, "Wheel support pulled into the ground");
+                    if (normalVelocity < 10f)
+                    {
+                        Check(Math.Abs(normalVelocity + force / mass * seconds - 10f) < 1e-4f,
+                            "Wheel support exceeded its depenetration speed limit");
+                    }
+                    else
+                    {
+                        Check(force == 0f, "Wheel accelerated outward beyond its depenetration limit");
+                    }
+                }
+                Check(WheelPhysics.LimitSupportForce(-100f, mass, 1f, 10f, seconds) == 0f,
+                    "Rebound damping pulled the wheel into the ground");
+                Check(WheelPhysics.LimitSupportForce(40f, mass, 0f, 10f, seconds) == 40f,
+                    "Force limiting changed normal low-load wheel support");
+            }
+        }
+    }
+
     // CheckBundledScenarios executes bundled Lua declarations against the real metadata and race parsers.
     static void CheckBundledScenarios()
     {
@@ -107,6 +158,7 @@ class Program
         Directory.CreateDirectory(directory);
         try
         {
+            CheckWheelSupport();
             float baseWheelInertia = WheelPhysics.DiskInverseInertia(2f, 0.25f);
             float doubleRadiusInertia = WheelPhysics.DiskInverseInertia(2f, 0.5f);
             float doubleMassInertia = WheelPhysics.DiskInverseInertia(4f, 0.25f);
