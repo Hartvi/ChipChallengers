@@ -17,6 +17,8 @@ bpy.ops.object.select_all(action='SELECT')
 bpy.ops.object.delete(use_global=False)
 rng=random.Random(629)
 geometry=[]
+fixed_buildings={}
+WORLD_SCALE=1.5
 
 # material creates a texture-free material that also survives OBJ/MTL export.
 def material(name,color,roughness=0.8,metallic=0):
@@ -117,7 +119,7 @@ def segment_distance(point,a,b):
     factor=max(0,min(1,(point-a.xy).dot(delta)/delta.length_squared))
     return (point-(a.xy+delta*factor)).length
 
-box('Sea surface',(60,-50,-2),(6000,6000,4),water)
+# The map deliberately has no sea/ground surface; the cliffs stand in open space.
 karst('Airfield island',0,-50,62,170,8,True)
 # A continuous runway with painted faces instead of raised collision markings.
 bands=[-16,-12,-11.6,-0.18,0.18,11.6,12,16]
@@ -139,15 +141,19 @@ for row in range(240):
 runway=mesh_object('Runway with flush markings',vertices,faces,[asphalt,concrete,white],indices)
 assert all(face.normal.z > 0 for face in runway.data.polygons), 'Runway faces must point up for Unity raycasts'
 for y in (28,-12,-52):
+    first_part=len(geometry)
     box('Hangar',(-36,y,runway_height+6),(22,28,12),concrete)
     box('Hangar roof',(-36,y,runway_height+12.5),(24,30,1),roof)
     box('Hangar door',(-24.94,y,runway_height+4.5),(0.12,17,8),steel)
     box('Hangar lintel',(-24.7,y,runway_height+9),(0.25,18,0.6),orange)
+    for part in geometry[first_part:]: fixed_buildings[part.name]=Vector((-36,y,runway_height))
 for x in (-16,16):
     box('Start pillar',(x,0,runway_height+4.5),(1,1,9),orange)
     box('Pillar cap',(x,0,runway_height+9.5),(1.5,1.5,1),white)
+first_part=len(geometry)
 box('Operations hut',(33,40,runway_height+4),(14,18,8),concrete)
 box('Operations roof',(33,40,runway_height+8.5),(16,20,1),roof)
+for part in geometry[first_part:]: fixed_buildings[part.name]=Vector((33,40,runway_height))
 
 # Reject towers that would obstruct any straight connection between successive hoops.
 tower_specs=[
@@ -171,7 +177,7 @@ for x,y,rx,ry,height in tower_specs:
         sx=x+offset*rx*0.55;sy=y+ry*0.45
         karst('Cliff outcrop',sx,sy,rx*0.30,ry*0.30,height*0.26)
 
-# Hoop normals follow the incoming/outgoing course direction and have a 24 m clear opening.
+# Hoop normals follow the incoming/outgoing course direction; world scaling widens their opening to 36 m.
 for index,point in enumerate(checkpoints+[finish]):
     previous=start if index==0 else checkpoints[index-1]
     following=(checkpoints+[finish])[index+1] if index<len(checkpoints) else point+(point-previous)
@@ -185,6 +191,21 @@ for index,point in enumerate(checkpoints+[finish]):
     for face in hoop.data.polygons: face.material_index=(face.index//(8*6))%2
     geometry.append(hoop)
 
+# Widen the landscape, runway, route and hoops; preserve each building's original dimensions.
+for obj in geometry:
+    if obj.name in fixed_buildings:
+        anchor=fixed_buildings[obj.name]
+        obj.location=anchor*WORLD_SCALE+(obj.location-anchor)
+    else:
+        obj.location*=WORLD_SCALE
+        obj.scale*=WORLD_SCALE
+for point in flight_path: point*=WORLD_SCALE
+spawn*=WORLD_SCALE
+inner_radius*=WORLD_SCALE
+for cliff in accepted:
+    cliff['center']=[v*WORLD_SCALE for v in cliff['center']]
+    for field in ('height','footprint_bound','flight_corridor_clearance'): cliff[field]*=WORLD_SCALE
+
 # game_point matches OBJ axis conversion and the importer's mirrored X axis.
 def game_point(point): return [-point.x,point.z,-point.y]
 # lua_vector writes three coordinates in the existing Lua API's indexed format.
@@ -194,7 +215,7 @@ checkpoint_lua='\n'.join('        '+lua_vector(p)+',' for p in checkpoints)
 Scenario({
     id = "%s",
     title = "Karst Coast Flight",
-    recordVersion = 1,
+    recordVersion = 2,
     scenarioLogicVersion = 1,
     completionType = "timeTrial",
     rules = {
@@ -206,7 +227,7 @@ LoadMap("karst_coast")
 SetPosition("player1", %s)
 SetRotation("player1", {0, 0, 0})
 Race({
-    radius = 12,
+    radius = 18,
     color = {80, 210, 130, 35},
     start = %s,
     checkpoints = {
@@ -250,18 +271,18 @@ scene.view_settings.view_transform='Standard';scene.view_settings.look='Medium H
 
 # camera creates an authoring camera looking toward a chosen landmark or flight corridor.
 def camera(name,location,target,ortho=None):
-    bpy.ops.object.camera_add(location=location)
+    bpy.ops.object.camera_add(location=Vector(location)*WORLD_SCALE)
     obj=bpy.context.object;obj.name=name
-    obj.rotation_euler=(Vector(target)-obj.location).to_track_quat('-Z','Y').to_euler()
+    obj.rotation_euler=(Vector(target)*WORLD_SCALE-obj.location).to_track_quat('-Z','Y').to_euler()
     obj.data.clip_end=5000;obj.data.lens=28
-    if ortho: obj.data.type='ORTHO';obj.data.ortho_scale=ortho
+    if ortho: obj.data.type='ORTHO';obj.data.ortho_scale=ortho*WORLD_SCALE
     return obj
 
 cameras=[camera('overview',(1050,-1250,1050),(90,-55,35),1550),
     camera('runway',(0,100,20),(0,-170,18)),
     camera('cliff_flight',(210,-375,118),(330,-300,105))]
 for cam in cameras:
-    scene.camera=cam;scene.render.filepath=str(OUT/(cam.name+'_v2.png'))
+    scene.camera=cam;scene.render.filepath=str(OUT/(cam.name+'_v3.png'))
     bpy.ops.render.render(write_still=True)
 scene.camera=cameras[0]
 bpy.ops.wm.save_as_mainfile(filepath=str(OUT/'karst_coast.blend'))
@@ -286,11 +307,11 @@ for a,b in zip(flight_path,flight_path[1:]):
         line=bpy.context.object;line.name='PREVIEW route guide'
         line.rotation_euler=delta.to_track_quat('Z','Y').to_euler()
         line.data.materials.append(route_mat)
-scene.camera=cameras[0];scene.render.filepath=str(OUT/'race_overview_v2.png')
+scene.camera=cameras[0];scene.render.filepath=str(OUT/'race_overview_v3.png')
 bpy.ops.render.render(write_still=True)
 bpy.ops.wm.save_as_mainfile(filepath=str(OUT/'karst_flight_preview.blend'))
 summary={'map':'karst_coast','scenario':'karst_flight_race','road_reference_width':12,
-    'hoop_clear_diameter':24,'trigger_diameter':24,'airborne_hoops':14,'checkpoints':13,
+    'world_scale':WORLD_SCALE,'sea_surface':False,'buildings_scaled':False,'hoop_clear_diameter':36,'trigger_diameter':36,'airborne_hoops':14,'checkpoints':13,
     'course_length':round(sum((b-a).length for a,b in zip(flight_path,flight_path[1:])),1),
     'triangles':sum(len(p.vertices)-2 for obj in geometry for p in obj.data.polygons),
     'cliffs':accepted,'spawn':game_point(spawn),'start':game_point(start),

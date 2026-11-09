@@ -1,5 +1,5 @@
 # Blender MTL File: 'None'
-# Material Count: 13
+# Material Count: 12
 
 newmtl Airfield_concrete
 Ns 39.999995
@@ -20,16 +20,6 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-
-newmtl Deep_turquoise_sea
-Ns 489.999983
-Ka 0.150000 0.150000 0.150000
-Kd 0.025000 0.220000 0.280000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.450000
-d 1.000000
-illum 3
 
 newmtl Hangar_blue_grey
 Ns 39.999995
