@@ -31,11 +31,11 @@ public class ScriptPanel : BaseSidePanel, InputReceiver
         this.btn.image.sprite = Resources.Load<Sprite>("UI/Art/tall_button");
         this.input.input.image.sprite = Resources.Load<Sprite>("UI/Art/white_square");
         this.input.placeholder.text = "Lua code...";
-        this.input.placeholder.fontSize = UIUtils.SmallFontSize;
+        UIUtils.SetFontSize(this.input.placeholder, UIUtils.SmallFontSize);
         this.input.input.onEndEdit.RemoveAllListeners();
         // SaveScript resolves the current player model instead of retaining a disconnected core.
         this.input.input.onEndEdit.AddListener(this.SaveScript);
-        this.input.input.textComponent.fontSize = UIUtils.SmallFontSize;
+        UIUtils.SetFontSize(this.input.input.textComponent, UIUtils.SmallFontSize);
         this.input.input.lineType = TMPro.TMP_InputField.LineType.MultiLineNewline;
         this.btn.AddBtnHoldActions(new Action[] { this.DragBtn });
         this.initialized = true;

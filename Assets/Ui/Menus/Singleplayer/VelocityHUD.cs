@@ -53,7 +53,7 @@ public class VelocityHUD : BasePanel
         BaseText[] txts = this.GetComponentsInChildren<BaseText>();
         for(int i = 0; i < txts.Length; ++i)
         {
-            txts[i].text.fontSize = UIUtils.SmallFontSize;
+            UIUtils.SetFontSize(txts[i].text, UIUtils.SmallFontSize);
         }
         txts[0].text.SetText(UIStrings.Velocity);
         this.velocityText = txts[1].text;

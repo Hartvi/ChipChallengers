@@ -39,7 +39,7 @@ public class MultiplayerMenu : BaseMenu, InputReceiver
         this.selectedCallbacks.SetCallbacks(selectedChipCallbacks);
         foreach (var t in this.GetComponentsInChildren<TMP_Text>())
         {
-            t.fontSize = UIUtils.MediumFontSize;
+            UIUtils.SetFontSize(t, UIUtils.MediumFontSize);
         }
         UIManager.instance.SwitchToMe(this);
     }

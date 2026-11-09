@@ -141,17 +141,17 @@ public class DisplaySingleton : MonoBehaviour
 
     public static void BasicLargeModification(TMP_Text txt)
     {
-        txt.fontSize = UIUtils.LargeFontSize;
+        UIUtils.SetFontSize(txt, UIUtils.LargeFontSize);
     }
 
     public static void BasicMediumModification(TMP_Text txt)
     {
-        txt.fontSize = UIUtils.MediumFontSize;
+        UIUtils.SetFontSize(txt, UIUtils.MediumFontSize);
     }
 
     public static void BasicSmallModification(TMP_Text txt)
     {
-        txt.fontSize = UIUtils.SmallFontSize;
+        UIUtils.SetFontSize(txt, UIUtils.SmallFontSize);
     }
 
     public static void BasicOrangeModification(TMP_Text txt)

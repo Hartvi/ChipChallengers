@@ -7,7 +7,7 @@ public class MiniControls : BaseText
     void Start()
     {
         this.text.SetText(UIStrings.MiniControls);
-        this.text.fontSize = UIUtils.SmallFontSize;
+        UIUtils.SetFontSize(this.text, UIUtils.SmallFontSize);
     }
 
     void Update()

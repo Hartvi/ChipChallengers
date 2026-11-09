@@ -7,7 +7,7 @@ public class QuitGame : BaseButton
     void Start()
     {
         this.text.SetText("Quit");
-        this.text.fontSize = UIUtils.MediumFontSize;
+        UIUtils.SetFontSize(this.text, UIUtils.MediumFontSize);
     }
     protected override void Execute()
     {

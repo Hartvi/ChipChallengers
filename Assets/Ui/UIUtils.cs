@@ -74,6 +74,16 @@ public static class UIUtils
         textObject.ForceMeshUpdate();
     }
 
+    public static void SetFontSize(TMP_Text textObject, float fontSize)
+    {
+        textObject.fontSize = fontSize;
+
+        // Compensate for thinner outlines at small sizes, with a cap to protect the fill.
+        float outlineScale = Mathf.Clamp(MediumFontSize / Mathf.Max(fontSize, 1f), 1f, 2f);
+        float baseOutlineWidth = DefaultFont.material.GetFloat(ShaderUtilities.ID_OutlineWidth);
+        textObject.outlineWidth = baseOutlineWidth * outlineScale;
+    }
+
     public static string DisplayFloat(float f)
     {
         return (Mathf.Round(f * 100f) * 0.01f).ToString();

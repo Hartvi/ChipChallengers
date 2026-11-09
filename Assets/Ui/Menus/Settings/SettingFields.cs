@@ -45,14 +45,14 @@ public class SettingFields : BasePanel
 
 
             baseTexts[i].text.SetText(currentSettingName);
-            baseTexts[i].text.fontSize = UIUtils.SmallFontSize;
+            UIUtils.SetFontSize(baseTexts[i].text, UIUtils.SmallFontSize);
 
             this.baseInputs[_i].input.onEndEdit.AddListener(x => OnEndInput(this.baseInputs[_i].input, baseSliders[_i].slider, x, currentSettingName));
             baseSliders[_i].slider.onValueChanged.AddListener(x => this.OnChangeSlider(x, currentSettingName));
 
             var smf = UIUtils.SmallFontSize;
-            this.baseInputs[_i].placeholder.fontSize = smf;
-            this.baseInputs[_i].input.textComponent.fontSize = smf;
+            UIUtils.SetFontSize(this.baseInputs[_i].placeholder, smf);
+            UIUtils.SetFontSize(this.baseInputs[_i].input.textComponent, smf);
 
             this.baseInputs[_i].placeholder.SetText(UIStrings.EnterANumber);
 
