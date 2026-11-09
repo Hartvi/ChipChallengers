@@ -17,6 +17,10 @@ public class CommonChip : AngleChip
     [SyncVar]
     public uint myCoreNetId = 0;
 
+    // Keep the replacement returned by AddComponent; GetComponent can still find
+    // the previous sensor until Unity completes its deferred destruction.
+    public SensorAspect Sensor { get; private set; }
+
     public override void OnStartServer()
     {
         base.OnStartServer();
@@ -308,9 +312,11 @@ public class CommonChip : AngleChip
             this.gameObject.AddComponentIdempotent<HitSoundAspect>().myChip = this;
         }
 
-        if (this.equivalentVirtualChip.ChipType == VChip.sensorStr && !this.isServer)
+        // The server runs the vehicle's Lua loop and needs the sensor read callbacks too.
+        if (this.equivalentVirtualChip.ChipType == VChip.sensorStr)
         {
-            this.gameObject.AddComponentIdempotent<SensorAspect>().myChip = this;
+            this.Sensor = this.gameObject.AddComponentIdempotent<SensorAspect>();
+            this.Sensor.myChip = this;
         }
 
         if (this.equivalentVirtualChip.keys.Contains(VChip.valueStr))

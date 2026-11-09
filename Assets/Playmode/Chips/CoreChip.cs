@@ -405,6 +405,9 @@ public class CoreChip : CommonChip
     [Server]
     public IEnumerator GenerateChips()
     {
+        // Pause Lua and physics before destroying objects captured by the old
+        // script. TriggerSpawn will bind a new script once all chips are ready.
+        this.PrepareReset();
         // ONLY ON THE SERVER
         // spawn function:
         // Destroy all of my existing chips
@@ -483,13 +486,11 @@ public class CoreChip : CommonChip
         // handle script
         this.scriptInstance = new ScriptInstance(this, this.VirtualModel);
 
-        // Destroy loop script component
-        for (int i = 0; i < 10; ++i)
+        // Retire every old loop, including components awaiting destruction.
+        foreach (var oldLoop in this.GetComponents<LoopScript>())
         {
-            if (this.GetComponent<LoopScript>())
-            {
-                GameObject.Destroy(this.GetComponent<LoopScript>());
-            }
+            oldLoop.enabled = false;
+            GameObject.Destroy(oldLoop);
         }
         this.loopScript = this.gameObject.AddComponent<LoopScript>();
         this.loopScript.vModel = this.VirtualModel;

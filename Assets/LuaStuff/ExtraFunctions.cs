@@ -98,8 +98,8 @@ public class ScriptInstance
         {
             int _i = i;
             var currentChip = vModel.chips[_i];
-            SensorAspect sa = currentChip.rChip.GetComponent<SensorAspect>();
-            if (sa is null) { continue; }
+            SensorAspect sa = currentChip.rChip.Sensor;
+            if (sa == null) { continue; }
 
             bool hasName = currentChip.TryGetProperty<string>(VChip.nameStr, out string nameval);
             string sensorStr = nameval + UIStrings.Read;
