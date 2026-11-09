@@ -21,7 +21,7 @@ public class WheelAspects : BaseAspect
 
     public const float carTyreStiffness = 200 * 1e3f;  // N/mm * 1e3
 
-    public static readonly float DepenetrationVelocity = 10f;
+    public static readonly float DepenetrationVelocity = 1f;
     public static readonly float DepenetrationVelocitySqr = DepenetrationVelocity * DepenetrationVelocity;
 
     // tire parameters:
