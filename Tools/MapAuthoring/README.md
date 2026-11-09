@@ -23,3 +23,13 @@ The geometry has been rendered and inspected, but full vehicle handling, runtime
 Select `industrial_test_track_race` in Scenarios to drive one lap with 13 ordered checkpoints. The vehicle spawns behind the start gate facing down the straight. Entering the start gate runs the existing hold/countdown; finishing the lap records the result using the existing persistence flow. The scenario requires 1000 Hz physics with 1 regular and 3 velocity solver iterations.
 
 After generating the map, run `build_industrial_race.py` with the same Blender command to regenerate the Lua and numbered gate previews from the saved road centreline. It writes `race_overview.png`, `race_layout.png`, `race_start_straight.png` and `industrial_race_preview.blend` beside the map renders. Gate spheres are preview-only and never added to the OBJ. Rebuild the race after changing the map geometry.
+
+## Karst Coast Flight
+
+Select `karst_flight_race` in Scenarios, or load `karst_coast` from the map panel for free flight. Bring a model capable of taking off; the scenario does not restrict chip types or automatically choose a plane.
+
+The airfield has a 24 m runway, hangars beside the start, and two orange start pillars. The countdown trigger sits between the pillars. After GO, take off and follow 13 airborne checkpoints, then return through the finish hoop above the airfield. All airborne hoops have a 24 m clear opening (double the industrial circuit's road width), with the existing spherical race triggers also 24 m across. Triggers detect entry into the sphere; this uses the existing race API, not a new directional hoop-crossing test.
+
+Twenty-one main limestone-style sea cliffs, smaller outcrops and vegetated summits surround the course. Their horizontal footprints are checked against the flight corridors, and every straight flight leg is raycast against the actual generated meshes. The sea is a visual surface with the map loader's normal solid collider; this map does not introduce water dynamics or crash rules.
+
+Run `build_karst_flight.py` using the Blender command above to generate `karst_coast.obj`, `.mtl`, and `karst_flight_race.lua`. It saves `karst_coast.blend`, `karst_flight_preview.blend`, the numbered route overview, runway/flight renders and `summary.json` to `C:/Users/Acer/BlenderTests/karst-flight`. Preview route lines and labels are excluded from the gameplay OBJ. The scenario uses 1000 Hz physics, 1 regular solver iteration and 3 velocity solver iterations. In-game takeoff, aircraft clearance and trigger behavior still need flight testing.
