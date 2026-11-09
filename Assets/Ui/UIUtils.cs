@@ -82,6 +82,14 @@ public static class UIUtils
         float outlineScale = Mathf.Clamp(MediumFontSize / Mathf.Max(fontSize, 1f), 1f, 2f);
         float baseOutlineWidth = DefaultFont.material.GetFloat(ShaderUtilities.ID_OutlineWidth);
         textObject.outlineWidth = baseOutlineWidth * outlineScale;
+
+        // Placeholders may be inactive while the input contains text.
+        var inputField = textObject.GetComponentInParent<TMP_InputField>(true);
+        if (inputField != null && inputField.textComponent == textObject &&
+            inputField.placeholder is TMP_Text placeholder && placeholder != textObject)
+        {
+            SetFontSize(placeholder, fontSize);
+        }
     }
 
     public static string DisplayFloat(float f)

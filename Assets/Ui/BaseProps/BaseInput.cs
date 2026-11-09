@@ -13,7 +13,7 @@ public class BaseInput : TopProp
     {
         this.input = this.GetComponent<TMP_InputField>();
         this.image = this.GetComponent<Image>();
-        this.placeholder = this.GetComponentInChildren<TMP_Text>();
+        this.placeholder = this.input.placeholder as TMP_Text;
     }
 
     // Update is called once per frame

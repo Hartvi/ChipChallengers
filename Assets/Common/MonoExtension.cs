@@ -42,7 +42,7 @@ public static class MonoExtension
         }
         foreach (var b in behaviours)
         {
-            TMP_Text[] ts = b.GetComponentsInChildren<TMP_Text>();
+            TMP_Text[] ts = b.GetComponentsInChildren<TMP_Text>(true);
             if (ts is null)
             {
                 continue;
