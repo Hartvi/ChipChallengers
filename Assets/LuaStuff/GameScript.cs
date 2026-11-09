@@ -236,7 +236,7 @@ public partial class GameScript : MonoBehaviour
         if (this.PlayerObjects.Contains(name))
         {
             var core = this.AllObjects[name].GetComponent<CoreChip>();
-            core.CmdResetPose(core.transform.position, Quaternion.Euler(p.x, p.y, p.z));
+            core.CmdResetRotation(Quaternion.Euler(p.x, p.y, p.z));
         }
         else
         {
@@ -268,7 +268,7 @@ public partial class GameScript : MonoBehaviour
         if (this.PlayerObjects.Contains(name))
         {
             var core = this.AllObjects[name].GetComponent<CoreChip>();
-            core.CmdResetPose(p, core.transform.rotation);
+            core.CmdResetPosition(p);
         }
         else
         {

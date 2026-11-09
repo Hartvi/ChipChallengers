@@ -95,6 +95,8 @@ The shared `GameManager.PlayContext` remembers the chosen scenario while the edi
 
 ## Scenario spawn positioning
 
+Lua player `SetPosition` and `SetRotation` queue partial pose resets; the server preserves the other coordinate when it executes each request, so consecutive calls cannot restore a stale client-side pose. `CoreChip.HasPendingPoseReset` stays true until the server acknowledges the latest queued pose request. Race gates remain disabled until that acknowledgement and model rebuilding finish; the initial retry pose is captured then. The default spawn raycast ignores triggers, including race gate spheres.
+
 Scenario loading resets the vehicle to the current map's default spawn before Lua initialization. `LoadMap(...)` resets it again after the new map's colliders are synchronized; the old map is disabled before destruction so spawn raycasts cannot hit it. A subsequent `SetPosition("player1", {...})` or `SetRotation(...)` supplies the authored scenario pose. Those operations and race retries freeze and clear motion across the complete vehicle before moving the core and rebuilding its children.
 
 ## Physics configuration callbacks

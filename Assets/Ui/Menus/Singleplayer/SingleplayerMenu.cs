@@ -64,7 +64,7 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
     {
         yield return null;
         while (this.CanLoadScenario(name, revision, entry) && NetworkClient.localPlayer != null &&
-               (CoreChip.ClientCoreChip.IsRebuilding ||
+               (CoreChip.ClientCoreChip.HasPendingPoseReset || CoreChip.ClientCoreChip.IsRebuilding ||
                 CoreChip.ClientCoreChip.srvResetCounter != CoreChip.ClientCoreChip.cltResetCounter ||
                 CoreChip.ClientCoreChip.loadedModelString != CoreChip.ClientCoreChip.modelString))
         {
