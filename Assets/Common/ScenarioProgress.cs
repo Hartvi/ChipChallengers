@@ -81,7 +81,7 @@ public class ScenarioPhysicsSettings
 
     // CreateStandard supplies the shared 1000 Hz preset when a scenario omits physics rules.
     public static ScenarioPhysicsSettings CreateStandard() => new ScenarioPhysicsSettings {
-        fixedDeltaTime = 0.001f, solverIterations = 1, solverVelocityIterations = 3
+        fixedDeltaTime = 0.001f, solverIterations = 6, solverVelocityIterations = 1
     };
 
     // Copy preserves physics values without sharing a mutable settings object.
