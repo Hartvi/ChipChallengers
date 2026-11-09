@@ -68,11 +68,11 @@ public class HUD : TopProp
         {
             TMP_Text nameTxt = this.CurrentNames[i].GetComponent<TMP_Text>();
             nameTxt.SetText(this.variables[this.displayVariables[i]].name);
-            nameTxt.fontSize = UIUtils.SmallFontSize;
+            UIUtils.SetFontSize(nameTxt, UIUtils.SmallFontSize);
 
             TMP_Text valueTxt = this.CurrentValues[i].GetComponent<TMP_Text>();
             valueTxt.SetText(UIUtils.DisplayFloat(this.variables[this.displayVariables[i]].defaultValue));
-            valueTxt.fontSize = UIUtils.SmallFontSize;
+            UIUtils.SetFontSize(valueTxt, UIUtils.SmallFontSize);
         }
         StackFrom(NameItem.Siblings<ItemBaseLeft>(takeInactive: false));
         StackFrom(ValueItem.Siblings<ItemBaseRight>(takeInactive: false));
@@ -120,7 +120,7 @@ public class HUD : TopProp
 
         foreach (var it in items)
         {
-            it.GetComponent<TMP_Text>().fontSize = UIUtils.SmallFontSize;
+            UIUtils.SetFontSize(it.GetComponent<TMP_Text>(), UIUtils.SmallFontSize);
         }
         //if(this.NameItem is not null)
         //{

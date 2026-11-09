@@ -6,7 +6,7 @@ public class GoToScenario : BaseTransition
     {
         base.Setup();
         this.text.text = UIStrings.Scenarios;
-        this.text.fontSize = UIUtils.MediumFontSize;
+        UIUtils.SetFontSize(this.text, UIUtils.MediumFontSize);
     }
 
     protected override void Execute()

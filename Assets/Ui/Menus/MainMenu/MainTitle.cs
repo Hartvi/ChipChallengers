@@ -8,7 +8,7 @@ public class MainTitle : BaseText
     public override void Setup()
     {
         base.Setup();
-        this.text.fontSize = UIUtils.LargeFontSize;
+        UIUtils.SetFontSize(this.text, UIUtils.LargeFontSize);
         this.text.horizontalAlignment = HorizontalAlignmentOptions.Center;
         this.text.text = UIStrings.GameTitle;
     }

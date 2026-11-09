@@ -46,19 +46,19 @@ public class ScenarioMenu : BaseMenu, InputReceiver
         this.scrollbar = this.GetComponentInChildren<BaseScrollbar>(true);
         var texts = this.GetComponentsInChildren<BaseText>(true);
         texts[0].text.SetText(UIStrings.Scenarios);
-        texts[0].text.fontSize = UIUtils.LargeFontSize;
+        UIUtils.SetFontSize(texts[0].text, UIUtils.LargeFontSize);
         this.selectionText = texts[1];
-        this.selectionText.text.fontSize = UIUtils.SmallFontSize;
+        UIUtils.SetFontSize(this.selectionText.text, UIUtils.SmallFontSize);
 
         // Start identifies footer buttons before scenarioList creates its button copies.
         var buttons = this.GetComponentsInChildren<BaseButton>(true);
         var backButton = buttons[buttons.Length - 2];
         this.playButton = buttons[buttons.Length - 1];
         backButton.text.SetText(UIStrings.Back);
-        backButton.text.fontSize = UIUtils.MediumFontSize;
+        UIUtils.SetFontSize(backButton.text, UIUtils.MediumFontSize);
         backButton.btn.onClick.AddListener(this.GoBack);
         this.playButton.text.SetText("Play");
-        this.playButton.text.fontSize = UIUtils.MediumFontSize;
+        UIUtils.SetFontSize(this.playButton.text, UIUtils.MediumFontSize);
         this.playButton.btn.onClick.AddListener(this.PlaySelectedScenario);
 
         this.scenarioList.ItemFontSize = UIUtils.SmallFontSize;

@@ -48,9 +48,9 @@ public class ControlsPanel : BasePanel, InputReceiver
     {
         BaseText[] txts = this.GetComponentsInChildren<BaseText>();
         this.Key1 = txts[0];
-        this.Key1.text.fontSize = (UIUtils.MediumFontSize + UIUtils.SmallFontSize) / 2;
+        UIUtils.SetFontSize(this.Key1.text, (UIUtils.MediumFontSize + UIUtils.SmallFontSize) / 2);
         this.Action1 = txts[1];
-        this.Action1.text.fontSize = (UIUtils.MediumFontSize + UIUtils.SmallFontSize) / 2;
+        UIUtils.SetFontSize(this.Action1.text, (UIUtils.MediumFontSize + UIUtils.SmallFontSize) / 2);
 
         int numTxts = UIStrings.ControlsKeys.Length;
         this.Keys1 = new BaseText[numTxts];

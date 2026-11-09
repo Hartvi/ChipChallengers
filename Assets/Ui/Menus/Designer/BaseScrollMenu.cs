@@ -49,7 +49,7 @@ public class BaseScrollMenu : BasePanel, InputReceiver
         // on click cancel: hide this menu
         foreach(TMP_Text t in this.GetComponentsInChildren<TMP_Text>())
         {
-            t.fontSize = UIUtils.MediumFontSize;
+            UIUtils.SetFontSize(t, UIUtils.MediumFontSize);
         }
         this.itemScroll = this.GetComponentInChildren<BaseItemScroll>();
         this.scrollbar = this.itemScroll.Siblings<BaseScrollbar>(false)[0];

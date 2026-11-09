@@ -22,7 +22,7 @@ public class PanelSwitcher : BasePanel
         for(int i = 0; i < this.btns.Length; ++i)
         {
             this.btns[i].text.SetText(UIStrings.EditorPanels[i]);
-            this.btns[i].text.fontSize = UIUtils.SmallFontSize;
+            UIUtils.SetFontSize(this.btns[i].text, UIUtils.SmallFontSize);
 
             this.panelObjects[i] = this.gameObject.GetComponentInParent<EditorMenu>().GetComponentInChildren(panels[i]).gameObject;
             

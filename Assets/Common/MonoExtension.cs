@@ -49,7 +49,7 @@ public static class MonoExtension
             }
             foreach (var t in ts)
             {
-                t.fontSize = fontSize;
+                UIUtils.SetFontSize(t, fontSize);
             }
         }
     }

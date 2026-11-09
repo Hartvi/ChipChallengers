@@ -129,7 +129,7 @@ public class BaseItemScroll : BasePanel
             var btn = (this.items[i] as BaseButton);
             string label = visibleItems[i].label;
             btn.text.text = this.formatLabel == null ? label : this.formatLabel(label);
-            btn.text.fontSize = this.ItemFontSize ?? UIUtils.MediumFontSize;
+            UIUtils.SetFontSize(btn.text, this.ItemFontSize ?? UIUtils.MediumFontSize);
 
             btn.btn.onClick.RemoveAllListeners();
             btn.btn.onClick.AddListener(() => action(label));

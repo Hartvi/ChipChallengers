@@ -126,7 +126,7 @@ public class ChipPanel : BaseSidePanel, InputReceiver
             var nameTxt = nameItems[i].GetComponent<TMP_Text>();
 
             nameTxt.SetText(leftTexts[i]);
-            nameTxt.fontSize = UIUtils.SmallFontSize;
+            UIUtils.SetFontSize(nameTxt, UIUtils.SmallFontSize);
 
             nameTxt.horizontalAlignment = HorizontalAlignmentOptions.Center;
             nameTxt.verticalAlignment = VerticalAlignmentOptions.Middle;
@@ -135,7 +135,7 @@ public class ChipPanel : BaseSidePanel, InputReceiver
 
             var valueTxt = valueItems[i].GetComponent<TMP_InputField>();
             valueTxt.SetTextWithoutNotify(rightTexts[i]);
-            valueTxt.textComponent.fontSize = UIUtils.SmallFontSize;
+            UIUtils.SetFontSize(valueTxt.textComponent, UIUtils.SmallFontSize);
 
             inputs[i] = valueTxt;
         }
@@ -228,7 +228,7 @@ public class ChipPanel : BaseSidePanel, InputReceiver
                         for (int k = 0; k < popUpItems.Length; ++k)
                         {
                             var btn = popUpItems[k].GetComponent<Button>();
-                            btn.GetComponentInChildren<TMP_Text>().fontSize = UIUtils.SmallFontSize;
+                            UIUtils.SetFontSize(btn.GetComponentInChildren<TMP_Text>(), UIUtils.SmallFontSize);
                             btn.onClick.RemoveAllListeners();
                             int _k = k;
                             btn.onClick.AddListener(
@@ -268,7 +268,7 @@ public class ChipPanel : BaseSidePanel, InputReceiver
                         for (int k = 0; k < popUpItems.Length; ++k)
                         {
                             var btn = popUpItems[k].GetComponent<Button>();
-                            btn.GetComponentInChildren<TMP_Text>().fontSize = UIUtils.SmallFontSize;
+                            UIUtils.SetFontSize(btn.GetComponentInChildren<TMP_Text>(), UIUtils.SmallFontSize);
                             btn.onClick.RemoveAllListeners();
                             int _k = k;
                             btn.onClick.AddListener(

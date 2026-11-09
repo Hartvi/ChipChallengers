@@ -12,11 +12,11 @@ public class IntroScreen : BasePanel
     {
         texts = GetComponentsInChildren<TMP_Text>();
         texts[1].text = UIStrings.IntroKeys;
-        texts[1].fontSize = UIUtils.MediumFontSize;
+        UIUtils.SetFontSize(texts[1], UIUtils.MediumFontSize);
         texts[1].enableWordWrapping = false;
         //texts[0].horizontalAlignment = HorizontalAlignmentOptions.Center;
         texts[2].text = UIStrings.IntroValues;
-        texts[2].fontSize = UIUtils.MediumFontSize;
+        UIUtils.SetFontSize(texts[2], UIUtils.MediumFontSize);
         texts[2].enableWordWrapping = false;
         //texts[1].horizontalAlignment = HorizontalAlignmentOptions.Center;
     }
