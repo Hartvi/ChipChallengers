@@ -3,35 +3,35 @@ using System.Collections.Generic;
 using System.Linq;
 using MoonSharp.Interpreter;
 
-// ScenarioRacePoint stores a race position without depending on a scene object.
-public struct ScenarioRacePoint
+// ChallengeRacePoint stores a race position without depending on a scene object.
+public struct ChallengeRacePoint
 {
     public float x, y, z;
-    // ScenarioRacePoint initializes the three coordinates of a race position.
-    public ScenarioRacePoint(float x, float y, float z) { this.x = x; this.y = y; this.z = z; }
+    // ChallengeRacePoint initializes the three coordinates of a race position.
+    public ChallengeRacePoint(float x, float y, float z) { this.x = x; this.y = y; this.z = z; }
 }
 
-// ScenarioRaceGate stores one checkpoint's position, radius and RGBA color.
-public class ScenarioRaceGate
+// ChallengeRaceGate stores one checkpoint's position, radius and RGBA color.
+public class ChallengeRaceGate
 {
-    public ScenarioRacePoint position;
+    public ChallengeRacePoint position;
     public float radius;
     public float[] color;
 }
 
-// ScenarioRaceDefinition describes ordered gates and optional lifecycle callbacks declared by Lua.
-public class ScenarioRaceDefinition
+// ChallengeRaceDefinition describes ordered gates and optional lifecycle callbacks declared by Lua.
+public class ChallengeRaceDefinition
 {
-    public readonly List<ScenarioRaceGate> gates = new List<ScenarioRaceGate>();
+    public readonly List<ChallengeRaceGate> gates = new List<ChallengeRaceGate>();
     public DynValue onStarted = DynValue.Nil;
     public DynValue onCheckpoint = DynValue.Nil;
     public DynValue onFinished = DynValue.Nil;
 
     // Parse validates a named race configuration while retaining the original gate-list format.
-    public static ScenarioRaceDefinition Parse(Table configuration, DynValue legacyFinished)
+    public static ChallengeRaceDefinition Parse(Table configuration, DynValue legacyFinished)
     {
         if (configuration == null) { throw new ArgumentException("Race expects a configuration table."); }
-        var race = new ScenarioRaceDefinition();
+        var race = new ChallengeRaceDefinition();
         if (!configuration.Get("start").IsNil() || !configuration.Get("finish").IsNil())
         {
             float radius = Number(configuration.Get("radius"), "radius", 5f);
@@ -83,11 +83,11 @@ public class ScenarioRaceDefinition
     }
 
     // Gate validates a position and copies the shared appearance into an independent gate definition.
-    static ScenarioRaceGate Gate(DynValue value, string label, float radius, float[] color)
+    static ChallengeRaceGate Gate(DynValue value, string label, float radius, float[] color)
     {
         if (value.Type != DataType.Table) { throw new ArgumentException("Race " + label + " requires a position table."); }
-        return new ScenarioRaceGate {
-            position = new ScenarioRacePoint(Coordinate(value.Table, "x", 1),
+        return new ChallengeRaceGate {
+            position = new ChallengeRacePoint(Coordinate(value.Table, "x", 1),
                 Coordinate(value.Table, "y", 2), Coordinate(value.Table, "z", 3)),
             radius = radius, color = color.ToArray()
         };
@@ -130,16 +130,16 @@ public class ScenarioRaceDefinition
     }
 }
 
-// ScenarioRaceProgress tracks gate order independently of gate visibility and Unity callback timing.
-public class ScenarioRaceProgress
+// ChallengeRaceProgress tracks gate order independently of gate visibility and Unity callback timing.
+public class ChallengeRaceProgress
 {
     public int NextGate { get; private set; }
     public bool Failed { get; private set; }
     public bool Finished => this.NextGate == this.gateCount;
     readonly int gateCount;
 
-    // ScenarioRaceProgress initializes progress for a course containing at least start and finish gates.
-    public ScenarioRaceProgress(int gateCount)
+    // ChallengeRaceProgress initializes progress for a course containing at least start and finish gates.
+    public ChallengeRaceProgress(int gateCount)
     {
         if (gateCount < 2) { throw new ArgumentException("A race requires at least two gates."); }
         this.gateCount = gateCount;
@@ -157,8 +157,8 @@ public class ScenarioRaceProgress
     public void Fail() => this.Failed = true;
 }
 
-// ScenarioRaceStartTiming defines the one-second settling hold followed by a three-second countdown.
-public static class ScenarioRaceStartTiming
+// ChallengeRaceStartTiming defines the one-second settling hold followed by a three-second countdown.
+public static class ChallengeRaceStartTiming
 {
     public const double HoldSeconds = 1;
     public const int CountdownSeconds = 3;

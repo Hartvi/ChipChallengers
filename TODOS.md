@@ -32,7 +32,7 @@ MP:
 - `+` ye wtf: fix camera shaking
 
 SCENARIOS:
-- `+` scenarios;
+- `+` challenges;
   - lua file: it should have a map
   - `+` in LUA make objs loadable, which can then give them positions and make the move like obstacles
   - `+` coin collector mode

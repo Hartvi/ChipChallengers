@@ -812,7 +812,7 @@ namespace MoonSharp.Interpreter.Execution.VM
 			}
 			else
 			{
-				throw new InternalErrorException("RET supports only 0 and 1 ret val scenarios");
+				throw new InternalErrorException("RET supports only 0 and 1 ret val challenges");
 			}
 
 			if (csi.Continuation != null)

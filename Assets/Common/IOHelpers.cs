@@ -8,7 +8,7 @@ public class IOHelpers
 {
     public const string ModelsDirectoryName = "Models/";
     public const string MapsDirectoryName = "Maps/";
-    public const string ScenariosDirectoryName = "Scenarios/";
+    public const string ChallengesDirectoryName = "Challenges/";
     public const string ModelFileType = "txt";
 
     public static string EnsureFileExtension(string fileName)
@@ -35,30 +35,30 @@ public class IOHelpers
         return IOHelpers.LoadTextFile(Path.Join(ModelsDirectoryName, modelName));
     }
 
-    public static string GetScenariosDirectory()
+    public static string GetChallengesDirectory()
     {
-        string ScenariosDir = Path.Join(Application.streamingAssetsPath, IOHelpers.ScenariosDirectoryName);
+        string ChallengesDir = Path.Join(Application.streamingAssetsPath, IOHelpers.ChallengesDirectoryName);
 
-        if (!Directory.Exists(ScenariosDir))
+        if (!Directory.Exists(ChallengesDir))
         {
-            Directory.CreateDirectory(ScenariosDir);
+            Directory.CreateDirectory(ChallengesDir);
         }
-        return ScenariosDir;
+        return ChallengesDir;
     }
 
-    public static string[] GetAllScenarios()
+    public static string[] GetAllChallenges()
     {
-        string ScenariosDir = Path.Join(Application.streamingAssetsPath, IOHelpers.ScenariosDirectoryName);
+        string ChallengesDir = Path.Join(Application.streamingAssetsPath, IOHelpers.ChallengesDirectoryName);
 
-        if (!Directory.Exists(ScenariosDir))
+        if (!Directory.Exists(ChallengesDir))
         {
-            Directory.CreateDirectory(ScenariosDir);
+            Directory.CreateDirectory(ChallengesDir);
         }
 
-        DirectoryInfo d = new DirectoryInfo(ScenariosDir);
-        FileInfo[] fi = d.GetFiles("*.*").Where(f => f.Extension.Equals(UIStrings.ScenarioExtension)).ToArray();
+        DirectoryInfo d = new DirectoryInfo(ChallengesDir);
+        FileInfo[] fi = d.GetFiles("*.*").Where(f => f.Extension.Equals(UIStrings.ChallengeExtension)).ToArray();
 
-        return fi.Select(x => x.Name.Substring(0, x.Name.Length - UIStrings.ScenarioExtension.Length)).ToArray();
+        return fi.Select(x => x.Name.Substring(0, x.Name.Length - UIStrings.ChallengeExtension.Length)).ToArray();
     }
 
     public static string GetMapsDirectory()

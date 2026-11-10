@@ -159,7 +159,7 @@ for y in (15,-10):
 for x in (-9,9):
     box('Start pillar',(x,-12,5.6),(0.7,0.7,6.5),orange)
     box('Pillar cap',(x,-12,9),(1.1,1.1,0.5),yellow)
-# Summit posts make the end of the climb identifiable without requiring scenario gates.
+# Summit posts make the end of the climb identifiable without requiring challenge gates.
 for x,y in [(-96,-60),(-84,-60)]:box('Summit goal post',(x,y,41.5),(0.7,0.7,7),orange)
 # Spare blocks and boulders sit off the routes as simple quarry landmarks.
 for x,y,z in [(185,5,30),(130,125,35),(-160,90,44),(-145,-130,38)]:

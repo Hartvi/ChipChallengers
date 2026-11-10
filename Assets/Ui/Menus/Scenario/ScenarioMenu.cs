@@ -5,18 +5,18 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 
-public class ScenarioMenu : BaseMenu, InputReceiver
+public class ChallengeMenu : BaseMenu, InputReceiver
 {
-    const int VisibleScenarios = 8;
-    BaseItemScroll scenarioList;
+    const int VisibleChallenges = 8;
+    BaseItemScroll challengeList;
     BaseScrollbar scrollbar;
     BaseText selectionText;
     BaseButton playButton;
-    string[] scenarios = new string[0];
-    string selectedScenario;
-    readonly Dictionary<string, ScenarioRunRecord> bestRuns = new Dictionary<string, ScenarioRunRecord>();
+    string[] challenges = new string[0];
+    string selectedChallenge;
+    readonly Dictionary<string, ChallengeRunRecord> bestRuns = new Dictionary<string, ChallengeRunRecord>();
 
-    // Setup declares the scenario list, selection text and navigation layout.
+    // Setup declares the challenge list, selection text and navigation layout.
     public override void Setup()
     {
         base.Setup();
@@ -38,19 +38,19 @@ public class ScenarioMenu : BaseMenu, InputReceiver
         );
     }
 
-    // Start initializes the scenario controls once and connects their actions.
+    // Start initializes the challenge controls once and connects their actions.
     protected override void Start()
     {
         base.Start();
-        this.scenarioList = this.GetComponentInChildren<BaseItemScroll>(true);
+        this.challengeList = this.GetComponentInChildren<BaseItemScroll>(true);
         this.scrollbar = this.GetComponentInChildren<BaseScrollbar>(true);
         var texts = this.GetComponentsInChildren<BaseText>(true);
-        texts[0].text.SetText(UIStrings.Scenarios);
+        texts[0].text.SetText(UIStrings.Challenges);
         UIUtils.SetFontSize(texts[0].text, UIUtils.LargeFontSize);
         this.selectionText = texts[1];
         UIUtils.SetFontSize(this.selectionText.text, UIUtils.SmallFontSize);
 
-        // Start identifies footer buttons before scenarioList creates its button copies.
+        // Start identifies footer buttons before challengeList creates its button copies.
         var buttons = this.GetComponentsInChildren<BaseButton>(true);
         var backButton = buttons[buttons.Length - 2];
         this.playButton = buttons[buttons.Length - 1];
@@ -59,11 +59,11 @@ public class ScenarioMenu : BaseMenu, InputReceiver
         backButton.btn.onClick.AddListener(this.GoBack);
         this.playButton.text.SetText("Play");
         UIUtils.SetFontSize(this.playButton.text, UIUtils.MediumFontSize);
-        this.playButton.btn.onClick.AddListener(this.PlaySelectedScenario);
+        this.playButton.btn.onClick.AddListener(this.PlaySelectedChallenge);
 
-        this.scenarioList.ItemFontSize = UIUtils.SmallFontSize;
-        this.scenarioList.SetupItemList(this.SelectScenario, VisibleScenarios, this.scenarios, this.FormatScenarioLabel);
-        this.scrollbar.scrollbar.onValueChanged.AddListener(this.scenarioList.Scroll);
+        this.challengeList.ItemFontSize = UIUtils.SmallFontSize;
+        this.challengeList.SetupItemList(this.SelectChallenge, VisibleChallenges, this.challenges, this.FormatChallengeLabel);
+        this.scrollbar.scrollbar.onValueChanged.AddListener(this.challengeList.Scroll);
         this.selectedCallbacks.SetCallbacks(new Action[] { this.OnEnterMenu });
         this.deselectedCallbacks.SetCallbacks(new Action[] {
             () => UIManager.instance.TurnMeOff(this)
@@ -71,47 +71,47 @@ public class ScenarioMenu : BaseMenu, InputReceiver
         this.OnEnterMenu();
     }
 
-    // OnEnterMenu refreshes available scenario names and restores selection without starting a session.
+    // OnEnterMenu refreshes available challenge names and restores selection without starting a session.
     void OnEnterMenu()
     {
-        // OnEnterMenu discovers scenario files through IOHelpers.GetAllScenarios without loading gameplay.
-        this.scenarios = IOHelpers.GetAllScenarios()
+        // OnEnterMenu discovers challenge files through IOHelpers.GetAllChallenges without loading gameplay.
+        this.challenges = IOHelpers.GetAllChallenges()
             .OrderBy(name => name, StringComparer.OrdinalIgnoreCase).ToArray();
         this.RefreshBestRuns();
-        this.scenarioList.virtualContainer.UpdateLabels(this.scenarios);
+        this.challengeList.virtualContainer.UpdateLabels(this.challenges);
         this.scrollbar.scrollbar.SetValueWithoutNotify(0f);
-        this.scenarioList.Scroll(0f);
-        this.scrollbar.scrollbar.interactable = this.scenarios.Length > VisibleScenarios;
-        if (!this.scenarios.Contains(this.selectedScenario))
+        this.challengeList.Scroll(0f);
+        this.scrollbar.scrollbar.interactable = this.challenges.Length > VisibleChallenges;
+        if (!this.challenges.Contains(this.selectedChallenge))
         {
-            this.selectedScenario = this.scenarios.FirstOrDefault();
+            this.selectedChallenge = this.challenges.FirstOrDefault();
         }
         this.UpdateSelection();
         UIManager.instance.SwitchToMe(this);
     }
 
-    // RefreshBestRuns matches available Lua contents to the fastest saved runs without executing scenario logic.
+    // RefreshBestRuns matches available Lua contents to the fastest saved runs without executing challenge logic.
     void RefreshBestRuns()
     {
         this.bestRuns.Clear();
-        ScenarioProgressSave save;
+        ChallengeProgressSave save;
         try
         {
-            save = new ScenarioProgressStore(Path.Combine(Application.persistentDataPath, "scenario-progress.json")).Load();
+            save = new ChallengeProgressStore(Path.Combine(Application.persistentDataPath, "challenge-progress.json")).Load();
         }
         catch (Exception error) when (error is IOException || error is UnauthorizedAccessException || error is Newtonsoft.Json.JsonException)
         {
-            Debug.LogWarning("Could not load scenario best times: " + error.Message);
+            Debug.LogWarning("Could not load challenge best times: " + error.Message);
             return;
         }
-        foreach (string name in this.scenarios)
+        foreach (string name in this.challenges)
         {
             try
             {
-                byte[] contents = File.ReadAllBytes(Path.Combine(IOHelpers.GetScenariosDirectory(), name + UIStrings.ScenarioExtension));
-                string hash = ScenarioContentHash.Compute(contents, Array.Empty<byte>());
-                var best = save.scenarios
-                    .Where(progress => progress.scenarioHash == hash && progress.scenarioLogicVersion == ScenarioLuaMetadata.CurrentLogicVersion)
+                byte[] contents = File.ReadAllBytes(Path.Combine(IOHelpers.GetChallengesDirectory(), name + UIStrings.ChallengeExtension));
+                string hash = ChallengeContentHash.Compute(contents, Array.Empty<byte>());
+                var best = save.challenges
+                    .Where(progress => progress.challengeHash == hash && progress.challengeLogicVersion == ChallengeLuaMetadata.CurrentLogicVersion)
                     .Select(progress => progress.bestRun)
                     .Where(run => run != null && run.hasTime && !double.IsNaN(run.timeSeconds) &&
                         !double.IsInfinity(run.timeSeconds) && run.timeSeconds >= 0)
@@ -120,13 +120,13 @@ public class ScenarioMenu : BaseMenu, InputReceiver
             }
             catch (Exception error) when (error is IOException || error is UnauthorizedAccessException)
             {
-                Debug.LogWarning("Could not read scenario " + name + ": " + error.Message);
+                Debug.LogWarning("Could not read challenge " + name + ": " + error.Message);
             }
         }
     }
 
-    // FormatScenarioLabel displays the best time and its model name and total chip count beside the scenario name.
-    string FormatScenarioLabel(string name)
+    // FormatChallengeLabel displays the best time and its model name and total chip count beside the challenge name.
+    string FormatChallengeLabel(string name)
     {
         if (!this.bestRuns.TryGetValue(name, out var run)) { return name + "  |  Best: --"; }
         string modelName = string.IsNullOrWhiteSpace(run.modelName) ? "Unnamed model" : run.modelName;
@@ -135,48 +135,48 @@ public class ScenarioMenu : BaseMenu, InputReceiver
             " s  |  Model: " + modelName + "  |  Chips: " + chips;
     }
 
-    // SelectScenario selects a listed scenario and refreshes the selection display.
-    void SelectScenario(string name)
+    // SelectChallenge selects a listed challenge and refreshes the selection display.
+    void SelectChallenge(string name)
     {
-        this.selectedScenario = name;
+        this.selectedChallenge = name;
         this.UpdateSelection();
     }
 
-    // UpdateSelection shows the selected scenario or empty state and enables Play when available.
+    // UpdateSelection shows the selected challenge or empty state and enables Play when available.
     void UpdateSelection()
     {
-        this.selectionText.text.SetText(this.selectedScenario == null
-            ? "No scenarios found. Add scenario files to StreamingAssets/Scenarios."
-            : "Selected: " + this.selectedScenario);
-        this.playButton.btn.interactable = this.selectedScenario != null;
+        this.selectionText.text.SetText(this.selectedChallenge == null
+            ? "No challenges found. Add challenge files to StreamingAssets/Challenges."
+            : "Selected: " + this.selectedChallenge);
+        this.playButton.btn.interactable = this.selectedChallenge != null;
     }
 
-    // PlaySelectedScenario launches the selected scenario through the sandbox startup flow.
-    void PlaySelectedScenario()
+    // PlaySelectedChallenge launches the selected challenge through the sandbox startup flow.
+    void PlaySelectedChallenge()
     {
-        if (this.selectedScenario == null) { return; }
-        SandboxMenu.PlayScenario(this.selectedScenario);
+        if (this.selectedChallenge == null) { return; }
+        SandboxMenu.PlayChallenge(this.selectedChallenge);
     }
 
     // GoBack returns to the main menu.
     void GoBack() => GoToMainMenu.Function(false);
 
-    // IsActive reports whether the scenario menu is active.
+    // IsActive reports whether the challenge menu is active.
     bool InputReceiver.IsActive() => this.gameObject.activeSelf;
-    // OnStartReceiving keeps the initialized scenario controls unchanged when input focus begins.
+    // OnStartReceiving keeps the initialized challenge controls unchanged when input focus begins.
     void InputReceiver.OnStartReceiving() { }
-    // OnStopReceiving keeps scenario selection unchanged when input focus ends.
+    // OnStopReceiving keeps challenge selection unchanged when input focus ends.
     void InputReceiver.OnStopReceiving() { }
-    // HandleInputs handles scenario launch, back navigation and mouse-wheel scrolling.
+    // HandleInputs handles challenge launch, back navigation and mouse-wheel scrolling.
     void InputReceiver.HandleInputs()
     {
         if (Input.GetKeyDown(KeyCode.Escape)) { this.GoBack(); return; }
         if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
         {
-            this.PlaySelectedScenario();
+            this.PlaySelectedChallenge();
             return;
         }
-        if (this.scenarios.Length > VisibleScenarios)
+        if (this.challenges.Length > VisibleChallenges)
         {
             this.scrollbar.scrollbar.value = Mathf.Clamp01(
                 this.scrollbar.scrollbar.value - 0.1f * Input.GetAxis("Mouse ScrollWheel"));

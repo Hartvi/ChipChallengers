@@ -74,8 +74,8 @@ namespace MoonSharp.Interpreter
 		/// Gets or sets the stack depth threshold at which MoonSharp starts doing
 		/// tail call optimizations.
 		/// TCOs can provide the little benefit of avoiding stack overflows in corner case
-		/// scenarios, at the expense of losing debug information and error stack traces 
-		/// in all other, more common scenarios. MoonSharp choice is to start performing
+		/// challenges, at the expense of losing debug information and error stack traces 
+		/// in all other, more common challenges. MoonSharp choice is to start performing
 		/// TCOs only after a certain threshold of stack usage is reached - by default
 		/// half the current stack depth (128K entries), thus 64K entries, on either
 		/// the internal stacks.
@@ -91,7 +91,7 @@ namespace MoonSharp.Interpreter
 		/// not detect all issues) and 2) it might trigger in very odd legal situations (like, switching threads 
 		/// inside a CLR-callback without actually having concurrency.
 		/// 
-		/// Disable this option if the thread check is giving problems in your scenario, but please check that
+		/// Disable this option if the thread check is giving problems in your challenge, but please check that
 		/// you are not calling MoonSharp execution concurrently as it is not supported.
 		/// </summary>
 		public bool CheckThreadAccess { get; set; }

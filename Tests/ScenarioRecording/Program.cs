@@ -20,16 +20,16 @@ class Program
         throw new Exception(message);
     }
     // Run creates a sample run containing vehicle, rule, timing and physics snapshots.
-    static ScenarioRunRecord Run(string id, double time, string model, int version = 1)
+    static ChallengeRunRecord Run(string id, double time, string model, int version = 1)
     {
-        return new ScenarioRunRecord {
-            scenarioHash = ScenarioContentHash.Compute(System.Text.Encoding.UTF8.GetBytes("test scenario"), Array.Empty<byte>()),
-            scenarioFileName = "test_scenario.lua",
+        return new ChallengeRunRecord {
+            challengeHash = ChallengeContentHash.Compute(System.Text.Encoding.UTF8.GetBytes("test challenge"), Array.Empty<byte>()),
+            challengeFileName = "test_challenge.lua",
             runId = id, hasTime = true, timeSeconds = time, modelName = model,
             playerName = "Driver", finishedAtUtc = "2026-11-04T15:32:18Z",
-            gameVersion = "test", scenarioLogicVersion = version,
+            gameVersion = "test", challengeLogicVersion = version,
             modelSnapshot = "{script=[[line one\nline two]]}",
-            chipCounts = { new ScenarioChipCount { chipType = "Wheel", count = 4 } },
+            chipCounts = { new ChallengeChipCount { chipType = "Wheel", count = 4 } },
             rules = { maxChips = 30, forbiddenChipTypes = { "Jet" } },
             physics = { fixedDeltaTime = 0.001f, solverIterations = 6, solverVelocityIterations = 1 }
         };
@@ -102,26 +102,26 @@ class Program
         }
     }
 
-    // CheckBundledScenarios executes bundled Lua declarations against the real metadata and race parsers.
-    static void CheckBundledScenarios()
+    // CheckBundledChallenges executes bundled Lua declarations against the real metadata and race parsers.
+    static void CheckBundledChallenges()
     {
-        string scenarioDirectory = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../Assets/StreamingAssets/Scenarios"));
+        string challengeDirectory = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../Assets/StreamingAssets/Challenges"));
         foreach (string file in new[] { "circuit1_race.lua", "load_race.lua", "industrial_test_track_race.lua", "karst_flight_race.lua", "quarry_climb_race.lua" })
         {
             var example = new Script();
-            ScenarioRaceDefinition exampleRace = null;
-            ScenarioLuaCallbacks.Register(example, value => ScenarioLuaMetadata.Parse(value, ""),
+            ChallengeRaceDefinition exampleRace = null;
+            ChallengeLuaCallbacks.Register(example, value => ChallengeLuaMetadata.Parse(value, ""),
                 () => {}, _ => {}, () => null,
-                (configuration, callback) => exampleRace = ScenarioRaceDefinition.Parse(configuration, callback));
+                (configuration, callback) => exampleRace = ChallengeRaceDefinition.Parse(configuration, callback));
             example.Globals["LoadMap"] = (Action<string>)(_ => {});
             example.Globals["SetPosition"] = (Action<string,Table>)((_,__) => {});
             example.Globals["SetRotation"] = (Action<string,Table>)((_,__) => {});
             example.Globals["Spawn"] = (Func<string,Table,string>)((_,__) => "test-object");
-            example.DoString(File.ReadAllText(Path.Combine(scenarioDirectory, file)));
+            example.DoString(File.ReadAllText(Path.Combine(challengeDirectory, file)));
             Check(exampleRace != null && exampleRace.gates.Count >= 2, "Bundled example failed to declare a race: " + file);
             float expectedRadius = file == "karst_flight_race.lua" ? 27f :
                 file == "industrial_test_track_race.lua" || file == "quarry_climb_race.lua" ? 8f : 2.5f;
-            Check(exampleRace.gates.All(g => g.radius == expectedRadius), "Bundled scenario gate size incorrect: " + file);
+            Check(exampleRace.gates.All(g => g.radius == expectedRadius), "Bundled challenge gate size incorrect: " + file);
             if (file == "industrial_test_track_race.lua")
             {
                 Check(exampleRace.gates.Count == 15, "Industrial circuit checkpoint count incorrect");
@@ -149,10 +149,10 @@ class Program
     // Main exercises wheel timing, Lua callback contracts and persistent records using disposable test saves.
     static void Main(string[] args)
     {
-        if (args.Contains("--scenarios-only"))
+        if (args.Contains("--challenges-only"))
         {
-            CheckBundledScenarios();
-            Console.WriteLine("PASS: " + checks + " bundled scenario checks.");
+            CheckBundledChallenges();
+            Console.WriteLine("PASS: " + checks + " bundled challenge checks.");
             return;
         }
         string directory = Path.Combine(Path.GetTempPath(), "chipchallengers-record-test-" + Guid.NewGuid().ToString("N"));
@@ -199,27 +199,27 @@ class Program
             }
             byte[] luaBytes = System.Text.Encoding.UTF8.GetBytes("return 1");
             byte[] mapBytes = System.Text.Encoding.UTF8.GetBytes("v 0 0 0");
-            string contentHash = ScenarioContentHash.Compute(luaBytes, mapBytes);
-            Check(contentHash.Length == 64 && contentHash == ScenarioContentHash.Compute(luaBytes, mapBytes),
-                "Scenario content hash was not a deterministic SHA-256 digest");
-            Check(contentHash != ScenarioContentHash.Compute(System.Text.Encoding.UTF8.GetBytes("return 2"), mapBytes),
-                "Lua changes did not affect the scenario hash");
-            Check(contentHash != ScenarioContentHash.Compute(luaBytes, System.Text.Encoding.UTF8.GetBytes("v 1 0 0")),
-                "Map changes did not affect the scenario hash");
-            Check(ScenarioContentHash.Compute(new byte[] { 1 }, new byte[] { 2, 3 }) !=
-                ScenarioContentHash.Compute(new byte[] { 1, 2 }, new byte[] { 3 }),
-                "Lua/map boundaries were ambiguous in the scenario hash");
-            Check(contentHash != ScenarioContentHash.Compute(mapBytes, luaBytes), "Lua/map order did not affect the hash");
-            Reject(() => ScenarioContentHash.Compute(null, mapBytes), "Null Lua contents accepted");
-            Reject(() => ScenarioContentHash.Compute(luaBytes, null), "Null map contents accepted");
+            string contentHash = ChallengeContentHash.Compute(luaBytes, mapBytes);
+            Check(contentHash.Length == 64 && contentHash == ChallengeContentHash.Compute(luaBytes, mapBytes),
+                "Challenge content hash was not a deterministic SHA-256 digest");
+            Check(contentHash != ChallengeContentHash.Compute(System.Text.Encoding.UTF8.GetBytes("return 2"), mapBytes),
+                "Lua changes did not affect the challenge hash");
+            Check(contentHash != ChallengeContentHash.Compute(luaBytes, System.Text.Encoding.UTF8.GetBytes("v 1 0 0")),
+                "Map changes did not affect the challenge hash");
+            Check(ChallengeContentHash.Compute(new byte[] { 1 }, new byte[] { 2, 3 }) !=
+                ChallengeContentHash.Compute(new byte[] { 1, 2 }, new byte[] { 3 }),
+                "Lua/map boundaries were ambiguous in the challenge hash");
+            Check(contentHash != ChallengeContentHash.Compute(mapBytes, luaBytes), "Lua/map order did not affect the hash");
+            Reject(() => ChallengeContentHash.Compute(null, mapBytes), "Null Lua contents accepted");
+            Reject(() => ChallengeContentHash.Compute(luaBytes, null), "Null map contents accepted");
             string path = Path.Combine(directory, "progress.json");
-            var store = new ScenarioProgressStore(path);
-            var metadata = new ScenarioMetadata { scenarioId = "permanent-id" };
-            Check(store.Load().scenarios.Count == 0, "First launch should have no records");
+            var store = new ChallengeProgressStore(path);
+            var metadata = new ChallengeMetadata { challengeId = "permanent-id" };
+            Check(store.Load().challenges.Count == 0, "First launch should have no records");
             Check(store.Record(metadata, Run("a", 42.731234, "First car")), "First finish missing");
             Check(!store.Record(metadata, Run("a", 42.731234, "First car")), "Duplicate finish counted");
             store.Record(metadata, Run("b", 48, "Slower car"));
-            var progress = store.Load().scenarios.Single();
+            var progress = store.Load().challenges.Single();
             Check(progress.completionCount == 2 && progress.completed, "Completion count incorrect");
             Check(progress.bestRun.modelName == "First car" && progress.lastRun.modelName == "Slower car", "Slower finish overwrote best vehicle");
             Check(progress.bestRun.timeSeconds == 42.731234, "Timing precision lost");
@@ -228,17 +228,17 @@ class Program
             Check(progress.bestRun.playerName == "Driver" && progress.bestRun.finishedAtUtc.EndsWith("Z"), "Player/date lost");
             Check(File.Exists(path + ".bak") && !File.Exists(path + ".tmp"), "Atomic save/backup failed");
             store.Record(metadata, Run("c", 40, "Faster car"));
-            Check(store.Load().scenarios.Single().bestRun.runId == "c", "New personal best missing");
+            Check(store.Load().challenges.Single().bestRun.runId == "c", "New personal best missing");
             store.Record(metadata, Run("d", 50, "New processor", 2));
-            Check(store.Load().scenarios.Count == 2, "Processor versions mixed");
+            Check(store.Load().challenges.Count == 2, "Processor versions mixed");
             metadata.recordVersion++;
             store.Record(metadata, Run("e", 55, "New course"));
-            Check(store.Load().scenarios.Count == 3, "Course versions mixed");
+            Check(store.Load().challenges.Count == 3, "Course versions mixed");
             var untimed = Run("untimed", 0, "Survival car");
             untimed.hasTime = false;
             untimed.completionType = "survival";
             store.Record(metadata, untimed);
-            progress = store.Load().scenarios.Last();
+            progress = store.Load().challenges.Last();
             Check(!progress.lastRun.hasTime && progress.bestRun.runId == "e", "Untimed finish became a zero-time best");
             string before = File.ReadAllText(path);
             Reject(() => store.Record(metadata, Run("bad", double.NaN, "Invalid")), "NaN accepted");
@@ -249,73 +249,73 @@ class Program
             try { store.Record(metadata, Run("f", 20, "Car")); } catch (Newtonsoft.Json.JsonException) { failed = true; }
             Check(failed && File.ReadAllText(path) == "{not valid JSON", "Corrupt save overwritten");
 
-            var hashStore = new ScenarioProgressStore(Path.Combine(directory, "hash-progress.json"));
-            var identityMetadata = new ScenarioMetadata();
+            var hashStore = new ChallengeProgressStore(Path.Combine(directory, "hash-progress.json"));
+            var identityMetadata = new ChallengeMetadata();
             var originalRun = Run("original", 10, "Car");
             hashStore.Record(identityMetadata, originalRun);
             var renamedRun = Run("renamed", 11, "Car");
-            renamedRun.scenarioFileName = "renamed.lua";
+            renamedRun.challengeFileName = "renamed.lua";
             hashStore.Record(identityMetadata, renamedRun);
-            var hashProgress = hashStore.Load().scenarios.Single();
-            Check(hashProgress.completionCount == 2 && hashProgress.scenarioHash == originalRun.scenarioHash &&
-                hashProgress.scenarioFileName == "renamed.lua", "Renaming split identical scenario contents or lost filename");
-            Check(hashProgress.bestRun.scenarioFileName == "test_scenario.lua" &&
-                hashProgress.lastRun.scenarioFileName == "renamed.lua", "Run filenames were overwritten by a rename");
+            var hashProgress = hashStore.Load().challenges.Single();
+            Check(hashProgress.completionCount == 2 && hashProgress.challengeHash == originalRun.challengeHash &&
+                hashProgress.challengeFileName == "renamed.lua", "Renaming split identical challenge contents or lost filename");
+            Check(hashProgress.bestRun.challengeFileName == "test_challenge.lua" &&
+                hashProgress.lastRun.challengeFileName == "renamed.lua", "Run filenames were overwritten by a rename");
             var editedRun = Run("edited", 9, "Car");
-            editedRun.scenarioHash = ScenarioContentHash.Compute(System.Text.Encoding.UTF8.GetBytes("changed Lua"), Array.Empty<byte>());
+            editedRun.challengeHash = ChallengeContentHash.Compute(System.Text.Encoding.UTF8.GetBytes("changed Lua"), Array.Empty<byte>());
             hashStore.Record(identityMetadata, editedRun);
-            Check(hashStore.Load().scenarios.Count == 2, "Changed Lua contents shared progress with the original");
+            Check(hashStore.Load().challenges.Count == 2, "Changed Lua contents shared progress with the original");
             var missingHash = Run("missing-hash", 1, "Car");
-            missingHash.scenarioHash = "";
-            Reject(() => hashStore.Record(identityMetadata, missingHash), "Missing scenario hash accepted");
+            missingHash.challengeHash = "";
+            Reject(() => hashStore.Record(identityMetadata, missingHash), "Missing challenge hash accepted");
             var missingFileName = Run("missing-filename", 1, "Car");
-            missingFileName.scenarioFileName = "";
-            Reject(() => hashStore.Record(identityMetadata, missingFileName), "Missing scenario filename accepted");
+            missingFileName.challengeFileName = "";
+            Reject(() => hashStore.Record(identityMetadata, missingFileName), "Missing challenge filename accepted");
             string hashJson = File.ReadAllText(Path.Combine(directory, "hash-progress.json"));
-            Check(hashJson.Contains("\"scenarioHash\"") && hashJson.Contains("\"scenarioFileName\"") &&
-                !hashJson.Contains("\"scenarioId\""), "Saved identity fields were not replaced");
+            Check(hashJson.Contains("\"challengeHash\"") && hashJson.Contains("\"challengeFileName\"") &&
+                !hashJson.Contains("\"challengeId\""), "Saved identity fields were not replaced");
             string oldPath = Path.Combine(directory, "old-progress.json");
-            string oldJson = "{\"saveVersion\":1,\"scenarios\":[{\"scenarioId\":\"old-id\",\"completed\":true,\"completionCount\":2}]}";
+            string oldJson = "{\"saveVersion\":1,\"challenges\":[{\"challengeId\":\"old-id\",\"completed\":true,\"completionCount\":2}]}";
             File.WriteAllText(oldPath, oldJson);
-            var oldStore = new ScenarioProgressStore(oldPath);
+            var oldStore = new ChallengeProgressStore(oldPath);
             oldStore.Record(identityMetadata, originalRun);
             var upgraded = oldStore.Load();
-            Check(upgraded.saveVersion == 2 && upgraded.scenarios.Count == 2 &&
-                upgraded.scenarios[0].scenarioHash == "" && upgraded.scenarios[0].completionCount == 2,
+            Check(upgraded.saveVersion == 2 && upgraded.challenges.Count == 2 &&
+                upgraded.challenges[0].challengeHash == "" && upgraded.challenges[0].completionCount == 2,
                 "Old records were lost or assigned an unverified hash");
             Check(File.ReadAllText(oldPath + ".v1.bak") == oldJson, "Original ID-based save was not preserved");
 
             var lua = new Script();
-            var table = lua.DoString("return {id='community-level', title='Hill', recordVersion=3, scenarioLogicVersion=1, rules={maxChips=30, forbiddenChipTypes={'Jet'}}}").Table;
-            var parsed = ScenarioLuaMetadata.Parse(table, "fallback");
-            Check(parsed.scenarioId == "community-level" && parsed.recordVersion == 3 && parsed.rules.maxChips == 30, "Lua metadata not parsed");
+            var table = lua.DoString("return {id='community-level', title='Hill', recordVersion=3, challengeLogicVersion=1, rules={maxChips=30, forbiddenChipTypes={'Jet'}}}").Table;
+            var parsed = ChallengeLuaMetadata.Parse(table, "fallback");
+            Check(parsed.challengeId == "community-level" && parsed.recordVersion == 3 && parsed.rules.maxChips == 30, "Lua metadata not parsed");
             Check(parsed.rules.forbiddenChipTypes.Single() == "Jet", "Lua restrictions lost");
-            Check(ScenarioLuaMetadata.Parse(lua.DoString("return {}").Table, "legacy:race").scenarioId == "legacy:race", "Legacy fallback lost");
-            Reject(() => ScenarioLuaMetadata.Parse(lua.DoString("return {id='x',scenarioLogicVersion=99}").Table, ""), "Unsupported processor accepted");
-            Reject(() => ScenarioLuaMetadata.Parse(lua.DoString("return {id='x',recordVersion=1.5}").Table, ""), "Fractional version accepted");
-            Reject(() => ScenarioLuaMetadata.Parse(lua.DoString("return {id='x',rules={maxChips=-2}}").Table, ""), "Invalid restriction accepted");
-            Reject(() => ScenarioLuaMetadata.Parse(lua.DoString("return {}").Table, ""), "Missing identity accepted");
-            var standard = ScenarioLuaMetadata.Parse(lua.DoString("return {id='standard'}").Table, "");
+            Check(ChallengeLuaMetadata.Parse(lua.DoString("return {}").Table, "legacy:race").challengeId == "legacy:race", "Legacy fallback lost");
+            Reject(() => ChallengeLuaMetadata.Parse(lua.DoString("return {id='x',challengeLogicVersion=99}").Table, ""), "Unsupported processor accepted");
+            Reject(() => ChallengeLuaMetadata.Parse(lua.DoString("return {id='x',recordVersion=1.5}").Table, ""), "Fractional version accepted");
+            Reject(() => ChallengeLuaMetadata.Parse(lua.DoString("return {id='x',rules={maxChips=-2}}").Table, ""), "Invalid restriction accepted");
+            Reject(() => ChallengeLuaMetadata.Parse(lua.DoString("return {}").Table, ""), "Missing identity accepted");
+            var standard = ChallengeLuaMetadata.Parse(lua.DoString("return {id='standard'}").Table, "");
             Check(standard.rules.physics.fixedDeltaTime == 0.001f && standard.rules.physics.solverIterations == 6 &&
                 standard.rules.physics.solverVelocityIterations == 1, "Missing physics rules did not use the shared preset");
-            var custom = ScenarioLuaMetadata.Parse(lua.DoString("return {id='custom',rules={physics={fixedDeltaTime=0.01,solverIterations=12,solverVelocityIterations=4}}}").Table, "");
+            var custom = ChallengeLuaMetadata.Parse(lua.DoString("return {id='custom',rules={physics={fixedDeltaTime=0.01,solverIterations=12,solverVelocityIterations=4}}}").Table, "");
             Check(custom.rules.physics.fixedDeltaTime == 0.01f && custom.rules.physics.solverIterations == 12 &&
                 custom.rules.physics.solverVelocityIterations == 4, "Explicit physics rules were not parsed");
-            var partial = ScenarioLuaMetadata.Parse(lua.DoString("return {id='partial',rules={physics={solverIterations=8}}}").Table, "");
+            var partial = ChallengeLuaMetadata.Parse(lua.DoString("return {id='partial',rules={physics={solverIterations=8}}}").Table, "");
             Check(partial.rules.physics.fixedDeltaTime == 0.001f && partial.rules.physics.solverIterations == 8,
                 "Partial physics rules inherited user settings instead of the standard preset");
-            Reject(() => ScenarioLuaMetadata.Parse(lua.DoString("return {id='x',rules={physics='invalid'}}").Table, ""), "Non-table physics accepted");
-            Reject(() => ScenarioLuaMetadata.Parse(lua.DoString("return {id='x',rules={physics={fixedDeltaTime=0}}}").Table, ""), "Zero timestep accepted");
-            Reject(() => ScenarioLuaMetadata.Parse(lua.DoString("return {id='x',rules={physics={fixedDeltaTime=1/0}}}").Table, ""), "Infinite timestep accepted");
-            Reject(() => ScenarioLuaMetadata.Parse(lua.DoString("return {id='x',rules={physics={fixedDeltaTime=0/0}}}").Table, ""), "NaN timestep accepted");
-            Reject(() => ScenarioLuaMetadata.Parse(lua.DoString("return {id='x',rules={physics={fixedDeltaTime=0.0001}}}").Table, ""), "Excessive physics frequency accepted");
-            Reject(() => ScenarioLuaMetadata.Parse(lua.DoString("return {id='x',rules={physics={solverIterations=0}}}").Table, ""), "Zero solver iterations accepted");
-            Reject(() => ScenarioLuaMetadata.Parse(lua.DoString("return {id='x',rules={physics={solverIterations=256}}}").Table, ""), "Excessive solver iterations accepted");
-            Reject(() => ScenarioLuaMetadata.Parse(lua.DoString("return {id='x',rules={physics={solverVelocityIterations=1.5}}}").Table, ""), "Fractional solver iterations accepted");
+            Reject(() => ChallengeLuaMetadata.Parse(lua.DoString("return {id='x',rules={physics='invalid'}}").Table, ""), "Non-table physics accepted");
+            Reject(() => ChallengeLuaMetadata.Parse(lua.DoString("return {id='x',rules={physics={fixedDeltaTime=0}}}").Table, ""), "Zero timestep accepted");
+            Reject(() => ChallengeLuaMetadata.Parse(lua.DoString("return {id='x',rules={physics={fixedDeltaTime=1/0}}}").Table, ""), "Infinite timestep accepted");
+            Reject(() => ChallengeLuaMetadata.Parse(lua.DoString("return {id='x',rules={physics={fixedDeltaTime=0/0}}}").Table, ""), "NaN timestep accepted");
+            Reject(() => ChallengeLuaMetadata.Parse(lua.DoString("return {id='x',rules={physics={fixedDeltaTime=0.0001}}}").Table, ""), "Excessive physics frequency accepted");
+            Reject(() => ChallengeLuaMetadata.Parse(lua.DoString("return {id='x',rules={physics={solverIterations=0}}}").Table, ""), "Zero solver iterations accepted");
+            Reject(() => ChallengeLuaMetadata.Parse(lua.DoString("return {id='x',rules={physics={solverIterations=256}}}").Table, ""), "Excessive solver iterations accepted");
+            Reject(() => ChallengeLuaMetadata.Parse(lua.DoString("return {id='x',rules={physics={solverVelocityIterations=1.5}}}").Table, ""), "Fractional solver iterations accepted");
             var copied = custom.rules.physics.Copy();
             copied.solverIterations = 20;
             Check(custom.rules.physics.solverIterations == 12 && !copied.Matches(custom.rules.physics), "Physics snapshots share mutable state");
-            var physicsStore = new ScenarioProgressStore(Path.Combine(directory, "physics.json"));
+            var physicsStore = new ChallengeProgressStore(Path.Combine(directory, "physics.json"));
             var standardRun = Run("standard-run", 42, "Car");
             physicsStore.Record(standard, standardRun);
             var mismatched = Run("mismatch", 10, "Car");
@@ -326,31 +326,31 @@ class Program
             alternate.physics.fixedDeltaTime = 0.01f;
             alternate.rules.physics = standard.rules.physics.Copy();
             physicsStore.Record(standard, alternate);
-            Check(physicsStore.Load().scenarios.Count == 2, "Results using different required physics were mixed");
-            var savedPhysics = physicsStore.Load().scenarios.Last().lastRun;
+            Check(physicsStore.Load().challenges.Count == 2, "Results using different required physics were mixed");
+            var savedPhysics = physicsStore.Load().challenges.Last().lastRun;
             Check(savedPhysics.physics.Matches(savedPhysics.rules.physics), "Required/actual physics did not survive serialization");
             int beginCalls = 0;
             double? finishedTime = null;
             Table receivedGates = null;
             DynValue finishCallback = DynValue.Nil;
-            ScenarioMetadata declared = null;
-            ScenarioLuaCallbacks.Register(lua,
-                value => declared = ScenarioLuaMetadata.Parse(value, "legacy:test"),
+            ChallengeMetadata declared = null;
+            ChallengeLuaCallbacks.Register(lua,
+                value => declared = ChallengeLuaMetadata.Parse(value, "legacy:test"),
                 () => beginCalls++, value => finishedTime = value,
                 () => finishedTime, (gates, callback) => { receivedGates = gates; finishCallback = callback; });
             Check(lua.DoString("return GetRaceResult()").IsNil(), "Unfinished Lua race returned a result");
-            lua.DoString("Scenario({id='callback-level'}); BeginScenarioAttempt(); Race({{position={1,2,3}},{position={4,5,6}}}, function(seconds) callbackTime=seconds end)");
-            Check(declared.scenarioId == "callback-level" && beginCalls == 1, "Lua configure/begin callbacks not forwarded");
+            lua.DoString("Challenge({id='callback-level'}); BeginChallengeAttempt(); Race({{position={1,2,3}},{position={4,5,6}}}, function(seconds) callbackTime=seconds end)");
+            Check(declared.challengeId == "callback-level" && beginCalls == 1, "Lua configure/begin callbacks not forwarded");
             Check(receivedGates.Length == 2 && !finishCallback.IsNil(), "Lua race gates or callback not forwarded");
             lua.Call(finishCallback, 42.125);
             Check(lua.Globals.Get("callbackTime").Number == 42.125, "Finish callback did not receive exact time");
-            lua.DoString("CompleteScenario(42.125)");
+            lua.DoString("CompleteChallenge(42.125)");
             Check(finishedTime == 42.125 && lua.DoString("return GetRaceResult()").Number == 42.125, "Completion/getter boundary lost time");
-            lua.DoString("CompleteScenario()");
+            lua.DoString("CompleteChallenge()");
             Check(finishedTime == null, "Untimed Lua completion did not forward null");
             lua.DoString("Race({{},{}})");
             Check(finishCallback.IsNil(), "Legacy one-argument Race no longer supported");
-            var race = ScenarioRaceDefinition.Parse(lua.DoString("return {start={0,0,0}, checkpoints={{10,0,0},{20,0,0}}, finish={30,0,0}, radius=4, color={255,0,0,120}, onStarted=function() started=true end, onCheckpoint=function(index,seconds) passed=index; split=seconds end, onFinished=function(seconds) result=seconds end}").Table, DynValue.Nil);
+            var race = ChallengeRaceDefinition.Parse(lua.DoString("return {start={0,0,0}, checkpoints={{10,0,0},{20,0,0}}, finish={30,0,0}, radius=4, color={255,0,0,120}, onStarted=function() started=true end, onCheckpoint=function(index,seconds) passed=index; split=seconds end, onFinished=function(seconds) result=seconds end}").Table, DynValue.Nil);
             Check(race.gates.Count == 4 && race.gates[0].position.x == 0 && race.gates[3].position.x == 30, "Named gate order incorrect");
             Check(race.gates.All(g => g.radius == 4 && g.color[0] == 255 && g.color[3] == 120), "Shared gate appearance lost");
             race.gates[0].color[0] = 0;
@@ -359,66 +359,66 @@ class Program
             lua.Call(race.onCheckpoint, 2, 12.5);
             lua.Call(race.onFinished, 25.75);
             Check(lua.Globals.Get("started").Boolean && lua.Globals.Get("passed").Number == 2 && lua.Globals.Get("split").Number == 12.5 && lua.Globals.Get("result").Number == 25.75, "Named lifecycle callbacks lost arguments");
-            var direct = ScenarioRaceDefinition.Parse(lua.DoString("return {start={x=0,y=1,z=2},finish={3,4,5}}").Table, DynValue.Nil);
+            var direct = ChallengeRaceDefinition.Parse(lua.DoString("return {start={x=0,y=1,z=2},finish={3,4,5}}").Table, DynValue.Nil);
             Check(direct.gates.Count == 2 && direct.gates[0].radius == 5 && direct.gates[0].position.y == 1, "Minimal race defaults invalid");
-            var oldRace = ScenarioRaceDefinition.Parse(lua.DoString("return {{position={0,0,0},size={5}},{position={10,0,0},size={8}}}").Table, DynValue.Nil);
+            var oldRace = ChallengeRaceDefinition.Parse(lua.DoString("return {{position={0,0,0},size={5}},{position={10,0,0},size={8}}}").Table, DynValue.Nil);
             Check(oldRace.gates[0].radius == 2.5f && oldRace.gates[1].radius == 4, "Original gate list changed its sizes");
-            Reject(() => ScenarioRaceDefinition.Parse(lua.DoString("return {start={0,0,0}}").Table, DynValue.Nil), "Missing finish accepted");
-            Reject(() => ScenarioRaceDefinition.Parse(lua.DoString("return {start={0,0},finish={1,2,3}}").Table, DynValue.Nil), "Incomplete position accepted");
-            Reject(() => ScenarioRaceDefinition.Parse(lua.DoString("return {start={0,0,0},finish={1,2,3},radius=0}").Table, DynValue.Nil), "Zero radius accepted");
-            Reject(() => ScenarioRaceDefinition.Parse(lua.DoString("return {start={0,0,0},finish={1,2,3},onFinished=42}").Table, DynValue.Nil), "Invalid named callback accepted");
-            Reject(() => ScenarioRaceDefinition.Parse(lua.DoString("return {start={0,0,0},finish={1,2,3},checkpoints='bad'}").Table, DynValue.Nil), "Non-list checkpoints accepted");
-            Reject(() => ScenarioRaceDefinition.Parse(lua.DoString("return {start={0,0,0},finish={1/0,2,3}}").Table, DynValue.Nil), "Infinite coordinate accepted");
-            var progressState = new ScenarioRaceProgress(4);
+            Reject(() => ChallengeRaceDefinition.Parse(lua.DoString("return {start={0,0,0}}").Table, DynValue.Nil), "Missing finish accepted");
+            Reject(() => ChallengeRaceDefinition.Parse(lua.DoString("return {start={0,0},finish={1,2,3}}").Table, DynValue.Nil), "Incomplete position accepted");
+            Reject(() => ChallengeRaceDefinition.Parse(lua.DoString("return {start={0,0,0},finish={1,2,3},radius=0}").Table, DynValue.Nil), "Zero radius accepted");
+            Reject(() => ChallengeRaceDefinition.Parse(lua.DoString("return {start={0,0,0},finish={1,2,3},onFinished=42}").Table, DynValue.Nil), "Invalid named callback accepted");
+            Reject(() => ChallengeRaceDefinition.Parse(lua.DoString("return {start={0,0,0},finish={1,2,3},checkpoints='bad'}").Table, DynValue.Nil), "Non-list checkpoints accepted");
+            Reject(() => ChallengeRaceDefinition.Parse(lua.DoString("return {start={0,0,0},finish={1/0,2,3}}").Table, DynValue.Nil), "Infinite coordinate accepted");
+            var progressState = new ChallengeRaceProgress(4);
             Check(!progressState.Pass(2) && progressState.NextGate == 0, "Out-of-order gate accepted");
             Check(progressState.Pass(0) && !progressState.Pass(0) && progressState.NextGate == 1, "Duplicate start accepted");
             progressState.Pass(1); progressState.Pass(2); progressState.Pass(3);
             Check(progressState.Finished && !progressState.Pass(3), "Finish was not one-shot");
-            var retry = new ScenarioRaceProgress(4);
+            var retry = new ChallengeRaceProgress(4);
             Check(retry.NextGate == 0 && !retry.Finished, "Retry kept old progress");
             retry.Fail();
             Check(!retry.Pass(0), "Invalidated attempt accepted a gate");
             int restarts = 0;
-            ScenarioLuaCallbacks.Register(lua, _ => {}, () => {}, _ => {}, () => null, (_,__) => {}, () => restarts++);
+            ChallengeLuaCallbacks.Register(lua, _ => {}, () => {}, _ => {}, () => null, (_,__) => {}, () => restarts++);
             lua.DoString("RestartRace()");
             Check(restarts == 1, "Lua retry callback not forwarded");
-            CheckBundledScenarios();
+            CheckBundledChallenges();
             var playContext = new GameplayContext();
-            Check(!playContext.IsScenario && playContext.ScenarioName == null, "New gameplay context was not regular sandbox");
-            playContext.SelectScenario("circuit1_race");
+            Check(!playContext.IsChallenge && playContext.ChallengeName == null, "New gameplay context was not regular sandbox");
+            playContext.SelectChallenge("circuit1_race");
             int firstSelection = playContext.Revision;
-            Check(playContext.IsScenario && playContext.MatchesScenario("circuit1_race", firstSelection), "Scenario selection was not retained");
-            Check(playContext.ScenarioName == "circuit1_race" && playContext.MatchesScenario("circuit1_race", firstSelection),
-                "Reading the context consumed the scenario before a later editor return");
-            Check(!playContext.MatchesScenario("load_race", firstSelection), "Load accepted the wrong scenario");
-            playContext.SelectScenario("load_race");
-            Check(!playContext.MatchesScenario("circuit1_race", firstSelection) && playContext.ScenarioName == "load_race",
-                "New scenario selection kept an old queued load valid");
+            Check(playContext.IsChallenge && playContext.MatchesChallenge("circuit1_race", firstSelection), "Challenge selection was not retained");
+            Check(playContext.ChallengeName == "circuit1_race" && playContext.MatchesChallenge("circuit1_race", firstSelection),
+                "Reading the context consumed the challenge before a later editor return");
+            Check(!playContext.MatchesChallenge("load_race", firstSelection), "Load accepted the wrong challenge");
+            playContext.SelectChallenge("load_race");
+            Check(!playContext.MatchesChallenge("circuit1_race", firstSelection) && playContext.ChallengeName == "load_race",
+                "New challenge selection kept an old queued load valid");
             int oldSelection = playContext.Revision;
-            playContext.SelectScenario("load_race");
-            Check(!playContext.MatchesScenario("load_race", oldSelection), "Reselecting a scenario did not invalidate earlier queued loads");
+            playContext.SelectChallenge("load_race");
+            Check(!playContext.MatchesChallenge("load_race", oldSelection), "Reselecting a challenge did not invalidate earlier queued loads");
             playContext.SelectSandbox();
-            Check(!playContext.IsScenario && playContext.ScenarioName == null && !playContext.MatchesScenario("load_race", oldSelection),
-                "Explicit sandbox selection kept scenario context");
-            Reject(() => playContext.SelectScenario(" "), "Empty scenario selection accepted");
-            Check(!playContext.IsScenario, "Invalid selection changed regular sandbox context");
-            int scenarioRetries = 0, modelResets = 0;
-            string retriedScenario = null;
-            playContext.Retry(name => { scenarioRetries++; retriedScenario = name; }, () => modelResets++);
-            Check(modelResets == 1 && scenarioRetries == 0, "Regular retry did not reset only the model");
-            playContext.SelectScenario("circuit1_race");
+            Check(!playContext.IsChallenge && playContext.ChallengeName == null && !playContext.MatchesChallenge("load_race", oldSelection),
+                "Explicit sandbox selection kept challenge context");
+            Reject(() => playContext.SelectChallenge(" "), "Empty challenge selection accepted");
+            Check(!playContext.IsChallenge, "Invalid selection changed regular sandbox context");
+            int challengeRetries = 0, modelResets = 0;
+            string retriedChallenge = null;
+            playContext.Retry(name => { challengeRetries++; retriedChallenge = name; }, () => modelResets++);
+            Check(modelResets == 1 && challengeRetries == 0, "Regular retry did not reset only the model");
+            playContext.SelectChallenge("circuit1_race");
             int retryRevision = playContext.Revision;
-            playContext.Retry(name => { scenarioRetries++; retriedScenario = name; }, () => modelResets++);
-            Check(scenarioRetries == 1 && retriedScenario == "circuit1_race" && modelResets == 1,
-                "Scenario retry fell back to a model-only reset");
-            playContext.Retry(name => { scenarioRetries++; retriedScenario = name; }, () => modelResets++);
-            Check(scenarioRetries == 2 && playContext.MatchesScenario("circuit1_race", retryRevision),
-                "Repeated retries lost scenario selection");
-            playContext.SelectScenario("custom_survival");
-            playContext.Retry(name => retriedScenario = name, () => modelResets++);
-            Check(retriedScenario == "custom_survival" && modelResets == 1,
-                "Non-race scenario retry depended on an active race");
-            var currentPhysics = ScenarioPhysicsSettings.CreateStandard();
+            playContext.Retry(name => { challengeRetries++; retriedChallenge = name; }, () => modelResets++);
+            Check(challengeRetries == 1 && retriedChallenge == "circuit1_race" && modelResets == 1,
+                "Challenge retry fell back to a model-only reset");
+            playContext.Retry(name => { challengeRetries++; retriedChallenge = name; }, () => modelResets++);
+            Check(challengeRetries == 2 && playContext.MatchesChallenge("circuit1_race", retryRevision),
+                "Repeated retries lost challenge selection");
+            playContext.SelectChallenge("custom_survival");
+            playContext.Retry(name => retriedChallenge = name, () => modelResets++);
+            Check(retriedChallenge == "custom_survival" && modelResets == 1,
+                "Non-race challenge retry depended on an active race");
+            var currentPhysics = ChallengePhysicsSettings.CreateStandard();
             var notifications = new System.Collections.Generic.List<string>();
             var physicsEvents = new PhysicsSettingsDispatcher();
             object bodyTarget = new object();
@@ -449,7 +449,7 @@ class Program
             Check(writes == 1 && notifications.Count == 3, "Identical settings caused extra notifications or writes");
             physicsEvents.Changing -= beforeChange;
             physicsEvents.Changed -= afterChange;
-            var originalPhysics = ScenarioPhysicsSettings.CreateStandard();
+            var originalPhysics = ChallengePhysicsSettings.CreateStandard();
             physicsEvents.Apply(() => currentPhysics, next => currentPhysics = next, originalPhysics, "restore");
             Check(currentPhysics.Matches(originalPhysics) && notifications.Count == 3,
                 "Restoration failed or unsubscribed listeners were retained");
@@ -479,23 +479,23 @@ class Program
                 currentPhysics = next;
             }, requestedPhysics, "attempt invalidation");
             invalidationEvents.Changing -= invalidate;
-            Check(!ScenarioRaceStartTiming.Ready(0) && ScenarioRaceStartTiming.CountdownAt(0) == 0,
+            Check(!ChallengeRaceStartTiming.Ready(0) && ChallengeRaceStartTiming.CountdownAt(0) == 0,
                 "Race started immediately at gate entry");
-            Check(!ScenarioRaceStartTiming.Ready(0.999) && ScenarioRaceStartTiming.CountdownAt(0.999) == 0,
+            Check(!ChallengeRaceStartTiming.Ready(0.999) && ChallengeRaceStartTiming.CountdownAt(0.999) == 0,
                 "Countdown started before the one-second settling hold");
-            Check(ScenarioRaceStartTiming.CountdownAt(1) == 3 && !ScenarioRaceStartTiming.Ready(1),
+            Check(ChallengeRaceStartTiming.CountdownAt(1) == 3 && !ChallengeRaceStartTiming.Ready(1),
                 "Settling hold did not transition to countdown 3");
-            Check(ScenarioRaceStartTiming.CountdownAt(2) == 2 && !ScenarioRaceStartTiming.Ready(2),
+            Check(ChallengeRaceStartTiming.CountdownAt(2) == 2 && !ChallengeRaceStartTiming.Ready(2),
                 "Countdown 2 timing incorrect");
-            Check(ScenarioRaceStartTiming.CountdownAt(3) == 1 && !ScenarioRaceStartTiming.Ready(3),
+            Check(ChallengeRaceStartTiming.CountdownAt(3) == 1 && !ChallengeRaceStartTiming.Ready(3),
                 "Countdown 1 timing incorrect");
-            Check(ScenarioRaceStartTiming.CountdownAt(3.999) == 1 && !ScenarioRaceStartTiming.Ready(3.999),
+            Check(ChallengeRaceStartTiming.CountdownAt(3.999) == 1 && !ChallengeRaceStartTiming.Ready(3.999),
                 "Race released before countdown completion");
-            Check(ScenarioRaceStartTiming.Ready(4) && ScenarioRaceStartTiming.CountdownAt(4) == 0,
+            Check(ChallengeRaceStartTiming.Ready(4) && ChallengeRaceStartTiming.CountdownAt(4) == 0,
                 "Race did not release at GO");
-            Check(ScenarioRaceStartTiming.CountdownAt(5) == 0 && ScenarioRaceStartTiming.Ready(5),
+            Check(ChallengeRaceStartTiming.CountdownAt(5) == 0 && ChallengeRaceStartTiming.Ready(5),
                 "Completed countdown produced an invalid negative number");
-            Console.WriteLine("PASS: " + checks + " scenario metadata and persistent-record checks.");
+            Console.WriteLine("PASS: " + checks + " challenge metadata and persistent-record checks.");
         }
         finally { Directory.Delete(directory, true); }
     }

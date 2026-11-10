@@ -37,13 +37,13 @@ public static class UIStrings
         "F1", "1-9", "up/down/+/-", "Ctrl+O", "Ctrl+M", "Ctrl+U", "Ctrl+R", "Ctrl+S", "Ctrl+P"
     };
     public static readonly string[] ControlsActions = new string[] {
-        "Display this panel", "Switch cameras", "Adjust camera", "Open model", "Open map", "Go to start", "Reset model / restart scenario", "Save model (in editor)", "Go to playmode (from editor)"
+        "Display this panel", "Switch cameras", "Adjust camera", "Open model", "Open map", "Go to start", "Reset model / restart challenge", "Save model (in editor)", "Go to playmode (from editor)"
     };
 
     public const string ModelExtension = ".txt";
     public const string MapExtension = ".obj";
-    public const string ScenarioExtension = ".lua";
-    public const string ScenarioString = "Scenario";
+    public const string ChallengeExtension = ".lua";
+    public const string ChallengeString = "Challenge";
 
     public const string Core = "Core";
 
@@ -51,7 +51,7 @@ public static class UIStrings
     public const string MainMenu = "Main menu";
     public const string Editor = "Editor";
     public const string Sandbox = "Sandbox";
-    public const string Scenarios = "Scenarios";
+    public const string Challenges = "Challenges";
     public const string ConnectToServer = "Connect";
     public const string Multiplayer = "Multiplayer";
     public const string Settings = "Settings";
@@ -96,7 +96,7 @@ public static class UIStrings
     public const string Bullet = "Bullet";
 
     // MAP RELATED
-    public const string EnterScenarioName = "Enter scenario name";
+    public const string EnterChallengeName = "Enter challenge name";
     public const string EnterMapName = "Enter map name";
     public const string EnterModelName = "Enter model name";
 

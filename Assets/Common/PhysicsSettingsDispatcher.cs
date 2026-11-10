@@ -3,15 +3,15 @@ using System;
 // PhysicsSettingsChange describes one configuration change and protects its before/after snapshots from listener edits.
 public sealed class PhysicsSettingsChange
 {
-    readonly ScenarioPhysicsSettings previous;
-    readonly ScenarioPhysicsSettings next;
-    public ScenarioPhysicsSettings Previous => this.previous.Copy();
-    public ScenarioPhysicsSettings Next => this.next.Copy();
+    readonly ChallengePhysicsSettings previous;
+    readonly ChallengePhysicsSettings next;
+    public ChallengePhysicsSettings Previous => this.previous.Copy();
+    public ChallengePhysicsSettings Next => this.next.Copy();
     public string Reason { get; }
     public object Target { get; }
 
     // PhysicsSettingsChange captures the settings, change reason and optional rigidbody target for notifications.
-    public PhysicsSettingsChange(ScenarioPhysicsSettings previous, ScenarioPhysicsSettings next, string reason, object target)
+    public PhysicsSettingsChange(ChallengePhysicsSettings previous, ChallengePhysicsSettings next, string reason, object target)
     {
         this.previous = previous.Copy();
         this.next = next.Copy();
@@ -35,8 +35,8 @@ public sealed class PhysicsSettingsDispatcher
     }
 
     // Apply validates a requested configuration and notifies listeners around one actual settings write.
-    public bool Apply(Func<ScenarioPhysicsSettings> read, Action<ScenarioPhysicsSettings> write,
-        ScenarioPhysicsSettings requested, string reason, object target = null)
+    public bool Apply(Func<ChallengePhysicsSettings> read, Action<ChallengePhysicsSettings> write,
+        ChallengePhysicsSettings requested, string reason, object target = null)
     {
         if (this.applying) { throw new InvalidOperationException("Physics settings cannot be changed inside a physics settings callback."); }
         Validate(requested);
@@ -56,7 +56,7 @@ public sealed class PhysicsSettingsDispatcher
     }
 
     // Validate rejects nonfinite timesteps and solver counts outside Unity's supported configuration range.
-    static void Validate(ScenarioPhysicsSettings settings)
+    static void Validate(ChallengePhysicsSettings settings)
     {
         if (settings == null || float.IsNaN(settings.fixedDeltaTime) || float.IsInfinity(settings.fixedDeltaTime) ||
             settings.fixedDeltaTime <= 0 || settings.solverIterations < 1 || settings.solverIterations > 255 ||

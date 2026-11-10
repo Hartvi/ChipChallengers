@@ -10,69 +10,69 @@ public class SandboxMenu : BaseMenu, InputReceiver
 {
     //public static SandboxMenu Instance;
     public static VMap myVMap = new VMap();
-    public static VScenario myVScenario = new VScenario();
-    bool reloadScenarioAfterBuild;
+    public static VChallenge myVChallenge = new VChallenge();
+    bool reloadChallengeAfterBuild;
     int playEntry;
-    Coroutine scenarioLoading;
+    Coroutine challengeLoading;
 
-    // PlayScenario remembers the selected scenario and enters play mode without clearing its context.
-    public static void PlayScenario(string name)
+    // PlayChallenge remembers the selected challenge and enters play mode without clearing its context.
+    public static void PlayChallenge(string name)
     {
-        GameManager.PlayContext.SelectScenario(name);
+        GameManager.PlayContext.SelectChallenge(name);
         GoToSandbox.Function();
     }
 
-    // RestartScenario unloads all scenario state and queues a fresh Lua load after resetting the player model.
-    void RestartScenario(string name)
+    // RestartChallenge unloads all challenge state and queues a fresh Lua load after resetting the player model.
+    void RestartChallenge(string name)
     {
-        if (!GameManager.PlayContext.IsScenario || GameManager.PlayContext.ScenarioName != name) { return; }
+        if (!GameManager.PlayContext.IsChallenge || GameManager.PlayContext.ChallengeName != name) { return; }
         this.playEntry++;
-        if (this.scenarioLoading != null) { StopCoroutine(this.scenarioLoading); }
-        this.scenarioLoading = null;
-        myVScenario.UnloadScenario();
-        this.reloadScenarioAfterBuild = true;
+        if (this.challengeLoading != null) { StopCoroutine(this.challengeLoading); }
+        this.challengeLoading = null;
+        myVChallenge.UnloadChallenge();
+        this.reloadChallengeAfterBuild = true;
         this.core.CmdResetCore();
     }
 
-    // LeaveScenario cancels queued scenario loads and removes scenario runtime and context after a manual map load.
-    void LeaveScenario()
+    // LeaveChallenge cancels queued challenge loads and removes challenge runtime and context after a manual map load.
+    void LeaveChallenge()
     {
         this.playEntry++;
-        this.reloadScenarioAfterBuild = false;
-        if (this.scenarioLoading != null) { StopCoroutine(this.scenarioLoading); }
-        this.scenarioLoading = null;
+        this.reloadChallengeAfterBuild = false;
+        if (this.challengeLoading != null) { StopCoroutine(this.challengeLoading); }
+        this.challengeLoading = null;
         GameManager.PlayContext.SelectSandbox();
-        myVScenario.UnloadScenario();
+        myVChallenge.UnloadChallenge();
     }
 
-    // LoadPendingScenario schedules one fresh scenario load after the player model is built for this play entry.
-    void LoadPendingScenario()
+    // LoadPendingChallenge schedules one fresh challenge load after the player model is built for this play entry.
+    void LoadPendingChallenge()
     {
-        if (!this.reloadScenarioAfterBuild) { return; }
-        this.reloadScenarioAfterBuild = false;
+        if (!this.reloadChallengeAfterBuild) { return; }
+        this.reloadChallengeAfterBuild = false;
         var context = GameManager.PlayContext;
-        if (!context.IsScenario) { return; }
-        this.scenarioLoading = StartCoroutine(this.LoadScenarioAfterBuild(context.ScenarioName, context.Revision, this.playEntry));
+        if (!context.IsChallenge) { return; }
+        this.challengeLoading = StartCoroutine(this.LoadChallengeAfterBuild(context.ChallengeName, context.Revision, this.playEntry));
     }
 
-    // CanLoadScenario rejects queued loads after leaving play mode or changing the selected scenario.
-    bool CanLoadScenario(string name, int revision, int entry) => this.isActiveAndEnabled &&
-        entry == this.playEntry && GameManager.PlayContext.MatchesScenario(name, revision);
+    // CanLoadChallenge rejects queued loads after leaving play mode or changing the selected challenge.
+    bool CanLoadChallenge(string name, int revision, int entry) => this.isActiveAndEnabled &&
+        entry == this.playEntry && GameManager.PlayContext.MatchesChallenge(name, revision);
 
-    // LoadScenarioAfterBuild waits for reset bookkeeping and model readiness before restarting the selected scenario.
-    IEnumerator LoadScenarioAfterBuild(string name, int revision, int entry)
+    // LoadChallengeAfterBuild waits for reset bookkeeping and model readiness before restarting the selected challenge.
+    IEnumerator LoadChallengeAfterBuild(string name, int revision, int entry)
     {
         yield return null;
-        while (this.CanLoadScenario(name, revision, entry) && NetworkClient.localPlayer != null &&
+        while (this.CanLoadChallenge(name, revision, entry) && NetworkClient.localPlayer != null &&
                (CoreChip.ClientCoreChip.HasPendingPoseReset || CoreChip.ClientCoreChip.IsRebuilding ||
                 CoreChip.ClientCoreChip.srvResetCounter != CoreChip.ClientCoreChip.cltResetCounter ||
                 CoreChip.ClientCoreChip.loadedModelString != CoreChip.ClientCoreChip.modelString))
         {
             yield return null;
         }
-        this.scenarioLoading = null;
-        if (!this.CanLoadScenario(name, revision, entry) || NetworkClient.localPlayer == null) { yield break; }
-        myVScenario.LoadNewScenario(name + UIStrings.ScenarioExtension);
+        this.challengeLoading = null;
+        if (!this.CanLoadChallenge(name, revision, entry) || NetworkClient.localPlayer == null) { yield break; }
+        myVChallenge.LoadNewChallenge(name + UIStrings.ChallengeExtension);
     }
 
     NetworkManager manager;
@@ -158,10 +158,10 @@ public class SandboxMenu : BaseMenu, InputReceiver
     {
         if (this.core != null) { this.core.ResetCompleted -= this.PositionCameraAfterReset; }
         this.playEntry++;
-        this.reloadScenarioAfterBuild = false;
-        if (this.scenarioLoading != null) { StopCoroutine(this.scenarioLoading); }
-        this.scenarioLoading = null;
-        myVScenario.UnloadScenario();
+        this.reloadChallengeAfterBuild = false;
+        if (this.challengeLoading != null) { StopCoroutine(this.challengeLoading); }
+        this.challengeLoading = null;
+        myVChallenge.UnloadChallenge();
         GameManager.RealTimeSettings.InMenu = true;
     }
 
@@ -193,7 +193,7 @@ public class SandboxMenu : BaseMenu, InputReceiver
     void OnEnterMenu()
     {
         this.playEntry++;
-        this.reloadScenarioAfterBuild = GameManager.PlayContext.IsScenario;
+        this.reloadChallengeAfterBuild = GameManager.PlayContext.IsChallenge;
         GameManager.RealTimeSettings.InMenu = false;
         GameManager.Instance.UpdateSettings();
 
@@ -234,11 +234,11 @@ public class SandboxMenu : BaseMenu, InputReceiver
             {
                 this.Hud.LinkCore(this.core);
             },
-            this.LoadPendingScenario
+            this.LoadPendingChallenge
         };
         this.core.SetAfterBuildListeners(afterBuildListeners);
 
-        var mapLoadedCallbacks = onLoadedCallbacksTmp.Concat(new Action[] { this.LeaveScenario, this.core.CmdResetToDefaultLocation }).ToArray();
+        var mapLoadedCallbacks = onLoadedCallbacksTmp.Concat(new Action[] { this.LeaveChallenge, this.core.CmdResetToDefaultLocation }).ToArray();
         this.MapPanel.SetOnLoadedCallbacks(mapLoadedCallbacks);
 
         //TODO: load model after entering playmode???
@@ -247,10 +247,10 @@ public class SandboxMenu : BaseMenu, InputReceiver
 
     }
 
-    // PositionCameraAfterReset places the play camera at the final spawn after model rebuilding and scenario initialization.
+    // PositionCameraAfterReset places the play camera at the final spawn after model rebuilding and challenge initialization.
     void PositionCameraAfterReset()
     {
-        if (!this.isActiveAndEnabled || this.core == null || this.reloadScenarioAfterBuild || this.scenarioLoading != null) { return; }
+        if (!this.isActiveAndEnabled || this.core == null || this.reloadChallengeAfterBuild || this.challengeLoading != null) { return; }
         CoreCameraPlacement.Place(this.mainCamera, this.core.transform,
             Mathf.Max(3f, this.cameraFollowSettings.posShift.x), Mathf.Max(2f, this.cameraFollowSettings.posShift.y));
     }
@@ -382,7 +382,7 @@ public class SandboxMenu : BaseMenu, InputReceiver
             {
                 if (this.core != null)
                 {
-                    GameManager.PlayContext.Retry(this.RestartScenario, this.core.CmdResetCore);
+                    GameManager.PlayContext.Retry(this.RestartChallenge, this.core.CmdResetCore);
                 }
             }
 #if UNITY_EDITOR

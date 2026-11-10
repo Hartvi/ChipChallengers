@@ -1,6 +1,6 @@
 ﻿# Industrial test track
 
-Load `industrial_test_track` from the in-game map panel. This is a free-driving map, not a scripted race scenario; it does not add gates, rules or saved results.
+Load `industrial_test_track` from the in-game map panel. This is a free-driving map, not a scripted race challenge; it does not add gates, rules or saved results.
 
 The circuit has a 12 m carriageway, broad runoff, a start straight at world origin, flowing bends, a raised section and simple industrial landmarks. Road markings are material assignments on the driving surface, so they do not add small collision bumps.
 
@@ -18,15 +18,15 @@ Blender uses Z up; OBJ export uses Y up for the game. The existing OBJ importer 
 
 The geometry has been rendered and inspected, but full vehicle handling, runtime materials and collision behavior still need an in-game driving test.
 
-## Race scenario
+## Race challenge
 
-Select `industrial_test_track_race` in Scenarios to drive one lap with 13 ordered checkpoints. The vehicle spawns behind the start gate facing down the straight. Entering the start gate runs the existing hold/countdown; finishing the lap records the result using the existing persistence flow. The scenario requires 1000 Hz physics with 1 regular and 3 velocity solver iterations.
+Select `industrial_test_track_race` in Challenges to drive one lap with 13 ordered checkpoints. The vehicle spawns behind the start gate facing down the straight. Entering the start gate runs the existing hold/countdown; finishing the lap records the result using the existing persistence flow. The challenge requires 1000 Hz physics with 1 regular and 3 velocity solver iterations.
 
 After generating the map, run `build_industrial_race.py` with the same Blender command to regenerate the Lua and numbered gate previews from the saved road centreline. It writes `race_overview.png`, `race_layout.png`, `race_start_straight.png` and `industrial_race_preview.blend` beside the map renders. Gate spheres are preview-only and never added to the OBJ. Rebuild the race after changing the map geometry.
 
 ## Karst Coast Flight
 
-Select `karst_flight_race` in Scenarios, or load `karst_coast` from the map panel for free flight. Bring a model capable of taking off; the scenario does not restrict chip types or automatically choose a plane.
+Select `karst_flight_race` in Challenges, or load `karst_coast` from the map panel for free flight. Bring a model capable of taking off; the challenge does not restrict chip types or automatically choose a plane.
 
 The airfield has a 36 m runway, hangars beside the start, and two orange start pillars. The countdown trigger sits between the pillars. After GO, take off and follow 13 airborne checkpoints, then return through the finish hoop above the airfield. The widened revision uses a 1.5x landscape/course scale: airborne hoops now have a 54 m clear opening and the existing spherical race triggers are also 54 m across after a further hoop-only enlargement. Flight gate opacity is 180/255 so active gates are easier to see. The finish hoop is raised to preserve its clearance above the runway. Hangars, the operations hut, their doors and roofs retain their original dimensions. Triggers detect entry into the sphere; this uses the existing race API, not a new directional hoop-crossing test.
 
@@ -40,6 +40,6 @@ Both sides of each route have retaining skirts extending from the road edge down
 
 Generate it with `build_quarry_climb.py` using the Blender command above. The script exports `quarry_climb.obj` and `.mtl`, validates upward-facing road surfaces and checks terrain does not intrude through route centrelines. It saves the editable `.blend`, annotated overview, driving-height views and `summary.json` under `C:/Users/Acer/BlenderTests/quarry-climb`. Annotation labels are render-only. Map generation does not place race triggers or change vehicle mechanics; steep-lane traction and step difficulty need in-game testing.
 
-Select `quarry_climb_race` in Scenarios for a summit time trial. Its two checkpoints sit at shared route merges, allowing the easy road or technical shortcuts. Enter the start gate for the existing hold/countdown, then finish between the summit posts. The scenario uses the existing result saving and retry flow, with 1000 Hz physics and solver counts 1/3. No model restrictions are imposed.
+Select `quarry_climb_race` in Challenges for a summit time trial. Its two checkpoints sit at shared route merges, allowing the easy road or technical shortcuts. Enter the start gate for the existing hold/countdown, then finish between the summit posts. The challenge uses the existing result saving and retry flow, with 1000 Hz physics and solver counts 1/3. No model restrictions are imposed.
 
-Run `build_karst_flight.py` using the Blender command above to generate `karst_coast.obj`, `.mtl`, and `karst_flight_race.lua`. It saves `karst_coast.blend`, `karst_flight_preview.blend`, the numbered route overview, runway/flight renders and `summary.json` to `C:/Users/Acer/BlenderTests/karst-flight`. Preview route lines and labels are excluded from the gameplay OBJ. The scenario uses 1000 Hz physics, 1 regular solver iteration and 3 velocity solver iterations. In-game takeoff, aircraft clearance and trigger behavior still need flight testing.
+Run `build_karst_flight.py` using the Blender command above to generate `karst_coast.obj`, `.mtl`, and `karst_flight_race.lua`. It saves `karst_coast.blend`, `karst_flight_preview.blend`, the numbered route overview, runway/flight renders and `summary.json` to `C:/Users/Acer/BlenderTests/karst-flight`. Preview route lines and labels are excluded from the gameplay OBJ. The challenge uses 1000 Hz physics, 1 regular solver iteration and 3 velocity solver iterations. In-game takeoff, aircraft clearance and trigger behavior still need flight testing.

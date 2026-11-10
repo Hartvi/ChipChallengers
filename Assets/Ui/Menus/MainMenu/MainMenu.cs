@@ -21,7 +21,7 @@ public class MainMenu : BaseMainMenu, InputReceiver
                 new VirtualProp(PropType.Panel, -1f, Vector2Int.right,
                     new VirtualProp(PropType.Panel, 0.2f),
                     new VirtualProp(PropType.Panel, 0.6f, Vector2Int.down,
-                        new VirtualProp(PropType.Button, btnHeight, typeof(GoToScenarios)),
+                        new VirtualProp(PropType.Button, btnHeight, typeof(GoToChallenges)),
                         new VirtualProp(PropType.Button, btnHeight, typeof(GoToSandbox)),
                         new VirtualProp(PropType.Button, btnHeight, typeof(GoToMultiplayer)),
                         new VirtualProp(PropType.Button, btnHeight, typeof(GoToEditor)),

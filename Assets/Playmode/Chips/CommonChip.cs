@@ -398,7 +398,7 @@ public class CommonChip : AngleChip
             throw new NullReferenceException($"To add Rigidbody you need an equivalent virtual chip.");
         }
         this.rb.mass = this.mass;
-        GameScript.ApplyScenarioPhysicsToBody(this.rb);
+        GameScript.ApplyChallengePhysicsToBody(this.rb);
         this.ResetMotion();
         this.rb.drag = 0f;
         this.rb.angularDrag = 0f;

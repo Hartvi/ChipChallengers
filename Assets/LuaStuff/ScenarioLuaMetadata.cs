@@ -1,30 +1,30 @@
 using System;
 using MoonSharp.Interpreter;
 
-// ScenarioLuaMetadata parses and validates scenario metadata and processor compatibility from Lua tables.
-public static class ScenarioLuaMetadata
+// ChallengeLuaMetadata parses and validates challenge metadata and processor compatibility from Lua tables.
+public static class ChallengeLuaMetadata
 {
     public const int CurrentLogicVersion = 1;
 
-    // Parse parses scenario identity, versions and rules from a Lua metadata table.
-    public static ScenarioMetadata Parse(Table table, string fallbackId)
+    // Parse parses challenge identity, versions and rules from a Lua metadata table.
+    public static ChallengeMetadata Parse(Table table, string fallbackId)
     {
-        if (table == null) { throw new ArgumentException("Scenario expects a metadata table."); }
-        var metadata = new ScenarioMetadata {
-            scenarioId = ReadString(table, "id", fallbackId),
+        if (table == null) { throw new ArgumentException("Challenge expects a metadata table."); }
+        var metadata = new ChallengeMetadata {
+            challengeId = ReadString(table, "id", fallbackId),
             title = ReadString(table, "title", ""),
             author = ReadString(table, "author", ""),
             completionType = ReadString(table, "completionType", "timeTrial"),
             recordVersion = ReadInt(table, "recordVersion", 1, 1),
-            scenarioLogicVersion = ReadInt(table, "scenarioLogicVersion", 1, 1)
+            challengeLogicVersion = ReadInt(table, "challengeLogicVersion", 1, 1)
         };
-        if (string.IsNullOrWhiteSpace(metadata.scenarioId))
+        if (string.IsNullOrWhiteSpace(metadata.challengeId))
         {
-            throw new ArgumentException("Scenario requires a stable id.");
+            throw new ArgumentException("Challenge requires a stable id.");
         }
-        if (metadata.scenarioLogicVersion != CurrentLogicVersion)
+        if (metadata.challengeLogicVersion != CurrentLogicVersion)
         {
-            throw new ArgumentException("Scenario expects unsupported logic version " + metadata.scenarioLogicVersion);
+            throw new ArgumentException("Challenge expects unsupported logic version " + metadata.challengeLogicVersion);
         }
         var rules = table.Get("rules");
         if (!rules.IsNil())

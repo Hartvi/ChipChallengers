@@ -15,14 +15,14 @@ public static class PhysicsSettingsManager
     }
 
     // Capture reads the actual global timestep and default solver configuration into an independent snapshot.
-    public static ScenarioPhysicsSettings Capture() => new ScenarioPhysicsSettings {
+    public static ChallengePhysicsSettings Capture() => new ChallengePhysicsSettings {
         fixedDeltaTime = Time.fixedDeltaTime,
         solverIterations = Physics.defaultSolverIterations,
         solverVelocityIterations = Physics.defaultSolverVelocityIterations
     };
 
     // Apply notifies subscribers before and after applying changed global physics settings.
-    public static bool Apply(ScenarioPhysicsSettings settings, string reason) => dispatcher.Apply(Capture, next => {
+    public static bool Apply(ChallengePhysicsSettings settings, string reason) => dispatcher.Apply(Capture, next => {
         Time.fixedDeltaTime = next.fixedDeltaTime;
         Physics.defaultSolverIterations = next.solverIterations;
         Physics.defaultSolverVelocityIterations = next.solverVelocityIterations;
@@ -54,7 +54,7 @@ public static class PhysicsSettingsManager
         var requested = Capture();
         requested.solverIterations = iterations;
         requested.solverVelocityIterations = velocityIterations;
-        return dispatcher.Apply(() => new ScenarioPhysicsSettings {
+        return dispatcher.Apply(() => new ChallengePhysicsSettings {
             fixedDeltaTime = Time.fixedDeltaTime, solverIterations = body.solverIterations,
             solverVelocityIterations = body.solverVelocityIterations
         }, next => {

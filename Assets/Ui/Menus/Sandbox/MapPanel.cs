@@ -8,9 +8,9 @@ public class MapPanel : BaseScrollMenu
 {
 
     CallbackArray OnLoadedCallbacks = new CallbackArray(false);
-    BaseText scenarioWarning;
+    BaseText challengeWarning;
 
-    // Setup adds a warning above the map list and leaves room for the scenario-exit button label.
+    // Setup adds a warning above the map list and leaves room for the challenge-exit button label.
     public override void Setup()
     {
         base.Setup();
@@ -30,9 +30,9 @@ public class MapPanel : BaseScrollMenu
     protected override void Start()
     {
         base.Start();
-        this.scenarioWarning = this.GetComponentInChildren<BaseText>(true);
-        UIUtils.SetFontSize(this.scenarioWarning.text, UIUtils.SmallFontSize);
-        this.UpdateScenarioWarning();
+        this.challengeWarning = this.GetComponentInChildren<BaseText>(true);
+        UIUtils.SetFontSize(this.challengeWarning.text, UIUtils.SmallFontSize);
+        this.UpdateChallengeWarning();
 
         this.itemScroll.SetupItemList(FillInput, Screen.height / 70, IOHelpers.GetAllMaps());
 
@@ -52,28 +52,28 @@ public class MapPanel : BaseScrollMenu
     // LoadMap notifies listeners and closes the panel only after the requested map loads successfully.
     void LoadMap()
     {
-        bool wasScenario = GameManager.PlayContext.IsScenario;
+        bool wasChallenge = GameManager.PlayContext.IsChallenge;
         if (!SandboxMenu.myVMap.LoadNewMap(this.input.input.text + UIStrings.MapExtension)) { return; }
 
         this.DeactivatePanel();
 
         this.OnLoadedCallbacks.Invoke();
-        if (wasScenario && !GameManager.PlayContext.IsScenario)
+        if (wasChallenge && !GameManager.PlayContext.IsChallenge)
         {
             DisplaySingleton.Instance.DisplayText(text => {
                 DisplaySingleton.BasicSmallModification(text);
                 DisplaySingleton.NoOverflowEtc(text);
                 var parent = (RectTransform)text.rectTransform.parent;
                 text.rectTransform.sizeDelta = new Vector2(parent.rect.width * 0.9f, parent.rect.height * 0.1f);
-                text.SetText("Scenario ended — regular sandbox");
-            }, 3f, "scenario-map-exit");
+                text.SetText("Challenge ended — regular sandbox");
+            }, 3f, "challenge-map-exit");
         }
     }
 
     public override void OnEnable()
     {
         base.OnEnable();
-        this.UpdateScenarioWarning();
+        this.UpdateChallengeWarning();
         if (this.itemScroll?.virtualContainer != null)
         {
             this.itemScroll.virtualContainer.UpdateLabels(IOHelpers.GetAllMaps());
@@ -81,21 +81,21 @@ public class MapPanel : BaseScrollMenu
         }
     }
 
-    // UpdateScenarioWarning explains the mode change before a map is loaded from an active scenario.
-    void UpdateScenarioWarning()
+    // UpdateChallengeWarning explains the mode change before a map is loaded from an active challenge.
+    void UpdateChallengeWarning()
     {
-        if (this.scenarioWarning == null || this.btns == null) { return; }
-        bool inScenario = GameManager.PlayContext.IsScenario;
-        this.btns[0].text.SetText(inScenario ? "Load map & leave scenario" : "Load map");
-        this.scenarioWarning.text.SetText(inScenario
-            ? "Loading a map ends the current scenario and returns to regular sandbox."
+        if (this.challengeWarning == null || this.btns == null) { return; }
+        bool inChallenge = GameManager.PlayContext.IsChallenge;
+        this.btns[0].text.SetText(inChallenge ? "Load map & leave challenge" : "Load map");
+        this.challengeWarning.text.SetText(inChallenge
+            ? "Loading a map ends the current challenge and returns to regular sandbox."
             : "");
-        this.scenarioWarning.gameObject.SetActive(inScenario);
+        this.challengeWarning.gameObject.SetActive(inChallenge);
 
         // Keep the footer fixed while giving the unused warning space back to the list.
         var listRow = this.itemScroll.rParent;
         float panelHeight = listRow.rParent.RT.sizeDelta.y;
-        float headerFraction = inScenario ? 0.1f : 0f;
+        float headerFraction = inChallenge ? 0.1f : 0f;
         float listFraction = 0.8f - headerFraction;
         var size = listRow.RT.sizeDelta;
         size.y = panelHeight * listFraction;

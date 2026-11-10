@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 
-public class VScenario
+public class VChallenge
 {
     public const string DefaultFileName = "";
 
-    string scenarioName = "";
-    public string FileName { get { return this.scenarioName; } }
+    string challengeName = "";
+    public string FileName { get { return this.challengeName; } }
 
     GameObject loadedObject;
 
-    public void LoadNewScenario(string name)
+    public void LoadNewChallenge(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -25,12 +25,12 @@ public class VScenario
             3f);
             return;
         }
-        this.scenarioName = name.Substring(0, name.Length - UIStrings.ScenarioExtension.Length);
+        this.challengeName = name.Substring(0, name.Length - UIStrings.ChallengeExtension.Length);
 
         string error = "";
-        string scenarioPath = Path.Join(IOHelpers.GetScenariosDirectory(), name).Replace("\\", "/");
+        string challengePath = Path.Join(IOHelpers.GetChallengesDirectory(), name).Replace("\\", "/");
 
-        if (!File.Exists(scenarioPath))
+        if (!File.Exists(challengePath))
         {
             error = "File doesn't exist.";
             DisplaySingleton.Instance.DisplayText(x =>
@@ -48,12 +48,12 @@ public class VScenario
                 GameObject.Destroy(this.loadedObject);
             }
 
-            this.loadedObject = new GameObject(UIStrings.ScenarioString);
+            this.loadedObject = new GameObject(UIStrings.ChallengeString);
             var gs = this.loadedObject.AddComponent<GameScript>();
 
-            byte[] scenarioContents = File.ReadAllBytes(scenarioPath);
-            using (var reader = new StreamReader(new MemoryStream(scenarioContents)))
-                gs.Activate(reader.ReadToEnd(), name, scenarioContents);
+            byte[] challengeContents = File.ReadAllBytes(challengePath);
+            using (var reader = new StreamReader(new MemoryStream(challengeContents)))
+                gs.Activate(reader.ReadToEnd(), name, challengeContents);
 
             this.loadedObject.SetActive(true);
 
@@ -61,8 +61,8 @@ public class VScenario
         }
     }
 
-    // UnloadScenario stops scenario logic and releases its temporary physics settings before destroying its objects.
-    public void UnloadScenario()
+    // UnloadChallenge stops challenge logic and releases its temporary physics settings before destroying its objects.
+    public void UnloadChallenge()
     {
         if (this.loadedObject == null) { return; }
         this.loadedObject.SetActive(false);

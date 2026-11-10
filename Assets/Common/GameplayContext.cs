@@ -1,35 +1,35 @@
 using System;
 
-// GameplayContext remembers regular sandbox or the selected scenario independently of runtime objects and menus.
+// GameplayContext remembers regular sandbox or the selected challenge independently of runtime objects and menus.
 public class GameplayContext
 {
-    public string ScenarioName { get; private set; }
-    public bool IsScenario => this.ScenarioName != null;
+    public string ChallengeName { get; private set; }
+    public bool IsChallenge => this.ChallengeName != null;
     public int Revision { get; private set; }
 
-    // SelectScenario remembers a scenario for each subsequent return from the editor to play mode.
-    public void SelectScenario(string name)
+    // SelectChallenge remembers a challenge for each subsequent return from the editor to play mode.
+    public void SelectChallenge(string name)
     {
-        if (string.IsNullOrWhiteSpace(name)) { throw new ArgumentException("A scenario name is required.", nameof(name)); }
-        this.ScenarioName = name;
+        if (string.IsNullOrWhiteSpace(name)) { throw new ArgumentException("A challenge name is required.", nameof(name)); }
+        this.ChallengeName = name;
         this.Revision++;
     }
 
-    // SelectSandbox clears the selected scenario when the player explicitly chooses regular sandbox.
+    // SelectSandbox clears the selected challenge when the player explicitly chooses regular sandbox.
     public void SelectSandbox()
     {
-        this.ScenarioName = null;
+        this.ChallengeName = null;
         this.Revision++;
     }
 
-    // Retry restarts the selected scenario or resets the model in regular sandbox without changing modes.
-    public void Retry(Action<string> restartScenario, Action resetSandbox)
+    // Retry restarts the selected challenge or resets the model in regular sandbox without changing modes.
+    public void Retry(Action<string> restartChallenge, Action resetSandbox)
     {
-        if (this.IsScenario) { restartScenario(this.ScenarioName); }
+        if (this.IsChallenge) { restartChallenge(this.ChallengeName); }
         else { resetSandbox(); }
     }
 
-    // MatchesScenario identifies queued loads that still belong to the current scenario selection.
-    public bool MatchesScenario(string name, int revision) => this.IsScenario &&
-        this.Revision == revision && string.Equals(this.ScenarioName, name, StringComparison.Ordinal);
+    // MatchesChallenge identifies queued loads that still belong to the current challenge selection.
+    public bool MatchesChallenge(string name, int revision) => this.IsChallenge &&
+        this.Revision == revision && string.Equals(this.ChallengeName, name, StringComparison.Ordinal);
 }

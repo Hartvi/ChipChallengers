@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Assimp;
 
-public class ScenarioPanel : BaseScrollMenu
+public class ChallengePanel : BaseScrollMenu
 {
 
     CallbackArray OnLoadedCallbacks = new CallbackArray(false);
@@ -13,9 +13,9 @@ public class ScenarioPanel : BaseScrollMenu
     {
         base.Start();
 
-        this.itemScroll.SetupItemList(FillInput, Screen.height / 70, IOHelpers.GetAllScenarios());
+        this.itemScroll.SetupItemList(FillInput, Screen.height / 70, IOHelpers.GetAllChallenges());
 
-        this.btns[0].btn.onClick.AddListener(this.LoadScenario);
+        this.btns[0].btn.onClick.AddListener(this.LoadChallenge);
 
         this.btns[1].btn.onClick.AddListener(this.DeactivatePanel);
 
@@ -25,12 +25,12 @@ public class ScenarioPanel : BaseScrollMenu
         this.itemScroll.Scroll(0f);
         this.scrollbar.scrollbar.value = 0f;
 
-        this.input.placeholder.SetText(UIStrings.EnterScenarioName);
+        this.input.placeholder.SetText(UIStrings.EnterChallengeName);
     }
 
-    void LoadScenario()
+    void LoadChallenge()
     {
-        SandboxMenu.myVScenario.LoadNewScenario(this.input.input.text + UIStrings.ScenarioExtension);
+        SandboxMenu.myVChallenge.LoadNewChallenge(this.input.input.text + UIStrings.ChallengeExtension);
 
         this.DeactivatePanel();
 
@@ -40,7 +40,7 @@ public class ScenarioPanel : BaseScrollMenu
     public override void OnEnable()
     {
         base.OnEnable();
-        if (this.itemScroll != null) this.itemScroll.virtualContainer.UpdateLabels(IOHelpers.GetAllScenarios());
+        if (this.itemScroll != null) this.itemScroll.virtualContainer.UpdateLabels(IOHelpers.GetAllChallenges());
     }
 
     void FillInput(string modelName)

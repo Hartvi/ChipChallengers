@@ -2,8 +2,8 @@ using System;
 using System.IO;
 using System.Security.Cryptography;
 
-// ScenarioContentHash identifies the exact Lua and map contents independently of their filenames.
-public static class ScenarioContentHash
+// ChallengeContentHash identifies the exact Lua and map contents independently of their filenames.
+public static class ChallengeContentHash
 {
     // Compute returns a lowercase SHA-256 hash of length-prefixed Lua bytes followed by length-prefixed map bytes.
     public static string Compute(byte[] luaContents, byte[] mapContents)

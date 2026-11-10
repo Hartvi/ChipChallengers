@@ -1,9 +1,9 @@
 -- Gates sit after route merges so the easy road and technical shortcuts are both valid.
-Scenario({
+Challenge({
     id = "4a9e4b50-6fd4-42ab-9d13-2499fd31a752",
     title = "Quarry Climb",
     recordVersion = 1,
-    scenarioLogicVersion = 1,
+    challengeLogicVersion = 1,
     completionType = "timeTrial",
     rules = {
         forbiddenChipTypes = {},

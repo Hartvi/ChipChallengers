@@ -7,8 +7,8 @@ using Mirror;
 
 public partial class GameScript
 {
-    ScenarioRaceDefinition raceDefinition;
-    ScenarioRaceProgress raceProgress;
+    ChallengeRaceDefinition raceDefinition;
+    ChallengeRaceProgress raceProgress;
     readonly List<string> raceGates = new List<string>();
     Vector3 raceSpawnPosition;
     Quaternion raceSpawnRotation;
@@ -23,14 +23,14 @@ public partial class GameScript
     // Race validates a course before replacing its gates and retains the original optional callback argument.
     void Race(Table configuration, DynValue legacyFinished)
     {
-        var definition = ScenarioRaceDefinition.Parse(configuration, legacyFinished);
+        var definition = ChallengeRaceDefinition.Parse(configuration, legacyFinished);
         this.ClearRace();
         this.raceDefinition = definition;
         foreach (var gate in definition.gates)
         {
             var table = new Table(this.script);
             table.Set("position", DynValue.NewTable(VectorTable(gate.position)));
-            table.Set("size", DynValue.NewTable(VectorTable(new ScenarioRacePoint(gate.radius * 2, gate.radius * 2, gate.radius * 2))));
+            table.Set("size", DynValue.NewTable(VectorTable(new ChallengeRacePoint(gate.radius * 2, gate.radius * 2, gate.radius * 2))));
             var color = new Table(this.script);
             for (int i = 0; i < gate.color.Length; ++i) { color.Set(i + 1, DynValue.NewNumber(gate.color[i])); }
             table.Set("color", DynValue.NewTable(color));
@@ -49,7 +49,7 @@ public partial class GameScript
     }
 
     // VectorTable converts a race position into the indexed vector format used by Spawn.
-    Table VectorTable(ScenarioRacePoint point)
+    Table VectorTable(ChallengeRacePoint point)
     {
         var table = new Table(this.script);
         table.Set(1, DynValue.NewNumber(point.x));
@@ -89,7 +89,7 @@ public partial class GameScript
         this.attemptCompleted = false;
         this.finalRaceTime = null;
         this.times.Remove("race");
-        this.raceProgress = new ScenarioRaceProgress(this.raceGates.Count);
+        this.raceProgress = new ChallengeRaceProgress(this.raceGates.Count);
         for (int i = 0; i < this.raceGates.Count; ++i)
         {
             if (i == 0) { this.Show(this.raceGates[i]); }
@@ -112,7 +112,7 @@ public partial class GameScript
         this.attemptCompleted = false;
         var core = CoreChip.ClientCoreChip;
         this.AllObjects["player1"] = core.gameObject;
-        this.ApplyScenarioPhysics();
+        this.ApplyChallengePhysics();
         core.CmdResetPose(this.raceSpawnPosition, this.raceSpawnRotation);
         this.pendingRaceRestart = StartCoroutine(this.RearmRaceAfterReset(core));
     }
@@ -185,7 +185,7 @@ public partial class GameScript
                 this.raceProgress.Fail();
                 this.isRace = false;
             }
-            this.ReportScenarioError(error.Message + " Press Ctrl+R to retry.");
+            this.ReportChallengeError(error.Message + " Press Ctrl+R to retry.");
         }
     }
 
@@ -197,7 +197,7 @@ public partial class GameScript
         double startedAt = Time.timeAsDouble;
         uint resetCounter = core.srvResetCounter;
         yield return null;
-        while (!ScenarioRaceStartTiming.Ready(Time.timeAsDouble - startedAt))
+        while (!ChallengeRaceStartTiming.Ready(Time.timeAsDouble - startedAt))
         {
             if (!this.CanFinishRaceStart(core, generation, resetCounter))
             {
@@ -205,10 +205,10 @@ public partial class GameScript
                 this.CancelRaceStart();
                 this.isRace = false;
                 this.raceProgress?.Fail();
-                this.ReportScenarioError("Race start cancelled. Press Ctrl+R to retry.");
+                this.ReportChallengeError("Race start cancelled. Press Ctrl+R to retry.");
                 yield break;
             }
-            int number = ScenarioRaceStartTiming.CountdownAt(Time.timeAsDouble - startedAt);
+            int number = ChallengeRaceStartTiming.CountdownAt(Time.timeAsDouble - startedAt);
             this.DisplayRaceStart(number == 0 ? "Get ready..." : number.ToString());
             yield return null;
         }
@@ -218,7 +218,7 @@ public partial class GameScript
         if (!valid) { this.isRace = false; yield break; }
         try
         {
-            this.BeginScenarioAttempt();
+            this.BeginChallengeAttempt();
             this.times["race"] = Time.timeAsDouble;
             this.raceProgress.Pass(0);
             this.Hide(this.raceGates[0]);
@@ -234,7 +234,7 @@ public partial class GameScript
                 this.raceProgress.Fail();
                 this.isRace = false;
             }
-            this.ReportScenarioError(error.Message + " Press Ctrl+R to retry.");
+            this.ReportChallengeError(error.Message + " Press Ctrl+R to retry.");
         }
     }
 
@@ -244,7 +244,7 @@ public partial class GameScript
         this.isActiveAndEnabled && this.isRace && generation == this.raceGeneration &&
         !core.freeze && !GameManager.RealTimeSettings.InMenu && core.srvResetCounter == resetCounter;
 
-    // CancelRaceStart stops pending staging and releases its vehicle without leaving a cancelled scenario frozen.
+    // CancelRaceStart stops pending staging and releases its vehicle without leaving a cancelled challenge frozen.
     void CancelRaceStart()
     {
         if (this.pendingRaceStart != null) { StopCoroutine(this.pendingRaceStart); }
@@ -259,7 +259,7 @@ public partial class GameScript
         this.DisplayRaceText(message, 0.25f, "race-start-countdown", true, 0.5f);
     }
 
-    // DisplayRaceText gives scenario messages a centered box spanning 90 percent of the canvas width.
+    // DisplayRaceText gives challenge messages a centered box spanning 90 percent of the canvas width.
     void DisplayRaceText(string message, float duration, string id, bool large, float height)
     {
         DisplaySingleton.Instance.DisplayText(text => {

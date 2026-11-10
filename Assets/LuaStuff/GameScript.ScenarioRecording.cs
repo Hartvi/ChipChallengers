@@ -8,13 +8,13 @@ using Mirror;
 
 public partial class GameScript
 {
-    public ScenarioMetadata Metadata { get; private set; }
-    public string ScenarioHash { get; private set; }
-    public string ScenarioFileName { get; private set; }
-    public event Action<ScenarioRunRecord> ScenarioCompleted;
-    ScenarioRunRecord activeAttemptRecord;
+    public ChallengeMetadata Metadata { get; private set; }
+    public string ChallengeHash { get; private set; }
+    public string ChallengeFileName { get; private set; }
+    public event Action<ChallengeRunRecord> ChallengeCompleted;
+    ChallengeRunRecord activeAttemptRecord;
     // activeAttempt owns the physics-change subscription for the currently recorded run.
-    ScenarioRunRecord activeAttempt {
+    ChallengeRunRecord activeAttempt {
         get { return this.activeAttemptRecord; }
         set {
             if (ReferenceEquals(this.activeAttemptRecord, value)) { return; }
@@ -26,63 +26,63 @@ public partial class GameScript
     CoreChip attemptCore;
     uint attemptResetCounter;
     double? finalRaceTime;
-    string fallbackScenarioId;
+    string fallbackChallengeId;
     bool attemptCompleted;
     static GameScript physicsOwner;
-    ScenarioPhysicsSettings previousPhysics;
+    ChallengePhysicsSettings previousPhysics;
     readonly Dictionary<Rigidbody, Vector2Int> previousBodySolvers = new Dictionary<Rigidbody, Vector2Int>();
 
-    // RegisterScenarioCallbacks hashes the Lua bytes with empty map contents and registers the Lua recording functions.
-    void RegisterScenarioCallbacks(string scenarioFileName, byte[] scenarioContents)
+    // RegisterChallengeCallbacks hashes the Lua bytes with empty map contents and registers the Lua recording functions.
+    void RegisterChallengeCallbacks(string challengeFileName, byte[] challengeContents)
     {
-        this.ScenarioHash = ScenarioContentHash.Compute(scenarioContents, Array.Empty<byte>());
-        this.ScenarioFileName = Path.GetFileName(scenarioFileName);
-        // fallbackScenarioId identifies files without explicit metadata by filename; Scenario({id=...}) supplies a permanent ID.
-        this.fallbackScenarioId = string.IsNullOrWhiteSpace(scenarioFileName)
-            ? "" : "legacy:" + Path.GetFileNameWithoutExtension(scenarioFileName);
-        this.Metadata = new ScenarioMetadata { scenarioId = this.fallbackScenarioId };
-        this.ApplyScenarioPhysics();
-        ScenarioLuaCallbacks.Register(this.script, this.ConfigureScenario,
-            this.BeginScenarioAttempt, this.CompleteAttempt, () => this.finalRaceTime, this.Race, this.RestartRace);
+        this.ChallengeHash = ChallengeContentHash.Compute(challengeContents, Array.Empty<byte>());
+        this.ChallengeFileName = Path.GetFileName(challengeFileName);
+        // fallbackChallengeId identifies files without explicit metadata by filename; Challenge({id=...}) supplies a permanent ID.
+        this.fallbackChallengeId = string.IsNullOrWhiteSpace(challengeFileName)
+            ? "" : "legacy:" + Path.GetFileNameWithoutExtension(challengeFileName);
+        this.Metadata = new ChallengeMetadata { challengeId = this.fallbackChallengeId };
+        this.ApplyChallengePhysics();
+        ChallengeLuaCallbacks.Register(this.script, this.ConfigureChallenge,
+            this.BeginChallengeAttempt, this.CompleteAttempt, () => this.finalRaceTime, this.Race, this.RestartRace);
     }
 
-    // ConfigureScenario applies validated scenario metadata before an attempt starts.
-    void ConfigureScenario(Table metadata)
+    // ConfigureChallenge applies validated challenge metadata before an attempt starts.
+    void ConfigureChallenge(Table metadata)
     {
         if (this.activeAttempt != null)
-            throw new InvalidOperationException("Cannot change scenario metadata during an attempt.");
-        this.Metadata = ScenarioLuaMetadata.Parse(metadata, this.fallbackScenarioId);
-        this.ApplyScenarioPhysics();
+            throw new InvalidOperationException("Cannot change challenge metadata during an attempt.");
+        this.Metadata = ChallengeLuaMetadata.Parse(metadata, this.fallbackChallengeId);
+        this.ApplyChallengePhysics();
     }
 
-    // BeginScenarioAttempt validates the vehicle and snapshots its build and settings for a new attempt.
-    public void BeginScenarioAttempt()
+    // BeginChallengeAttempt validates the vehicle and snapshots its build and settings for a new attempt.
+    public void BeginChallengeAttempt()
     {
-        if (string.IsNullOrWhiteSpace(this.Metadata.scenarioId))
-            throw new InvalidOperationException("Declare Scenario({id=...}) before starting an attempt.");
+        if (string.IsNullOrWhiteSpace(this.Metadata.challengeId))
+            throw new InvalidOperationException("Declare Challenge({id=...}) before starting an attempt.");
         if (NetworkClient.localPlayer == null)
             throw new InvalidOperationException("Player is not ready.");
         var core = CoreChip.ClientCoreChip;
         var model = core.VirtualModel;
         var counts = model.chips.GroupBy(chip => chip.ChipType)
             .OrderBy(group => group.Key, StringComparer.Ordinal)
-            .Select(group => new ScenarioChipCount { chipType = group.Key, count = group.Count() }).ToList();
+            .Select(group => new ChallengeChipCount { chipType = group.Key, count = group.Count() }).ToList();
         this.CheckRules(counts);
         if (core.freeze || GameManager.RealTimeSettings.InMenu)
             throw new InvalidOperationException("Start the attempt in play mode.");
-        this.ApplyScenarioPhysics();
-        this.activeAttempt = new ScenarioRunRecord {
-            scenarioHash = this.ScenarioHash,
-            scenarioFileName = this.ScenarioFileName,
+        this.ApplyChallengePhysics();
+        this.activeAttempt = new ChallengeRunRecord {
+            challengeHash = this.ChallengeHash,
+            challengeFileName = this.ChallengeFileName,
             runId = Guid.NewGuid().ToString("N"),
             gameVersion = Application.version,
-            scenarioLogicVersion = ScenarioLuaMetadata.CurrentLogicVersion,
+            challengeLogicVersion = ChallengeLuaMetadata.CurrentLogicVersion,
             completionType = this.Metadata.completionType,
             modelName = string.IsNullOrWhiteSpace(model.ModelName) ? GameManager.Instance.GetModel() : model.ModelName,
             modelSnapshot = model.ToLuaString(),
             chipCounts = counts,
             physics = PhysicsSettingsManager.Capture(),
-            rules = new ScenarioRuleSnapshot {
+            rules = new ChallengeRuleSnapshot {
                 maxChips = this.Metadata.rules.maxChips,
                 forbiddenChipTypes = new List<string>(this.Metadata.rules.forbiddenChipTypes),
                 physics = this.Metadata.rules.physics.Copy()
@@ -95,15 +95,15 @@ public partial class GameScript
     }
 
     // CheckRules rejects vehicles exceeding the chip limit or containing forbidden chip types.
-    void CheckRules(List<ScenarioChipCount> counts)
+    void CheckRules(List<ChallengeChipCount> counts)
     {
         var rules = this.Metadata.rules;
         if (rules.maxChips >= 0 && counts.Sum(x => x.count) > rules.maxChips)
-            throw new InvalidOperationException("Scenario allows at most " + rules.maxChips + " chips.");
+            throw new InvalidOperationException("Challenge allows at most " + rules.maxChips + " chips.");
         var forbidden = counts.Where(x => rules.forbiddenChipTypes.Any(type =>
             string.Equals(type, x.chipType, StringComparison.OrdinalIgnoreCase))).Select(x => x.chipType).ToArray();
         if (forbidden.Length > 0)
-            throw new InvalidOperationException("Scenario forbids chip types: " + string.Join(", ", forbidden));
+            throw new InvalidOperationException("Challenge forbids chip types: " + string.Join(", ", forbidden));
     }
 
     // AttemptIsValid checks live attempt state and optionally verifies the full model and body settings before saving.
@@ -131,7 +131,7 @@ public partial class GameScript
         if (this.activeAttempt == null)
         {
             if (this.attemptCompleted) { return; }
-            throw new InvalidOperationException("Call BeginScenarioAttempt before completing a scenario.");
+            throw new InvalidOperationException("Call BeginChallengeAttempt before completing a challenge.");
         }
         if (!this.AttemptIsValid(verifySnapshot: true))
         {
@@ -145,12 +145,12 @@ public partial class GameScript
         run.timeSeconds = seconds.GetValueOrDefault();
         run.playerName = PlayerPrefs.GetString("PlayerName", "Player");
         run.finishedAtUtc = DateTimeOffset.UtcNow.ToString("O");
-        var store = new ScenarioProgressStore(Path.Combine(Application.persistentDataPath, "scenario-progress.json"));
+        var store = new ChallengeProgressStore(Path.Combine(Application.persistentDataPath, "challenge-progress.json"));
         store.Record(this.Metadata, run);
         this.activeAttempt = null;
         this.attemptCompleted = true;
         this.finalRaceTime = seconds;
-        this.ScenarioCompleted?.Invoke(run);
+        this.ChallengeCompleted?.Invoke(run);
     }
 
     // CheckAttemptValidity invalidates an active attempt when its vehicle, settings or play mode changes.
@@ -172,12 +172,12 @@ public partial class GameScript
         this.activeAttempt = null;
         this.isRace = false;
         this.raceProgress?.Fail();
-        this.ReportScenarioError("Attempt invalidated (" + reason + "). " +
+        this.ReportChallengeError("Attempt invalidated (" + reason + "). " +
             (this.raceDefinition == null ? "Start a new attempt to retry." : "Press Ctrl+R to retry."));
     }
 
-    // ReportScenarioError logs a scenario error and displays it briefly on screen.
-    void ReportScenarioError(string message)
+    // ReportChallengeError logs a challenge error and displays it briefly on screen.
+    void ReportChallengeError(string message)
     {
         Debug.LogWarning(message);
         DisplaySingleton.Instance.DisplayText(text => {
@@ -186,8 +186,8 @@ public partial class GameScript
         }, 5f);
     }
 
-    // ApplyScenarioPhysics preserves player settings once and applies the scenario rules to the active simulation.
-    void ApplyScenarioPhysics()
+    // ApplyChallengePhysics preserves player settings once and applies the challenge rules to the active simulation.
+    void ApplyChallengePhysics()
     {
         if (physicsOwner != null && physicsOwner != this) { physicsOwner.RestorePhysics(); }
         if (this.previousPhysics == null)
@@ -198,19 +198,19 @@ public partial class GameScript
         }
         physicsOwner = this;
         var required = this.Metadata.rules.physics;
-        PhysicsSettingsManager.Apply(required, "Scenario physics rules");
-        foreach (var body in FindObjectsOfType<Rigidbody>()) { ApplyScenarioPhysicsToBody(body); }
+        PhysicsSettingsManager.Apply(required, "Challenge physics rules");
+        foreach (var body in FindObjectsOfType<Rigidbody>()) { ApplyChallengePhysicsToBody(body); }
     }
 
-    // ApplyScenarioPhysicsToBody applies required solver settings to existing or newly rebuilt chip bodies.
-    public static void ApplyScenarioPhysicsToBody(Rigidbody body)
+    // ApplyChallengePhysicsToBody applies required solver settings to existing or newly rebuilt chip bodies.
+    public static void ApplyChallengePhysicsToBody(Rigidbody body)
     {
         if (physicsOwner == null || body == null) { return; }
         var owner = physicsOwner;
         if (!owner.previousBodySolvers.ContainsKey(body))
             owner.previousBodySolvers[body] = new Vector2Int(owner.previousPhysics.solverIterations, owner.previousPhysics.solverVelocityIterations);
         var required = owner.Metadata.rules.physics;
-        PhysicsSettingsManager.ApplyBody(body, required.solverIterations, required.solverVelocityIterations, "Scenario body solvers");
+        PhysicsSettingsManager.ApplyBody(body, required.solverIterations, required.solverVelocityIterations, "Challenge body solvers");
     }
 
     // RestorePhysics restores player settings and the original solver settings of surviving bodies once.
@@ -232,7 +232,7 @@ public partial class GameScript
         this.previousBodySolvers.Clear();
     }
 
-    // OnDisable stops the scenario's attempt and gates and restores the player's physics settings.
+    // OnDisable stops the challenge's attempt and gates and restores the player's physics settings.
     void OnDisable()
     {
         this.CancelRaceStart();
