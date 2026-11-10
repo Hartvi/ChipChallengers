@@ -41,6 +41,7 @@ public class CoreChip : CommonChip
     bool raceStartHeld;
     public bool IsRaceStartHeld => this.raceStartHeld;
     bool frozen = false;
+    bool assemblyHidden = true;
     public bool IsRebuilding { get; private set; }
     public static CoreChip ClientCoreChip => NetworkClient.localPlayer.GetComponent<CoreChip>();
 
@@ -217,6 +218,31 @@ public class CoreChip : CommonChip
         this.LoadString(state);
     }
 
+    // Reveal in LateUpdate so aspect Start methods and reset callbacks finish first.
+    void LateUpdate()
+    {
+        if (!this.isClient) { return; }
+        if (this.loadedModelString == null || this.IsRebuilding || this.frozen ||
+            this.srvResetCounter != this.cltResetCounter || this.modelString != this.loadedModelString)
+        {
+            // Recheck renderers while hidden to include visuals created by aspect initialization.
+            this.SetModelAssemblyVisible(false);
+        }
+        else if (this.assemblyHidden)
+        {
+            this.SetModelAssemblyVisible(true);
+        }
+    }
+
+    void SetModelAssemblyVisible(bool visible)
+    {
+        foreach (var chip in this.AllChips)
+        {
+            if (chip != null) { ((CommonChip)chip).SetAssemblyVisible(visible); }
+        }
+        this.assemblyHidden = !visible;
+    }
+
     void PrintSrvCounter(uint oldVal, uint newVal)
     {
         print($"Core: {this.netId} SERVER: {this.isServer} old: {oldVal} new {newVal}");
@@ -356,6 +382,7 @@ public class CoreChip : CommonChip
     // PrepareReset pauses the model and clears retained input and motion before resetting.
     void PrepareReset()
     {
+        this.SetModelAssemblyVisible(false);
         this.IsRebuilding = true;
         this.inputMessage = new InputMessage();
         foreach (var chip in this.AllChips)
@@ -449,6 +476,7 @@ public class CoreChip : CommonChip
     [Client]
     public void TriggerSpawn()
     {
+        this.SetModelAssemblyVisible(false);
         this.IsRebuilding = true;
         this.inputMessage = new InputMessage();
         // Freeze every body before repositioning the first chip.

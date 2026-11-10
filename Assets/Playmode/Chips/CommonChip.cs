@@ -30,10 +30,20 @@ public class CommonChip : AngleChip
     public override void OnStartClient()
     {
         base.OnStartClient();
+        this.SetAssemblyVisible(false);
         //if (!this.isServer)
         //{
         //    this.rb.isKinematic = true;
         //}
+    }
+
+    // Keep networking and setup active while hiding unfinished chip visuals.
+    public void SetAssemblyVisible(bool visible)
+    {
+        foreach (var renderer in this.GetComponentsInChildren<Renderer>(true))
+        {
+            renderer.forceRenderingOff = !visible;
+        }
     }
 
     [Server]
