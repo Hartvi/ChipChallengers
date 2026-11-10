@@ -207,12 +207,6 @@ public class WheelAspects : BaseAspect
         }
         wheelVisual.Rotate(Vector3.up, -WheelPhysics.SpinDegrees(this.myChip.Omega, Time.deltaTime), Space.Self);
 
-        //this.totalSlip = 0.5f * (Mathf.Abs(this.xSlip) + Mathf.Abs(this.ySlip) + this.totalSlip1);
-        this.totalSlip = 0.25f * (Mathf.Abs(this.xSlip) + Mathf.Abs(this.ySlip) + this.totalSlip1 + this.totalSlip2 + this.totalSlip3);
-        this.totalSlip3 = this.totalSlip2;
-        this.totalSlip2 = this.totalSlip1;
-        this.totalSlip1 = this.totalSlip;
-
         this.particles.gameObject.SetActive(true);
         if (!this.particles.isPlaying)
         {
@@ -266,6 +260,12 @@ public class WheelAspects : BaseAspect
             this.xSlip = 0f;
             this.ySlip = 0f;
         }
+        // Sample slip on physics ticks so visual updates cannot miss short-lived contacts.
+        this.totalSlip = 0.25f * (Mathf.Abs(this.xSlip) + Mathf.Abs(this.ySlip) +
+            this.totalSlip1 + this.totalSlip2 + this.totalSlip3);
+        this.totalSlip3 = this.totalSlip2;
+        this.totalSlip2 = this.totalSlip1;
+        this.totalSlip1 = this.totalSlip;
         this.ApplyTorque(this.value);
     }
 

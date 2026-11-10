@@ -339,9 +339,12 @@ public class CommonChip : AngleChip
                 // WHEEL - power = power, brake = brake
                 if (this.equivalentVirtualChip.ChipType == VChip.wheelStr)
                 {
-                    this.gameObject.AddComponentIdempotent<WheelAspects>().myChip = this;
+                    var wheel = this.gameObject.AddComponentIdempotent<WheelAspects>();
+                    wheel.myChip = this;
                     this.gameObject.AddComponentIdempotent<WheelSoundAspect>().myChip = this;
-                    //this.gameObject.AddComponentIdempotent<TireSoundAspect>().myChip = this;
+                    var tireSound = this.gameObject.AddComponentIdempotent<TireSoundAspect>();
+                    tireSound.myChip = this;
+                    tireSound.wheelAspect = wheel;
                 }
                 if (this.equivalentVirtualChip.ChipType == VChip.gunStr)
                 {
