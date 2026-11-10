@@ -1,5 +1,6 @@
 
 ### TODO
+- fix bullets phasing through walls
 - test the multiplayer stuff
   - when you disconnect as host - make clients go to main menu
   - make sure that transitioning from playmode as a client to editor makes the client disconnect and then reconnect to its own host for now
@@ -53,6 +54,11 @@ SCENARIOS:
   - `+` to print stuff to screen as text
 
 ### Done
+- fix the camera flicking when it's up above
+- race text - make it smaller
+- fix faster zoom in
+- orbit the car instead of following
+- lmb to shoot
  `+` in multiplayer: 
   - done :unspawn objects
   - done: add joints to objects on client

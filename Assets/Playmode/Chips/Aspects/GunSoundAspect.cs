@@ -4,8 +4,7 @@ using UnityEngine;
 
 public class GunSoundAspect : BaseSoundAspect
 {
-    GunAspect gunAspect;
-    float oldCharge = 0f;
+    public GunAspect gunAspect;
 
     protected override void Awake()
     {
@@ -21,22 +20,20 @@ public class GunSoundAspect : BaseSoundAspect
         {
             s.clip = this.audioClip;
         }
-        this.gunAspect = this.GetComponent<GunAspect>();
+        this.gunAspect.Fired += this.PlayShot;
     }
 
-    void Update()
+    void PlayShot()
     {
-        if (this.gunAspect.charge < this.oldCharge)
-        {
-            var s = this.soundPool.Next();
-            s.volume = GameManager.RealTimeSettings.Volume;
-            s.Play();
-        }
-        this.oldCharge = this.gunAspect.charge;
+        if (!this.isActiveAndEnabled) { return; }
+        var s = this.soundPool.Next();
+        s.volume = GameManager.RealTimeSettings.Volume;
+        s.Play();
     }
 
     protected override void OnDestroy()
     {
+        if (this.gunAspect is not null) { this.gunAspect.Fired -= this.PlayShot; }
         base.OnDestroy();
         // normally has to be done when this spawns extra objects
         //this.soundPool.DeleteObjects();

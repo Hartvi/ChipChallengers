@@ -361,8 +361,11 @@ public class CommonChip : AngleChip
                 if (this.equivalentVirtualChip.ChipType == VChip.gunStr)
                 {
                     //if(this.isServer) 
-                    this.gameObject.AddComponentIdempotent<GunAspect>().myChip = this;
-                    this.gameObject.AddComponentIdempotent<GunSoundAspect>().myChip = this;
+                    var gun = this.gameObject.AddComponentIdempotent<GunAspect>();
+                    gun.myChip = this;
+                    var gunSound = this.gameObject.AddComponentIdempotent<GunSoundAspect>();
+                    gunSound.myChip = this;
+                    gunSound.gunAspect = gun;
                     this.gameObject.AddComponentIdempotent<GunDustAspect>().myChip = this;
                 }
             }

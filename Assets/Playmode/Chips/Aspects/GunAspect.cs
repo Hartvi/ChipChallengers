@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class GunAspect : BaseAspect
 {
+    public event System.Action Fired;
+
     float _charge = 0f;
     public float charge => _charge;
     float power = 1f;
@@ -76,6 +78,7 @@ public class GunAspect : BaseAspect
         Vector3 initialBulletPosition = this.transform.position;
 
         this.bulletPool.Next().Fire(initialBulletPosition, forward * this.projectileVelocity);
+        this.Fired?.Invoke();
         //Debug.DrawLine(this.transform.position, this.transform.position + this.transform.forward*2f);
     }
 
