@@ -97,15 +97,8 @@ public class CreateChipPanel : BasePanel
         Debug.Assert(core.isClient);
 
         VModel vm = core.VirtualModel;
+        this.editorMenu.SelectChipAfterBuild(newChip.id);
         vm.chips = vm.chips.Concat(new VChip[] { newChip }).ToArray();
-        //core.CmdLoadString(vm.ToLuaString());
-
-        //core.srvResetCounter += 1;
-
-        // TODO make this more secure:
-        // HOW???
-        // TODO NEWCHIP CAN BE NULL????
-        this.editorMenu.selectedChip = this.editorMenu.highlighter.SelectVChip(newChip.id);// rChip.equivalentVirtualChip.id);
         this.gameObject.SetActive(false);
     }
 

@@ -15,6 +15,7 @@ public class EditorMenu : BaseMenu, InputReceiver
     private Camera _camera;
     CoreChip entryCameraCore;
     public CommonChip _selectedChip;
+    string pendingChipSelection;
     public CommonChip selectedChip
     {
         get
@@ -199,9 +200,7 @@ public class EditorMenu : BaseMenu, InputReceiver
 
         //print($"Setting editormenu callback to model changed");
         Action[] afterBuildListeners = new Action[] {
-            () => {
-                this.selectedChip = this.highlighter.SelectVChip(this.selectedChip.equivalentVirtualChip.id);
-            },
+            this.RefreshChipSelection,
             this.VariablePanel.RefreshModel,
             this.ScriptPanel.RefreshModel
 
@@ -242,6 +241,7 @@ public class EditorMenu : BaseMenu, InputReceiver
 
     void OnLeaveMenu()
     {
+        this.pendingChipSelection = null;
         if (this.entryCameraCore != null) { this.entryCameraCore.ResetCompleted -= this.PositionCameraOnEntry; }
         this.entryCameraCore = null;
         this.highlighter.ParentHighlighter.SetActive(false);
@@ -251,6 +251,19 @@ public class EditorMenu : BaseMenu, InputReceiver
         var core = CoreChip.ClientCoreChip;
         core.VirtualModel.SaveThisModelToFile(UIStrings.Backup + UIStrings.ModelExtension);
         core.freeze = false;
+    }
+
+    // New chips can only be highlighted once their runtime objects have been built.
+    public void SelectChipAfterBuild(string chipId)
+    {
+        this.pendingChipSelection = chipId;
+    }
+
+    void RefreshChipSelection()
+    {
+        string chipId = this.pendingChipSelection ?? this.selectedChip.equivalentVirtualChip.id;
+        this.pendingChipSelection = null;
+        this.selectedChip = this.highlighter.SelectVChip(chipId);
     }
 
     public VChip selectedVChip
