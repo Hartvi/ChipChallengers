@@ -6,9 +6,9 @@ using Dummiesman;
 
 public class VMap
 {
-    public const string DefaultFileName = "first_map.obj";
+    public const string DefaultFileName = "industrial_test_track.obj";
     
-    string mapName = "first_map.obj";
+    string mapName = DefaultFileName;
     public string FileName { get { return this.mapName; } }
 
     GameObject loadedObject;
