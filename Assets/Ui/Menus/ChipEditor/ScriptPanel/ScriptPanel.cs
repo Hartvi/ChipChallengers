@@ -105,10 +105,13 @@ public class ScriptPanel : BaseSidePanel, InputReceiver
     protected override void OnDisable()
     {
         base.OnDisable();
+        this.insideChipPanel = false;
         if (this.pendingRefresh != null) { StopCoroutine(this.pendingRefresh); }
         this.pendingRefresh = null;
         this.boundModel = null;
     }
+
+    public bool IsPointerOver => this.isActiveAndEnabled && this.insideChipPanel;
 
     public bool IsSelected
     {
