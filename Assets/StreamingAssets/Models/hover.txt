@@ -1,0 +1,41 @@
+{chips = {{id = 'a', orientation = '0', parentId = '', Colour = '#FFFFFF', Name = 'joe', Type = 'Core', }, {id = 'ag', orientation = '2', parentId = 'a', Angle = '0', Colour = '#FFFFFF', Spring = '1e9', Damper = '1e6', Option = '0', Name = 'chip_name', Type = 'Chip', }, {id = 'aga', orientation = '0', parentId = 'ag', Angle = '0', Colour = '#FFFFFF', Spring = '1e9', Damper = '1e6', Option = '0', Name = 'chip_name', Type = 'Chip', }, {id = 'agaa', orientation = '0', parentId = 'aga', Angle = '0', Colour = '#FFFFFF', Spring = '1e9', Damper = '1e6', Option = '0', Name = 'chip_name', Type = 'Chip', }, {id = 'agaaa', orientation = '0', parentId = 'agaa', Angle = '0', Colour = '#FFFFFF', Spring = '1e9', Damper = '1e6', Option = '0', Name = 'chip_name', Type = 'Chip', }, {id = 'agaaaa', orientation = '0', parentId = 'agaaa', Angle = '0', Colour = '#FFFFFF', Spring = '1e9', Damper = '1e6', Option = '0', Name = 'chip_name', Type = 'Chip', }, {id = 'agaaaaa', orientation = '0', parentId = 'agaaaa', Angle = '0', Colour = '#FFFFFF', Spring = '1e9', Damper = '1e6', Option = '0', Name = 'chip_name', Type = 'Chip', }, {id = 'ah', orientation = '3', parentId = 'a', Angle = '0', Colour = '#FFFFFF', Spring = '1e9', Damper = '1e6', Option = '0', Name = 'chip_name', Type = 'Chip', }, {id = 'aha', orientation = '0', parentId = 'ah', Angle = '0', Colour = '#FFFFFF', Spring = '1e9', Damper = '1e6', Option = '0', Name = 'chip_name', Type = 'Chip', }, {id = 'ahaa', orientation = '0', parentId = 'aha', Angle = '0', Value = 'power', Brake = '0', Colour = '0', Spring = '1e9', Damper = '1e6', Option = '0', Name = 'chip_name', Type = 'Jet', }, {id = 'ai', orientation = '1', parentId = 'a', Angle = '0', Colour = '#FFFFFF', Spring = '1e9', Damper = '1e6', Option = '0', Name = 'chip_name', Type = 'Chip', }, {id = 'aia', orientation = '0', parentId = 'ai', Angle = '0', Colour = '#FFFFFF', Spring = '1e9', Damper = '1e6', Option = '0', Name = 'chip_name', Type = 'Chip', }, {id = 'aiaa', orientation = '0', parentId = 'aia', Angle = '0', Value = 'power2', Brake = '0', Colour = '0', Spring = '1e9', Damper = '1e6', Option = '0', Name = 'chip_name', Type = 'Jet', }, {id = 'agaaaaaa', orientation = '3', parentId = 'agaaaaa', Angle = '0', Colour = '#FFFFFF', Spring = '1e9', Damper = '1e6', Option = '0', Name = 'chip_name', Type = 'Chip', }, {id = 'agaaaaaaa', orientation = '0', parentId = 'agaaaaaa', Angle = '0', Colour = '#FFFFFF', Spring = '1e9', Damper = '1e6', Option = '0', Name = 'chip_name', Type = 'Chip', }, {id = 'agaaaaaaaa', orientation = '0', parentId = 'agaaaaaaa', Angle = '0', Value = 'power4', Brake = '0', Colour = '0', Spring = '1e9', Damper = '1e6', Option = '0', Name = 'chip_name', Type = 'Jet', }, {id = 'agaaaaab', orientation = '1', parentId = 'agaaaaa', Angle = '0', Colour = '#FFFFFF', Spring = '1e9', Damper = '1e6', Option = '0', Name = 'chip_name', Type = 'Chip', }, {id = 'agaaaaaba', orientation = '0', parentId = 'agaaaaab', Angle = '0', Colour = '#FFFFFF', Spring = '1e9', Damper = '1e6', Option = '0', Name = 'chip_name', Type = 'Chip', }, {id = 'agaaaaabaa', orientation = '0', parentId = 'agaaaaaba', Angle = '0', Value = 'power3', Brake = '0', Colour = '0', Spring = '1e9', Damper = '1e6', Option = '0', Name = 'chip_name', Type = 'Jet', }, {id = 'aiab', orientation = '0', parentId = 'aia', Angle = '-90', Value = '0', Colour = '#FFFFFF', Option = '0', Name = 'dist2', Type = 'Sensor', }, {id = 'ahab', orientation = '0', parentId = 'aha', Angle = '-90', Value = '0', Colour = '#FFFFFF', Option = '0', Name = 'dist1', Type = 'Sensor', }, {id = 'agaaaaaaab', orientation = '0', parentId = 'agaaaaaaa', Angle = '-90', Value = '0', Colour = '#FFFFFF', Option = '0', Name = 'dist4', Type = 'Sensor', }, {id = 'agaaaaabab', orientation = '0', parentId = 'agaaaaaba', Angle = '-90', Value = '0', Colour = '#FFFFFF', Option = '0', Name = 'dist3', Type = 'Sensor', }, {id = 'agaab', orientation = '0', parentId = 'agaa', Angle = '90', Colour = '#FFFFFF', Spring = '1e9', Damper = '1e6', Option = '0', Name = 'chip_name', Type = 'Axle', }, {id = 'aj', orientation = '0', parentId = 'a', Angle = '-90', Value = 'run', Brake = '0', Colour = '#CC0000', Spring = '1e9', Damper = '1e6', Option = '0', Name = 'chip_name', Type = 'Jet', }, {id = 'ahac', orientation = '1', parentId = 'aha', Angle = '-90', Value = 'lr', Brake = '0', Colour = '#FFFFFF', Spring = '1e9', Damper = '1e6', Option = '0', Name = 'chip_name', Type = 'Jet', }, {id = 'aiac', orientation = '3', parentId = 'aia', Angle = '-90', Value = 'lr2', Brake = '0', Colour = '#FFFFFF', Spring = '1e9', Damper = '1e6', Option = '0', Name = 'chip_name', Type = 'Jet', }, {id = 'agaabb', orientation = '2', parentId = 'agaab', Angle = '0', Colour = '#FFFFFF', Spring = '1e9', Damper = '1e6', Option = '0', Name = 'chip_name', Type = 'Chip', }, }, variables = {{name = 'power', defaultValue = 0, maxValue = 1000, minValue = -1000, backstep = 0, }, {name = 'power3', defaultValue = 0, maxValue = 1000, minValue = -1000, backstep = 0, }, {name = 'power4', defaultValue = 0, maxValue = 1000, minValue = -1000, backstep = 0, }, {name = 'power2', defaultValue = 0, maxValue = 1000, minValue = -1000, backstep = 0, }, {name = 'run', defaultValue = 0, maxValue = 500, minValue = -500, backstep = 100, }, {name = 'lr', defaultValue = 0, maxValue = 500, minValue = -500, backstep = 100, }, {name = 'lr2', defaultValue = 0, maxValue = 500, minValue = -500, backstep = 100, }, }, script = [[olde1 = 0
+olde2 = 0
+olde3 = 0
+olde4 = 0
+h = 5
+kP = 1000
+kD = 1400
+
+function Loop()
+ if Key("w") then
+  run = run + 100
+ end
+ if Key("s") then
+  run = run - 100
+ end
+ if Key("a") then
+  lr = lr + 100
+  lr2 = lr2 - 100
+ end
+ if Key("d") then
+  lr = lr - 100
+  lr2 = lr2 + 100
+ end
+
+ d1 = dist1.Read()
+ d2 = dist2.Read()
+ d3 = dist3.Read()
+ d4 = dist4.Read()
+ e1 = h - d1
+ e2 = h - d2
+ e3 = h - d3
+ e4 = h - d4
+ power  = kP * e1 + kD * (e1 - olde1)
+ power2 = kP * e2 + kD * (e2 - olde2)
+ power3 = kP * e3 + kD * (e3 - olde3)
+ power4 = kP * e4 + kD * (e4 - olde4)
+ olde1 = e1
+ olde2 = e2
+ olde3 = e3
+ olde4 = e4
+end]] }

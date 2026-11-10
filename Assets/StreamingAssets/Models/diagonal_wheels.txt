@@ -1,0 +1,22 @@
+{chips = {{id = 'a', orientation = '0', parentId = '', Colour = '#FFFFFF', Name = 'joe', Type = 'Core', }, {id = 'aa', orientation = '3', parentId = 'a', Angle = 'angle', Colour = '#FFFFFF', Spring = '1e9', Damper = '1e6', Option = '0', Name = 'chip_name', Type = 'Rudder', }, {id = 'ab', orientation = '1', parentId = 'a', Angle = 'angle', Colour = '#FFFFFF', Spring = '1e9', Damper = '1e6', Option = '0', Name = 'chip_name', Type = 'Rudder', }, {id = 'aba', orientation = '0', parentId = 'ab', Angle = '-60', Value = 'power', Brake = '0', Colour = '#FFFFFF', Spring = '1e9', Damper = '1e6', Option = '0', Name = 'chip_name', Type = 'Wheel', }, {id = 'aaa', orientation = '0', parentId = 'aa', Angle = '-60', Value = 'power2', Brake = '0', Colour = '#FFFFFF', Spring = '1e9', Damper = '1e6', Option = '0', Name = 'chip_name', Type = 'Wheel', }, {id = 'ac', orientation = '2', parentId = 'a', Angle = '0', Colour = '#FFFFFF', Spring = '1e9', Damper = '1e6', Option = '0', Name = 'chip_name', Type = 'Chip', }, {id = 'acc', orientation = '2', parentId = 'ac', Angle = '150', Colour = '#FFFFFF', Spring = '1e9', Damper = '1e6', Option = '0', Name = 'chip_name', Type = 'Chip', }, {id = 'acd', orientation = '0', parentId = 'ac', Angle = '0', Colour = '#FFFFFF', Spring = '1e9', Damper = '1e6', Option = '0', Name = 'chip_name', Type = 'Chip', }, {id = 'acda', orientation = '0', parentId = 'acd', Angle = '0', Colour = '#FFFFFF', Spring = '1e9', Damper = '1e6', Option = '0', Name = 'chip_name', Type = 'Chip', }, {id = 'acdaa', orientation = '0', parentId = 'acda', Angle = '0', Colour = '#FFFFFF', Spring = '1e9', Damper = '1e6', Option = '0', Name = 'chip_name', Type = 'Chip', }, {id = 'acdaaa', orientation = '1', parentId = 'acdaa', Angle = '0', Colour = '#FFFFFF', Spring = '1e9', Damper = '1e6', Option = '0', Name = 'chip_name', Type = 'Chip', }, {id = 'acdaaaa', orientation = '0', parentId = 'acdaaa', Angle = '-60', Value = 'power2', Brake = 'brake', Colour = '#FFFFFF', Spring = '1e9', Damper = '1e6', Option = '0', Name = 'chip_name', Type = 'Wheel', }, {id = 'acdaaab', orientation = '1', parentId = 'acdaaa', Angle = '-20', Colour = '#FFFFFF', Spring = '1e9', Damper = '1e6', Option = '0', Name = 'chip_name', Type = 'Chip', }, {id = 'acdaab', orientation = '3', parentId = 'acdaa', Angle = '0', Colour = '#FFFFFF', Spring = '1e9', Damper = '1e6', Option = '0', Name = 'chip_name', Type = 'Chip', }, {id = 'acdaaba', orientation = '0', parentId = 'acdaab', Angle = '-60', Value = 'power', Brake = 'brake', Colour = '#FFFFFF', Spring = '1e9', Damper = '1e6', Option = '0', Name = 'chip_name', Type = 'Wheel', }, {id = 'acdaabb', orientation = '3', parentId = 'acdaab', Angle = '-20', Colour = '#FFFFFF', Spring = '1e9', Damper = '1e6', Option = '0', Name = 'chip_name', Type = 'Chip', }, {id = 'acdb', orientation = '0', parentId = 'acd', Angle = '90', Colour = '#FFFFFF', Spring = '1e9', Damper = '1e6', Option = '0', Name = 'chip_name', Type = 'Axle', }, {id = 'acdba', orientation = '0', parentId = 'acdb', Angle = '0', Colour = '#FFFFFF', Spring = '1e9', Damper = '1e6', Option = '0', Name = 'chip_name', Type = 'Chip', }, {id = 'acdbb', orientation = '2', parentId = 'acdb', Angle = '0', Colour = '#FFFFFF', Spring = '1e9', Damper = '1e6', Option = '0', Name = 'chip_name', Type = 'Chip', }, }, variables = {{name = '', defaultValue = 0, maxValue = 1, minValue = -1, backstep = 1, }, {name = 'angle', defaultValue = 0, maxValue = 15, minValue = -15, backstep = 1, }, {name = 'brake', defaultValue = 0, maxValue = 100, minValue = 0, backstep = 100, }, {name = 'power', defaultValue = 0, maxValue = 50, minValue = -50, backstep = 5, }, {name = 'power2', defaultValue = 0, maxValue = 50, minValue = -50, backstep = 5, }, }, script = [[function Loop()
+ if Key("w") then
+  power = power + 0.5
+  power2 = power2 - 0.5
+ end
+ if Key("s") then
+  power = power - 0.5
+  power2 = power2 + 0.5
+ end
+ if Key("a") then
+  angle = angle - 1
+ end
+ if Key("d") then
+  angle = angle + 1
+ end
+ if Key("c") then
+  brake = 100
+ end
+ if Key("x") then
+  gun = 1
+ end
+end]] }

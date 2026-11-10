@@ -1,0 +1,17 @@
+{chips = {{id = 'a', orientation = '0', parentId = '', Colour = '#FFFFFF', Name = 'joe', Type = 'Core', }, }, variables = {{name = '', defaultValue = 0, maxValue = 1, minValue = -1, backstep = 1, }, {name = 'angle', defaultValue = 0, maxValue = 90, minValue = -90, backstep = 1, }, }, script = [[-- comment
+-- Available functions:
+-- Key("k") => true/false
+-- KeyDown("k") => true/false
+-- KeyUp("k") => true/false
+-- Sin(x) => float
+-- Cos(x) => float
+-- md = MouseDown() => md[1] = left mouse down, md[2] = right mouse down
+-- mu = MouseUp() => mu[1] = left mouse up, mu[2] = right mouse up
+-- m = Mouse() => m[1] = mouse x position on screen, m[2] = mouse y position on screen
+-- ic = IsClicked() => ic[1] = 1 if mouse left is being held down, ic[2] = 1 if mouse right is being held down
+-- You can directly set variables that you created 
+function Loop()
+ if Key("w") then
+  angle = angle + 1
+ end
+end]] }
