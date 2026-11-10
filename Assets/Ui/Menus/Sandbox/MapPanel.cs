@@ -53,7 +53,7 @@ public class MapPanel : BaseScrollMenu
     void LoadMap()
     {
         bool wasScenario = GameManager.PlayContext.IsScenario;
-        if (!SingleplayerMenu.myVMap.LoadNewMap(this.input.input.text + UIStrings.MapExtension)) { return; }
+        if (!SandboxMenu.myVMap.LoadNewMap(this.input.input.text + UIStrings.MapExtension)) { return; }
 
         this.DeactivatePanel();
 
@@ -65,7 +65,7 @@ public class MapPanel : BaseScrollMenu
                 DisplaySingleton.NoOverflowEtc(text);
                 var parent = (RectTransform)text.rectTransform.parent;
                 text.rectTransform.sizeDelta = new Vector2(parent.rect.width * 0.9f, parent.rect.height * 0.1f);
-                text.SetText("Scenario ended — regular singleplayer");
+                text.SetText("Scenario ended — regular sandbox");
             }, 3f, "scenario-map-exit");
         }
     }
@@ -84,7 +84,7 @@ public class MapPanel : BaseScrollMenu
         bool inScenario = GameManager.PlayContext.IsScenario;
         this.btns[0].text.SetText(inScenario ? "Load map & leave scenario" : "Load map");
         this.scenarioWarning.text.SetText(inScenario
-            ? "Loading a map ends the current scenario and returns to regular singleplayer."
+            ? "Loading a map ends the current scenario and returns to regular sandbox."
             : "");
     }
 

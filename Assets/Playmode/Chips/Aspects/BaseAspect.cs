@@ -16,9 +16,9 @@ public abstract class BaseAspect : MonoBehaviour
     protected virtual void Awake()
     {
         this.myChip = this.gameObject.GetComponent<CommonChip>();
-        //if (SingleplayerMenu.Instance is null)
+        //if (SandboxMenu.Instance is null)
         //{
-        //    throw new NullReferenceException("BaseAspect requires SingleplayerMenu to be initialized");
+        //    throw new NullReferenceException("BaseAspect requires SandboxMenu to be initialized");
         //}
     }
 
@@ -33,7 +33,7 @@ public abstract class BaseAspect : MonoBehaviour
     //    print($"STARTING ASPECT ON CLIENT");
     //    //    base.OnStartClient();
     //    //    this.myChip.myCore.RuntimeFunctions.Add(this);
-    //    //    //SingleplayerMenu.RuntimeFunctions.Add(this);
+    //    //    //SandboxMenu.RuntimeFunctions.Add(this);
     //}
 
     public abstract void RuntimeFunction();

@@ -151,11 +151,11 @@ public class ScenarioMenu : BaseMenu, InputReceiver
         this.playButton.btn.interactable = this.selectedScenario != null;
     }
 
-    // PlaySelectedScenario launches the selected scenario through the singleplayer startup flow.
+    // PlaySelectedScenario launches the selected scenario through the sandbox startup flow.
     void PlaySelectedScenario()
     {
         if (this.selectedScenario == null) { return; }
-        SingleplayerMenu.PlayScenario(this.selectedScenario);
+        SandboxMenu.PlayScenario(this.selectedScenario);
     }
 
     // GoBack returns to the main menu.

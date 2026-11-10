@@ -6,9 +6,9 @@ using TMPro;
 using System.Linq;
 using Mirror;
 
-public class SingleplayerMenu : BaseMenu, InputReceiver
+public class SandboxMenu : BaseMenu, InputReceiver
 {
-    //public static SingleplayerMenu Instance;
+    //public static SandboxMenu Instance;
     public static VMap myVMap = new VMap();
     public static VScenario myVScenario = new VScenario();
     bool reloadScenarioAfterBuild;
@@ -19,7 +19,7 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
     public static void PlayScenario(string name)
     {
         GameManager.PlayContext.SelectScenario(name);
-        GoToSingleplayer.Function();
+        GoToSandbox.Function();
     }
 
     // RestartScenario unloads all scenario state and queues a fresh Lua load after resetting the player model.
@@ -41,7 +41,7 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
         this.reloadScenarioAfterBuild = false;
         if (this.scenarioLoading != null) { StopCoroutine(this.scenarioLoading); }
         this.scenarioLoading = null;
-        GameManager.PlayContext.SelectSingleplayer();
+        GameManager.PlayContext.SelectSandbox();
         myVScenario.UnloadScenario();
     }
 
@@ -372,7 +372,7 @@ public class SingleplayerMenu : BaseMenu, InputReceiver
         {
             if (Input.GetKeyDown(KeyCode.M))
             {
-                this.MapPanel.ActivatePanel(SingleplayerMenu.myVMap.FileName);
+                this.MapPanel.ActivatePanel(SandboxMenu.myVMap.FileName);
             }
             if (Input.GetKeyDown(KeyCode.E))
             {

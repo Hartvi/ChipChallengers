@@ -214,7 +214,7 @@ public partial class GameScript : MonoBehaviour
         {
             m = mapName.Substring(0, mapName.Length - UIStrings.MapExtension.Length);
         }
-        if (SingleplayerMenu.myVMap.LoadNewMap(m + UIStrings.MapExtension))
+        if (SandboxMenu.myVMap.LoadNewMap(m + UIStrings.MapExtension))
         {
             CoreChip.ClientCoreChip.CmdResetToDefaultLocation();
         }

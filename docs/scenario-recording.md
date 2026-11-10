@@ -85,13 +85,13 @@ Attempt validity checks in `Update` compare only live player, reset, play-mode a
 
 Scenario loading applies the rules to the global timestep/default solvers and existing rigidbodies. Rebuilt chip bodies receive the same solvers. Each run stores both the required rule snapshot and actual physics snapshot. Changing physics during an attempt invalidates it; the store rejects mismatched required/actual settings and keeps results from different physics presets separate.
 
-Leaving singleplayer unloads the active scenario and restores the prior timestep and surviving bodies' previous solvers without rewriting player preferences. Replacing or failing to load a scenario also releases its override. The loaded map remains available after scenario unloading.
+Leaving sandbox unloads the active scenario and restores the prior timestep and surviving bodies' previous solvers without rewriting player preferences. Replacing or failing to load a scenario also releases its override. The loaded map remains available after scenario unloading.
 
 ## Play mode and editor transitions
 
-The main menu's Scenarios screen selects and launches a scenario. Regular Singleplayer no longer contains a scenario picker or scenario-loading shortcuts. Choosing Singleplayer explicitly clears the scenario selection; joining a multiplayer server clears it too.
+The main menu's Scenarios screen selects and launches a scenario. Regular Sandbox no longer contains a scenario picker or scenario-loading shortcuts. Choosing Sandbox explicitly clears the scenario selection; joining a multiplayer server clears it too.
 
-The shared `GameManager.PlayContext` remembers the chosen scenario while the editor is open. Leaving play mode unloads the scenario runtime and restores player physics settings, but does not erase the selection. Returning from the editor through Play/Ctrl+P rebuilds the edited vehicle and reloads the complete selected scenario with fresh gates, timers, objects and attempt state. Regular singleplayer returns to regular singleplayer. Queued scenario loads are cancelled when leaving play mode or selecting a different context, and a scenario reload happens only once per play entry.
+The shared `GameManager.PlayContext` remembers the chosen scenario while the editor is open. Leaving play mode unloads the scenario runtime and restores player physics settings, but does not erase the selection. Returning from the editor through Play/Ctrl+P rebuilds the edited vehicle and reloads the complete selected scenario with fresh gates, timers, objects and attempt state. Regular sandbox returns to regular sandbox. Queued scenario loads are cancelled when leaving play mode or selecting a different context, and a scenario reload happens only once per play entry.
 
 ## Scenario spawn positioning
 

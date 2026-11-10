@@ -363,7 +363,7 @@ public class EditorMenu : BaseMenu, InputReceiver
             }
             if (Input.GetKeyDown(KeyCode.M))
             {
-                GoToSingleplayer.Function();
+                GoToSandbox.Function();
             }
 #else
             if (Input.GetKeyDown(KeyCode.S))
@@ -377,7 +377,7 @@ public class EditorMenu : BaseMenu, InputReceiver
             }
             if (Input.GetKeyDown(KeyCode.P))
             {
-                GoToSingleplayer.Function();
+                GoToSandbox.Function();
             }
 #endif
             if (Input.GetKeyDown(KeyCode.Z))

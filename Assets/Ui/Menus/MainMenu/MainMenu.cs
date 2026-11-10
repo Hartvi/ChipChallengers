@@ -21,8 +21,8 @@ public class MainMenu : BaseMainMenu, InputReceiver
                 new VirtualProp(PropType.Panel, -1f, Vector2Int.right,
                     new VirtualProp(PropType.Panel, 0.2f),
                     new VirtualProp(PropType.Panel, 0.6f, Vector2Int.down,
-                        new VirtualProp(PropType.Button, btnHeight, typeof(GoToSingleplayer)),
-                        new VirtualProp(PropType.Button, btnHeight, typeof(GoToScenario)),
+                        new VirtualProp(PropType.Button, btnHeight, typeof(GoToScenarios)),
+                        new VirtualProp(PropType.Button, btnHeight, typeof(GoToSandbox)),
                         new VirtualProp(PropType.Button, btnHeight, typeof(GoToMultiplayer)),
                         new VirtualProp(PropType.Button, btnHeight, typeof(GoToEditor)),
                         new VirtualProp(PropType.Button, btnHeight, typeof(GoToSettings)),
@@ -44,8 +44,8 @@ public class MainMenu : BaseMainMenu, InputReceiver
         this.selectedCallbacks.SetCallbacks(onSelectedCallbacks);
         this.selectedCallbacks.Invoke();
 
-        // load default map so it show in singleplayer, settings, editor and all the other menus!!!
-        SingleplayerMenu.myVMap.LoadNewMap(VMap.DefaultFileName);
+        // load default map so it show in sandbox, settings, editor and all the other menus!!!
+        SandboxMenu.myVMap.LoadNewMap(VMap.DefaultFileName);
         if (global::MainMenu.goToMultiplayerMenu)
         {
             global::MainMenu.goToMultiplayerMenu = false;

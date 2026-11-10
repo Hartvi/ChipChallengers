@@ -1,6 +1,6 @@
 using System;
 
-// GameplayContext remembers regular singleplayer or the selected scenario independently of runtime objects and menus.
+// GameplayContext remembers regular sandbox or the selected scenario independently of runtime objects and menus.
 public class GameplayContext
 {
     public string ScenarioName { get; private set; }
@@ -15,18 +15,18 @@ public class GameplayContext
         this.Revision++;
     }
 
-    // SelectSingleplayer clears the selected scenario when the player explicitly chooses regular singleplayer.
-    public void SelectSingleplayer()
+    // SelectSandbox clears the selected scenario when the player explicitly chooses regular sandbox.
+    public void SelectSandbox()
     {
         this.ScenarioName = null;
         this.Revision++;
     }
 
-    // Retry restarts the selected scenario or resets the model in regular singleplayer without changing modes.
-    public void Retry(Action<string> restartScenario, Action resetSingleplayer)
+    // Retry restarts the selected scenario or resets the model in regular sandbox without changing modes.
+    public void Retry(Action<string> restartScenario, Action resetSandbox)
     {
         if (this.IsScenario) { restartScenario(this.ScenarioName); }
-        else { resetSingleplayer(); }
+        else { resetSandbox(); }
     }
 
     // MatchesScenario identifies queued loads that still belong to the current scenario selection.

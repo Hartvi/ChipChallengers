@@ -384,7 +384,7 @@ class Program
             Check(restarts == 1, "Lua retry callback not forwarded");
             CheckBundledScenarios();
             var playContext = new GameplayContext();
-            Check(!playContext.IsScenario && playContext.ScenarioName == null, "New gameplay context was not regular singleplayer");
+            Check(!playContext.IsScenario && playContext.ScenarioName == null, "New gameplay context was not regular sandbox");
             playContext.SelectScenario("circuit1_race");
             int firstSelection = playContext.Revision;
             Check(playContext.IsScenario && playContext.MatchesScenario("circuit1_race", firstSelection), "Scenario selection was not retained");
@@ -397,11 +397,11 @@ class Program
             int oldSelection = playContext.Revision;
             playContext.SelectScenario("load_race");
             Check(!playContext.MatchesScenario("load_race", oldSelection), "Reselecting a scenario did not invalidate earlier queued loads");
-            playContext.SelectSingleplayer();
+            playContext.SelectSandbox();
             Check(!playContext.IsScenario && playContext.ScenarioName == null && !playContext.MatchesScenario("load_race", oldSelection),
-                "Explicit singleplayer selection kept scenario context");
+                "Explicit sandbox selection kept scenario context");
             Reject(() => playContext.SelectScenario(" "), "Empty scenario selection accepted");
-            Check(!playContext.IsScenario, "Invalid selection changed regular singleplayer context");
+            Check(!playContext.IsScenario, "Invalid selection changed regular sandbox context");
             int scenarioRetries = 0, modelResets = 0;
             string retriedScenario = null;
             playContext.Retry(name => { scenarioRetries++; retriedScenario = name; }, () => modelResets++);

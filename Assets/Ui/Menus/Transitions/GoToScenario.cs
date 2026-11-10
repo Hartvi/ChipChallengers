@@ -1,5 +1,5 @@
 
-public class GoToScenario : BaseTransition
+public class GoToScenarios : BaseTransition
 {
 
     public override void Setup()
@@ -11,7 +11,7 @@ public class GoToScenario : BaseTransition
 
     protected override void Execute()
     {
-        GoToScenario.Function();
+        GoToScenarios.Function();
     }
 
     public static void Function()
@@ -20,7 +20,7 @@ public class GoToScenario : BaseTransition
         // inherit is host from other menus
         BaseMenu.SwitchToMenu(typeof(ScenarioMenu));
 
-        BaseTransition.InvokeAfterClickedCallbacks(typeof(GoToScenario));
+        BaseTransition.InvokeAfterClickedCallbacks(typeof(GoToScenarios));
     }
 }
 

@@ -30,7 +30,7 @@ public class ScenarioPanel : BaseScrollMenu
 
     void LoadScenario()
     {
-        SingleplayerMenu.myVScenario.LoadNewScenario(this.input.input.text + UIStrings.ScenarioExtension);
+        SandboxMenu.myVScenario.LoadNewScenario(this.input.input.text + UIStrings.ScenarioExtension);
 
         this.DeactivatePanel();
 

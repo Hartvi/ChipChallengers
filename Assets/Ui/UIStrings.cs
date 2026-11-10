@@ -50,7 +50,7 @@ public static class UIStrings
     public const string GameTitle = "Chip Challengers";
     public const string MainMenu = "Main menu";
     public const string Editor = "Editor";
-    public const string Singleplayer = "Singleplayer";
+    public const string Sandbox = "Sandbox";
     public const string Scenarios = "Scenarios";
     public const string ConnectToServer = "Connect";
     public const string Multiplayer = "Multiplayer";

@@ -23,7 +23,7 @@ public class ConnectToHost : BaseTransition
 
     public void Function()
     {
-        GameManager.PlayContext.SelectSingleplayer();
+        GameManager.PlayContext.SelectSandbox();
         GameManager.isHost = false;
         NetworkManager.singleton.StartClient();
         this.text.text = "Connecting...";
@@ -53,8 +53,8 @@ public class ConnectToHost : BaseTransition
             }
             else { break; }
         }
-        print($"Switching to singleplayer");
-        BaseMenu.SwitchToMenu(typeof(SingleplayerMenu));
+        print($"Switching to sandbox");
+        BaseMenu.SwitchToMenu(typeof(SandboxMenu));
 
         BaseTransition.InvokeAfterClickedCallbacks(typeof(ConnectToHost));
     }

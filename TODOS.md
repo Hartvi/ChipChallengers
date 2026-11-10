@@ -106,18 +106,18 @@ SCENARIOS:
 - `+` remove cowl collider
 - `+` stop the camera shaking - e.g. when flying the plane the camera shakes back and forth every frame
 - `+` make the camera follow the player also in direction of looking, so when player goes down, camera also looks down
-- `+` singleplayer - text at the top to show F1 and ESC
-- `+` freeze the model when not in singleplayer mode
+- `+` sandbox - text at the top to show F1 and ESC
+- `+` freeze the model when not in sandbox mode
 - `+` Lua controls and model-variable logic intentionally remain active in the editor; physical movement stays frozen.
 - `+` TODO fix crash when I change Core type to something other
   - Core type MUST NOT BE CHANGEABLE
 - `+` when freshly downloading the game, then check if the settings are at default values, otherwise set them to default
-- `+` move the LUA listener to the singleplayer InputHandler
+- `+` move the LUA listener to the sandbox InputHandler
 - `+` Create nice example models
 - `+++` fix build bugs in how it doesn't show runtime variables and switching between editor and playmode doesn't work
 - `+` fix camera
 - `+` add F1 controls
-- `+` hide empty variable in singleplayer and editor
+- `+` hide empty variable in sandbox and editor
 - `+` hide extensions in all panel loaders
 - `+` hide `.mtl` files in map loader
 - `+` Basic linking and setting of setting values
