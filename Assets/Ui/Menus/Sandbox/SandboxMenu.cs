@@ -79,6 +79,9 @@ public class SandboxMenu : BaseMenu, InputReceiver
 
     Camera mainCamera;
     const float MaxFollowElevation = 80f;
+    const float WakeFollowSpeed = 1f;
+    const float WakeHalfAngle = 30f;
+    bool userOrbitOutsideWake;
     //Vector3 oldLookAtPos = Vector3.zero;
     CameraFollowSettings cameraFollowSettings;
     Vector3 lastMousePos = Vector3.zero;
@@ -220,6 +223,7 @@ public class SandboxMenu : BaseMenu, InputReceiver
 
         if (this.core != null) { this.core.ResetCompleted -= this.PositionCameraAfterReset; }
         this.core = CoreChip.ClientCoreChip;
+        this.lastCorePos = this.core.transform.position;
         this.core.ResetCompleted += this.PositionCameraAfterReset;
         GameManager.cameraMoveMode = CameraMoveMode.Follow;
         //print("SET NEW CORE");
@@ -265,9 +269,11 @@ public class SandboxMenu : BaseMenu, InputReceiver
         if (!this.isActiveAndEnabled || this.core == null || this.reloadChallengeAfterBuild || this.challengeLoading != null) { return; }
         CoreCameraPlacement.Place(this.mainCamera, this.core.transform,
             Mathf.Max(3f, this.cameraFollowSettings.posShift.x), Mathf.Max(2f, this.cameraFollowSettings.posShift.y));
+        this.lastCorePos = this.core.transform.position;
+        this.userOrbitOutsideWake = false;
     }
 
-    void CameraFollowMove()
+    void CameraFollowMove(bool mouseOrbitMoved)
     {
         this.cameraFollowSettings.posShift.x = Mathf.Max(0.5f, this.cameraFollowSettings.posShift.x);
         this.cameraFollowSettings.posShift.y = Mathf.Min(this.cameraFollowSettings.posShift.y,
@@ -279,6 +285,21 @@ public class SandboxMenu : BaseMenu, InputReceiver
         Vector3 corePos = this.core.transform.position;
         Vector3 lookAtPos = corePos;
 
+        Vector3 coreMovement = corePos - this.lastCorePos;
+        Vector3 orbitOffset = camTransform.position - this.lastCorePos;
+        Vector3 coreVelocity = this.core.rb.velocity;
+        bool moving = coreVelocity.sqrMagnitude > WakeFollowSpeed * WakeFollowSpeed;
+        bool inWake = moving &&
+            Vector3.Dot(orbitOffset.normalized, -coreVelocity.normalized) >
+                Mathf.Cos(WakeHalfAngle * Mathf.Deg2Rad);
+        if (mouseOrbitMoved) { this.userOrbitOutsideWake = true; }
+        else if (inWake) { this.userOrbitOutsideWake = false; }
+        if (!inWake)
+        {
+            // Preserve the orbit unless movement should pull the camera into a trailing view.
+            camTransform.position += coreMovement;
+        }
+
         // Correct distance toward the current target, rather than the previous frame's viewing direction.
         Vector3 toCore = corePos - camTransform.position;
         Vector3 deltaPos = Mathf.Max(0f, toCore.magnitude - cs.posShift.x) * toCore.normalized;
@@ -286,6 +307,15 @@ public class SandboxMenu : BaseMenu, InputReceiver
         // camera stays above the object in world coordinates
         Vector3 deltaPosY = 0.1f * (corePos.y + cs.posShift.y - camTransform.position.y) * camTransform.up;
         camTransform.position = camTransform.position + deltaPos + deltaPosY;
+
+        if (moving && !this.userOrbitOutsideWake)
+        {
+            // Turning or drifting cannot move an automatic trailing view outside the cone.
+            Vector3 wakeOffset = camTransform.position - corePos;
+            Vector3 wakeDirection = Vector3.RotateTowards(-coreVelocity.normalized,
+                wakeOffset.normalized, WakeHalfAngle * Mathf.Deg2Rad, 0f);
+            camTransform.position = corePos + wakeDirection * wakeOffset.magnitude;
+        }
 
         // Keep a horizontal offset so LookAt never reaches the unstable overhead pole.
         Vector3 offset = camTransform.position - corePos;
@@ -368,6 +398,7 @@ public class SandboxMenu : BaseMenu, InputReceiver
 
     void InputReceiver.OnStartReceiving()
     {
+        if (this.core != null) { this.lastCorePos = this.core.transform.position; }
     }
 
     void InputReceiver.OnStopReceiving()
@@ -487,9 +518,11 @@ public class SandboxMenu : BaseMenu, InputReceiver
         {
             case CameraMoveMode.Follow:
                 {
+                    bool mouseOrbitMoved = false;
                     if (Input.GetMouseButton(1))
                     {
                         Vector3 mouseVelocity = Input.mousePosition - this.lastMousePos;
+                        mouseOrbitMoved = mouseVelocity.x != 0f || mouseVelocity.y != 0f;
                         Transform camTransform = this.mainCamera.transform;
                         camTransform.position += -0.033f * (mouseVelocity.x * camTransform.right);
                         this.cameraFollowSettings.posShift.y += -0.033f * mouseVelocity.y; //  +  * camTransform.up
@@ -498,7 +531,7 @@ public class SandboxMenu : BaseMenu, InputReceiver
                     {
                         this.cameraFollowSettings.posShift.x += -0.165f * Input.mouseScrollDelta.y;
                     }
-                    this.CameraFollowMove();
+                    this.CameraFollowMove(mouseOrbitMoved);
                     //if (Input.GetKeyDown(KeyCode.KeypadMultiply) || Input.GetKeyDown(KeyCode.Asterisk))
                     //{
                     //    this.cameraFollowSettings.predict *= 2f;
@@ -528,6 +561,8 @@ public class SandboxMenu : BaseMenu, InputReceiver
                     break;
                 }
         }
+
+        if (this.core != null) { this.lastCorePos = this.core.transform.position; }
 
     }
 
