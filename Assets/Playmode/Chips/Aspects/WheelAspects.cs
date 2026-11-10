@@ -33,7 +33,7 @@ public class WheelAspects : BaseAspect
     public const float stiffness = 20;
     public const float B = 10f;
     public const float C = 1.9f;
-    public const float D = 0.9f;
+    public const float D = 1.0f;
     public const float E = 0.97f;
     const float ContactForceScale = 1000f;
 
@@ -55,7 +55,8 @@ public class WheelAspects : BaseAspect
 
     Func<Vector3>[] vectors;
 
-    Rigidbody collidingRigidbody;
+    RaycastHit[] contacts;
+    int contactCount;
 
     protected override void Start()
     {
@@ -83,6 +84,7 @@ public class WheelAspects : BaseAspect
         this.phi = this.distBetweenRayEnds / this.radius;
         this.numRays = Mathf.RoundToInt(2 * Mathf.PI / this.phi);
         this.vectors = new Func<Vector3>[this.numRays];
+        this.contacts = new RaycastHit[this.numRays];
         // cast rays this.radius` long from the center of the object
         for(int i = 0; i < this.numRays; ++i)
         {
@@ -127,9 +129,14 @@ public class WheelAspects : BaseAspect
         this.yForce = yImpulse * yDir;
         Vector3 totalForce = ContactForceScale * (this.yForce + this.xForce);
         this.rb.AddForceAtPosition(totalForce, this.point, ForceMode.Force);
-        if (this.collidingRigidbody != null)
+        for (int i = 0; i < this.contactCount; ++i)
         {
-            this.collidingRigidbody.AddForceAtPosition(-totalForce, this.point, ForceMode.Force);
+            var contact = this.contacts[i];
+            if (contact.rigidbody != null)
+            {
+                contact.rigidbody.AddForceAtPosition(-totalForce / this.contactCount,
+                    contact.point, ForceMode.Force);
+            }
         }
 
         float dOmega = WheelPhysics.ContactSpinDelta(ContactForceScale * xImpulse, this.radius,
@@ -234,10 +241,16 @@ public class WheelAspects : BaseAspect
             float m = this.rb.mass;
             // Dampen motion at the contact, including rocking around the wheel attachment.
             this.v1 = this.rb.GetPointVelocity(this.point);
-            if (this.collidingRigidbody != null)
+            Vector3 surfaceVelocity = Vector3.zero;
+            for (int i = 0; i < this.contactCount; ++i)
             {
-                this.v1 -= this.collidingRigidbody.GetPointVelocity(this.point);
+                var contact = this.contacts[i];
+                if (contact.rigidbody != null)
+                {
+                    surfaceVelocity += contact.rigidbody.GetPointVelocity(contact.point);
+                }
             }
+            this.v1 -= surfaceVelocity / this.contactCount;
             float normalVelocity = Vector3.Dot(this.v1, n);
             float desiredForce = ContactForceScale * (m * stiffness * this.compression - 0.5f * normalVelocity);
             float supportForce = WheelPhysics.LimitSupportForce(desiredForce, m, normalVelocity,
@@ -263,8 +276,7 @@ public class WheelAspects : BaseAspect
         point = Vector3.zero;
         normal = Vector3.zero;
         compression = 0f;
-        this.collidingRigidbody = null;
-        bool hasContact = false;
+        this.contactCount = 0;
 
         for (int i = 0; i < this.vectors.Length; ++i)
         {
@@ -273,17 +285,20 @@ public class WheelAspects : BaseAspect
             {
                 float hitCompression = WheelPhysics.NormalCompression(this.radius, h.distance,
                     Vector3.Dot(rayDirection, h.normal));
-                // Keep the deepest contact rather than the first ray that grazes a surface.
-                if (hasContact && hitCompression <= compression) { continue; }
-
-                hasContact = true;
-                point = h.point;
-                normal = h.normal;
-                compression = hitCompression;
-                this.collidingRigidbody = h.rigidbody;
+                this.contacts[this.contactCount++] = h;
+                point += h.point;
+                normal += h.normal;
+                compression += hitCompression;
             }
         }
-        return hasContact;
+        if (this.contactCount == 0) { return false; }
+
+        point /= this.contactCount;
+        compression /= this.contactCount;
+        // A direction needs unit length; exactly opposing contacts have no net direction.
+        if (normal.sqrMagnitude < 0.000001f) { return false; }
+        normal.Normalize();
+        return true;
     }
 
     protected override void OnDestroy()
