@@ -54,6 +54,8 @@ public class GunAspect : BaseAspect
 
     public override void RuntimeFunction()
     {
+        if (this.myChip.IsDead) { return; }
+
         if (this._charge < 1f)
         {
             this._charge += this.dPowerPerFrame * Time.deltaTime;

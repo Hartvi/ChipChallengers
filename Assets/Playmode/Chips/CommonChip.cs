@@ -20,6 +20,7 @@ public class CommonChip : AngleChip
     // Keep the replacement returned by AddComponent; GetComponent can still find
     // the previous sensor until Unity completes its deferred destruction.
     public SensorAspect Sensor { get; private set; }
+    public bool IsDead { get; private set; }
 
     public override void OnStartServer()
     {
@@ -280,6 +281,7 @@ public class CommonChip : AngleChip
     [Client]
     public CommonChip[] AddChildren(CoreChip core)
     {
+        this.IsDead = false;
         Color colour = this.GetColour();
         //print($"COLOUR: {colour}");
         this.mrs = this.GetComponentsInChildren<MeshRenderer>().Where(x => x.tag == VChip.colourStr).ToArray();
@@ -503,6 +505,8 @@ public class CommonChip : AngleChip
 
     private void SleepyTime()
     {
+        if (this.IsDead) { return; }
+        this.IsDead = true;
         // remove from callbacks to LUA
         this.RemoveMeFromVariableCallbacks.Invoke();
     }
