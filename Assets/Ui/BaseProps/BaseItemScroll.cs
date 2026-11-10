@@ -79,11 +79,7 @@ public class BaseItemScroll : BasePanel
         this.virtualContainer = new VirtualContainer(numberOfDisplayItems, labels);
         this.NumberOfDisplayItems = numberOfDisplayItems;
 
-        // rotation points up if it's normal and down if it's upside down
-        // for stack direction up or down then it follows that the abs(dot product) of these two shall be greater than 0.5
-        this.realSize = Mathf.Max(Mathf.Abs(this.RT.sizeDelta.x * StackDirection.x), Mathf.Abs(this.RT.sizeDelta.y * StackDirection.y));
-        this.realItemSize = this.realSize / NumberOfDisplayItems;
-        this.realEdge = -0.5f * this.realSize * StackDirection;
+        this.RefreshLayout();
 
         for (int i = 0; i < this.items.Length; ++i)
         {
@@ -93,6 +89,15 @@ public class BaseItemScroll : BasePanel
             }
         }
         Scroll(0f);
+    }
+
+    // Recalculate row sizes after the list's available space changes.
+    public void RefreshLayout()
+    {
+        if (!this.hasSetDisplayItems) { return; }
+        this.realSize = Mathf.Max(Mathf.Abs(this.RT.sizeDelta.x * StackDirection.x), Mathf.Abs(this.RT.sizeDelta.y * StackDirection.y));
+        this.realItemSize = this.realSize / NumberOfDisplayItems;
+        this.realEdge = -0.5f * this.realSize * StackDirection;
     }
 
     protected Vector2 RealPosition(float relativePosition)

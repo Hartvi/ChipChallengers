@@ -74,7 +74,11 @@ public class MapPanel : BaseScrollMenu
     {
         base.OnEnable();
         this.UpdateScenarioWarning();
-        if (this.itemScroll is not null) this.itemScroll.virtualContainer.UpdateLabels(IOHelpers.GetAllMaps());
+        if (this.itemScroll?.virtualContainer != null)
+        {
+            this.itemScroll.virtualContainer.UpdateLabels(IOHelpers.GetAllMaps());
+            this.itemScroll.Scroll(this.scrollbar.scrollbar.value);
+        }
     }
 
     // UpdateScenarioWarning explains the mode change before a map is loaded from an active scenario.
@@ -86,6 +90,27 @@ public class MapPanel : BaseScrollMenu
         this.scenarioWarning.text.SetText(inScenario
             ? "Loading a map ends the current scenario and returns to regular sandbox."
             : "");
+        this.scenarioWarning.gameObject.SetActive(inScenario);
+
+        // Keep the footer fixed while giving the unused warning space back to the list.
+        var listRow = this.itemScroll.rParent;
+        float panelHeight = listRow.rParent.RT.sizeDelta.y;
+        float headerFraction = inScenario ? 0.1f : 0f;
+        float listFraction = 0.8f - headerFraction;
+        var size = listRow.RT.sizeDelta;
+        size.y = panelHeight * listFraction;
+        listRow.RT.sizeDelta = size;
+        var position = listRow.RT.anchoredPosition;
+        position.y = panelHeight * (0.5f - headerFraction - 0.5f * listFraction);
+        listRow.RT.anchoredPosition = position;
+        foreach (var child in listRow.rChildren)
+        {
+            // Scrollbars are rotated: resize in the row's axes, then convert back.
+            var childSize = TopProp.Rotate2D(child.RT.sizeDelta, child.vProp.Rotation);
+            childSize.y = size.y;
+            child.RT.sizeDelta = TopProp.Rotate2D(childSize, child.vProp.Rotation);
+        }
+        this.itemScroll.RefreshLayout();
     }
 
     void FillInput(string modelName)
