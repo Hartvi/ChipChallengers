@@ -104,7 +104,7 @@ public class SandboxMenu : BaseMenu, InputReceiver
         base.Setup();
         this.vProp = new VirtualProp(PropType.Panel, 1f, zero,
             new VirtualProp(PropType.Panel, 1f, down,
-                new VirtualProp(PropType.Image, 0.04f, down,
+                new VirtualProp(PropType.Panel, 0.04f, down,
                     new VirtualProp(PropType.Text, 1f, down, typeof(MiniControls))
                 )
             ),
