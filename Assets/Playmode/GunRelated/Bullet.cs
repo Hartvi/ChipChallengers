@@ -69,6 +69,7 @@ public class Bullet : MonoBehaviour
             if (h is not null)
             {
                 h.ApplyDamage(this.myPower);
+                this.gameObject.SetActive(false);
             }
         }
 
