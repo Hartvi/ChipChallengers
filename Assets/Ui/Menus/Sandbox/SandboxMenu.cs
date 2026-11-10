@@ -393,7 +393,8 @@ public class SandboxMenu : BaseMenu, InputReceiver
             {
                 if (this.core != null)
                 {
-                    GameManager.PlayContext.Retry(this.RestartChallenge, this.core.CmdResetCore);
+                    GameManager.PlayContext.Retry(this.RestartChallenge,
+                        () => this.core.CmdResetPose(this.core.rb.position + Vector3.up, Quaternion.identity));
                 }
             }
 #if UNITY_EDITOR
