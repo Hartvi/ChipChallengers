@@ -184,7 +184,10 @@ public class DisplaySingleton : MonoBehaviour
     {
         BasicRedModification(txt);
         BasicSmallModification(txt);
-        BasicBottomModification(txt);
+        RectTransform rt = txt.rectTransform;
+        rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.anchoredPosition = Vector2.zero;
         NoOverflowEtc(txt);
     }
 

@@ -173,30 +173,23 @@ public class ScriptInstance
 
     public void CallLoop()
     {
-#if UNITY_EDITOR
-        DynValue res = script.Call(script.Globals["Loop"]);
-#else
         try
         {
-            //foreach (var k in this.script.Globals.Keys)
-            //{
-            //    PRINT.IPrint($"Key: {k} Value: {this.script.Globals[k]}");
-            //}
-            //PRINT.IPrint($"Script:\n{this.scriptString}");
-            DynValue res = script.Call(script.Globals["Loop"]);
+            this.script.Call(this.script.Globals["Loop"]);
         }
         catch (Exception e)
         {
+            string message = e is InterpreterException scriptError
+                ? scriptError.DecoratedMessage ?? scriptError.Message
+                : e.Message;
             DisplaySingleton.Instance.DisplayText(
                 x =>
                 {
-                    //PRINT.IPrint($"Setting compile error");
                     DisplaySingleton.ErrorMsgModification(x);
-                    x.SetText(e.Message);
-                }, 5f
+                    x.SetText(message);
+                }, 5f, "model-script-loop-error"
             );
         }
-#endif
     }
 
     public void SetVariable(string var, float val)
