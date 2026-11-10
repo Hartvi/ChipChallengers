@@ -22,7 +22,8 @@ public class MultiplayerMenu : BaseMenu, InputReceiver
                     new VirtualProp(PropType.Panel, 0.6f, Vector2Int.down,
                         new VirtualProp(PropType.Text, 0.2f, typeof(ConnectToServer)),
                         new VirtualProp(PropType.Input, 0.2f, typeof(IPAddress)),
-                        new VirtualProp(PropType.Button, 0.2f, typeof(ConnectToHost))
+                        new VirtualProp(PropType.Button, 0.2f, typeof(ConnectToHost)),
+                        new VirtualProp(PropType.Button, 0.2f)
                     )
                 )
             )
@@ -32,6 +33,10 @@ public class MultiplayerMenu : BaseMenu, InputReceiver
     protected override void Start()
     {
         this.cth = this.GetComponentInChildren<ConnectToHost>();
+        var buttons = this.GetComponentsInChildren<BaseButton>();
+        var backButton = buttons[buttons.Length - 1];
+        backButton.text.SetText(UIStrings.Back);
+        backButton.btn.onClick.AddListener(this.GoBack);
 
         Action[] selectedChipCallbacks = new Action[] {
             () => UIManager.instance.SwitchToMe(this)
@@ -50,10 +55,17 @@ public class MultiplayerMenu : BaseMenu, InputReceiver
         {
             if (cth.connecting)
             {
+                this.cth.CancelConnection();
                 return;
             }
-            GoToMainMenu.Function(true);
+            this.GoBack();
         }
+    }
+
+    void GoBack()
+    {
+        this.cth.CancelConnection();
+        GoToMainMenu.Function(false);
     }
 
     bool InputReceiver.IsActive() => this.gameObject.activeSelf;

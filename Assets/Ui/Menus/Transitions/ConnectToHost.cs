@@ -6,8 +6,8 @@ using Mirror;
 
 public class ConnectToHost : BaseTransition
 {
-    bool stopConnection = false;
-    public bool connecting = false;
+    Coroutine connectionRoutine;
+    public bool connecting { get; private set; }
 
     public override void Setup()
     {
@@ -23,12 +23,32 @@ public class ConnectToHost : BaseTransition
 
     public void Function()
     {
+        if (this.connecting)
+        {
+            this.CancelConnection();
+            return;
+        }
+
         GameManager.PlayContext.SelectSandbox();
         GameManager.isHost = false;
         NetworkManager.singleton.StartClient();
-        this.text.text = "Connecting...";
+        this.text.text = "Cancel";
         this.connecting = true;
-        StartCoroutine(ConnectToServer());
+        this.connectionRoutine = StartCoroutine(ConnectToServer());
+    }
+
+    public void CancelConnection()
+    {
+        if (!this.connecting) { return; }
+
+        if (this.connectionRoutine != null)
+        {
+            StopCoroutine(this.connectionRoutine);
+            this.connectionRoutine = null;
+        }
+        this.connecting = false;
+        this.text.text = UIStrings.ConnectToServer;
+        NetworkManager.singleton.StopClient();
     }
 
     IEnumerator ConnectToServer()
@@ -37,23 +57,22 @@ public class ConnectToHost : BaseTransition
         {
             if (NetworkClient.localPlayer == null)
             {
-                this.stopConnection = !NetworkClient.isConnecting;
-                if (this.stopConnection && !NetworkClient.isConnected)
+                if (!NetworkClient.isConnecting && !NetworkClient.isConnected)
                 {
+                    this.connectionRoutine = null;
                     this.connecting = false;
-                    this.stopConnection = false;
                     this.text.text = UIStrings.ConnectToServer;
 
                     NetworkManager.singleton.StopClient();
-                    print($"StopClient");
                     yield break;
-                    //BaseMenu.SwitchToMenu(typeof(MainMenu));
                 }
                 yield return null;
             }
             else { break; }
         }
-        print($"Switching to sandbox");
+        this.connectionRoutine = null;
+        this.connecting = false;
+        this.text.text = UIStrings.ConnectToServer;
         BaseMenu.SwitchToMenu(typeof(SandboxMenu));
 
         BaseTransition.InvokeAfterClickedCallbacks(typeof(ConnectToHost));
