@@ -496,7 +496,7 @@ public class SandboxMenu : BaseMenu, InputReceiver
                     }
                     if (Input.mouseScrollDelta.y != 0f)
                     {
-                        this.cameraFollowSettings.posShift.x += -0.033f * Input.mouseScrollDelta.y;
+                        this.cameraFollowSettings.posShift.x += -0.165f * Input.mouseScrollDelta.y;
                     }
                     this.CameraFollowMove();
                     //if (Input.GetKeyDown(KeyCode.KeypadMultiply) || Input.GetKeyDown(KeyCode.Asterisk))
