@@ -282,7 +282,18 @@ public partial class GameScript
     {
         if (!this.times.ContainsKey("race")) { return; }
         int checkpoints = Math.Max(0, this.raceProgress.NextGate - 1);
-        this.DisplayRaceText($"TIME: {this.GetTime("race"):F2} SECONDS - CHECKPOINTS: {checkpoints}/{this.raceGates.Count - 2}",
-            0.1f, "race-timer", false, 0.85f);
+        DisplaySingleton.Instance.DisplayText(text => {
+            DisplaySingleton.BasicSmallModification(text);
+            text.color = Color.black;
+            var rect = text.rectTransform;
+            var parent = (RectTransform)rect.parent;
+            rect.anchorMin = rect.anchorMax = Vector2.one;
+            rect.pivot = Vector2.one;
+            rect.sizeDelta = new Vector2(parent.rect.width * 0.45f, parent.rect.height * 0.12f);
+            rect.anchoredPosition = new Vector2(-parent.rect.width * 0.02f, -parent.rect.height * 0.05f);
+            text.enableWordWrapping = true;
+            text.alignment = TMPro.TextAlignmentOptions.TopRight;
+            text.SetText($"TIME: {this.GetTime("race"):F2} SECONDS\nCHECKPOINTS: {checkpoints}/{this.raceGates.Count - 2}");
+        }, 0.1f, "race-timer");
     }
 }
