@@ -173,6 +173,7 @@ public class SandboxMenu : BaseMenu, InputReceiver
 
     private IEnumerator AsyncEnterMenu()
     {
+        bool startingHost = !manager.isNetworkActive && GameManager.isHost;
         if (!manager.isNetworkActive)
         {
             if (GameManager.isHost) { manager.StartHost(); }
@@ -186,6 +187,16 @@ public class SandboxMenu : BaseMenu, InputReceiver
                CoreChip.ClientCoreChip.loadedModelString == null)
         {
             yield return null;
+        }
+        if (startingHost)
+        {
+            var core = CoreChip.ClientCoreChip;
+            core.CmdResetToDefaultLocation();
+            while (core.HasPendingPoseReset || core.IsRebuilding ||
+                   core.srvResetCounter != core.cltResetCounter)
+            {
+                yield return null;
+            }
         }
         this.OnEnterMenu();
     }

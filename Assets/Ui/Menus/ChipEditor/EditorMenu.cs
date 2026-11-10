@@ -151,6 +151,7 @@ public class EditorMenu : BaseMenu, InputReceiver
 
     private IEnumerator AsyncEnterMenu()
     {
+        bool startingHost = !manager.isNetworkActive && GameManager.isHost;
         if (!manager.isNetworkActive)
         {
             if (GameManager.isHost) { manager.StartHost(); }
@@ -180,6 +181,16 @@ public class EditorMenu : BaseMenu, InputReceiver
                 yield return null;
             }
             else { break; }
+        }
+        if (startingHost)
+        {
+            var core = CoreChip.ClientCoreChip;
+            core.CmdResetToDefaultLocation();
+            while (core.HasPendingPoseReset || core.IsRebuilding ||
+                   core.srvResetCounter != core.cltResetCounter)
+            {
+                yield return null;
+            }
         }
         this.OnEnterMenu();
     }
