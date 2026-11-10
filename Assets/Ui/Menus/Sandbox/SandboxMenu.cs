@@ -78,6 +78,7 @@ public class SandboxMenu : BaseMenu, InputReceiver
     NetworkManager manager;
 
     Camera mainCamera;
+    const float MaxFollowElevation = 80f;
     //Vector3 oldLookAtPos = Vector3.zero;
     CameraFollowSettings cameraFollowSettings;
     Vector3 lastMousePos = Vector3.zero;
@@ -268,6 +269,9 @@ public class SandboxMenu : BaseMenu, InputReceiver
 
     void CameraFollowMove()
     {
+        this.cameraFollowSettings.posShift.x = Mathf.Max(0.5f, this.cameraFollowSettings.posShift.x);
+        this.cameraFollowSettings.posShift.y = Mathf.Min(this.cameraFollowSettings.posShift.y,
+            this.cameraFollowSettings.posShift.x * Mathf.Sin(MaxFollowElevation * Mathf.Deg2Rad));
         CameraFollowSettings cs = this.cameraFollowSettings;
         Transform camTransform = this.mainCamera.transform;
 
@@ -282,6 +286,19 @@ public class SandboxMenu : BaseMenu, InputReceiver
         // camera stays above the object in world coordinates
         Vector3 deltaPosY = 0.1f * (corePos.y + cs.posShift.y - camTransform.position.y) * camTransform.up;
         camTransform.position = camTransform.position + deltaPos + deltaPosY;
+
+        // Keep a horizontal offset so LookAt never reaches the unstable overhead pole.
+        Vector3 offset = camTransform.position - corePos;
+        Vector3 horizontalOffset = Vector3.ProjectOnPlane(offset, Vector3.up);
+        float minHorizontalDistance = Mathf.Max(0f, offset.y) / Mathf.Tan(MaxFollowElevation * Mathf.Deg2Rad);
+        if (horizontalOffset.magnitude < minHorizontalDistance)
+        {
+            Vector3 direction = horizontalOffset.sqrMagnitude > 0.000001f
+                ? horizontalOffset.normalized
+                : Vector3.ProjectOnPlane(-camTransform.forward, Vector3.up).normalized;
+            if (direction.sqrMagnitude < 0.000001f) { direction = Vector3.back; }
+            camTransform.position = corePos + direction * minHorizontalDistance + Vector3.up * offset.y;
+        }
 
         camTransform.LookAt(lookAtPos);
     }
