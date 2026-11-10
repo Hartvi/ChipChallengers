@@ -15,7 +15,7 @@ public class GoToSandbox : BaseTransition
     }
 
     // Function resumes the current play context unless an explicit sandbox selection clears it.
-    public static void Function(bool regularSandbox = false)
+    public static new void Function(bool regularSandbox = false)
     {
         if (regularSandbox) { GameManager.PlayContext.SelectSandbox(); }
         GameManager.isHost = true;
