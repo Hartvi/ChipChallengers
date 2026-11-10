@@ -71,7 +71,7 @@ public class GunAspect : BaseAspect
         this.rb.AddForce(-forward * this.recoilImpulse, ForceMode.Impulse);
         this._charge = 0f;
 
-        Vector3 initialBulletPosition = this.transform.position + forward * GeometricChip.ChipSide;
+        Vector3 initialBulletPosition = this.transform.position;
 
         this.bulletPool.Next().Fire(initialBulletPosition, forward * this.projectileVelocity);
         //Debug.DrawLine(this.transform.position, this.transform.position + this.transform.forward*2f);
