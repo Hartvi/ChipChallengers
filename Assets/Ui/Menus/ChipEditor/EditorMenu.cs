@@ -309,10 +309,11 @@ public class EditorMenu : BaseMenu, InputReceiver
 
     void SwitchCameraModes()
     {
+        Camera cam = Camera.main;
+        cam.transform.position += 0.11f * Input.mouseScrollDelta.y * cam.transform.forward;
+
         if (Input.GetMouseButton(1))
         {
-            Camera cam = Camera.main;
-            cam.transform.position += 0.11f * Input.mouseScrollDelta.y * Camera.main.transform.transform.forward;
             float moveX = Input.GetAxis("Mouse X");
             float moveY = Input.GetAxis("Mouse Y");
 
