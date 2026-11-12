@@ -5,6 +5,10 @@ using UnityEngine;
 
 public static class JointUtility
 {
+    // Breaking strength is separate from the spring/damper that holds the target angle.
+    // Finite limits let collisions tear assemblies apart instead of remaining unbreakable.
+    public const float BreakForce = 100000f; // N
+    public const float BreakTorque = 25000f; // N m
 
     public static ConfigurableJoint AttachWithConfigurableJoint(GameObject child, GameObject parent, Vector3 globalPoint, Vector3 globalAxis) {
         
@@ -25,6 +29,8 @@ public static class JointUtility
             throw new NullReferenceException($"Rigidbody of Parent {parent} of child {child} is null.");
         }
         cj.connectedBody = parentRB;
+        cj.breakForce = BreakForce;
+        cj.breakTorque = BreakTorque;
 
         // Convert global point and axis to the Parent's local space
         Vector3 localAnchor = child.transform.InverseTransformPoint(globalPoint);

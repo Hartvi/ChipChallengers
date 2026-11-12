@@ -494,6 +494,13 @@ public class CommonChip : AngleChip
     }
 
 
+    private void OnJointBreak(float breakForce)
+    {
+        // Physics has already removed the constraint; disable the detached branch
+        // just as we do when bullet damage destroys its attachment.
+        this.Die();
+    }
+
     public void Die()
     {
         GameObject.Destroy(this.cj);
