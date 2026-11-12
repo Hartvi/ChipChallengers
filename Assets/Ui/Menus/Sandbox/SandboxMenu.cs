@@ -80,7 +80,10 @@ public class SandboxMenu : BaseMenu, InputReceiver
     Camera mainCamera;
     const float MaxFollowElevation = 80f;
     const float WakeFollowSpeed = 1f;
-    const float WakeHalfAngle = 30f;
+    const float WakeHorizontalHalfAngle = 30f;
+    const float WakeVerticalHalfAngle = 60f;
+    [SerializeField, Min(0.1f)] float followPositionSharpness = 6f;
+    [SerializeField, Min(0f)] float horizontalFollowDrag = 0.15f;
     bool userOrbitOutsideWake;
     //Vector3 oldLookAtPos = Vector3.zero;
     CameraFollowSettings cameraFollowSettings;
@@ -277,7 +280,7 @@ public class SandboxMenu : BaseMenu, InputReceiver
     {
         this.cameraFollowSettings.posShift.x = Mathf.Max(0.5f, this.cameraFollowSettings.posShift.x);
         this.cameraFollowSettings.posShift.y = Mathf.Min(this.cameraFollowSettings.posShift.y,
-            this.cameraFollowSettings.posShift.x * Mathf.Sin(MaxFollowElevation * Mathf.Deg2Rad));
+            this.cameraFollowSettings.posShift.x * Mathf.Tan(MaxFollowElevation * Mathf.Deg2Rad));
         CameraFollowSettings cs = this.cameraFollowSettings;
         Transform camTransform = this.mainCamera.transform;
 
@@ -286,49 +289,61 @@ public class SandboxMenu : BaseMenu, InputReceiver
         Vector3 lookAtPos = corePos;
 
         Vector3 coreMovement = corePos - this.lastCorePos;
+        Vector3 followPosition = camTransform.position + coreMovement;
+        // Carry the orbit with the core both inside and outside the trailing cone.
+        Vector3 targetPosition = followPosition;
         Vector3 orbitOffset = camTransform.position - this.lastCorePos;
         Vector3 coreVelocity = this.core.rb.velocity;
         bool moving = coreVelocity.sqrMagnitude > WakeFollowSpeed * WakeFollowSpeed;
+        Vector3 trailingDirection = -coreVelocity;
+        float orbitYaw = Mathf.Atan2(orbitOffset.x, orbitOffset.z) * Mathf.Rad2Deg;
+        float trailingYaw = Vector3.ProjectOnPlane(trailingDirection, Vector3.up).sqrMagnitude > 0.000001f
+            ? Mathf.Atan2(trailingDirection.x, trailingDirection.z) * Mathf.Rad2Deg : orbitYaw;
+        float orbitElevation = Mathf.Atan2(orbitOffset.y,
+            Vector3.ProjectOnPlane(orbitOffset, Vector3.up).magnitude) * Mathf.Rad2Deg;
+        float trailingElevation = Mathf.Atan2(trailingDirection.y,
+            Vector3.ProjectOnPlane(trailingDirection, Vector3.up).magnitude) * Mathf.Rad2Deg;
         bool inWake = moving &&
-            Vector3.Dot(orbitOffset.normalized, -coreVelocity.normalized) >
-                Mathf.Cos(WakeHalfAngle * Mathf.Deg2Rad);
+            Mathf.Abs(Mathf.DeltaAngle(trailingYaw, orbitYaw)) <= WakeHorizontalHalfAngle &&
+            Mathf.Abs(orbitElevation - trailingElevation) <= WakeVerticalHalfAngle;
         if (mouseOrbitMoved) { this.userOrbitOutsideWake = true; }
         else if (inWake) { this.userOrbitOutsideWake = false; }
-        if (!inWake)
-        {
-            // Preserve the orbit unless movement should pull the camera into a trailing view.
-            camTransform.position += coreMovement;
-        }
-
-        // Correct distance toward the current target, rather than the previous frame's viewing direction.
-        Vector3 toCore = corePos - camTransform.position;
-        Vector3 deltaPos = Mathf.Max(0f, toCore.magnitude - cs.posShift.x) * toCore.normalized;
-
-        // camera stays above the object in world coordinates
-        Vector3 deltaPosY = 0.1f * (corePos.y + cs.posShift.y - camTransform.position.y) * camTransform.up;
-        camTransform.position = camTransform.position + deltaPos + deltaPosY;
+        // Height is independent of the horizontal orbit radius and follows world up.
+        targetPosition.y = corePos.y + cs.posShift.y;
 
         if (moving && !this.userOrbitOutsideWake)
         {
-            // Turning or drifting cannot move an automatic trailing view outside the cone.
-            Vector3 wakeOffset = camTransform.position - corePos;
-            Vector3 wakeDirection = Vector3.RotateTowards(-coreVelocity.normalized,
-                wakeOffset.normalized, WakeHalfAngle * Mathf.Deg2Rad, 0f);
-            camTransform.position = corePos + wakeDirection * wakeOffset.magnitude;
+            // Clamp horizontal and vertical trailing angles independently, then ease toward them.
+            Vector3 wakeOffset = targetPosition - corePos;
+            float wakeYaw = Mathf.Atan2(wakeOffset.x, wakeOffset.z) * Mathf.Rad2Deg;
+            float wakeElevation = Mathf.Atan2(wakeOffset.y,
+                Vector3.ProjectOnPlane(wakeOffset, Vector3.up).magnitude) * Mathf.Rad2Deg;
+            wakeYaw = (trailingYaw + Mathf.Clamp(Mathf.DeltaAngle(trailingYaw, wakeYaw),
+                -WakeHorizontalHalfAngle, WakeHorizontalHalfAngle)) * Mathf.Deg2Rad;
+            wakeElevation = Mathf.Clamp(Mathf.Clamp(wakeElevation, trailingElevation - WakeVerticalHalfAngle,
+                trailingElevation + WakeVerticalHalfAngle), -MaxFollowElevation, MaxFollowElevation) * Mathf.Deg2Rad;
+            targetPosition = corePos + new Vector3(cs.posShift.x * Mathf.Sin(wakeYaw),
+                cs.posShift.x * Mathf.Tan(wakeElevation), cs.posShift.x * Mathf.Cos(wakeYaw));
         }
 
-        // Keep a horizontal offset so LookAt never reaches the unstable overhead pole.
-        Vector3 offset = camTransform.position - corePos;
-        Vector3 horizontalOffset = Vector3.ProjectOnPlane(offset, Vector3.up);
-        float minHorizontalDistance = Mathf.Max(0f, offset.y) / Mathf.Tan(MaxFollowElevation * Mathf.Deg2Rad);
-        if (horizontalOffset.magnitude < minHorizontalDistance)
-        {
-            Vector3 direction = horizontalOffset.sqrMagnitude > 0.000001f
-                ? horizontalOffset.normalized
-                : Vector3.ProjectOnPlane(-camTransform.forward, Vector3.up).normalized;
-            if (direction.sqrMagnitude < 0.000001f) { direction = Vector3.back; }
-            camTransform.position = corePos + direction * minHorizontalDistance + Vector3.up * offset.y;
-        }
+        // Smooth around a cylinder: yaw, X/Z radius, and height are independent.
+        float blend = 1f - Mathf.Exp(-this.followPositionSharpness * Time.deltaTime);
+        Vector3 currentOffset = followPosition - corePos;
+        Vector3 targetOffset = targetPosition - corePos;
+        float currentYaw = Mathf.Atan2(currentOffset.x, currentOffset.z) * Mathf.Rad2Deg;
+        // Horizontal drag pulls the orbit behind movement only inside the cone.
+        // Apply it only to yaw so vertical following and the orbit radius stay independent.
+        float drag = inWake ? this.horizontalFollowDrag : 0f;
+        float targetYaw = Mathf.Atan2(targetOffset.x - coreVelocity.x * drag,
+            targetOffset.z - coreVelocity.z * drag) * Mathf.Rad2Deg;
+        float yaw = Mathf.LerpAngle(currentYaw, targetYaw, blend) * Mathf.Deg2Rad;
+        // Only zoom changes the radius; direction changes keep the camera on the orbit.
+        float currentRadius = Mathf.Sqrt(currentOffset.x * currentOffset.x + currentOffset.z * currentOffset.z);
+        float horizontalRadius = Mathf.Lerp(currentRadius, cs.posShift.x, blend);
+        float maxHeight = horizontalRadius * Mathf.Tan(MaxFollowElevation * Mathf.Deg2Rad);
+        float height = Mathf.Clamp(Mathf.Lerp(currentOffset.y, targetOffset.y, blend), -maxHeight, maxHeight);
+        camTransform.position = corePos + new Vector3(horizontalRadius * Mathf.Sin(yaw),
+            height, horizontalRadius * Mathf.Cos(yaw));
 
         camTransform.LookAt(lookAtPos);
     }
