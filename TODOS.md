@@ -1,6 +1,7 @@
 
 ### TODO
-- fix bullets phasing through walls
+- auto-detect CPU load to adjust physics rate
+- introduce gameplay step by step
 - test the multiplayer stuff
   - when you disconnect as host - make clients go to main menu
   - make sure that transitioning from playmode as a client to editor makes the client disconnect and then reconnect to its own host for now
@@ -54,6 +55,8 @@ SCENARIOS:
   - `+` to print stuff to screen as text
 
 ### Done
+- hide solver iterations from menu
+- smooth camera following with a cylindrical orbit and horizontal drag inside the trailing cone
 - fix the camera flicking when it's up above
 - race text - make it smaller
 - fix faster zoom in
