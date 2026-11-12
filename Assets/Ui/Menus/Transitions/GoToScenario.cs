@@ -16,6 +16,16 @@ public class GoToChallenges : BaseTransition
 
     public static void Function()
     {
+        if (DrivingIntroduction.ShouldOffer)
+        {
+            BaseMenu.SwitchToMenu(typeof(IntroductionOfferMenu));
+            return;
+        }
+        Browse();
+    }
+
+    public static void Browse()
+    {
         GameManager.isHost = true;
         // inherit is host from other menus
         BaseMenu.SwitchToMenu(typeof(ChallengeMenu));

@@ -11,6 +11,7 @@ public class VChallenge
     public string FileName { get { return this.challengeName; } }
 
     GameObject loadedObject;
+    public GameScript Runtime => this.loadedObject == null ? null : this.loadedObject.GetComponent<GameScript>();
 
     public void LoadNewChallenge(string name)
     {

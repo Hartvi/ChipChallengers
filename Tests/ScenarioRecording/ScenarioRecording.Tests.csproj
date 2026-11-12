@@ -13,6 +13,7 @@
     <Compile Include="../../Assets/LuaStuff/ScenarioLuaCallbacks.cs" Link="ScenarioLuaCallbacks.cs" />
     <Compile Include="../../Assets/LuaStuff/ScenarioRaceDefinition.cs" Link="ScenarioRaceDefinition.cs" />
     <Compile Include="../../Assets/Common/GameplayContext.cs" Link="GameplayContext.cs" />
+    <Compile Include="../../Assets/Common/DrivingIntroductionProgress.cs" Link="DrivingIntroductionProgress.cs" />
     <Compile Include="../../Assets/Common/PhysicsSettingsDispatcher.cs" Link="PhysicsSettingsDispatcher.cs" />
     <Reference Include="Newtonsoft.Json">
       <HintPath>../../Library/PackageCache/com.unity.nuget.newtonsoft-json@3.2.1/Runtime/Newtonsoft.Json.dll</HintPath>

@@ -1,5 +1,7 @@
 # Challenge recording checks
 
+Introduction checks cover action/gate-driven lesson progression, braking deceleration, completion only at the finish, retry context, and leaving tutorial mode. Overlay layout, independent introduction/countdown vehicle holds, skipping and restoring the previous model require Unity Play-mode checks.
+
 Wheel support checks cover zero compression at first contact, equal support at equal normal penetration for short and oblique rays, non-attractive rebound forces, and depenetration limits at 500 and 1000 Hz. Wheel timing checks also integrate driven and coasting spin at both rates and across a runtime rate switch, verify braking does not reverse spin, and compare a full visual revolution at 30/60/120 FPS. Driven-spin comparisons allow 0.1 percent for first-order timestep integration. Inertia checks use solid-disk mass/radius values, and free-spin resistance halves moderate spin in about two seconds. Ground contacts, axle-turning reactions and full vehicle handling require Unity Play-mode testing.
 
 Requires .NET 9 and the project's Unity-generated `Library/ScriptAssemblies/Assembly-CSharp-firstpass.dll` plus restored Newtonsoft package.

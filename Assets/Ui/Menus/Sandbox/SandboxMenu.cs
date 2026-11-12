@@ -14,6 +14,7 @@ public class SandboxMenu : BaseMenu, InputReceiver
     bool reloadChallengeAfterBuild;
     int playEntry;
     Coroutine challengeLoading;
+    DrivingIntroduction introduction;
 
     // PlayChallenge remembers the selected challenge and enters play mode without clearing its context.
     public static void PlayChallenge(string name)
@@ -26,6 +27,7 @@ public class SandboxMenu : BaseMenu, InputReceiver
     void RestartChallenge(string name)
     {
         if (!GameManager.PlayContext.IsChallenge || GameManager.PlayContext.ChallengeName != name) { return; }
+        this.introduction?.PrepareRetry();
         this.playEntry++;
         if (this.challengeLoading != null) { StopCoroutine(this.challengeLoading); }
         this.challengeLoading = null;
@@ -37,6 +39,7 @@ public class SandboxMenu : BaseMenu, InputReceiver
     // LeaveChallenge cancels queued challenge loads and removes challenge runtime and context after a manual map load.
     void LeaveChallenge()
     {
+        this.introduction?.End();
         this.playEntry++;
         this.reloadChallengeAfterBuild = false;
         if (this.challengeLoading != null) { StopCoroutine(this.challengeLoading); }
@@ -153,6 +156,7 @@ public class SandboxMenu : BaseMenu, InputReceiver
         this.MapPanel = this.GetComponentInChildren<MapPanel>();
 
         this.cameraFollowSettings = new CameraFollowSettings(posShift: Vector2.up * 3f + Vector2.right * 10f, predict: 0.05f, sensitivity: 1f, lowPass: 0f);
+        this.introduction = this.gameObject.AddComponent<DrivingIntroduction>();
 
         this.selectedCallbacks.SetCallbacks(new Action[] { () => UIManager.instance.SwitchToMe(this), this.StartOnEnterMenu });
         this.selectedCallbacks.Invoke();
@@ -163,6 +167,7 @@ public class SandboxMenu : BaseMenu, InputReceiver
 
     void OnLeaveMenu()
     {
+        this.introduction?.End();
         if (this.core != null) { this.core.ResetCompleted -= this.PositionCameraAfterReset; }
         this.playEntry++;
         this.reloadChallengeAfterBuild = false;
@@ -232,9 +237,6 @@ public class SandboxMenu : BaseMenu, InputReceiver
         //print("SET NEW CORE");
         this.core.freeze = false;
 
-        // SEND COMMANDS PERTAINING TO CORE
-        this.core.CmdResetCore();
-
         // when model is loaded: add callbacks to rebuild the model, add callbacks to link the variables to the HUD
         Action[] onLoadedCallbacksTmp = new Action[] {
             //() => {
@@ -259,6 +261,13 @@ public class SandboxMenu : BaseMenu, InputReceiver
 
         var mapLoadedCallbacks = onLoadedCallbacksTmp.Concat(new Action[] { this.LeaveChallenge, this.core.CmdResetToDefaultLocation }).ToArray();
         this.MapPanel.SetOnLoadedCallbacks(mapLoadedCallbacks);
+
+        if (GameManager.PlayContext.IsIntroduction)
+        {
+            this.GetComponentInChildren<IntroScreen>(true).gameObject.SetActive(false);
+            this.introduction.Begin(this.core);
+        }
+        else { this.core.CmdResetCore(); }
 
         //TODO: load model after entering playmode???
         //Debug.Log("TODO: add HUD");
@@ -425,6 +434,11 @@ public class SandboxMenu : BaseMenu, InputReceiver
 
     void InputReceiver.HandleInputs()
     {
+        if (this.introduction != null && this.introduction.BlocksControls)
+        {
+            if (Input.GetKeyDown(KeyCode.Escape)) { GoToMainMenu.Function(false); }
+            return;
+        }
         //#if UNITY_EDITOR
         if (Input.GetKey(KeyCode.Space))
         {

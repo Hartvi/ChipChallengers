@@ -2,6 +2,8 @@
 ### TODO
 - auto-detect CPU load to adjust physics rate
 - introduce gameplay step by step
+  - done: guided first drive on the first race, welcome overlay, driving hints, skip/replay and first-time offer
+  - next: guided building lesson and a shooting challenge for the gun
 - test the multiplayer stuff
   - when you disconnect as host - make clients go to main menu
   - make sure that transitioning from playmode as a client to editor makes the client disconnect and then reconnect to its own host for now

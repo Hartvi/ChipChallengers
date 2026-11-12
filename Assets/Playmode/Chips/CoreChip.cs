@@ -40,6 +40,8 @@ public class CoreChip : CommonChip
     [SyncVar]
     bool raceStartHeld;
     public bool IsRaceStartHeld => this.raceStartHeld;
+    [SyncVar] bool introductionHeld;
+    bool IsDrivingHeld => this.raceStartHeld || this.introductionHeld;
     bool frozen = false;
     bool assemblyHidden = true;
     public bool IsRebuilding { get; private set; }
@@ -192,7 +194,7 @@ public class CoreChip : CommonChip
         {
             return;
         }
-        if (this.raceStartHeld) { return; }
+        if (this.IsDrivingHeld) { return; }
         foreach (var rtf in this.RuntimeFunctions)
         {
             if (rtf != null)
@@ -596,11 +598,30 @@ public class CoreChip : CommonChip
     public void CmdSetRaceStartHeld(bool held)
     {
         this.raceStartHeld = held;
+        this.ApplyDrivingHold();
+    }
+
+    // Introduction and countdown holds are independent so releasing either cannot release the other.
+    [Command]
+    public void CmdSetIntroductionHeld(bool held)
+    {
+        this.introductionHeld = held;
+        this.inputMessage.Keys = Array.Empty<char>();
+        this.inputMessage.KeysDown = Array.Empty<char>();
+        this.inputMessage.KeysUp = Array.Empty<char>();
+        Array.Clear(this.inputMessage.MouseClicked, 0, this.inputMessage.MouseClicked.Length);
+        Array.Clear(this.inputMessage.MouseDown, 0, this.inputMessage.MouseDown.Length);
+        Array.Clear(this.inputMessage.MouseUp, 0, this.inputMessage.MouseUp.Length);
+        this.ApplyDrivingHold();
+    }
+
+    void ApplyDrivingHold()
+    {
         foreach (var chip in this.AllChips)
         {
             if (chip == null) { continue; }
             var body = chip.GetComponent<Rigidbody>();
-            if (held)
+            if (this.IsDrivingHeld)
             {
                 var common = (CommonChip)chip;
                 common.Omega = 0f;
@@ -629,7 +650,7 @@ public class CoreChip : CommonChip
             var r = chip.GetComponent<Rigidbody>();
             if (r != null)
             {
-                r.isKinematic = f || this.raceStartHeld;
+                r.isKinematic = f || this.IsDrivingHeld;
             }
         }
     }

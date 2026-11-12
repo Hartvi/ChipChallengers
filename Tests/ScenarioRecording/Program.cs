@@ -106,7 +106,7 @@ class Program
     static void CheckBundledChallenges()
     {
         string challengeDirectory = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../Assets/StreamingAssets/Challenges"));
-        foreach (string file in new[] { "circuit1_race.lua", "load_race.lua", "industrial_test_track_race.lua", "karst_flight_race.lua", "quarry_climb_race.lua" })
+        foreach (string file in new[] { "dev_short_race.lua", "01_industrial_test_track_race.lua", "03_karst_flight_race.lua", "02_quarry_climb_race.lua" })
         {
             var example = new Script();
             ChallengeRaceDefinition exampleRace = null;
@@ -119,10 +119,10 @@ class Program
             example.Globals["Spawn"] = (Func<string,Table,string>)((_,__) => "test-object");
             example.DoString(File.ReadAllText(Path.Combine(challengeDirectory, file)));
             Check(exampleRace != null && exampleRace.gates.Count >= 2, "Bundled example failed to declare a race: " + file);
-            float expectedRadius = file == "karst_flight_race.lua" ? 27f :
-                file == "industrial_test_track_race.lua" || file == "quarry_climb_race.lua" ? 8f : 2.5f;
+            float expectedRadius = file == "03_karst_flight_race.lua" ? 27f :
+                file == "01_industrial_test_track_race.lua" || file == "02_quarry_climb_race.lua" ? 8f : 2.5f;
             Check(exampleRace.gates.All(g => g.radius == expectedRadius), "Bundled challenge gate size incorrect: " + file);
-            if (file == "industrial_test_track_race.lua")
+            if (file == "01_industrial_test_track_race.lua")
             {
                 Check(exampleRace.gates.Count == 15, "Industrial circuit checkpoint count incorrect");
                 var start = exampleRace.gates.First().position;
@@ -130,14 +130,14 @@ class Program
                 Check(start.x == finish.x && start.y == finish.y && start.z == finish.z,
                     "Industrial lap did not finish at its start line");
             }
-            if (file == "karst_flight_race.lua")
+            if (file == "03_karst_flight_race.lua")
             {
                 Check(exampleRace.gates.Count == 15, "Flight course did not declare 13 checkpoints plus start and finish");
                 Check(exampleRace.gates.All(gate => gate.color[3] == 180f), "Flight gate opacity was not increased");
                 Check(exampleRace.gates.Skip(1).All(gate => gate.position.y - gate.radius > 0),
                     "An airborne flight gate intersects sea level");
             }
-            if (file == "quarry_climb_race.lua")
+            if (file == "02_quarry_climb_race.lua")
             {
                 Check(exampleRace.gates.Count == 4, "Quarry course should have two route-merge checkpoints");
                 Check(exampleRace.gates.Last().position.y > exampleRace.gates.First().position.y + 30,
@@ -383,7 +383,37 @@ class Program
             lua.DoString("RestartRace()");
             Check(restarts == 1, "Lua retry callback not forwarded");
             CheckBundledChallenges();
+            var intro = new DrivingIntroductionProgress();
+            intro.Observe(false, false, 0, 5f, true, true, true);
+            Check(intro.Current == DrivingIntroductionProgress.Lesson.Accelerate, "Introduction advanced before countdown finished");
+            intro.Observe(true, false, 1, 5f, false, false, false);
+            Check(intro.Current == DrivingIntroductionProgress.Lesson.Accelerate, "Gate alone skipped acceleration lesson");
+            intro.Observe(true, false, 1, 5f, true, false, false);
+            Check(intro.Current == DrivingIntroductionProgress.Lesson.Steer, "Driving through first gate did not teach steering");
+            intro.Observe(true, false, 2, 5f, true, true, false);
+            Check(intro.Current == DrivingIntroductionProgress.Lesson.Brake, "Steering through bend did not teach braking");
+            intro.Observe(true, false, 2, 5f, false, false, true);
+            Check(intro.Current == DrivingIntroductionProgress.Lesson.Brake, "Brake key alone completed braking lesson");
+            intro.Observe(true, false, 2, 4f, false, false, true);
+            Check(intro.Current == DrivingIntroductionProgress.Lesson.Finish, "Slowing under braking did not advance lesson");
+            intro.Observe(true, true, 13, 4f, false, false, false);
+            Check(intro.Current == DrivingIntroductionProgress.Lesson.Complete, "Finishing lap did not complete introduction");
+            var shortcutIntro = new DrivingIntroductionProgress();
+            shortcutIntro.Observe(true, false, 13, 0f, false, false, false);
+            Check(shortcutIntro.Current != DrivingIntroductionProgress.Lesson.Complete, "Checkpoints completed introduction without finish");
+            shortcutIntro.Observe(true, true, 13, 2f, false, false, false);
+            Check(shortcutIntro.Current == DrivingIntroductionProgress.Lesson.Complete, "Finishing left tutorial stuck on an earlier hint");
+
             var playContext = new GameplayContext();
+            playContext.SelectIntroduction("intro_track");
+            Check(playContext.IsIntroduction && playContext.IsChallenge, "Introduction did not select its challenge");
+            playContext.Retry(_ => { }, () => { throw new Exception("Introduction retry reset sandbox"); });
+            Check(playContext.IsIntroduction, "Retry cleared introduction mode");
+            playContext.SelectChallenge("intro_track");
+            Check(!playContext.IsIntroduction && playContext.IsChallenge, "Normal race retained tutorial mode");
+            playContext.SelectIntroduction("intro_track");
+            playContext.SelectSandbox();
+            Check(!playContext.IsIntroduction, "Leaving challenge retained tutorial mode");
             Check(!playContext.IsChallenge && playContext.ChallengeName == null, "New gameplay context was not regular sandbox");
             playContext.SelectChallenge("circuit1_race");
             int firstSelection = playContext.Revision;
