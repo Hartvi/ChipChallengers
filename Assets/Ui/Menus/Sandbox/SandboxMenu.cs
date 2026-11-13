@@ -15,6 +15,12 @@ public class SandboxMenu : BaseMenu, InputReceiver
     int playEntry;
     Coroutine challengeLoading;
     DrivingIntroduction introduction;
+    bool playerReady;
+
+    bool CanControlCore => this.playerReady && NetworkClient.localPlayer != null &&
+        this.core != null && this.core.rb != null && !this.core.IsRebuilding &&
+        !this.core.HasPendingPoseReset && this.core.srvResetCounter == this.core.cltResetCounter &&
+        this.core.loadedModelString != null && this.core.loadedModelString == this.core.modelString;
 
     // PlayChallenge remembers the selected challenge and enters play mode without clearing its context.
     public static void PlayChallenge(string name)
@@ -169,6 +175,7 @@ public class SandboxMenu : BaseMenu, InputReceiver
 
     void OnLeaveMenu()
     {
+        this.playerReady = false;
         this.introduction?.End();
         if (this.core != null) { this.core.ResetCompleted -= this.PositionCameraAfterReset; }
         this.playEntry++;
@@ -181,6 +188,7 @@ public class SandboxMenu : BaseMenu, InputReceiver
 
     void StartOnEnterMenu()
     {
+        this.playerReady = false;
         Debug.Assert(this.isActiveAndEnabled);
         StartCoroutine(AsyncEnterMenu());
     }
@@ -270,6 +278,7 @@ public class SandboxMenu : BaseMenu, InputReceiver
             this.introduction.Begin(this.core);
         }
         else { this.core.CmdResetCore(); }
+        this.playerReady = true;
 
         //TODO: load model after entering playmode???
         //Debug.Log("TODO: add HUD");
@@ -458,7 +467,8 @@ public class SandboxMenu : BaseMenu, InputReceiver
 
     void InputReceiver.HandleInputs()
     {
-        if (this.introduction != null && this.introduction.BlocksControls)
+        if (!this.isActiveAndEnabled) { return; }
+        if (!this.CanControlCore || (this.introduction != null && this.introduction.BlocksControls))
         {
             if (Input.GetKeyDown(KeyCode.Escape)) { GoToMainMenu.Function(false); }
             return;
@@ -523,6 +533,7 @@ public class SandboxMenu : BaseMenu, InputReceiver
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             GoToMainMenu.Function(true);
+            return;
         }
 
         if (Input.GetKeyDown(KeyCode.F1))
