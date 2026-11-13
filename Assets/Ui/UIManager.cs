@@ -31,17 +31,14 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    public void SwitchToMe(InputReceiver me, bool stopReceiving = true)
+    public void SwitchToMe(InputReceiver me)
     {
         if (keyboardReceivers.Count > 0)
         {
             var lastReceiver = keyboardReceivers[keyboardReceivers.Count - 1];
             if (lastReceiver != me)
             {
-                if(stopReceiving)
-                {
-                    lastReceiver.OnStopReceiving();
-                }
+                lastReceiver.OnStopReceiving();
                 me.OnStartReceiving();
             }
         }

@@ -8,10 +8,17 @@ using TMPro;
 public class HUD : TopProp
 {
     VelocityHUD velocityHUD;
+    CanvasGroup visibility;
 
     public override void Setup()
     {
         base.Setup();
+        this.visibility = this.GetComponent<CanvasGroup>();
+        if (this.visibility == null)
+        {
+            this.visibility = this.gameObject.AddComponent<CanvasGroup>();
+        }
+        this.visibility.alpha = 0f;
         this.vProp = new VirtualProp(PropType.Panel, 1f, right,
             new VirtualProp(PropType.Panel, 0.05f),
             new VirtualProp(PropType.Panel, 0.1f, up,
@@ -82,7 +89,6 @@ public class HUD : TopProp
     {
         if (this.displayVariables == null)
         {
-            print("HUD IS NULL");
             return;
         }
         for (int i = 0; i < this.displayVariables.Length; ++i)
@@ -112,6 +118,7 @@ public class HUD : TopProp
 
         this.LinkFocus(core);
         this.LinkVariables(core.VirtualModel);
+        this.visibility.alpha = 1f;
     }
 
     void SetupItems()

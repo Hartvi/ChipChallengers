@@ -88,6 +88,7 @@ public class SandboxMenu : BaseMenu, InputReceiver
     [SerializeField, Min(0.1f)] float followPositionSharpness = 6f;
     [SerializeField, Min(0f)] float horizontalFollowDrag = 0.15f;
     bool userOrbitOutsideWake;
+    bool mouseOrbitMovedThisFrame;
     //Vector3 oldLookAtPos = Vector3.zero;
     CameraFollowSettings cameraFollowSettings;
     Vector3 lastMousePos = Vector3.zero;
@@ -286,6 +287,28 @@ public class SandboxMenu : BaseMenu, InputReceiver
         this.userOrbitOutsideWake = false;
     }
 
+    // Automatic tracking continues even when an overlay owns input focus.
+    void LateUpdate()
+    {
+        bool mouseOrbitMoved = this.mouseOrbitMovedThisFrame;
+        this.mouseOrbitMovedThisFrame = false;
+        this.lastMousePos = Input.mousePosition;
+        if (this.core == null || this.mainCamera == null) { return; }
+        if (this.core.IsRebuilding || this.core.HasPendingPoseReset ||
+            (this.introduction != null && this.introduction.BlocksControls))
+        {
+            this.lastCorePos = this.core.transform.position;
+            return;
+        }
+        switch (GameManager.cameraMoveMode)
+        {
+            case CameraMoveMode.Follow: this.CameraFollowMove(mouseOrbitMoved); break;
+            case CameraMoveMode.CopyOutside: this.CameraCopyOutside(); break;
+            case CameraMoveMode.CopyInside: this.CameraCopyInside(); break;
+        }
+        this.lastCorePos = this.core.transform.position;
+    }
+
     void CameraFollowMove(bool mouseOrbitMoved)
     {
         this.cameraFollowSettings.posShift.x = Mathf.Max(0.5f, this.cameraFollowSettings.posShift.x);
@@ -423,7 +446,7 @@ public class SandboxMenu : BaseMenu, InputReceiver
 
     void InputReceiver.OnStartReceiving()
     {
-        if (this.core != null) { this.lastCorePos = this.core.transform.position; }
+        this.lastMousePos = Input.mousePosition;
     }
 
     void InputReceiver.OnStopReceiving()
@@ -504,7 +527,7 @@ public class SandboxMenu : BaseMenu, InputReceiver
 
         if (Input.GetKeyDown(KeyCode.F1))
         {
-            UIManager.instance.SwitchToMe(this.ControlsPanel, stopReceiving: false);
+            UIManager.instance.SwitchToMe(this.ControlsPanel);
             //this.ControlsPanel.gameObject.SetActive(true);
         }
         if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1))
@@ -548,11 +571,10 @@ public class SandboxMenu : BaseMenu, InputReceiver
         {
             case CameraMoveMode.Follow:
                 {
-                    bool mouseOrbitMoved = false;
                     if (Input.GetMouseButton(1))
                     {
                         Vector3 mouseVelocity = Input.mousePosition - this.lastMousePos;
-                        mouseOrbitMoved = mouseVelocity.x != 0f || mouseVelocity.y != 0f;
+                        this.mouseOrbitMovedThisFrame = mouseVelocity.x != 0f || mouseVelocity.y != 0f;
                         Transform camTransform = this.mainCamera.transform;
                         camTransform.position += -0.033f * (mouseVelocity.x * camTransform.right);
                         this.cameraFollowSettings.posShift.y += -0.033f * mouseVelocity.y; //  +  * camTransform.up
@@ -561,7 +583,6 @@ public class SandboxMenu : BaseMenu, InputReceiver
                     {
                         this.cameraFollowSettings.posShift.x += -0.165f * Input.mouseScrollDelta.y;
                     }
-                    this.CameraFollowMove(mouseOrbitMoved);
                     //if (Input.GetKeyDown(KeyCode.KeypadMultiply) || Input.GetKeyDown(KeyCode.Asterisk))
                     //{
                     //    this.cameraFollowSettings.predict *= 2f;
@@ -570,7 +591,6 @@ public class SandboxMenu : BaseMenu, InputReceiver
                     //{
                     //    this.cameraFollowSettings.predict *= 0.5f;
                     //}
-                    this.lastMousePos = Input.mousePosition;
                     break;
                 }
             case CameraMoveMode.Free:
@@ -578,21 +598,7 @@ public class SandboxMenu : BaseMenu, InputReceiver
                     this.CameraFreeMove();
                     break;
                 }
-            // Copy position with offset and rotation
-            case CameraMoveMode.CopyOutside:
-                {
-                    this.CameraCopyOutside();
-                    break;
-                }
-            // Copy position & rotation without any offsets etc
-            case CameraMoveMode.CopyInside:
-                {
-                    this.CameraCopyInside();
-                    break;
-                }
         }
-
-        if (this.core != null) { this.lastCorePos = this.core.transform.position; }
 
     }
 

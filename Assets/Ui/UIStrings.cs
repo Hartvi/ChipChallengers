@@ -34,10 +34,26 @@ public static class UIStrings
     public const string MiniControls = "   Mini controls:   F1 - show controls   Ctrl+U - go to start   Ctrl+R - retry/reset   Esc - go to main menu";
 
     public static readonly string[] ControlsKeys = {
-        "F1", "1-9", "up/down/+/-", "Ctrl+O", "Ctrl+M", "Ctrl+U", "Ctrl+R", "Ctrl+S", "Ctrl+P"
+        "F1",
+        "1-9, ↑/↓/+/-",
+        "Ctrl+O",
+        "Ctrl+M",
+        "Ctrl+U",
+        "Ctrl+R",
+        "Ctrl+E",
+        "Ctrl+S",
+        "Ctrl+P"
     };
     public static readonly string[] ControlsActions = new string[] {
-        "Display this panel", "Switch cameras", "Adjust camera", "Open model", "Open map", "Go to start", "Reset model / restart challenge", "Save model (in editor)", "Go to playmode (from editor)"
+        "Display this panel",
+        "Camera controls",
+        "Open model",
+        "Open map",
+        "Go to start",
+        "Reset model / restart challenge",
+        "Go to editor",
+        "Save model (in editor)",
+        "Go to playmode (from editor)"
     };
 
     public const string ModelExtension = ".txt";
