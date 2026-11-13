@@ -16,7 +16,7 @@ public class BulletTests
         projectile.AddComponent<SphereCollider>();
         projectile.AddComponent<Rigidbody>().useGravity = false;
         this.bullet = projectile.AddComponent<Bullet>();
-        this.bullet.SetupBullet(0.001f, 2f);
+        this.bullet.SetupBullet(2f);
     }
 
     [TearDown]
@@ -74,6 +74,48 @@ public class BulletTests
         Assert.AreEqual(1, nearDeaths);
         Assert.AreEqual(0, farDeaths);
         Assert.IsFalse(this.bullet.gameObject.activeSelf);
+    }
+
+    [TestCase(0.5f)]
+    [TestCase(2f)]
+    public void ImpactTransfersProjectileMomentumToOtherObjectsOnly(float projectileMass)
+    {
+        var sourceCore = this.Create("Source core", -2f).AddComponent<CoreChip>();
+        var gun = this.Surface("Source gun", 1f);
+        var gunBody = gun.AddComponent<Rigidbody>();
+        gunBody.useGravity = false;
+        gun.AddComponent<CommonChip>().myCore = sourceCore;
+        var sourceWheel = this.Surface("Another chip on the source model", 2f);
+        var wheelBody = sourceWheel.AddComponent<Rigidbody>();
+        wheelBody.useGravity = false;
+        sourceWheel.AddComponent<CommonChip>().myCore = sourceCore;
+        var target = this.Surface("Other object", 4f).AddComponent<Rigidbody>();
+        target.useGravity = false;
+        target.mass = 4f;
+        var fartherTarget = this.Surface("Farther object", 6f).AddComponent<Rigidbody>();
+        fartherTarget.useGravity = false;
+        this.bullet.GetComponent<Rigidbody>().mass = projectileMass;
+        Vector3 velocity = Vector3.forward * (10f / Time.fixedDeltaTime);
+
+        bool autoSimulation = Physics.autoSimulation;
+        try
+        {
+            Physics.autoSimulation = false;
+            this.bullet.Fire(this.origin, velocity, gunBody, sourceCore);
+            Physics.SyncTransforms();
+            this.Step();
+            Physics.Simulate(Time.fixedDeltaTime);
+
+            Assert.That(target.velocity.z, Is.EqualTo(projectileMass * velocity.z / target.mass).Within(0.001f));
+            Assert.That(gunBody.velocity.sqrMagnitude, Is.Zero);
+            Assert.That(wheelBody.velocity.sqrMagnitude, Is.Zero);
+            Assert.That(fartherTarget.velocity.sqrMagnitude, Is.Zero);
+            Assert.That(this.bullet.gameObject.activeSelf, Is.False);
+        }
+        finally
+        {
+            Physics.autoSimulation = autoSimulation;
+        }
     }
 
     [Test]

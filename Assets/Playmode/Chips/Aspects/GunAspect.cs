@@ -13,7 +13,6 @@ public class GunAspect : BaseAspect
 
     float projectileWeight;
     float projectileVelocity;
-    float bulletWeightPerTime;
     float recoilImpulse;
 
     ObjectPool<Bullet> bulletPool;
@@ -28,8 +27,7 @@ public class GunAspect : BaseAspect
         this.projectileVelocity = 333f;
         Debug.LogWarning($"TODO: update bullet strengths when physics rate is changed");
 
-        this.bulletWeightPerTime = this.projectileWeight;
-        this.recoilImpulse = this.bulletWeightPerTime * this.projectileVelocity;
+        this.recoilImpulse = this.projectileWeight * this.projectileVelocity;
         // dp/dt = (dm*dv)/dt = m*dv/dt 
         // dv = vel, dt = fixeddeltatime, m = projectileweight
 
@@ -86,7 +84,7 @@ public class GunAspect : BaseAspect
     Bullet GenerateBullet()
     {
         Bullet b = Instantiate(Resources.Load(UIStrings.GunRelated + "/" + UIStrings.Bullet) as GameObject).AddComponent<Bullet>();
-        b.SetupBullet(this.bulletWeightPerTime, this.power);
+        b.SetupBullet(this.power);
         return b;
     }
 

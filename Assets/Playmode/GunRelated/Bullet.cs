@@ -5,16 +5,14 @@ public class Bullet : MonoBehaviour
     public const float LifeTime = 5f;
 
     float myPower;
-    float bulletWeightPerTime;
     float remainingLife;
     Rigidbody rb;
     Rigidbody sourceBody;
     CoreChip sourceCore;
     Vector3 velocity;
 
-    public void SetupBullet(float bulletWeightPerTime, float power)
+    public void SetupBullet(float power)
     {
-        this.bulletWeightPerTime = bulletWeightPerTime;
         this.myPower = power;
         this.rb = this.GetComponent<Rigidbody>();
         // Flight and impacts are handled below; a solid projectile would push its own gun on spawn.
@@ -61,7 +59,9 @@ public class Bullet : MonoBehaviour
             this.gameObject.SetActive(false);
             if (closest.rigidbody != null)
             {
-                closest.rigidbody.AddForceAtPosition(this.velocity * this.bulletWeightPerTime,
+                // Replace the momentum formerly transferred by the projectile's physical collision.
+                // The gun's recoil parameter is not the projectile Rigidbody's mass.
+                closest.rigidbody.AddForceAtPosition(this.velocity * this.rb.mass,
                     closest.point, ForceMode.Impulse);
             }
             var health = closest.collider.GetComponentInParent<HealthAspect>();
