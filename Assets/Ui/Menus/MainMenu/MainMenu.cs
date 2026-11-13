@@ -9,7 +9,6 @@ public class MainMenu : BaseMainMenu, InputReceiver
     public static bool goToMultiplayerMenu = false;
 
     float numberOfButtons = 7f;
-    [SerializeField] bool useButtonBackgroundImage = true;
     [SerializeField] Vector3 menuCameraPosition = new Vector3(35f, 32f, -65f);
     [SerializeField] Vector3 menuCameraTarget = new Vector3(-30f, 1f, 25f);
 
@@ -40,16 +39,11 @@ public class MainMenu : BaseMainMenu, InputReceiver
     override protected void Start()
     {
         base.Start();
-        var buttonSprite = this.useButtonBackgroundImage
-            ? Resources.Load<Sprite>("UI/Art/tall_field_transparent")
-            : null;
+        var buttonSprite = Resources.Load<Sprite>("UI/Art/tall_field_transparent");
+            
         foreach (var button in this.GetComponentsInChildren<BaseButton>(true))
         {
             button.image.sprite = buttonSprite;
-            if (!this.useButtonBackgroundImage)
-            {
-                button.image.color = Color.clear;
-            }
         }
         print("ENTER MAIN MENU");
 
