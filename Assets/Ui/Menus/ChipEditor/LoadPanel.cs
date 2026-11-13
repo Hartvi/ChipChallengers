@@ -4,6 +4,7 @@ using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
 using Mirror;
 
@@ -14,6 +15,14 @@ public class LoadPanel : BaseScrollMenu
 
     protected override void Start()
     {
+        // Keep the load menu above scenario text, which is brought forward on every update.
+        var parentCanvas = this.GetComponentInParent<Canvas>();
+        var canvas = this.gameObject.AddComponent<Canvas>();
+        canvas.overrideSorting = true;
+        canvas.sortingLayerID = parentCanvas.sortingLayerID;
+        canvas.sortingOrder = parentCanvas.sortingOrder + 1;
+        this.gameObject.AddComponent<GraphicRaycaster>();
+
         base.Start();
 
         this.itemScroll.SetupItemList(FillInput, Screen.height / 70, IOHelpers.GetAllModels());

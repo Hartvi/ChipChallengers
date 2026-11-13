@@ -316,7 +316,7 @@ public partial class GameScript
             var parent = (RectTransform)rect.parent;
             rect.anchorMin = rect.anchorMax = Vector2.one;
             rect.pivot = Vector2.one;
-            rect.sizeDelta = new Vector2(parent.rect.width * 0.45f, parent.rect.height * 0.12f);
+            rect.sizeDelta = new Vector2(parent.rect.width * 0.20f, parent.rect.height * 0.12f);
             rect.anchoredPosition = new Vector2(-parent.rect.width * 0.02f, -parent.rect.height * 0.05f);
             text.enableWordWrapping = true;
             text.alignment = TMPro.TextAlignmentOptions.TopRight;
