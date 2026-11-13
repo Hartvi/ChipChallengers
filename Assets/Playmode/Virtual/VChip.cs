@@ -235,8 +235,10 @@ public class VChip
 
     public VChip(string chipType, LocalDirection localDirection, VChip parent)
     {
-        string[] keys = new string[] { VChip.typeStr };
-        string[] vals = new string[] { chipType };
+        // Store defaults immediately so new chips and the editor display start with the same values.
+        string[] keys = ArrayExtensions.AccessLikeDict(chipType, VChip.chipData.keys, VChip.chipData.values).ToArray();
+        string[] vals = keys.Select(key => key == VChip.typeStr ? chipType :
+            ArrayExtensions.AccessLikeDict(key, VChip.allPropertiesStr, VChip.allPropertiesDefaultsStrings)).ToArray();
 
         this.orientation = (int)localDirection;
         this.parentChip = parent;

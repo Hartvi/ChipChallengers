@@ -331,45 +331,7 @@ public class CommonChip : AngleChip
             this.Sensor.myChip = this;
         }
 
-        if (this.equivalentVirtualChip.keys.Contains(VChip.valueStr))
-        {
-
-            // TODO cosmetics as in jet spitting fire and wheel turning discs
-            this._value = this.GetValue();
-
-            if (this.equivalentVirtualChip.ChipType == VChip.jetStr)
-            {
-                this.gameObject.AddComponentIdempotent<JetAspect>();
-                this.gameObject.AddComponentIdempotent<JetSoundAspect>();
-                this.gameObject.AddComponentIdempotent<JetDustAspect>();
-                this.gameObject.AddComponentIdempotent<JetFlameAspect>();
-            }
-            if (this.equivalentVirtualChip.keys.Contains(VChip.brakeStr))
-            {
-                this._brake = this.GetBrake();
-                // GUN - power = gun power, brake to trigger,
-                // WHEEL - power = power, brake = brake
-                if (this.equivalentVirtualChip.ChipType == VChip.wheelStr)
-                {
-                    var wheel = this.gameObject.AddComponentIdempotent<WheelAspects>();
-                    wheel.myChip = this;
-                    this.gameObject.AddComponentIdempotent<WheelSoundAspect>().myChip = this;
-                    var tireSound = this.gameObject.AddComponentIdempotent<TireSoundAspect>();
-                    tireSound.myChip = this;
-                    tireSound.wheelAspect = wheel;
-                }
-                if (this.equivalentVirtualChip.ChipType == VChip.gunStr)
-                {
-                    //if(this.isServer) 
-                    var gun = this.gameObject.AddComponentIdempotent<GunAspect>();
-                    gun.myChip = this;
-                    var gunSound = this.gameObject.AddComponentIdempotent<GunSoundAspect>();
-                    gunSound.myChip = this;
-                    gunSound.gunAspect = gun;
-                    this.gameObject.AddComponentIdempotent<GunDustAspect>().myChip = this;
-                }
-            }
-        }
+        this.SetupTypeAspects();
 
         List<CommonChip> allChildren = new List<CommonChip>();
         // when there are no Children left then the recursion stops
@@ -378,6 +340,47 @@ public class CommonChip : AngleChip
             allChildren.AddRange(this.AddChild(childChip, core));
         }
         return allChildren.ToArray();
+    }
+
+    void SetupTypeAspects()
+    {
+        // Read controls supported by the type, using defaults for omitted saved properties.
+        if (this.equivalentVirtualChip.HasProperty(VChip.valueStr))
+        {
+            this._value = this.GetValue();
+        }
+        if (this.equivalentVirtualChip.HasProperty(VChip.brakeStr))
+        {
+            this._brake = this.GetBrake();
+        }
+
+        // Runtime components belong to chip types, regardless of serialized property keys.
+        switch (this.equivalentVirtualChip.ChipType)
+        {
+            case VChip.jetStr:
+                this.gameObject.AddComponentIdempotent<JetAspect>();
+                this.gameObject.AddComponentIdempotent<JetSoundAspect>();
+                this.gameObject.AddComponentIdempotent<JetDustAspect>();
+                this.gameObject.AddComponentIdempotent<JetFlameAspect>();
+                break;
+            case VChip.wheelStr:
+                var wheel = this.gameObject.AddComponentIdempotent<WheelAspects>();
+                wheel.myChip = this;
+                this.gameObject.AddComponentIdempotent<WheelSoundAspect>().myChip = this;
+                var tireSound = this.gameObject.AddComponentIdempotent<TireSoundAspect>();
+                tireSound.myChip = this;
+                tireSound.wheelAspect = wheel;
+                break;
+            case VChip.gunStr:
+                var gun = this.gameObject.AddComponentIdempotent<GunAspect>();
+                gun.myChip = this;
+                var gunSound = this.gameObject.AddComponentIdempotent<GunSoundAspect>();
+                gunSound.myChip = this;
+                gunSound.gunAspect = gun;
+                this.gameObject.AddComponentIdempotent<GunDustAspect>().myChip = this;
+                break;
+        }
+
     }
 
     private void ConfigureJointSpringDamper(ConfigurableJoint cj)
