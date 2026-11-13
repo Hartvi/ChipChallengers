@@ -10,6 +10,7 @@ public partial class GameScript
     ChallengeRaceDefinition raceDefinition;
     ChallengeRaceProgress raceProgress;
     readonly List<string> raceGates = new List<string>();
+    readonly List<Color> raceGateColors = new List<Color>();
     Vector3 raceSpawnPosition;
     Quaternion raceSpawnRotation;
     int raceGeneration;
@@ -43,6 +44,7 @@ public partial class GameScript
             string name = this.Spawn("gate", table);
             this.raceGates.Add(name);
             var gateObject = this.SceneObjects[name];
+            this.raceGateColors.Add(gateObject.GetComponent<Renderer>().material.color);
             var trigger = gateObject.AddComponent<SphereCollider>();
             trigger.isTrigger = true;
             trigger.radius = 0.5f;
@@ -83,6 +85,7 @@ public partial class GameScript
             this.AllObjects.Remove(name);
         }
         this.raceGates.Clear();
+        this.raceGateColors.Clear();
         this.raceDefinition = null;
         this.raceProgress = null;
     }
@@ -90,6 +93,7 @@ public partial class GameScript
     // PrepareRaceStart resets timing and progress and exposes only the start gate for a new attempt.
     void PrepareRaceStart()
     {
+        this.SetRaceGateColors(false);
         this.activeAttempt = null;
         this.attemptCompleted = false;
         this.finalRaceTime = null;
@@ -101,6 +105,26 @@ public partial class GameScript
             else { this.Hide(this.raceGates[i]); }
         }
         this.isRace = true;
+    }
+
+    // Failed gates retain their transparency and visibility; retries restore the declared colors.
+    void SetRaceGateColors(bool failed)
+    {
+        for (int i = 0; i < this.raceGates.Count; ++i)
+        {
+            if (!this.SceneObjects.TryGetValue(this.raceGates[i], out var gate) || gate == null) { continue; }
+            var renderer = gate.GetComponent<Renderer>();
+            if (renderer == null) { continue; }
+            Color original = this.raceGateColors[i];
+            renderer.material.color = failed ? new Color(1f, 0f, 0f, original.a) : original;
+        }
+    }
+
+    void FailRace()
+    {
+        this.isRace = false;
+        this.raceProgress?.Fail();
+        this.SetRaceGateColors(true);
     }
 
     // RestartRace returns the vehicle to its original spawn and rearms the course after rebuilding finishes.
@@ -187,8 +211,7 @@ public partial class GameScript
         {
             if (generation == this.raceGeneration)
             {
-                this.raceProgress.Fail();
-                this.isRace = false;
+                this.FailRace();
             }
             this.ReportChallengeError(error.Message + " Press Ctrl+R to retry.");
         }
@@ -208,8 +231,7 @@ public partial class GameScript
             {
                 this.pendingRaceStart = null;
                 this.CancelRaceStart();
-                this.isRace = false;
-                this.raceProgress?.Fail();
+                this.FailRace();
                 this.ReportChallengeError("Race start cancelled. Press Ctrl+R to retry.");
                 yield break;
             }
@@ -220,7 +242,7 @@ public partial class GameScript
         this.pendingRaceStart = null;
         bool valid = this.CanFinishRaceStart(core, generation, resetCounter);
         this.CancelRaceStart();
-        if (!valid) { this.isRace = false; yield break; }
+        if (!valid) { this.FailRace(); yield break; }
         try
         {
             this.BeginChallengeAttempt();
@@ -236,8 +258,7 @@ public partial class GameScript
         {
             if (generation == this.raceGeneration)
             {
-                this.raceProgress.Fail();
-                this.isRace = false;
+                this.FailRace();
             }
             this.ReportChallengeError(error.Message + " Press Ctrl+R to retry.");
         }

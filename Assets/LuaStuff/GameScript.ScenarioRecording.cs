@@ -170,8 +170,7 @@ public partial class GameScript
     {
         if (this.activeAttempt == null) { return; }
         this.activeAttempt = null;
-        this.isRace = false;
-        this.raceProgress?.Fail();
+        this.FailRace();
         this.ReportChallengeError("Attempt invalidated (" + reason + "). " +
             (this.raceDefinition == null ? "Start a new attempt to retry." : "Press Ctrl+R to retry."));
     }
