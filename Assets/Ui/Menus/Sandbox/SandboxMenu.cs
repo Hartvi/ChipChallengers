@@ -504,7 +504,7 @@ public class SandboxMenu : BaseMenu, InputReceiver
 
         if (Input.GetKeyDown(KeyCode.F1))
         {
-            UIManager.instance.SwitchToMe(this.ControlsPanel);
+            UIManager.instance.SwitchToMe(this.ControlsPanel, stopReceiving: false);
             //this.ControlsPanel.gameObject.SetActive(true);
         }
         if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1))
