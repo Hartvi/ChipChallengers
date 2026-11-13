@@ -162,7 +162,8 @@ public partial class GameScript
     // OnPhysicsSettingsChanging invalidates an active run before a global or per-body physics configuration changes.
     void OnPhysicsSettingsChanging(PhysicsSettingsChange change)
     {
-        this.InvalidateAttempt("physics settings changed: " + change.Reason);
+        // Do not leak internals of the state
+        this.InvalidateAttempt("physics settings changed");
     }
 
     // InvalidateAttempt stops recording and race progression once and releases the attempt's physics subscription.
