@@ -315,8 +315,9 @@ end
         string selectedVarName = selectedVar.name;
         if (string.IsNullOrEmpty(selectedVarName)) { return; }
 
-        if (this.chips.Any(chip => VChip.dynamicPropertiesStr.Any(property =>
-            chip.TryGetProperty<string>(property, out string value) && value == selectedVarName)))
+        // Read stored strings directly: missing properties can have numeric defaults.
+        if (this.chips.Any(chip => Enumerable.Range(0, chip.keys.Length).Any(index =>
+            VChip.dynamicPropertiesStr.Contains(chip.keys[index]) && chip.vals[index] == selectedVarName)))
         {
             DisplaySingleton.Instance.DisplayText(text =>
             {

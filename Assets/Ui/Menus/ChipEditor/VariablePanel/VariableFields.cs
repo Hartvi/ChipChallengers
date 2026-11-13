@@ -116,7 +116,7 @@ public class VariableFields : BaseImage
 
     private void SanitizeInputField(TMP_InputField inputField, string input)
     {
-        inputField.SetTextWithoutNotify(ValidateFloatInput(input));
+        inputField.SetTextWithoutNotify(string.IsNullOrWhiteSpace(input) ? "0" : ValidateFloatInput(input));
     }
 
     private string ValidateFloatInput(string input)

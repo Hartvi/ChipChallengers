@@ -180,22 +180,34 @@ public class DisplaySingleton : MonoBehaviour
         txt.alignment = TextAlignmentOptions.Center;
     }
 
+    // Shared message position: horizontally centered, one-quarter down from the top.
+    public static void MessagePositionModification(TMP_Text txt)
+    {
+        RectTransform rt = txt.rectTransform;
+        rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.75f);
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.anchoredPosition = Vector2.zero;
+    }
+
     public static void ErrorMsgModification(TMP_Text txt)
     {
         BasicRedModification(txt);
         BasicSmallModification(txt);
-        RectTransform rt = txt.rectTransform;
-        rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
-        rt.pivot = new Vector2(0.5f, 0.5f);
-        rt.anchoredPosition = Vector2.zero;
+        MessagePositionModification(txt);
         NoOverflowEtc(txt);
+    }
+
+    public static void CenteredWarningMsgModification(TMP_Text txt)
+    {
+        ErrorMsgModification(txt);
+        txt.color = Color.yellow;
     }
 
     public static void WarnMsgModification(TMP_Text txt)
     {
         BasicOrangeModification(txt);
         BasicSmallModification(txt);
-        BasicBottomModification(txt);
+        MessagePositionModification(txt);
         NoOverflowEtc(txt);
     }
 

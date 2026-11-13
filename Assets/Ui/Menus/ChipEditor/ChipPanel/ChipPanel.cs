@@ -285,6 +285,15 @@ public class ChipPanel : BaseSidePanel, InputReceiver
             inputs[_i].onEndEdit.AddListener(
                 x =>
                 {
+                    if (string.IsNullOrWhiteSpace(x))
+                    {
+                        string property = texts[_i].text;
+                        x = property == VChip.nameStr || property == VChip.typeStr || property == VChip.colourStr
+                            ? ArrayExtensions.AccessLikeDict(property, VChip.allPropertiesStr, VChip.allPropertiesDefaultsStrings)
+                            : "0";
+                        inputs[_i].SetTextWithoutNotify(x);
+                    }
+
                     // Clicking a popup button ends editing before its click fires.
                     // An unchanged value must not rebuild the model and close the popup.
                     if (vc.vals[_i] == x) { return; }
@@ -297,7 +306,18 @@ public class ChipPanel : BaseSidePanel, InputReceiver
                     }
                     else
                     {
+                        bool createsVariable = VChip.dynamicPropertiesStr.Contains(texts[_i].text) &&
+                            StringHelpers.IsVariableName(x) &&
+                            !vc.MyModel.variables.Any(variable => variable.name == x);
                         vc.vals[_i] = x;
+                        if (createsVariable)
+                        {
+                            DisplaySingleton.Instance.DisplayText(text =>
+                            {
+                                DisplaySingleton.CenteredWarningMsgModification(text);
+                                text.SetText($"Variable '{x}' was created.");
+                            }, 3f);
+                        }
                     }
                 }
             );

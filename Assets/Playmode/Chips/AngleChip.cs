@@ -100,8 +100,8 @@ public abstract class AngleChip : OptionChip
                     core.VirtualModel.AddVariable(VVar.DefaultValueVariable(propertyStr));
                     DisplaySingleton.Instance.DisplayText(x =>
                     {
-                        DisplaySingleton.WarnMsgModification(x);
-                        x.SetText($"Added new variable '{propertyStr}'.");
+                        DisplaySingleton.CenteredWarningMsgModification(x);
+                        x.SetText($"Variable '{propertyStr}' was created.");
                     }, 3f);
                 }
                 else
