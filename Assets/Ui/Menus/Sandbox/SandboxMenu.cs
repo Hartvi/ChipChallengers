@@ -139,7 +139,8 @@ public class SandboxMenu : BaseMenu, InputReceiver
             //    )
             //),
             new VirtualProp(PropType.Panel, 1f, typeof(LoadPanel)),
-            new VirtualProp(PropType.Panel, 1f, typeof(MapPanel))
+            new VirtualProp(PropType.Panel, 1f, typeof(MapPanel)),
+            new VirtualProp(PropType.Panel, 1f, typeof(IntroductionOverlay))
         );
     }
 

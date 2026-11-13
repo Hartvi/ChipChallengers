@@ -57,7 +57,7 @@ public class DrivingIntroduction : MonoBehaviour
         this.keepModel = false;
         this.active = true;
         this.progress = new DrivingIntroductionProgress();
-        this.overlay = this.overlay != null ? this.overlay : IntroductionOverlay.Create(this.transform);
+        this.overlay = this.GetComponentInChildren<IntroductionOverlay>(true);
         this.SetHeld(true);
         this.overlay.ShowModal("Your first drive", "Preparing your car and the practice lap...",
             null, null, "Back to menu", () => GoToMainMenu.Function(false));
@@ -150,12 +150,13 @@ public class DrivingIntroduction : MonoBehaviour
     {
         if (this.race.RaceCountingDown) { return "Get ready!\nYour car will be released after the countdown."; }
         if (!this.race.RaceReady) { return "Lap interrupted.\nPress Ctrl+R to restart, or Esc to leave."; }
+        if (!this.race.RaceHasStarted) { return "1 / 4   Reach the starting gate\nHold W to drive into the gate ahead. The countdown starts there."; }
         switch (this.progress.Current)
         {
             case DrivingIntroductionProgress.Lesson.Accelerate:
                 return "1 / 4   Get moving\nHold W and drive through the first gate. S reverses.";
             case DrivingIntroductionProgress.Lesson.Steer:
-                return "2 / 4   Follow the bend\nUse A / D to steer through the next gate.";
+                return "2 / 4   A bend is ahead\nUse A / D to steer and follow the road through the gates.";
             case DrivingIntroductionProgress.Lesson.Brake:
                 return "3 / 4   Control your speed\nHold C to slow down for a corner.";
             default:
@@ -168,7 +169,6 @@ public class DrivingIntroduction : MonoBehaviour
         if (this.race == null || !this.race.RaceReady) { return; }
         this.SetHeld(false);
         this.lastProgressAt = Time.unscaledTime;
-        this.race.StartIntroductionRace();
         this.overlay.ShowPrompt(this.Message(), this.Skip);
     }
 

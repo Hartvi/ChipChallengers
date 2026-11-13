@@ -8,13 +8,14 @@ public class IntroductionOfferMenu : BaseMenu, InputReceiver
     public override void Setup()
     {
         base.Setup();
-        this.vProp = new VirtualProp(PropType.Panel, 1f);
+        this.vProp = new VirtualProp(PropType.Panel, 1f, zero,
+            new VirtualProp(PropType.Panel, 1f, typeof(IntroductionOverlay)));
     }
 
     protected override void Start()
     {
         base.Start();
-        this.overlay = IntroductionOverlay.Create(this.transform);
+        this.overlay = this.GetComponentInChildren<IntroductionOverlay>(true);
         this.selectedCallbacks.SetCallbacks(new Action[] { this.ShowOffer });
         this.deselectedCallbacks.SetCallbacks(new Action[] { () => UIManager.instance.TurnMeOff(this) });
         this.ShowOffer();

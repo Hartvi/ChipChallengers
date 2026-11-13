@@ -12,8 +12,9 @@ public class DrivingIntroductionProgress
         bool accelerate, bool steer, bool brake)
     {
         if (finished) { this.Current = Lesson.Complete; return; }
-        if (!raceStarted || this.Current == Lesson.Complete) { return; }
+        // Remember driving to the start gate, but keep the first lesson through the countdown.
         this.accelerated |= accelerate && speed > 1f;
+        if (!raceStarted || this.Current == Lesson.Complete) { return; }
         this.steered |= steer && speed > 1f;
         if (brake)
         {
@@ -21,8 +22,9 @@ public class DrivingIntroductionProgress
             this.braked |= this.brakingStartSpeed > 1f && speed < this.brakingStartSpeed - 0.5f;
         }
         else { this.brakingStartSpeed = 0f; }
-        if (this.Current == Lesson.Accelerate && this.accelerated && checkpoints >= 1) { this.Current = Lesson.Steer; }
-        if (this.Current == Lesson.Steer && this.steered && checkpoints >= 2) { this.Current = Lesson.Brake; }
+        // Explain turns on the opening straight, before reaching the first checkpoint/bend.
+        if (this.Current == Lesson.Accelerate && this.accelerated) { this.Current = Lesson.Steer; }
+        if (this.Current == Lesson.Steer && this.steered && checkpoints >= 1) { this.Current = Lesson.Brake; }
         if (this.Current == Lesson.Brake && this.braked) { this.Current = Lesson.Finish; }
     }
 }

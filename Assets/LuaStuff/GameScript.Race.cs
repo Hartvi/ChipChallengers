@@ -22,14 +22,6 @@ public partial class GameScript
     public bool RaceHasFinished => this.raceProgress != null && this.raceProgress.Finished;
     public int PassedCheckpoints => Math.Max(0, (this.raceProgress?.NextGate ?? 0) - 1);
 
-    // The introduction starts the existing countdown from its spawn after the player dismisses the overlay.
-    public void StartIntroductionRace()
-    {
-        if (!GameManager.PlayContext.IsIntroduction || !this.RaceReady || this.RaceCountingDown ||
-            this.RaceHasStarted || NetworkClient.localPlayer == null) { return; }
-        this.PassRaceGate(Time.timeAsDouble);
-    }
-
     // Race creates a race from named start/checkpoint/finish positions and shared gate appearance.
     public void Race(Table configuration) => this.Race(configuration, DynValue.Nil);
 
