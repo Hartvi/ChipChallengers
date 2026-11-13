@@ -18,7 +18,7 @@ public class IntroductionOverlay : BasePanel
         this.primary = new VirtualProp(PropType.Button, 0.1f);
         this.secondary = new VirtualProp(PropType.Button, 0.1f);
         this.tertiary = new VirtualProp(PropType.Button, 0.1f);
-        this.card = new VirtualProp(PropType.Image, 0.7f, down,
+        this.card = new VirtualProp(PropType.Image, 0.7f, down, typeof(FrostedImage),
             new VirtualProp(PropType.Panel, 0.03f),
             this.title, this.body, this.primary,
             new VirtualProp(PropType.Panel, 0.02f), this.secondary,
@@ -30,7 +30,7 @@ public class IntroductionOverlay : BasePanel
 
         this.hint = new VirtualProp(PropType.Text, 0.73f);
         this.skip = new VirtualProp(PropType.Button, 0.27f);
-        this.prompt = new VirtualProp(PropType.Image, 0.47f, down, this.hint, this.skip);
+        this.prompt = new VirtualProp(PropType.Image, 0.47f, down, typeof(FrostedImage), this.hint, this.skip);
         this.vProp = new VirtualProp(PropType.Panel, 1f, zero,
             this.modal,
             new VirtualProp(PropType.Panel, 1f, down,
@@ -50,9 +50,9 @@ public class IntroductionOverlay : BasePanel
         canvas.overrideSorting = true;
         canvas.sortingOrder = 100;
         this.gameObject.AddComponent<GraphicRaycaster>();
-        SetBackground(this.modal, new Color(0.02f, 0.04f, 0.07f, 0.8f), true);
-        SetBackground(this.card, new Color(0.07f, 0.11f, 0.16f, 1f), true);
-        SetBackground(this.prompt, new Color(0.04f, 0.08f, 0.13f, 0.94f), false);
+        SetBackground(this.modal, new Color(0.02f, 0.04f, 0.07f, 0.2f), true);
+        SetBackground(this.card, new Color(0.07f, 0.11f, 0.16f, 0.6f), true);
+        SetBackground(this.prompt, new Color(0.04f, 0.08f, 0.13f, 0.4f), false);
         ConfigureText(this.title, UIUtils.LargeFontSize);
         ConfigureText(this.body, UIUtils.SmallFontSize);
         ConfigureText(this.hint, UIUtils.SmallFontSize);
