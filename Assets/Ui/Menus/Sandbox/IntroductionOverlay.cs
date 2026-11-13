@@ -51,7 +51,7 @@ public class IntroductionOverlay : BasePanel
         canvas.sortingOrder = 100;
         this.gameObject.AddComponent<GraphicRaycaster>();
         SetBackground(this.modal, new Color(0.02f, 0.04f, 0.07f, 0.2f), true);
-        SetBackground(this.card, new Color(0.07f, 0.11f, 0.16f, 0.6f), true);
+        SetBackground(this.card, new Color(0.07f, 0.11f, 0.16f, 0.8f), true);
         SetBackground(this.prompt, new Color(0.04f, 0.08f, 0.13f, 0.4f), false);
         ConfigureText(this.title, UIUtils.LargeFontSize);
         ConfigureText(this.body, UIUtils.SmallFontSize);
