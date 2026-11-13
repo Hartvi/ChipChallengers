@@ -11,6 +11,7 @@ public class MainMenu : BaseMainMenu, InputReceiver
     float numberOfButtons = 7f;
     [SerializeField] Vector3 menuCameraPosition = new Vector3(35f, 32f, -65f);
     [SerializeField] Vector3 menuCameraTarget = new Vector3(-30f, 1f, 25f);
+    Material buttonTextMaterial;
 
     public override void Setup()
     {
@@ -43,6 +44,19 @@ public class MainMenu : BaseMainMenu, InputReceiver
         foreach (var button in this.GetComponentsInChildren<BaseButton>(true))
         {
             button.image.sprite = buttonSprite;
+            if (this.buttonTextMaterial == null)
+            {
+                this.buttonTextMaterial = new Material(button.text.fontSharedMaterial) {
+                    name = "Main menu text shadow", hideFlags = HideFlags.HideAndDontSave
+                };
+                this.buttonTextMaterial.EnableKeyword("UNDERLAY_ON");
+                this.buttonTextMaterial.SetColor("_UnderlayColor", new Color(0f, 0f, 0f, 0.75f));
+                this.buttonTextMaterial.SetFloat("_UnderlayOffsetX", 0.7f);
+                this.buttonTextMaterial.SetFloat("_UnderlayOffsetY", -0.7f);
+                this.buttonTextMaterial.SetFloat("_UnderlaySoftness", 0.3f);
+            }
+            button.text.fontSharedMaterial = this.buttonTextMaterial;
+            button.text.UpdateMeshPadding();
         }
         print("ENTER MAIN MENU");
 
@@ -72,6 +86,14 @@ public class MainMenu : BaseMainMenu, InputReceiver
         if (camera == null) { return; }
         camera.transform.position = this.menuCameraPosition;
         camera.transform.LookAt(this.menuCameraTarget, Vector3.up);
+        var blur = camera.GetComponent<MenuBackgroundBlur>();
+        if (blur == null) { blur = camera.gameObject.AddComponent<MenuBackgroundBlur>(); }
+        blur.Menu = this;
+    }
+
+    void OnDestroy()
+    {
+        if (this.buttonTextMaterial != null) { Destroy(this.buttonTextMaterial); }
     }
 
     void InputReceiver.OnStartReceiving() { }
