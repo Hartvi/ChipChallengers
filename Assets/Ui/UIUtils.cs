@@ -70,6 +70,8 @@ public static class UIUtils
         TMP_FontAsset myFont = UIUtils.DefaultFont;
 
         textObject.font = myFont;
+        textObject.fontSharedMaterial = myFont.material;
+        textObject.UpdateMeshPadding();
 
         textObject.ForceMeshUpdate();
     }
@@ -78,10 +80,8 @@ public static class UIUtils
     {
         textObject.fontSize = fontSize;
 
-        // Compensate for thinner outlines at small sizes, with a cap to protect the fill.
-        float outlineScale = Mathf.Clamp(MediumFontSize / Mathf.Max(fontSize, 1f), 1f, 2f);
-        float baseOutlineWidth = DefaultFont.material.GetFloat(ShaderUtilities.ID_OutlineWidth);
-        textObject.outlineWidth = baseOutlineWidth * outlineScale;
+        // Preserve the authored shared material, including its outline and underlay settings.
+        textObject.UpdateMeshPadding();
 
         // Placeholders may be inactive while the input contains text.
         var inputField = textObject.GetComponentInParent<TMP_InputField>(true);
