@@ -30,6 +30,7 @@ public class VelocityHUD : BasePanel
     Vector3 position => this._focus.transform.position;
 
     TMP_Text velocityText;
+    [SerializeField] bool displayPosition = false;
     TMP_Text positionText;
 
     public override void Setup()
@@ -59,16 +60,16 @@ public class VelocityHUD : BasePanel
         this.velocityText = txts[1].text;
 
         txts[2].text.SetText("");
-        this.positionText = txts[3].text;
-        this.positionText.SetText("");
+        txts[3].text.SetText("");
+        this.positionText = this.displayPosition ? txts[3].text : null;
+        this.positionText?.SetText("");
 
-        txts[2].text.SetText(UIStrings.Position);
-        this.positionText = txts[3].text;
+        if(this.displayPosition) txts[2].text.SetText(UIStrings.Position);
     }
 
     void SetPosition()
     {
-        this.positionText.SetText(this.position.ToString().Trim('(', ')'));
+        this.positionText?.SetText(this.position.ToString().Trim('(', ')'));
     }
 
     void SetVelocity()
