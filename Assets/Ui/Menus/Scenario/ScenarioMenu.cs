@@ -63,6 +63,10 @@ public class ChallengeMenu : BaseMenu, InputReceiver
 
         this.challengeList.ItemFontSize = UIUtils.SmallFontSize;
         this.challengeList.SetupItemList(this.SelectChallenge, VisibleChallenges, this.challenges, this.FormatChallengeLabel);
+        foreach (var button in this.challengeList.GetComponentsInChildren<BaseButton>(true))
+        {
+            button.text.color = Color.black;
+        }
         this.scrollbar.scrollbar.onValueChanged.AddListener(this.challengeList.Scroll);
         this.selectedCallbacks.SetCallbacks(new Action[] { this.OnEnterMenu });
         this.deselectedCallbacks.SetCallbacks(new Action[] {
