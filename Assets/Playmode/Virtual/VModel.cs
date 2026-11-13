@@ -313,6 +313,18 @@ end
         VVar selectedVar = this.GetSelectedVariable();
         if (selectedVar == null) { return; }
         string selectedVarName = selectedVar.name;
+        if (string.IsNullOrEmpty(selectedVarName)) { return; }
+
+        if (this.chips.Any(chip => VChip.dynamicPropertiesStr.Any(property =>
+            chip.TryGetProperty<string>(property, out string value) && value == selectedVarName)))
+        {
+            DisplaySingleton.Instance.DisplayText(text =>
+            {
+                DisplaySingleton.ErrorMsgModification(text);
+                text.SetText("variable is still being used in a chip");
+            }, 3f);
+            return;
+        }
 
         this.variables = this.variables.Where(x => x != selectedVar).ToArray(); //  .Concat(new VirtualVariable[]{ v }).ToArray();
         this.SetSelectedVariable(string.Empty);
