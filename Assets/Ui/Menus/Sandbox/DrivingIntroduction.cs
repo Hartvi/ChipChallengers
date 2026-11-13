@@ -110,7 +110,7 @@ public class DrivingIntroduction : MonoBehaviour
                 this.overlay.ShowModal("Your first drive",
                     "Drive through the gates in order to complete a lap.\n\n" +
                     "W / S  Accelerate / reverse     A / D  Steer\nC  Brake\n\n" +
-                    "We'll guide you as you go. X fires the gun; you won't need it on this lap.",
+                    "We'll guide you as you go.",
                     "Let's drive", this.StartDriving, "Skip introduction", this.Skip);
             }
             else if (Time.unscaledTime - this.lastProgressAt > 30f)

@@ -290,7 +290,8 @@ public partial class GameScript
     {
         DisplaySingleton.Instance.DisplayText(text => {
             if (large) { DisplaySingleton.BasicLargeModification(text); }
-            else { DisplaySingleton.BasicMediumModification(text); text.color = Color.black; }
+            else { DisplaySingleton.BasicMediumModification(text); }
+            text.color = Color.white;
             var rect = text.rectTransform;
             var parent = (RectTransform)rect.parent;
             rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
@@ -310,7 +311,7 @@ public partial class GameScript
         int checkpoints = Math.Max(0, this.raceProgress.NextGate - 1);
         DisplaySingleton.Instance.DisplayText(text => {
             DisplaySingleton.BasicSmallModification(text);
-            text.color = Color.black;
+            text.color = Color.white;
             var rect = text.rectTransform;
             var parent = (RectTransform)rect.parent;
             rect.anchorMin = rect.anchorMax = Vector2.one;

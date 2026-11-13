@@ -24,7 +24,7 @@ public class GunAspect : BaseAspect
         this.power = this.value;
         //print($"gun power: {this.power}");
 
-        this.projectileWeight = 1e-6f * this.power;
+        this.projectileWeight = 1e-4f * this.power;
         this.projectileVelocity = 333f;
         Debug.LogWarning($"TODO: update bullet strengths when physics rate is changed");
 
@@ -77,7 +77,8 @@ public class GunAspect : BaseAspect
 
         Vector3 initialBulletPosition = this.transform.position;
 
-        this.bulletPool.Next().Fire(initialBulletPosition, forward * this.projectileVelocity);
+        this.bulletPool.Next().Fire(initialBulletPosition, forward * this.projectileVelocity,
+            this.rb, this.myChip.myCore);
         this.Fired?.Invoke();
         //Debug.DrawLine(this.transform.position, this.transform.position + this.transform.forward*2f);
     }
