@@ -48,7 +48,7 @@ public class ChallengeMenu : BaseMenu, InputReceiver
         texts[0].text.SetText(UIStrings.Challenges);
         UIUtils.SetFontSize(texts[0].text, UIUtils.LargeFontSize);
         this.selectionText = texts[1];
-        UIUtils.SetFontSize(this.selectionText.text, UIUtils.SmallFontSize);
+        UIUtils.SetFontSize(this.selectionText.text, 0.5f * (UIUtils.MediumFontSize + UIUtils.SmallFontSize));
 
         // Start identifies footer buttons before challengeList creates its button copies.
         var buttons = this.GetComponentsInChildren<BaseButton>(true);
