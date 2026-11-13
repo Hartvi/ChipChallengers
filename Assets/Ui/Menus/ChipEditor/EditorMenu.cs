@@ -309,10 +309,17 @@ public class EditorMenu : BaseMenu, InputReceiver
 
     void SwitchCameraModes()
     {
+        const float minimumChipDistance = 0.25f;
         Camera cam = Camera.main;
         if (!this.ScriptPanel.IsPointerOver)
         {
-            cam.transform.position += 0.55f * Input.mouseScrollDelta.y * cam.transform.forward;
+            float zoom = 0.55f * Input.mouseScrollDelta.y;
+            if (GameManager.cameraMoveMode == CameraMoveMode.Follow && this.selectedChip != null && zoom > 0f)
+            {
+                float distance = Vector3.Distance(cam.transform.position, this.lastSelectedPosition);
+                zoom = Mathf.Min(zoom, Mathf.Max(0f, distance - minimumChipDistance));
+            }
+            cam.transform.position += zoom * cam.transform.forward;
         }
 
         if (Input.GetMouseButton(1))
@@ -366,6 +373,15 @@ public class EditorMenu : BaseMenu, InputReceiver
             }
         }
 
+        if (GameManager.cameraMoveMode == CameraMoveMode.Follow && this.selectedChip != null)
+        {
+            Vector3 offset = cam.transform.position - this.lastSelectedPosition;
+            if (offset.sqrMagnitude < minimumChipDistance * minimumChipDistance)
+            {
+                Vector3 direction = offset.sqrMagnitude > 0f ? offset.normalized : -cam.transform.forward;
+                cam.transform.position = this.lastSelectedPosition + direction * minimumChipDistance;
+            }
+        }
     }
 
     void InEditorInputs()
