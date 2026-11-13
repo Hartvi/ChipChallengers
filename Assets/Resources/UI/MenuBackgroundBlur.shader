@@ -28,6 +28,26 @@ Shader "Hidden/ChipChallengers/MenuBackgroundBlur"
             }
             ENDCG
         }
+        Pass
+        {
+            CGPROGRAM
+            #pragma vertex vert_img
+            #pragma fragment downsample
+            #include "UnityCG.cginc"
+            sampler2D _MainTex;
+            float4 _MainTex_TexelSize;
+
+            fixed4 downsample(v2f_img input) : SV_Target
+            {
+                float2 offset = abs(_MainTex_TexelSize.xy) * 0.5;
+                fixed4 color = tex2D(_MainTex, input.uv + float2(-offset.x, -offset.y));
+                color += tex2D(_MainTex, input.uv + float2(offset.x, -offset.y));
+                color += tex2D(_MainTex, input.uv + float2(-offset.x, offset.y));
+                color += tex2D(_MainTex, input.uv + offset);
+                return color * 0.25;
+            }
+            ENDCG
+        }
     }
     Fallback Off
 }

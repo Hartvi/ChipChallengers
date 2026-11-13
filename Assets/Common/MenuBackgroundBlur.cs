@@ -24,39 +24,69 @@ public class MenuBackgroundBlur : MonoBehaviour
             if (shader == null || !shader.isSupported) { Graphics.Blit(source, destination); return; }
             this.material = new Material(shader) { hideFlags = HideFlags.HideAndDontSave };
         }
-        var temporary = RenderTexture.GetTemporary(source.width, source.height, 0, source.format);
-        temporary.filterMode = FilterMode.Bilinear;
-        temporary.wrapMode = TextureWrapMode.Clamp;
+        RenderTexture downsampled = null;
+        RenderTexture temporary = null;
         try
         {
             float radiusPixels = Mathf.Pow((float)Screen.width * Screen.height, 0.2f);
             float step = radiusPixels / 4f;
+            // Prefilter in 2x steps so the Gaussian samples stay at most one texel apart.
+            // Widely spaced samples at full resolution leave repeated, grid-like edges.
+            var input = source;
+            while (step * input.width / source.width > 1f && input.width > 1 && input.height > 1)
+            {
+                var smaller = GetBlurTexture(Mathf.Max(1, input.width / 2), Mathf.Max(1, input.height / 2), source.format);
+                try { Graphics.Blit(input, smaller, this.material, 1); }
+                catch { RenderTexture.ReleaseTemporary(smaller); throw; }
+                if (downsampled != null) { RenderTexture.ReleaseTemporary(downsampled); }
+                downsampled = smaller;
+                input = smaller;
+            }
+            temporary = GetBlurTexture(input.width, input.height, source.format);
             this.material.SetVector("_BlurDirection", new Vector4(step / source.width, 0f, 0f, 0f));
-            Graphics.Blit(source, temporary, this.material);
+            Graphics.Blit(input, temporary, this.material, 0);
             this.material.SetVector("_BlurDirection", new Vector4(0f, step / source.height, 0f, 0f));
             if (panels)
             {
-                if (this.panelTexture == null || this.panelTexture.width != source.width ||
-                    this.panelTexture.height != source.height || this.panelTexture.format != source.format)
+                if (this.panelTexture == null || this.panelTexture.width != input.width ||
+                    this.panelTexture.height != input.height || this.panelTexture.format != source.format)
                 {
                     this.ReleasePanelTexture();
-                    this.panelTexture = new RenderTexture(source.width, source.height, 0, source.format) {
+                    this.panelTexture = new RenderTexture(input.width, input.height, 0, source.format) {
                         name = "UI panel background blur", filterMode = FilterMode.Bilinear,
                         wrapMode = TextureWrapMode.Clamp, hideFlags = HideFlags.HideAndDontSave
                     };
                     this.panelTexture.Create();
                 }
-                Graphics.Blit(temporary, this.panelTexture, this.material);
+                Graphics.Blit(temporary, this.panelTexture, this.material, 0);
                 Shader.SetGlobalTexture("_PanelBlurTexture", this.panelTexture);
                 Graphics.Blit(fullScreen ? this.panelTexture : source, destination);
             }
             else
             {
                 this.ReleasePanelTexture();
-                Graphics.Blit(temporary, destination, this.material);
+                // Finish at the reduced resolution before bilinear upsampling to the screen.
+                if (downsampled != null)
+                {
+                    Graphics.Blit(temporary, downsampled, this.material, 0);
+                    Graphics.Blit(downsampled, destination);
+                }
+                else { Graphics.Blit(temporary, destination, this.material, 0); }
             }
         }
-        finally { RenderTexture.ReleaseTemporary(temporary); }
+        finally
+        {
+            if (temporary != null) { RenderTexture.ReleaseTemporary(temporary); }
+            if (downsampled != null) { RenderTexture.ReleaseTemporary(downsampled); }
+        }
+    }
+
+    static RenderTexture GetBlurTexture(int width, int height, RenderTextureFormat format)
+    {
+        var texture = RenderTexture.GetTemporary(width, height, 0, format);
+        texture.filterMode = FilterMode.Bilinear;
+        texture.wrapMode = TextureWrapMode.Clamp;
+        return texture;
     }
 
     void OnDestroy()

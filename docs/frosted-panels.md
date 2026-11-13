@@ -11,4 +11,6 @@ new VirtualProp(PropType.Image, 0.7f, down, typeof(FrostedImage),
 
 The main camera's `MenuBackgroundBlur` captures a shared scene texture only while a frosted image is active. It uses the existing screen-scaled radius. Panels sample the screen region behind them instead of stretching the entire scene into each rectangle. Outside the tutorial card/hint panel the camera remains sharp; the welcome overlay still dims the surroundings. The main menu retains its full-screen blur.
 
+The scene is progressively downsampled with a 2x2 averaging filter before the horizontal and vertical Gaussian blur. This keeps blur samples close together to avoid repeated edges and square patterns. The shared result is bilinearly upsampled for display.
+
 This implementation targets the project's built-in render pipeline and screen-space overlay canvas on the main camera. It blurs the 3D scene, not other UI layered underneath a panel. Intermediate textures are resized with the camera output and released when no longer needed.
