@@ -20,7 +20,7 @@ public class ControlsPanel : BasePanel, InputReceiver
     {
         base.Setup();
         this.vProp = new VirtualProp(PropType.Panel, 1f, right,
-            new VirtualProp(PropType.Panel, 1f, down,
+            new VirtualProp(PropType.Image, 1f, down, typeof(FrostedImage),
                 new VirtualProp(PropType.Panel, 0.1f),
                 new VirtualProp(PropType.Panel, -1f, right,
                     new VirtualProp(PropType.Panel, 0.5f, right,
@@ -46,6 +46,7 @@ public class ControlsPanel : BasePanel, InputReceiver
 
     void Start()
     {
+        this.GetComponentInChildren<FrostedImage>().image.color = new Color(0.02f, 0.04f, 0.07f, 0.4f);
         BaseText[] txts = this.GetComponentsInChildren<BaseText>();
         this.Key1 = txts[0];
         UIUtils.SetFontSize(this.Key1.text, (UIUtils.MediumFontSize + UIUtils.SmallFontSize) / 2);
