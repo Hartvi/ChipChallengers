@@ -12,7 +12,7 @@ public class RuntimeTreeTests
         root.SetActive(false);
         try
         {
-            var chip = root.AddComponent<CommonChip>();
+            var chip = NetworkTestObjects.Add<CommonChip>(root);
             chip.SetValue(100f);
             chip.SetBrake(10f);
             chip.Die();
@@ -33,7 +33,7 @@ public class RuntimeTreeTests
             var item = new GameObject("Runtime tree test");
             item.SetActive(false);
             objects.Add(item);
-            return item.AddComponent<CommonChip>();
+            return NetworkTestObjects.Add<CommonChip>(item);
         }
         try
         {

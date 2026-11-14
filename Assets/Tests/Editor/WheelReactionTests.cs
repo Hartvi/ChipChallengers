@@ -23,8 +23,8 @@ public class WheelReactionTests
             var wheelBody = wheelObject.AddComponent<Rigidbody>();
             wheelBody.useGravity = false;
             wheelBody.mass = 2;
-            var chip = wheelObject.AddComponent<CommonChip>();
-            chip.myCore = coreObject.AddComponent<CoreChip>();
+            var chip = NetworkTestObjects.Add<CommonChip>(wheelObject);
+            chip.myCore = NetworkTestObjects.Add<CoreChip>(coreObject);
             var wheel = wheelObject.AddComponent<WheelAspects>();
             wheel.myChip = chip;
             Physics.SyncTransforms();

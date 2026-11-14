@@ -73,7 +73,7 @@ public class ChipTypeSetupTests
         root = new GameObject("Chip type setup regression test");
         // Test setup synchronously without starting network, audio, or physics updates.
         root.SetActive(false);
-        var chip = root.AddComponent<CommonChip>();
+        var chip = NetworkTestObjects.Add<CommonChip>(root);
         chip.equivalentVirtualChip = virtualChip;
         typeof(CommonChip).GetMethod("SetupTypeAspects", BindingFlags.Instance | BindingFlags.NonPublic)
             .Invoke(chip, null);

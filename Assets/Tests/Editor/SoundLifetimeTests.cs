@@ -11,7 +11,7 @@ public class SoundLifetimeTests
         root.SetActive(false);
         try
         {
-            var core = root.AddComponent<CoreChip>();
+            var core = NetworkTestObjects.Add<CoreChip>(root);
             core.myCore = core;
             var flags = BindingFlags.Instance | BindingFlags.NonPublic;
             for (int rebuild = 0; rebuild < 5; rebuild++)

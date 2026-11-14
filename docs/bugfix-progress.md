@@ -47,3 +47,5 @@ Fixes follow the numbered findings in `code-review-2026-11-14.md`. Each complete
 | Additional — self-closing input receivers | Fixed | Remove obsolete bookkeeping that indexed an empty stack after a receiver closed itself during Update; regression expanded |
 
 Unity Play-mode and multiplayer checks require separate runtime validation; a C# compilation check does not exercise Mirror weaving or physics.
+
+Native validation: Unity 2021.3.16f1 compiled the isolated project and completed Mirror weaving. Its first test run exposed incomplete Mirror setup in edit-mode fixtures; fixtures now initialize identities and enter a bounded client state for client-gated checks.

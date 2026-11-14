@@ -90,15 +90,15 @@ public class BulletTests
     [TestCase(2f)]
     public void ImpactTransfersProjectileMomentumToOtherObjectsOnly(float projectileMass)
     {
-        var sourceCore = this.Create("Source core", -2f).AddComponent<CoreChip>();
+        var sourceCore = NetworkTestObjects.Add<CoreChip>(this.Create("Source core", -2f));
         var gun = this.Surface("Source gun", 1f);
         var gunBody = gun.AddComponent<Rigidbody>();
         gunBody.useGravity = false;
-        gun.AddComponent<CommonChip>().myCore = sourceCore;
+        NetworkTestObjects.Add<CommonChip>(gun).myCore = sourceCore;
         var sourceWheel = this.Surface("Another chip on the source model", 2f);
         var wheelBody = sourceWheel.AddComponent<Rigidbody>();
         wheelBody.useGravity = false;
-        sourceWheel.AddComponent<CommonChip>().myCore = sourceCore;
+        NetworkTestObjects.Add<CommonChip>(sourceWheel).myCore = sourceCore;
         var target = this.Surface("Other object", 4f).AddComponent<Rigidbody>();
         target.useGravity = false;
         target.mass = 4f;

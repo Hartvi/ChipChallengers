@@ -13,7 +13,7 @@ public class SensorAspectTests
         try
         {
             var body = gameObject.AddComponent<Rigidbody>();
-            var chip = gameObject.AddComponent<CommonChip>();
+            var chip = NetworkTestObjects.Add<CommonChip>(gameObject);
             var sensor = gameObject.AddComponent<SensorAspect>();
             sensor.myChip = chip;
             sensor.sensorType = SensorType.Acceleration;
