@@ -90,6 +90,7 @@ public static class Clipboard
         CoreChip core = CoreChip.ClientCoreChip;
 
         VModel vm = core.VirtualModel;
+        vm.PrepareSensorNames(newChips);
         vm.chips = vm.chips.Concat(newChips).ToArray();
         // refresh virtual chips
         //vm.chips = vm.GetAllVChips();

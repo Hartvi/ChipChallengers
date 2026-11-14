@@ -252,6 +252,9 @@ end
     {
         if (v == null || !ModelValidation.IsVariableName(v.name)) { throw new ArgumentException("Choose a valid variable name."); }
         v.ValidateDefinition();
+        if (this.chips.Any(chip => chip.ChipType == VChip.sensorStr &&
+            SensorBindingName(chip) == v.name))
+            throw new ArgumentException("A sensor already uses this name. Choose a different variable name.");
         VVar existingVariable = this.variables.FirstOrDefault(x => x.name == v.name);
 
         if (existingVariable is null)
@@ -279,6 +282,37 @@ end
         this.AddVariable(v);
         this.SetSelectedVariable(v.name);
     }
+
+    // Prepare a complete pasted/type-changed batch before publishing a model change.
+    public void PrepareSensorNames(VChip[] additions)
+    {
+        var incoming = new HashSet<VChip>(additions);
+        var used = new HashSet<string>(this.variables.Select(variable => variable.name), StringComparer.Ordinal);
+        foreach (var chip in this.chips.Where(chip => chip.ChipType == VChip.sensorStr && !incoming.Contains(chip)))
+            used.Add(SensorBindingName(chip));
+        foreach (var chip in additions.Where(chip => chip.ChipType == VChip.sensorStr))
+        {
+            int index = Array.IndexOf((string[])chip.keys, VChip.nameStr);
+            string preferred = SensorBindingName(chip);
+            if (!ModelValidation.IsVariableName(preferred)) preferred = "sensor";
+            string name = preferred;
+            int number = 1;
+            while (!used.Add(name))
+            {
+                string suffix = "_" + number++;
+                name = preferred.Substring(0, Math.Min(preferred.Length, 64 - suffix.Length)) + suffix;
+            }
+            if (index < 0)
+            {
+                chip.keys = chip.keys.Concat(new[] { VChip.nameStr }).ToArray();
+                chip.vals = chip.vals.Concat(new[] { name }).ToArray();
+            }
+            else ((string[])chip.vals)[index] = name;
+        }
+    }
+
+    static string SensorBindingName(VChip chip) =>
+        ArrayExtensions.AccessLikeDict(VChip.nameStr, chip.keys, chip.vals) ?? "chip_name";
 
     public VVar GetSelectedVariable()
     {

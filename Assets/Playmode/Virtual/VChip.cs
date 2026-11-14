@@ -598,6 +598,7 @@ public class VChip
         this.vals = newValues;
         this.CheckAndSetVals();
         // Notify once, after keys and values describe a complete valid chip of the new type.
+        if (type == sensorStr) this.MyModel?.PrepareSensorNames(new[] { this });
         this.vals[Array.IndexOf(newKeys, typeStr)] = type;
     }
 

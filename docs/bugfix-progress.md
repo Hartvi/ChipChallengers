@@ -2,6 +2,8 @@
 
 Follow-up redo 1: unfinished Lua is accepted as editable model data and can be saved/reloaded. Syntax errors disable the runtime program with feedback instead of rejecting and replacing the draft. Structural validation and execution budgets remain in force. Native draft save/load and safe initialization regression passed.
 
+Follow-up redo 2: sensor pastes allocate unique names across existing sensors, variables and the entire pasted batch. Mirrored/repeated pastes and legacy unnamed sensors are supported. Type conversion to Sensor also allocates a free name; variable/sensor conflicts are rejected before mutation. Three native paste regressions passed.
+
 Fixes follow the numbered findings in `code-review-2026-11-14.md`. Each completed finding receives its own commit. Existing unrelated local files are excluded.
 
 | Finding | Status | Validation |
