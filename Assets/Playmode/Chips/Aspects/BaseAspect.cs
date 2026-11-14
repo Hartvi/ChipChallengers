@@ -39,6 +39,8 @@ public abstract class BaseAspect : MonoBehaviour
     public abstract void RuntimeFunction();
     protected virtual void OnDestroy()
     {
+        if (this.myChip != null && this.myChip.myCore != null)
+            this.myChip.myCore.RuntimeFunctions.Remove(this);
     }
 }
 
