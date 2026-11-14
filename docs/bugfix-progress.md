@@ -26,5 +26,6 @@ Fixes follow the numbered findings in `code-review-2026-11-14.md`. Each complete
 | 20 — unbounded/zero-power gun allocation | Fixed | Lazy pool capped at 256 bullets, dynamic finite power, max 50 shots/sec, physics-tick charge; rate/zero/tiny/nonfinite power regressions |
 | 21 — inconsistent impact/recoil mass | Fixed | One finite positive projectile mass shared by recoil and reused bullet bodies; mass regression added and compiled |
 | 22 — missing wheel support reaction | Fixed | Normal and tangential forces share equal/opposite contact distribution; dynamic-platform momentum regression added and compiled |
+| 23 — fresh-install volume/particle defaults | Fixed | All preference reads supply their declared defaults; volume/particle setters apply runtime values; player-source compilation |
 
 Unity Play-mode and multiplayer checks require separate runtime validation; a C# compilation check does not exercise Mirror weaving or physics.

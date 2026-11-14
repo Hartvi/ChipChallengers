@@ -85,7 +85,7 @@ public class GameManager : MonoBehaviour
     int GetFrameRate()
     {
         string s = UIStrings.Framerate;
-        int i = PlayerPrefs.GetInt(s);
+        int i = PlayerPrefs.GetInt(s, defaultIntSettings[s]);
 
         if (i < minMaxIntSettings[s].Item1 || i > minMaxIntSettings[s].Item2)
         {
@@ -97,7 +97,7 @@ public class GameManager : MonoBehaviour
     int GetPhysicsRate()
     {
         string s = UIStrings.PhysicsRate;
-        int i = PlayerPrefs.GetInt(s);
+        int i = PlayerPrefs.GetInt(s, defaultIntSettings[s]);
 
         if (i < minMaxIntSettings[s].Item1 || i > minMaxIntSettings[s].Item2)
         {
@@ -130,7 +130,7 @@ public class GameManager : MonoBehaviour
     int GetPhysicsParticles()
     {
         string s = UIStrings.PhysicsParticles;
-        int i = PlayerPrefs.GetInt(s);
+        int i = PlayerPrefs.GetInt(s, defaultIntSettings[s]);
 
         if (i < minMaxIntSettings[s].Item1 || i > minMaxIntSettings[s].Item2)
         {
@@ -143,7 +143,7 @@ public class GameManager : MonoBehaviour
     int GetVolume()
     {
         string s = UIStrings.Volume;
-        int i = PlayerPrefs.GetInt(s);
+        int i = PlayerPrefs.GetInt(s, defaultIntSettings[s]);
 
         if (i < minMaxIntSettings[s].Item1 || i > minMaxIntSettings[s].Item2)
         {
@@ -186,7 +186,7 @@ public class GameManager : MonoBehaviour
         string s = UIStrings.Volume;
         int newf = SaturateIntSetting(s, i);
 
-        Debug.LogWarning($"TODO: set global volume to {i}");
+        GameManager.RealTimeSettings.Volume = newf / 100f;
 
         //AudioManager.Instance.
         PlayerPrefs.SetInt(s, newf);
@@ -199,7 +199,7 @@ public class GameManager : MonoBehaviour
         string s = UIStrings.PhysicsParticles;
         int newf = SaturateIntSetting(s, i);
 
-        Debug.LogWarning($"TODO: set physics particles to {i}");
+        GameManager.RealTimeSettings.ParticleRate = newf / 100f;
 
         PlayerPrefs.SetInt(s, newf);
         PlayerPrefs.Save();
