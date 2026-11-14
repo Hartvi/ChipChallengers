@@ -12,10 +12,10 @@ Fixes follow the numbered findings in `code-review-2026-11-14.md`. Each complete
 | 6 — unbounded Lua/model execution | Fixed | Instruction budgets on vehicle/challenge callbacks, no executable model parsing, source/object limits; infinite-loop and bundled-model regressions |
 | 7 — malformed models and missing cores | Fixed | Pre-publication schema/tree validation; empty, duplicate, missing-parent, cyclic and invalid-option cases; bundled model compatibility |
 | 8 — shipped Up Arrow velocity boost | Fixed | Removed debug force path; player-source compilation |
-| 9 — remote disconnect navigates everyone to the menu | Fixed | Navigation moved to Mirror's local-player-only teardown hook; player-source compilation (multi-instance runtime check pending) |
+| 9 — remote disconnect navigates everyone to the menu | Fixed | Navigation moved to Mirror's local-player-only teardown hook; host and remaining client stayed in sandbox after another client disconnected |
 | 10 — render-dependent vehicle controls | Fixed | Fixed 50 Hz control clock/backstep across 30–1000 Hz samples; buffered input-edge checks; Lua DeltaTime exposed |
 | 11 — zero accelerometer readings | Fixed | Cached physics-tick velocity differences; Unity regression added; player/editor-source compilation |
-| 12 — inconsistent multiplayer worlds | Fixed | Host map announcements/content checks and spawn resets; remote map selection blocked; scripted challenges restricted to solo sessions; compile checks (multi-instance runtime pending) |
+| 12 — inconsistent multiplayer worlds | Fixed | Host map announcements/content checks and spawn resets; remote map selection blocked; scripted challenges restricted to solo sessions; host/two-client map change and solo restriction passed |
 | 13 — remote variable/effect presentation | Fixed | Observer values applied before presentation; server-authoritative shot events with harmless client bullets; observer/bullet regressions added and compiled |
 | 14 — host-resolution mouse normalization | Fixed | Normalize at the sender, consume normalized coordinates on the host; resolution/neutral/nonfinite checks |
 | 15 — redo branches and remote undo | Fixed | Server-owned undo/redo commands, serialized pending edits, bounded history; empty/undo/redo/new-branch regressions |
@@ -49,6 +49,15 @@ Fixes follow the numbered findings in `code-review-2026-11-14.md`. Each complete
 | Multiplayer validation — client physics warning flood | Fixed | Use Mirror's silent ServerCallback guard for Unity's automatic FixedUpdate callback |
 | Multiplayer validation — map files opened exclusively for writing | Fixed | Minimal OBJ importer patch opens geometry/materials read-only with shared readers, supporting protected installs and simultaneous local instances; native regression added |
 
-Unity Play-mode and multiplayer checks require separate runtime validation; a C# compilation check does not exercise Mirror weaving or physics.
+## Final verification
 
-Native validation: Unity 2021.3.16f1 compiled the isolated project and completed Mirror weaving. Its first test run exposed incomplete Mirror setup in edit-mode fixtures; fixtures now initialize identities and enter a bounded client state for client-gated checks.
+- Standalone production-code checks: **145 vehicle/runtime**, **301 challenge/save**, and **15 bundled challenge** checks passed.
+- Unity **2021.3.16f1**: **31/31 EditMode tests passed**, including native physics, observer variable updates, model trees, aspect/audio ownership, menus, focus and shared read-only map access.
+- Full **Windows x64 player build succeeded with zero errors**, including Mirror's actual IL postprocessing/weaving.
+- Three separate headless Windows players passed the host/two-client check: joins, host map change, remote undo/redo on both clients, three further resets per client, solo challenge restriction, clean disconnect, and preservation of sandbox on the host and remaining client.
+- After initial setup settled, both clients retained **75 AudioSources and 60 aspect registrations** through all three resets.
+- Native validation ran in a detached temporary worktree. Its validation-only build uses a separate company/product name and save directory. The open editor and ordinary player saves were left intact.
+
+The reproducible build/probe sources and instructions are in `Tests/UnityValidation`. The probe remains outside `Assets` in the normal project. An early native run exposed incomplete Mirror lifecycle setup in some test fixtures; those fixtures were corrected before the passing run.
+
+The headless checks do not assess visual design, audible mixing, long-session handling or internet latency. An editor tutorial and menu redesign remain feature work, as described in the original review.
