@@ -55,6 +55,7 @@ partial class Program
         Check(!keyInput.Held('w') && keyInput.KeysDown.Length == 0, "Malformed input did not clear retained controls");
         CheckGunTiming();
         CheckUserModelFiles();
+        CheckVariableDefinitions();
         Check(Math.Abs(GunFireControl.ProjectileMass(100) - 0.01f) < 1e-8f &&
             GunFireControl.ProjectileMass(1e-30f) > 0, "Projectile/recoil mass is invalid");
         var history = new HistoryStack();
@@ -249,6 +250,23 @@ partial class Program
         {
             if (System.IO.Path.GetFullPath(root).StartsWith(System.IO.Path.GetFullPath(System.IO.Path.GetTempPath()), StringComparison.OrdinalIgnoreCase))
                 System.IO.Directory.Delete(root, true);
+        }
+    }
+
+    static void CheckVariableDefinitions()
+    {
+        var variable = new VVar(new[] { "power", "5", "-10", "10", "1" });
+        Check(variable.currentValue == 5 && variable.defaultValue == 5, "Constructor clamped before initializing bounds");
+        foreach (var values in new[] {
+            new[] { "1bad", "0", "-1", "1", "1" }, new[] { "end", "0", "-1", "1", "1" },
+            new[] { "Loop", "0", "-1", "1", "1" }, new[] { "power", "2", "-1", "1", "1" },
+            new[] { "power", "0", "1", "-1", "1" }, new[] { "power", "0", "-1", "1", "-1" },
+            new[] { "power", "NaN", "-1", "1", "1" } })
+        {
+            bool rejected = false;
+            try { new VVar(values); }
+            catch (Exception error) when (error is ArgumentException || error is FormatException) { rejected = true; }
+            Check(rejected, "Invalid variable definition was accepted");
         }
     }
 }

@@ -39,8 +39,8 @@ public static class ModelValidation
             string name = Text(variable.Get("name"), "variable name");
             if ((name.Length > 0 && !IsVariableName(name)) || !names.Add(name))
                 throw new ArgumentException("Variable names must be unique Lua identifiers, separate from the script API.");
-            foreach (string field in new[] { "defaultValue", "minValue", "maxValue", "backstep" })
-                ModelNumbers.Read(variable.Get(field));
+            VVar.ValidateDefinition(name, ModelNumbers.Read(variable.Get("defaultValue")), ModelNumbers.Read(variable.Get("minValue")),
+                ModelNumbers.Read(variable.Get("maxValue")), ModelNumbers.Read(variable.Get("backstep")));
         }
         var allowedTypes = new HashSet<string>(spawnableTypes, StringComparer.Ordinal) { "Core" };
         var byId = new Dictionary<string, Table>(StringComparer.Ordinal);

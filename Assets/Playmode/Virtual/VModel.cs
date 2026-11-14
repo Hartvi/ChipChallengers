@@ -250,6 +250,8 @@ end
 
     public void AddVariable(VVar v)
     {
+        if (v == null || !ModelValidation.IsVariableName(v.name)) { throw new ArgumentException("Choose a valid variable name."); }
+        v.ValidateDefinition();
         VVar existingVariable = this.variables.FirstOrDefault(x => x.name == v.name);
 
         if (existingVariable is null)

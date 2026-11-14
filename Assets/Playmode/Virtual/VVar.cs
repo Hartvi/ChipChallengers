@@ -37,6 +37,7 @@ public class VVar
         get { return this._currentValue; }
         set
         {
+            if (float.IsNaN(value) || float.IsInfinity(value)) { throw new ArgumentException("Variable values must be finite."); }
             this._currentValue = Math.Max(Math.Min(value, this.maxValue), this.minValue);
             //if(this.name == "angle")
             //{
@@ -86,6 +87,7 @@ public class VVar
 
     public string ToLuaString()
     {
+        this.ValidateDefinition();
         // Initialize string with beginning of table
         string luaCode = "{";
 
@@ -136,6 +138,7 @@ public class VVar
         this.maxValue = ModelNumbers.Read(luaTable.Get("maxValue"));
         this.backstep = ModelNumbers.Read(luaTable.Get("backstep"));
         this.defaultValue = ModelNumbers.Read(luaTable.Get("defaultValue"));
+        this.ValidateDefinition();
         this.currentValue = this.defaultValue;
     }
     public static VVar[] FromLuaTables(Table[] luaTables)
@@ -148,44 +151,35 @@ public class VVar
     }
     public VVar(string[] vals)
     {
-        if (vals.Length < 5) // Ensure there are enough elements in the array
-            throw new ArgumentException("vals must contain at least 5 elements");
-
+        if (vals == null || vals.Length != 5) { throw new ArgumentException("Expected Name, Default, Minimum, Maximum and Backstep."); }
         this.name = vals[0];
-        float defaultValue;
-        if (!ModelNumbers.TryParse(vals[1], out defaultValue))
-        {
-            defaultValue = 0f;
-        }
-
-        float minValue;
-        if (!ModelNumbers.TryParse(vals[2], out minValue))
-        {
-            minValue = 0f;
-        }
-
-        float maxValue;
-        if (!ModelNumbers.TryParse(vals[3], out maxValue))
-        {
-            maxValue = 0f;
-        }
-
-        float backstep;
-        if (!ModelNumbers.TryParse(vals[4], out backstep))
-        {
-            backstep = 0f;
-        }
-
-        this.defaultValue = defaultValue;
-        this.currentValue = defaultValue;
-        this.minValue = minValue;
-        this.maxValue = maxValue;
-        this.backstep = backstep;
-
+        this.defaultValue = ModelNumbers.Parse(vals[1]);
+        this.minValue = ModelNumbers.Parse(vals[2]);
+        this.maxValue = ModelNumbers.Parse(vals[3]);
+        this.backstep = ModelNumbers.Parse(vals[4]);
+        this.ValidateDefinition();
+        this.currentValue = this.defaultValue;
     }
+
     public override string ToString()
     {
         return this.name;
+    }
+
+    public void ValidateDefinition()
+    {
+        ValidateDefinition(this.name, this.defaultValue, this.minValue, this.maxValue, this.backstep);
+    }
+
+    public static void ValidateDefinition(string name, float defaultValue, float minimum, float maximum, float backstep)
+    {
+        if (name == null || (name.Length > 0 && !ModelValidation.IsVariableName(name)))
+            throw new ArgumentException("Use a Lua variable name that is separate from keywords and the control API.");
+        if (new[] { defaultValue, minimum, maximum, backstep }.Any(value => float.IsNaN(value) || float.IsInfinity(value)))
+            throw new ArgumentException("Variable settings must be finite numbers.");
+        if (minimum > maximum || defaultValue < minimum || defaultValue > maximum)
+            throw new ArgumentException("Minimum must be at most Default, and Default at most Maximum.");
+        if (backstep < 0) { throw new ArgumentException("Backstep cannot be negative."); }
     }
 }
 

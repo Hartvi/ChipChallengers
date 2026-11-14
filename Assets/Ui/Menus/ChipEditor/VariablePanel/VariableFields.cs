@@ -48,7 +48,8 @@ public class VariableFields : BaseImage
         this.inputs[0].input.onEndEdit.RemoveAllListeners();
         this.inputs[0].input.onEndEdit.AddListener(
             x => {
-                this.inputs[0].input.SetTextWithoutNotify(PermitOnlyVariables(x));
+                if (!string.IsNullOrEmpty(x) && !ModelValidation.IsVariableName(x))
+                    this.ShowError("Use a Lua variable name that is separate from keywords and the control API.");
             }
         );
         for(int i = 1; i < this.inputs.Length; ++i)
@@ -92,19 +93,21 @@ public class VariableFields : BaseImage
 
     public void AddVariable()
     {
-        if (!this.inputs[0].input.text.IsVariableName())
+        if (!ModelValidation.IsVariableName(this.inputs[0].input.text))
         {
-            DisplaySingleton.Instance.DisplayText(x =>
-                {
-                    DisplaySingleton.WarnMsgModification(x);
-                    x.SetText($"Variable name {this.inputs[0].input.text} is invalid");
-                }, 
-                3f
-            );
+            this.ShowError("Choose a valid Lua variable name.");
+            return;
         }
         string[] vals = this.inputs.Select(x => x.input.text).ToArray();
-        VVar v = new VVar(vals);
-        CoreChip.ClientCoreChip.VirtualModel.AddAndSelectVariable(v);
+        try
+        {
+            VVar v = new VVar(vals);
+            CoreChip.ClientCoreChip.VirtualModel.AddAndSelectVariable(v);
+        }
+        catch (Exception error) when (error is ArgumentException || error is FormatException)
+        {
+            this.ShowError(error.Message);
+        }
         // add variable, select it
         // update the display panel for variables
     }
@@ -116,28 +119,23 @@ public class VariableFields : BaseImage
 
     private void SanitizeInputField(TMP_InputField inputField, string input)
     {
-        inputField.SetTextWithoutNotify(string.IsNullOrWhiteSpace(input) ? "0" : ValidateFloatInput(input));
+        if (string.IsNullOrWhiteSpace(input)) { inputField.SetTextWithoutNotify("0"); }
+        else if (ModelNumbers.TryParse(input, out float value)) { inputField.SetTextWithoutNotify(ModelNumbers.Format(value)); }
+        else { this.ShowError("Enter a finite number."); }
     }
 
-    private string ValidateFloatInput(string input)
+    void ShowError(string message)
     {
-        string tmp = input;
-        while (!IsFloat(tmp) && tmp.Length > 0)
-        {
-            tmp = tmp.Substring(0, Math.Max(0, tmp.Length - 1));
-        }
-
-        return tmp;
-    }
-
-    private bool IsFloat(string value)
-    {
-        return ModelNumbers.TryParse(value, out _);
+        DisplaySingleton.Instance.DisplayText(text => {
+            DisplaySingleton.ErrorMsgModification(text);
+            text.SetText(message);
+        }, 4f, "variable-input-error");
     }
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Tab) && Input.GetKey(KeyCode.LeftShift))
+        if (!this.initialized || !this.inputs.Any(input => input.input.isFocused)) { return; }
+        if (Input.GetKeyDown(KeyCode.Tab) && (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)))
         {
             bool wasFocused = false;
             for (int i = this.inputs.Length - 1; i > -1; --i)
@@ -155,7 +153,7 @@ public class VariableFields : BaseImage
             }
         }
 
-        if (Input.GetKeyDown(KeyCode.Tab))
+        if (Input.GetKeyDown(KeyCode.Tab) && !Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift))
         {
             bool wasFocused = false;
             for (int i = 0; i < this.inputs.Length; ++i)
@@ -189,15 +187,4 @@ public class VariableFields : BaseImage
         }
     }
 
-    string PermitOnlyVariables(string input)
-    {
-        string tmp = input;
-        while (!StringHelpers.IsVariableName(tmp) && tmp.Length > 0)
-        {
-            tmp = tmp.Substring(0, Math.Max(0, tmp.Length - 1));
-        }
-
-        return tmp;
-    }
 }
-

@@ -34,5 +34,6 @@ Fixes follow the numbered findings in `code-review-2026-11-14.md`. Each complete
 | 28 — independent messages overwrite each other | Fixed | Unique transient IDs with expiry/cap, explicit reusable Lua print slots, canvas reacquisition; message lifecycle regression added and compiled |
 | 29 — best times ignore changed maps | Fixed | Run identity includes loaded map content, run stores map identity, browser verifies installed geometry, legacy times remain separate; map-change regressions |
 | 30 — fragile Lua key discovery | Fixed | Transmit supported held/edge states without scanning source; uppercase, digits/keypad, space/control keys and malformed packets handled; key regressions |
+| 31 — variable initialization and validation | Fixed | Initialize validated bounds before value; reject invalid names, nonfinite settings, inverted/default-outside ranges and negative backstep before mutation; variable regressions |
 
 Unity Play-mode and multiplayer checks require separate runtime validation; a C# compilation check does not exercise Mirror weaving or physics.
