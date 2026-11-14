@@ -47,6 +47,7 @@ Fixes follow the numbered findings in `code-review-2026-11-14.md`. Each complete
 | Additional — self-closing input receivers | Fixed | Remove obsolete bookkeeping that indexed an empty stack after a receiver closed itself during Update; regression expanded |
 | Additional — detachment after the joint is already gone | Fixed | Avoid requesting destruction of a missing joint; native detachment regression |
 | Multiplayer validation — client physics warning flood | Fixed | Use Mirror's silent ServerCallback guard for Unity's automatic FixedUpdate callback |
+| Multiplayer validation — map files opened exclusively for writing | Fixed | Minimal OBJ importer patch opens geometry/materials read-only with shared readers, supporting protected installs and simultaneous local instances; native regression added |
 
 Unity Play-mode and multiplayer checks require separate runtime validation; a C# compilation check does not exercise Mirror weaving or physics.
 

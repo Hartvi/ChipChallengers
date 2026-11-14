@@ -306,14 +306,14 @@ namespace Dummiesman
                 var mtlLoader = new MTLLoader();
                 Materials = mtlLoader.Load(mtlPath);
 
-                using (var fs = new FileStream(path, FileMode.Open))
+                using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
                 {
                     return Load(fs);
                 }
             }
             else
             {
-                using (var fs = new FileStream(path, FileMode.Open))
+                using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
                 {
                     return Load(fs);
                 }

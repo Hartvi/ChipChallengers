@@ -298,7 +298,7 @@ public class MTLLoader {
         _objFileInfo = new FileInfo(path); //get file info
         SearchPaths.Add(_objFileInfo.Directory.FullName); //add root path to search dir
 
-        using (var fs = new FileStream(path, FileMode.Open))
+        using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
         {
             return Load(fs); //actually load
         }
