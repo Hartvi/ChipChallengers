@@ -94,46 +94,27 @@ public class LoadPanel : BaseScrollMenu
 
     void RebuildWithNewModelOnline()
     {
-        VModel model = null;
-        string modelNameWithExtension = this.input.input.text + UIStrings.ModelExtension;
-        GameManager.Instance.SetModel(this.input.input.text);
-        // SWITCH TO SERVER
-#if UNITY_EDITOR
-        model = VModel.LoadModelFromFile(modelNameWithExtension);
-#else
         try
         {
-            model = VModel.LoadModelFromFile(this.input.input.text + UIStrings.ModelExtension);
+            string filename = ModelFileNames.Normalize(this.input.input.text);
+            var model = VModel.LoadModelFromFile(filename);
+            if (model == null)
+            {
+                DisplaySingleton.Instance.DisplayText(ModelDoesNotExist, 4f, "model-load-error");
+                return;
+            }
+            VehicleLuaProgram.ValidateSyntax(model.script);
+            this.loadedModel = model;
+            CoreChip.ClientCoreChip.CmdLoadNamedModel(model.ToLuaString(), filename);
+            this.DeactivatePanel();
+            foreach (Action callback in OnLoadedCallbacks) { callback(); }
         }
-        catch (Exception e)
+        catch (Exception error)
         {
-            UnityEngine.Debug.LogWarning($"Model could not be loaded.");
-            UnityEngine.Debug.Log(e.Message);
-            DisplaySingleton.Instance.DisplayText(LoadPanel.ModelDoesNotExist, 3f);
-        }
-#endif
-
-        this.loadedModel = model;
-        if (this.loadedModel == null)
-        {
-            // TODO: show error
-            DisplaySingleton.Instance.DisplayText(LoadPanel.ModelIsInvalid, 3f);
-            return;
-        }
-        string luaModel = IOHelpers.LoadModel(modelNameWithExtension);
-
-        var core = CoreChip.ClientCoreChip;
-
-        core.CmdLoadString(luaModel);
-        //core.TriggerSpawn(this.loadedModel, true);
-        //core.VirtualModel.AddModelChangedCallback(x => core.TriggerSpawn(x, true));
-        //core.VirtualModel.AddModelChangedCallback(x => core.history.SaveState(core.VirtualModel.ToLuaString()));
-        //core.history.SaveState(core.VirtualModel.ToLuaString());
-        this.DeactivatePanel();
-
-        foreach (Action a in LoadPanel.OnLoadedCallbacks)
-        {
-            a();
+            DisplaySingleton.Instance.DisplayText(text => {
+                DisplaySingleton.ErrorMsgModification(text);
+                text.SetText("Model could not be loaded: " + error.Message);
+            }, 5f, "model-load-error");
         }
     }
 

@@ -382,6 +382,7 @@ end
 
     public static VModel LoadModelFromFile(string modelName)
     {
+        modelName = ModelFileNames.Normalize(modelName);
         if (!IOHelpers.ModelExists(modelName))
         {
             return null;
@@ -389,7 +390,7 @@ end
 
         string luaModel = IOHelpers.LoadModel(modelName);
         VModel m = VModel.FromLuaModel(luaModel);
-        m.modelName = modelName.Substring(0, modelName.Length - UIStrings.ModelExtension.Length);
+        m.modelName = ModelFileNames.DisplayName(modelName);
         //PRINT.IPrint(m.variables.Length);
         return m;
     }

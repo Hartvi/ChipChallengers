@@ -59,7 +59,7 @@ public class SavePanel : BaseScrollMenu
                 return;
             }
             CoreChip.ClientCoreChip.VirtualModel.SaveThisModelToFile(filename);
-            GameManager.Instance.SetModel(name);
+            GameManager.Instance.SetModel(ModelFileNames.DisplayName(filename));
             this.DeactivatePanel();
             DisplaySingleton.Instance.DisplayText(text => {
                 DisplaySingleton.BasicSmallModification(text);

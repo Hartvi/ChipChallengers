@@ -13,6 +13,7 @@
     <Compile Include="../../Assets/Common/ControlKeys.cs" Link="ControlKeys.cs" />
     <Compile Include="../../Assets/Common/GunFireControl.cs" Link="GunFireControl.cs" />
     <Compile Include="../../Assets/Common/ModelFileStore.cs" Link="ModelFileStore.cs" />
+    <Compile Include="../../Assets/Common/ModelFileNames.cs" Link="ModelFileNames.cs" />
     <Compile Include="../../Assets/Common/AtomicTextFile.cs" Link="AtomicTextFile.cs" />
     <Compile Include="../../Assets/Multiplayer/InputMessage.cs" Link="InputMessage.cs" />
     <Compile Include="../../Assets/Ui/Menus/ChipEditor/HistoryStack.cs" Link="HistoryStack.cs" />

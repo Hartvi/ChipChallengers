@@ -34,14 +34,7 @@ public class IOHelpers
 
     public static string EnsureFileExtension(string fileName)
     {
-        string extension = Path.GetExtension(fileName);
-
-        if (string.IsNullOrEmpty(extension))
-        {
-            return fileName + UIStrings.ModelExtension;
-        }
-
-        return fileName;
+        return ModelFileNames.Normalize(fileName);
     }
 
     public static void SaveModel(string modelName, string modelString)

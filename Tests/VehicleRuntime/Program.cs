@@ -56,6 +56,7 @@ partial class Program
         CheckGunTiming();
         CheckUserModelFiles();
         CheckVariableDefinitions();
+        CheckModelNames();
         Check(Math.Abs(GunFireControl.ProjectileMass(100) - 0.01f) < 1e-8f &&
             GunFireControl.ProjectileMass(1e-30f) > 0, "Projectile/recoil mass is invalid");
         var history = new HistoryStack();
@@ -245,6 +246,14 @@ partial class Program
                 "An interrupted save damaged the model or retained its partial file");
             System.IO.File.WriteAllText(System.IO.Path.Combine(bundled, "new-example.txt"), "new example");
             Check(files.Read("new-example.txt") == "new example" && files.Names().Length == 2, "New bundled examples became unavailable");
+            files.Write("car.txt.txt", "repeated suffix");
+            Check(files.Read(ModelFileNames.DisplayName("car.txt.txt")) == "repeated suffix", "A displayed repeated suffix selected a different model");
+            string caseUser = System.IO.Path.Combine(root, "case-user");
+            System.IO.Directory.CreateDirectory(caseUser);
+            System.IO.File.WriteAllText(System.IO.Path.Combine(caseUser, "CAR.TXT"), "existing player work");
+            var caseFiles = new ModelFileStore(caseUser, bundled);
+            caseFiles.MigrateLegacyFiles();
+            Check(caseFiles.Read("car") == "existing player work", "Migration replaced a user model with different filename casing");
         }
         finally
         {
@@ -268,5 +277,17 @@ partial class Program
             catch (Exception error) when (error is ArgumentException || error is FormatException) { rejected = true; }
             Check(rejected, "Invalid variable definition was accepted");
         }
+    }
+
+    static void CheckModelNames()
+    {
+        foreach (string name in new[] { "car", "car.txt", "car.TXT", "my car", "car.v2", "car.lua", "car.txt.txt", "café" })
+        {
+            string filename = ModelFileNames.Normalize(name);
+            Check(ModelFileNames.Normalize(ModelFileNames.DisplayName(filename)) == filename && ModelFileNames.Normalize(filename) == filename,
+                "Displayed/saved name does not reload the same file: " + name);
+        }
+        foreach (string name in new[] { "", "  ", "../car", "..\\car", "C:car", "CON", "nul.txt", "LPT1", "bad?name", "car.", ".txt" })
+            Check(!ModelFileNames.TryNormalize(name, out _), "Invalid/escaping model filename accepted: " + name);
     }
 }

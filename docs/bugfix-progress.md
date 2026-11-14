@@ -35,5 +35,6 @@ Fixes follow the numbered findings in `code-review-2026-11-14.md`. Each complete
 | 29 — best times ignore changed maps | Fixed | Run identity includes loaded map content, run stores map identity, browser verifies installed geometry, legacy times remain separate; map-change regressions |
 | 30 — fragile Lua key discovery | Fixed | Transmit supported held/edge states without scanning source; uppercase, digits/keypad, space/control keys and malformed packets handled; key regressions |
 | 31 — variable initialization and validation | Fixed | Initialize validated bounds before value; reject invalid names, nonfinite settings, inverted/default-outside ranges and negative backstep before mutation; variable regressions |
+| 32 — save/load filenames and premature selection | Fixed | One safe filename/display rule, optional .txt, case-compatible lookup, load error recovery, selected name updated only after server acceptance; filename regressions |
 
 Unity Play-mode and multiplayer checks require separate runtime validation; a C# compilation check does not exercise Mirror weaving or physics.

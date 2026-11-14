@@ -225,6 +225,15 @@ public class CoreChip : CommonChip
         this.LoadString(state);
     }
 
+    [Command]
+    public void CmdLoadNamedModel(string state, string filename) => this.LoadString(state, selectedName: filename);
+
+    [TargetRpc]
+    void TargetModelLoadAccepted(NetworkConnectionToClient target, string filename)
+    {
+        GameManager.Instance.SetModel(ModelFileNames.DisplayName(filename));
+    }
+
     // Reveal in LateUpdate so aspect Start methods and reset callbacks finish first.
     void LateUpdate()
     {
@@ -256,11 +265,11 @@ public class CoreChip : CommonChip
     }
 
     [Server]
-    public void LoadString(string state, bool recordHistory = true)
+    public void LoadString(string state, bool recordHistory = true, string selectedName = null)
     {
         if (this.IsRebuilding)
         {
-            this.QueueEdit(() => this.LoadString(state, recordHistory));
+            this.QueueEdit(() => this.LoadString(state, recordHistory, selectedName));
             return;
         }
         print($"srv: LoadString");
@@ -270,6 +279,7 @@ public class CoreChip : CommonChip
             model = VModel.FromLuaModel(state);
             // Reject incomplete source before replacing a working assembly or its script.
             VehicleLuaProgram.ValidateSyntax(model.script);
+            if (selectedName != null) { selectedName = ModelFileNames.Normalize(selectedName); }
         }
         catch (Exception e)
         {
@@ -285,6 +295,8 @@ public class CoreChip : CommonChip
         this.VirtualModel = model;
         this.variableValues = new float[model.variables.Length];
         if (recordHistory) { this.history.SaveState(this.modelString); }
+        if (selectedName != null && this.connectionToClient != null)
+            this.TargetModelLoadAccepted(this.connectionToClient, selectedName);
 
 
         StartCoroutine(this.GenerateChips());
