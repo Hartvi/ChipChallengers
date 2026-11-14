@@ -84,12 +84,15 @@ public class SettingFields : BasePanel
 
     void OnEndInput(TMP_InputField inputField, Slider slider, string txt, string settingName)
     {
-        string tmp = txt;
-        int a;
-
-        while (!int.TryParse(tmp, out a))
+        if (!int.TryParse(txt, out int a))
         {
-            tmp = tmp.Substring(0, tmp.Length - 1);
+            inputField.SetTextWithoutNotify(this.GetIntSetting(settingName).ToString());
+            var range = GameManager.minMaxIntSettings[settingName];
+            DisplaySingleton.Instance.DisplayText(text => {
+                DisplaySingleton.ErrorMsgModification(text);
+                text.SetText($"Enter a whole number from {range.Item1} to {range.Item2}.");
+            }, 4f, "setting-input-error");
+            return;
         }
 
         if (UIStrings.SettingsIntProperties.Contains(settingName))
@@ -127,6 +130,7 @@ public class SettingFields : BasePanel
 
     void SetIntSetting(string settingName, int settingValue)
     {
+        settingValue = GameManager.Instance.SaturateIntSetting(settingName, settingValue);
         if (settingValue != PlayerPrefs.GetInt(settingName))
         {
             PlayerPrefs.SetInt(settingName, settingValue);
