@@ -9,7 +9,7 @@ Requires .NET 9 and the project's Unity-generated `Library/ScriptAssemblies/Asse
 Run from the repository root:
 
 ```powershell
-dotnet run --project Tests/ChallengeRecording/ChallengeRecording.Tests.csproj
+dotnet run --project Tests/ScenarioRecording/ScenarioRecording.Tests.csproj
 ```
 
 Use `-- --challenges-only` after that command to validate just the bundled Lua challenges with scene operations stubbed out, including the industrial track's 13 checkpoints and matching start/finish.
