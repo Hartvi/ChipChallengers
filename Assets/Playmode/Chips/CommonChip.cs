@@ -539,8 +539,11 @@ public class CommonChip : AngleChip
     public void Die()
     {
         if (this.IsDead) { return; }
-        if (this.cj != null) { this.cj.connectedBody = null; }
-        GameObject.Destroy(this.cj);
+        if (this.cj != null)
+        {
+            this.cj.connectedBody = null;
+            GameObject.Destroy(this.cj);
+        }
 
         CommonChip[] myDescendants = this.GetMyDescendants();
 
