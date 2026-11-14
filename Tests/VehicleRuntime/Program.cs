@@ -47,6 +47,7 @@ partial class Program
         CheckModelValidation();
         CheckControlTiming();
         CheckGunTiming();
+        CheckUserModelFiles();
         Check(Math.Abs(GunFireControl.ProjectileMass(100) - 0.01f) < 1e-8f &&
             GunFireControl.ProjectileMass(1e-30f) > 0, "Projectile/recoil mass is invalid");
         var history = new HistoryStack();
@@ -212,5 +213,30 @@ partial class Program
         var changing = new GunFireControl();
         Check(!changing.Step(0, true, 1, out _) && changing.Step(100, true, 0.1f, out float activePower) && activePower == 100,
             "A gun did not respond to changed power");
+    }
+
+    static void CheckUserModelFiles()
+    {
+        string root = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "chip-model-files-" + Guid.NewGuid().ToString("N"));
+        string bundled = System.IO.Path.Combine(root, "installed"), user = System.IO.Path.Combine(root, "user");
+        System.IO.Directory.CreateDirectory(bundled);
+        try
+        {
+            System.IO.File.WriteAllText(System.IO.Path.Combine(bundled, "car.txt"), "legacy car");
+            var files = new ModelFileStore(user, bundled);
+            files.MigrateLegacyFiles();
+            Check(files.Read("car.txt") == "legacy car" && System.IO.File.Exists(System.IO.Path.Combine(user, "car.txt")), "Legacy model was not migrated");
+            files.Write("car.txt", "player edit");
+            files.MigrateLegacyFiles();
+            Check(files.Read("car.txt") == "player edit" && System.IO.File.ReadAllText(System.IO.Path.Combine(bundled, "car.txt")) == "legacy car",
+                "User save changed installed content or migration replaced user work");
+            System.IO.File.WriteAllText(System.IO.Path.Combine(bundled, "new-example.txt"), "new example");
+            Check(files.Read("new-example.txt") == "new example" && files.Names().Length == 2, "New bundled examples became unavailable");
+        }
+        finally
+        {
+            if (System.IO.Path.GetFullPath(root).StartsWith(System.IO.Path.GetFullPath(System.IO.Path.GetTempPath()), StringComparison.OrdinalIgnoreCase))
+                System.IO.Directory.Delete(root, true);
+        }
     }
 }

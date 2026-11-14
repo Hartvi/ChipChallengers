@@ -10,6 +10,27 @@ public class IOHelpers
     public const string MapsDirectoryName = "Maps/";
     public const string ChallengesDirectoryName = "Challenges/";
     public const string ModelFileType = "txt";
+    static ModelFileStore modelFiles;
+    static bool migrationWarningShown;
+
+    static ModelFileStore Models
+    {
+        get
+        {
+            if (modelFiles == null)
+                modelFiles = new ModelFileStore(Path.Combine(Application.persistentDataPath, ModelsDirectoryName),
+                    Path.Combine(Application.streamingAssetsPath, ModelsDirectoryName));
+            try { modelFiles.MigrateLegacyFiles(); }
+            catch (System.Exception error) when (error is IOException || error is System.UnauthorizedAccessException)
+            {
+                if (!migrationWarningShown) { Debug.LogWarning("Could not migrate legacy models: " + error.Message); }
+                migrationWarningShown = true;
+            }
+            return modelFiles;
+        }
+    }
+
+    public static string GetModelsDirectory() => Models.UserDirectory;
 
     public static string EnsureFileExtension(string fileName)
     {
@@ -26,13 +47,13 @@ public class IOHelpers
     public static void SaveModel(string modelName, string modelString)
     {
         // leave the checking of the existence of the file to the UI part of the program
-        IOHelpers.SaveTextFile(Path.Join(ModelsDirectoryName, modelName), modelString);
+        Models.Write(modelName, modelString);
     }
 
     public static string LoadModel(string modelName)
     {
         // leave the checking of the existence of the file to the UI part of the program
-        return IOHelpers.LoadTextFile(Path.Join(ModelsDirectoryName, modelName));
+        return Models.Read(modelName);
     }
 
     public static string GetChallengesDirectory()
@@ -89,24 +110,12 @@ public class IOHelpers
 
     public static string[] GetAllModels()
     {
-        string ModelsDir = Path.Join(Application.streamingAssetsPath, IOHelpers.ModelsDirectoryName);
-
-        if (!Directory.Exists(ModelsDir))
-        {
-            Directory.CreateDirectory(ModelsDir);
-        }
-
-
-        DirectoryInfo d = new DirectoryInfo(ModelsDir);
-
-        FileInfo[] fi = d.GetFiles("*.*").Where(f => f.Extension.Equals(UIStrings.ModelExtension)).ToArray();
-
-        return fi.Select(x => x.Name.Substring(0, x.Name.Length - UIStrings.ModelExtension.Length)).ToArray();
+        return Models.Names();
     }
 
     public static bool ModelExists(string modelName)
     {
-        return IOHelpers.FileExists(Path.Join(IOHelpers.ModelsDirectoryName, modelName));
+        return Models.Exists(modelName);
     }
 
     public static bool FileExists(string fileName)

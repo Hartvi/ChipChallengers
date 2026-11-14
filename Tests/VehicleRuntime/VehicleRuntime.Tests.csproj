@@ -11,6 +11,7 @@
     <Compile Include="../../Assets/Common/VehicleControlClock.cs" Link="VehicleControlClock.cs" />
     <Compile Include="../../Assets/Common/InputCoordinates.cs" Link="InputCoordinates.cs" />
     <Compile Include="../../Assets/Common/GunFireControl.cs" Link="GunFireControl.cs" />
+    <Compile Include="../../Assets/Common/ModelFileStore.cs" Link="ModelFileStore.cs" />
     <Compile Include="../../Assets/Multiplayer/InputMessage.cs" Link="InputMessage.cs" />
     <Compile Include="../../Assets/Ui/Menus/ChipEditor/HistoryStack.cs" Link="HistoryStack.cs" />
     <Compile Include="../../Assets/LuaStuff/LuaExecution.cs" Link="LuaExecution.cs" />
