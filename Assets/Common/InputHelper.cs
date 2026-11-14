@@ -3,6 +3,19 @@ using UnityEngine;
 
 class InputHelper
 {
+    public static IEnumerable<char> SupportedKeys => ControlKeys.Supported;
+    public static bool Held(char key) => Read(key, Input.GetKey);
+    public static bool Down(char key) => Read(key, Input.GetKeyDown);
+    public static bool Up(char key) => Read(key, Input.GetKeyUp);
+
+    static bool Read(char key, System.Func<KeyCode, bool> read)
+    {
+        key = ControlKeys.Normalize(key);
+        if (!chartoKeycode.TryGetValue(key, out var code)) { return false; }
+        if (read(code)) { return true; }
+        if (key >= '0' && key <= '9') { return read((KeyCode)((int)KeyCode.Keypad0 + key - '0')); }
+        return key == '\n' && read(KeyCode.KeypadEnter);
+    }
     public static Dictionary<char, KeyCode> chartoKeycode = new Dictionary<char, KeyCode>()
     {
         //-------------------------LOGICAL mappings-------------------------
@@ -36,16 +49,21 @@ class InputHelper
         {'z', KeyCode.Z},
         
         //KeyPad Numbers
-        {'1', KeyCode.Keypad1},
-        {'2', KeyCode.Keypad2},
-        {'3', KeyCode.Keypad3},
-        {'4', KeyCode.Keypad4},
-        {'5', KeyCode.Keypad5},
-        {'6', KeyCode.Keypad6},
-        {'7', KeyCode.Keypad7},
-        {'8', KeyCode.Keypad8},
-        {'9', KeyCode.Keypad9},
-        {'0', KeyCode.Keypad0},
+        {'1', KeyCode.Alpha1},
+        {'2', KeyCode.Alpha2},
+        {'3', KeyCode.Alpha3},
+        {'4', KeyCode.Alpha4},
+        {'5', KeyCode.Alpha5},
+        {'6', KeyCode.Alpha6},
+        {'7', KeyCode.Alpha7},
+        {'8', KeyCode.Alpha8},
+        {'9', KeyCode.Alpha9},
+        {'0', KeyCode.Alpha0},
+        {' ', KeyCode.Space},
+        {'\t', KeyCode.Tab},
+        {'\b', KeyCode.Backspace},
+        {'\n', KeyCode.Return},
+        {'\u001b', KeyCode.Escape},
         
         //Other Symbols
         {'!', KeyCode.Exclaim}, //1

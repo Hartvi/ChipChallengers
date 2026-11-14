@@ -1,5 +1,4 @@
 using System;
-using System.Text.RegularExpressions;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
@@ -33,8 +32,6 @@ public class CoreChip : CommonChip
 
     public InputMessage inputMessage = new InputMessage();
 
-    [SyncVar]
-    char[] keysToCheck = new char[0];
     [SyncVar]
     public bool freeze = false;
     [SyncVar]
@@ -289,7 +286,6 @@ public class CoreChip : CommonChip
         this.variableValues = new float[model.variables.Length];
         if (recordHistory) { this.history.SaveState(this.modelString); }
 
-        this.keysToCheck = this.GetInputCharactersFromModel(model.script ?? string.Empty);
 
         StartCoroutine(this.GenerateChips());
         foreach (Action a in this.OnLoadedCallbacks)
@@ -341,38 +337,6 @@ public class CoreChip : CommonChip
             DisplaySingleton.ErrorMsgModification(text);
             text.SetText("Model was not changed: " + message);
         }, 5f, "model-load-error");
-    }
-
-    char[] GetInputCharactersFromModel(string m)
-    {
-        List<char> ks = new List<char>();
-        string parenthesesPattern = @"(\(""([a-zA-Z])""\))|(\('([a-zA-Z])'\))";
-
-        string keyDownPattern = UIStrings.KeyDown + parenthesesPattern;
-        string keyUpPattern = UIStrings.KeyUp + parenthesesPattern;
-        string keyPattern = UIStrings.Key + parenthesesPattern;
-
-        MatchCollection matches = Regex.Matches(m, keyDownPattern);
-        foreach (Match match in matches)
-        {
-            string capturedCharacter = match.Groups[2].Success ? match.Groups[2].Value : match.Groups[4].Value;
-            ks.Add(capturedCharacter[0]);
-        }
-
-        matches = Regex.Matches(m, keyUpPattern);
-        foreach (Match match in matches)
-        {
-            string capturedCharacter = match.Groups[2].Success ? match.Groups[2].Value : match.Groups[4].Value;
-            ks.Add(capturedCharacter[0]);
-        }
-
-        matches = Regex.Matches(m, keyPattern);
-        foreach (Match match in matches)
-        {
-            string capturedCharacter = match.Groups[2].Success ? match.Groups[2].Value : match.Groups[4].Value;
-            ks.Add(capturedCharacter[0]);
-        }
-        return ks.ToArray();
     }
 
     //[Command]
@@ -775,17 +739,17 @@ public class CoreChip : CommonChip
         List<char> ks = new List<char>();
         List<char> kds = new List<char>();
         List<char> kus = new List<char>();
-        foreach (var k in this.keysToCheck)
+        foreach (var k in InputHelper.SupportedKeys)
         {
-            if (Input.GetKey(InputHelper.chartoKeycode[k]))
+            if (InputHelper.Held(k))
             {
                 ks.Add(k);
             }
-            if (Input.GetKeyDown(InputHelper.chartoKeycode[k]))
+            if (InputHelper.Down(k))
             {
                 kds.Add(k);
             }
-            if (Input.GetKeyUp(InputHelper.chartoKeycode[k]))
+            if (InputHelper.Up(k))
             {
                 kus.Add(k);
             }

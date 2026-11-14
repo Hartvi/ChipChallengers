@@ -10,6 +10,7 @@
     <Compile Include="../../Assets/Common/ModelValidation.cs" Link="ModelValidation.cs" />
     <Compile Include="../../Assets/Common/VehicleControlClock.cs" Link="VehicleControlClock.cs" />
     <Compile Include="../../Assets/Common/InputCoordinates.cs" Link="InputCoordinates.cs" />
+    <Compile Include="../../Assets/Common/ControlKeys.cs" Link="ControlKeys.cs" />
     <Compile Include="../../Assets/Common/GunFireControl.cs" Link="GunFireControl.cs" />
     <Compile Include="../../Assets/Common/ModelFileStore.cs" Link="ModelFileStore.cs" />
     <Compile Include="../../Assets/Common/AtomicTextFile.cs" Link="AtomicTextFile.cs" />

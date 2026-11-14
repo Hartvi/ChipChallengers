@@ -176,20 +176,20 @@ public class ScriptInstance
 
     public bool Key(char k)
     {
-        return this.inputMessage.Keys.Contains(k);
+        return this.inputMessage.Held(k);
         //bool ret = Input.GetKey(InputHelper.chartoKeycode[k]);
         //return ret;
     }
 
     public bool KeyDown(char k)
     {
-        return this.inputMessage.KeysDown.Contains(k);
+        return this.inputMessage.Down(k);
         //return Input.GetKeyDown(InputHelper.chartoKeycode[k]);
     }
 
     public bool KeyUp(char k)
     {
-        return this.inputMessage.KeysUp.Contains(k);
+        return this.inputMessage.Up(k);
         //return Input.GetKeyUp(InputHelper.chartoKeycode[k]);
     }
 

@@ -46,6 +46,13 @@ partial class Program
         CheckLuaLimits();
         CheckModelValidation();
         CheckControlTiming();
+        var keyInput = new InputMessage();
+        var emptyButtons = new bool[3];
+        keyInput.Accumulate(new[] { 'W', '1', ' ' }, new[] { 'W' }, new[] { '1' }, emptyButtons, emptyButtons, emptyButtons, new float[2]);
+        Check(keyInput.Held('w') && keyInput.Held('W') && keyInput.Held('1') && keyInput.Held(' '), "Supported keys or uppercase aliases were lost");
+        Check(keyInput.Down('w') && keyInput.Up('1') && !keyInput.Held('é'), "Key edge/unsupported-key handling failed");
+        keyInput.Accumulate(null, null, null, null, null, null, null);
+        Check(!keyInput.Held('w') && keyInput.KeysDown.Length == 0, "Malformed input did not clear retained controls");
         CheckGunTiming();
         CheckUserModelFiles();
         Check(Math.Abs(GunFireControl.ProjectileMass(100) - 0.01f) < 1e-8f &&

@@ -113,18 +113,18 @@ public partial class GameScript : MonoBehaviour
 
     public static bool Key(char k)
     {
-        bool ret = Input.GetKey(InputHelper.chartoKeycode[k]);
+        bool ret = InputHelper.Held(k);
         return ret;
     }
 
     public static bool KeyDown(char k)
     {
-        return Input.GetKeyDown(InputHelper.chartoKeycode[k]);
+        return InputHelper.Down(k);
     }
 
     public static bool KeyUp(char k)
     {
-        return Input.GetKeyUp(InputHelper.chartoKeycode[k]);
+        return InputHelper.Up(k);
     }
 
 
