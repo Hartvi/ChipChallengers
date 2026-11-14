@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Dummiesman;
+using System;
 
 public class VMap
 {
@@ -10,57 +11,65 @@ public class VMap
     
     string mapName = DefaultFileName;
     public string FileName { get { return this.mapName; } }
+    public string ContentHash { get; private set; }
+    public event Action Loaded;
 
     GameObject loadedObject;
+    public bool IsLoaded => this.loadedObject != null && this.loadedObject.activeSelf;
 
     // LoadNewMap replaces the active map and synchronizes its colliders before spawn queries run.
-    public bool LoadNewMap(string name)
+    public bool LoadNewMap(string name, bool fromHost = false)
     {
-        if (string.IsNullOrWhiteSpace(name))
+        if (WorldSession.IsRemoteClient && !fromHost)
         {
-            string msg = "File is null/empty";
-            DisplaySingleton.Instance.DisplayText(x =>
-            {
-                DisplaySingleton.ErrorMsgModification(x);
-                x.SetText(msg);
-            },
-            3f);
+            WorldSession.Report("The host chooses the multiplayer map.");
+            return false;
+        }
+        if (string.IsNullOrWhiteSpace(name) || Path.GetFileName(name) != name ||
+            !name.EndsWith(UIStrings.MapExtension, StringComparison.OrdinalIgnoreCase))
+        {
+            WorldSession.Report("Choose a valid map from the map list.");
             return false;
         }
         string loadedMapName = name.Substring(0, name.Length - UIStrings.MapExtension.Length);
 
-        string error = "";
         string objPath = Path.Join(IOHelpers.GetMapsDirectory(), name).Replace("\\", "/");
 
         if (!File.Exists(objPath))
         {
-            error = "File doesn't exist.";
-            DisplaySingleton.Instance.DisplayText(x =>
-            {
-                DisplaySingleton.ErrorMsgModification(x);
-                x.SetText(error);
-            },
-            3f);
+            WorldSession.Report("Map file does not exist.");
         }
         else
         {
-            if (this.loadedObject != null)
+            GameObject replacement = null;
+            try
             {
-                this.loadedObject.SetActive(false);
-                GameObject.Destroy(this.loadedObject);
+                string hash = ChallengeContentHash.Compute(Array.Empty<byte>(), File.ReadAllBytes(objPath));
+                replacement = new OBJLoader().Load(objPath);
+                replacement.SetActive(false);
+                foreach (var renderer in replacement.GetComponentsInChildren<MeshRenderer>(true))
+                {
+                    renderer.gameObject.AddComponent<MeshCollider>();
+                    renderer.gameObject.SetActive(true);
+                }
+                if (this.loadedObject != null)
+                {
+                    this.loadedObject.SetActive(false);
+                    GameObject.Destroy(this.loadedObject);
+                }
+                this.loadedObject = replacement;
+                this.loadedObject.SetActive(true);
+                Physics.SyncTransforms();
+                this.mapName = loadedMapName;
+                this.ContentHash = hash;
             }
-
-            this.loadedObject = new OBJLoader().Load(objPath);
-
-            MeshRenderer[] meshRenderers = this.loadedObject.GetComponentsInChildren<MeshRenderer>();
-            foreach(MeshRenderer m in meshRenderers)
+            catch (Exception error)
             {
-                m.gameObject.AddComponent<MeshCollider>();
-                m.gameObject.SetActive(true);
+                if (replacement != null) { GameObject.Destroy(replacement); }
+                WorldSession.Report("Map could not be loaded: " + error.Message);
+                return false;
             }
-            this.loadedObject.SetActive(true);
-            Physics.SyncTransforms();
-            this.mapName = loadedMapName;
+            this.Loaded?.Invoke();
             return true;
         }
         return false;

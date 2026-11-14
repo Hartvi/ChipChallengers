@@ -59,6 +59,11 @@ public class MainMenu : BaseMainMenu, InputReceiver
         // load default map so it show in sandbox, settings, editor and all the other menus!!!
         SandboxMenu.myVMap.LoadNewMap(VMap.DefaultFileName);
         this.selectedCallbacks.Invoke();
+        if (!string.IsNullOrEmpty(WorldSession.LastError))
+        {
+            WorldSession.Report(WorldSession.LastError);
+            WorldSession.LastError = null;
+        }
         if (global::MainMenu.goToMultiplayerMenu)
         {
             global::MainMenu.goToMultiplayerMenu = false;

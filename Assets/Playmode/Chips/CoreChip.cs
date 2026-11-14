@@ -362,6 +362,9 @@ public class CoreChip : CommonChip
     // CmdResetToDefaultLocation queues a reset to the map surface with the standard clearance.
     public void CmdResetToDefaultLocation() => this.QueuePoseReset(Vector3.zero, Quaternion.identity, PoseResetMode.DefaultLocation);
 
+    [Server]
+    public void ServerResetToMapSpawn() => this.ResetPose(StaticChip.RaycastFromAbove(), Quaternion.identity);
+
     // QueuePoseReset marks a request pending before Mirror sends it to the server.
     void QueuePoseReset(Vector3 position, Quaternion rotation, PoseResetMode mode)
     {

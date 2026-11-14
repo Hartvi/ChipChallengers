@@ -34,6 +34,7 @@ public class DrivingIntroduction : MonoBehaviour
 
     public static void Launch()
     {
+        if (!WorldSession.RequireSoloChallenge()) { return; }
         if (!File.Exists(Path.Combine(IOHelpers.GetChallengesDirectory(), ChallengeName + UIStrings.ChallengeExtension)))
         {
             Debug.LogWarning("The introduction track is missing.");

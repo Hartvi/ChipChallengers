@@ -25,6 +25,7 @@ public class SandboxMenu : BaseMenu, InputReceiver
     // PlayChallenge remembers the selected challenge and enters play mode without clearing its context.
     public static void PlayChallenge(string name)
     {
+        if (!WorldSession.RequireSoloChallenge()) { return; }
         GameManager.PlayContext.SelectChallenge(name);
         GoToSandbox.Function();
     }

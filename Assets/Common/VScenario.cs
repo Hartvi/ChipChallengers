@@ -15,6 +15,7 @@ public class VChallenge
 
     public void LoadNewChallenge(string name)
     {
+        if (!WorldSession.RequireSoloChallenge()) { return; }
         if (string.IsNullOrWhiteSpace(name))
         {
             string msg = "File is null/empty";
