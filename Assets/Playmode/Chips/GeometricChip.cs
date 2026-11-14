@@ -173,6 +173,7 @@ public abstract class GeometricChip : StaticChip
 
     public void SetParent(GeometricChip parentChip)
     {
+        if (this.parentChip != null) { this.parentChip.childChips.Remove(this); }
         // null parents not allowed in this function - we can only add Children to core and lower, not null
         Debug.Assert(this.myCore == parentChip.myCore, $"Parent chip core: {parentChip.myCore} this core: {this.myCore}");
         //if (this.parentChip != null)
@@ -188,5 +189,16 @@ public abstract class GeometricChip : StaticChip
         //print($"current Parent {parentChip.name} of {name}");
         parentChip.SetChild(this);
     }
+
+    public virtual void ClearTreeLinks()
+    {
+        if (this.parentChip != null) { this.parentChip.childChips.Remove(this); }
+        this.parentChip = null;
+        foreach (var child in this.childChips)
+            if (child != null && child.parentChip == this) { child.parentChip = null; }
+        this.childChips.Clear();
+    }
+
+    protected virtual void OnDestroy() => this.ClearTreeLinks();
 }
 

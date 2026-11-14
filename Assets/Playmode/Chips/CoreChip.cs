@@ -503,6 +503,7 @@ public class CoreChip : CommonChip
         // script. TriggerSpawn will bind a new script once all chips are ready.
         this.PrepareReset();
         // ONLY ON THE SERVER
+        this.ClearRuntimeLinks();
         // spawn function:
         // Destroy all of my existing chips
         if (this.AllChildren is not null)
@@ -546,6 +547,7 @@ public class CoreChip : CommonChip
         this.SetModelAssemblyVisible(false);
         this.IsRebuilding = true;
         this.inputMessage = new InputMessage();
+        this.ClearRuntimeLinks();
         // Freeze every body before repositioning the first chip.
         foreach (var id in this.netIds)
         {
@@ -614,6 +616,17 @@ public class CoreChip : CommonChip
         foreach (var a in this._AfterBuildActions)
         {
             a();
+        }
+    }
+
+    void ClearRuntimeLinks()
+    {
+        foreach (var chip in this.AllChips)
+        {
+            if (chip == null) { continue; }
+            var common = (CommonChip)chip;
+            common.ReleaseVariableBindings();
+            common.ClearTreeLinks();
         }
     }
 

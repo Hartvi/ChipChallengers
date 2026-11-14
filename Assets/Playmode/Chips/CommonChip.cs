@@ -22,6 +22,24 @@ public class CommonChip : AngleChip
     public SensorAspect Sensor { get; private set; }
     public bool IsDead { get; private set; }
 
+    public void ReleaseVariableBindings()
+    {
+        this.RemoveMeFromVariableCallbacks.Invoke();
+        this.RemoveMeFromVariableCallbacks.SetCallbacks(Array.Empty<Action>());
+    }
+
+    public override void ClearTreeLinks()
+    {
+        this._RealParent = null;
+        base.ClearTreeLinks();
+    }
+
+    protected override void OnDestroy()
+    {
+        this.ReleaseVariableBindings();
+        base.OnDestroy();
+    }
+
     public override void OnStartServer()
     {
         base.OnStartServer();
