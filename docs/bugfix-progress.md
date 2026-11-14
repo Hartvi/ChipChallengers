@@ -44,5 +44,6 @@ Fixes follow the numbered findings in `code-review-2026-11-14.md`. Each complete
 | Additional — standalone test README | Fixed | Corrected the runnable project path to Tests/ScenarioRecording |
 | Additional — misleading sensor option labels | Fixed | Labels now describe angular velocity, forward direction and velocity without changing saved indices or sensor outputs |
 | Additional — legacy sound reservations | Fixed | Per-sound bounded pools, positive limits, safe missing sounds and owned-source teardown; Unity regression added |
+| Additional — self-closing input receivers | Fixed | Remove obsolete bookkeeping that indexed an empty stack after a receiver closed itself during Update; regression expanded |
 
 Unity Play-mode and multiplayer checks require separate runtime validation; a C# compilation check does not exercise Mirror weaving or physics.
