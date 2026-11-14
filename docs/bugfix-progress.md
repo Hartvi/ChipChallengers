@@ -42,5 +42,6 @@ Fixes follow the numbered findings in `code-review-2026-11-14.md`. Each complete
 | Additional — item sibling navigation | Fixed | Traverse the parent's actual items, handle inactive gaps/empty lists and ignore stale cached indices; Unity regression added |
 | Additional — UI item pool growth after hiding rows | Fixed | Grow by actual missing objects instead of reactivating existing rows; empty hide is safe; Unity regression added |
 | Additional — standalone test README | Fixed | Corrected the runnable project path to Tests/ScenarioRecording |
+| Additional — misleading sensor option labels | Fixed | Labels now describe angular velocity, forward direction and velocity without changing saved indices or sensor outputs |
 
 Unity Play-mode and multiplayer checks require separate runtime validation; a C# compilation check does not exercise Mirror weaving or physics.

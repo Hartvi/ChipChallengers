@@ -7,6 +7,6 @@ a = {
         {"Basic"},
         {"Basic", "Large", "XL"},
         {"Turbofan", "Balloon"},
-        {"LiDAR", "Altimeter", "Tachometer", "Gyroscope", "Accelerometer", "Compass"},
+        {"LiDAR", "Altimeter", "Angular velocity", "Forward direction", "Accelerometer", "Velocity"},
     }
 }
