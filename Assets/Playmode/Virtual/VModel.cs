@@ -44,22 +44,13 @@ public class VModel
         }
         set
         {
-            //PRINT.IPrint($"Setting chips to length: {value.Length}");
+            if (value == null) { throw new ArgumentNullException(nameof(value)); }
             this._chips = value;
-            for (int i = 0; i < this._chips.Length; ++i)
+            var childrenByParent = value.ToLookup(chip => chip.parentId);
+            foreach (var chip in value)
             {
-                // TODO link children to parents since we have all chips at once so we can quickly build the model
-                VChip chip = this._chips[i];
-                //PRINT.print($"Id: {chip.id}");
-                for (int k = 0; k < this._chips.Length; ++k)
-                {
-                    VChip[] children = this._chips.Where(x => x.parentId == chip.id).ToArray();
-                    chip.Children = children;
-                }
-            }
-            foreach (var v in value)
-            {
-                v.MyModel = this;
+                chip.Children = childrenByParent[chip.id].ToArray();
+                chip.MyModel = this;
             }
             this.TriggerModelChanged();
         }
@@ -237,34 +228,9 @@ end
                 this.variables = this.variables.Append(VVar.DefaultValueVariable(value)).ToArray();
             }
         }
-        //PRINT.IPrint($"LOADED SCRIPT: {this.script}");
-        bool coreFound = false;
-        //PRINT.print($"Number of chips: {this.chips.Length}");
-        //foreach (var virtualChip in this.chips)
-        //{
-        //    PRINT.print($"Id: {virtualChip.id}");
-        //    PRINT.print($"parent id: {virtualChip.parentId}");
-        //}
-        foreach (var virtualChip in this.chips)
-        {
-            var parentChips = this.chips.Where(x => x.id == virtualChip.parentId).ToArray();
-            if (parentChips.Length > 1)
-            {
-                throw new ArgumentException($"Chip {virtualChip} cannot have more than one parent, id: {virtualChip.parentId}, num: {PRINT.MakePrintable(parentChips)}.");
-            }
-            else if (parentChips.Length == 0)
-            {
-                if (coreFound)
-                {
-                    throw new ArgumentException($"Cannot have more than one core. Chip {virtualChip.id} has no Parent.");
-                }
-                coreFound = true;
-            }
-            else
-            {
-                virtualChip.parentChip = parentChips[0];
-            }
-        }
+        var chipsById = this.chips.ToDictionary(chip => chip.id, StringComparer.Ordinal);
+        foreach (var chip in this.chips)
+            chip.parentChip = chip.parentId != null && chipsById.TryGetValue(chip.parentId, out var parent) ? parent : null;
     }
 
     public void AddModelChangedCallback(Action<VModel> action)
@@ -431,24 +397,20 @@ end
 
     VChip[] GetChipAndChildren(string id)
     {
-        var core = CoreChip.ClientCoreChip;
-        VModel vm = core.VirtualModel;
-        var allchips = core.AllChips;
-
-        List<VChip> _GetChipAndChildren(string id)
+        var root = this.chips.FirstOrDefault(chip => chip.id == id);
+        if (root == null) { return Array.Empty<VChip>(); }
+        var result = new List<VChip>();
+        var pending = new Stack<VChip>();
+        var visited = new HashSet<VChip>();
+        pending.Push(root);
+        while (pending.Count > 0)
         {
-            List<VChip> vcs = new List<VChip>();
-            CommonChip cc = allchips.FirstOrDefault(x => x.equivalentVirtualChip.id == id) as CommonChip;
-
-            VChip vc = cc.equivalentVirtualChip;
-            for (int i = 0; i < vc.Children.Length; ++i)
-            {
-                vcs.AddRange(_GetChipAndChildren(vc.Children[i].id));
-            }
-            vcs.Add(vc);
-            return vcs;
+            var chip = pending.Pop();
+            if (!visited.Add(chip)) { continue; }
+            result.Add(chip);
+            foreach (var child in chip.Children) { pending.Push(child); }
         }
-        return _GetChipAndChildren(id).ToArray();
+        return result.ToArray();
     }
 
     public void DeleteChip(string id)
