@@ -48,6 +48,35 @@ public class CoreChip : CommonChip
     Action[] OnLoadedCallbacks = { };
     public HistoryStack history = new HistoryStack();
     public ScriptInstance scriptInstance;
+    [SyncVar(hook = nameof(OnLuaErrorChanged))] string serverLuaError;
+    public string LuaError => this.scriptInstance?.Error ?? this.serverLuaError;
+
+    public void ReportLuaError(string message)
+    {
+#if UNITY_EDITOR
+        if (this.isServer || this.isLocalPlayer) Debug.LogWarning("Vehicle Lua: " + message, this);
+#endif
+        if (this.isServer) this.serverLuaError = message;
+        if (this.isLocalPlayer) ShowLuaError(message);
+    }
+
+    void OnLuaErrorChanged(string previous, string current)
+    {
+        if (!this.isLocalPlayer) return;
+        if (string.IsNullOrEmpty(current)) DisplaySingleton.Instance.HideText("model-script-error");
+        else if (!this.isServer)
+        {
+#if UNITY_EDITOR
+            Debug.LogWarning("Vehicle Lua: " + current, this);
+#endif
+            ShowLuaError(current);
+        }
+    }
+
+    static void ShowLuaError(string message) => DisplaySingleton.Instance.DisplayText(text => {
+        DisplaySingleton.ErrorMsgModification(text);
+        text.SetText(message);
+    }, 5f, "model-script-error");
 
     private LoopScript loopScript;
     readonly VehicleControlClock controlClock = new VehicleControlClock();
@@ -424,6 +453,7 @@ public class CoreChip : CommonChip
     // PrepareReset pauses the model and clears retained input and motion before resetting.
     void PrepareReset()
     {
+        this.serverLuaError = null;
         this.controlClock.Reset();
         this.SetModelAssemblyVisible(false);
         this.IsRebuilding = true;

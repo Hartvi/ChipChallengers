@@ -16,6 +16,8 @@ public class ScriptInstance
     VehicleLuaProgram program;
     bool errorReported;
     string scriptString;
+    public string Error => this.program.Error;
+    public string Source => this.scriptString;
 
     Dictionary<string, VVar> Name2Var;
 
@@ -153,13 +155,7 @@ public class ScriptInstance
         {
             this.errorReported = true;
             string message = this.program.Error;
-            DisplaySingleton.Instance.DisplayText(
-                x =>
-                {
-                    DisplaySingleton.ErrorMsgModification(x);
-                    x.SetText(message);
-                }, 5f, "model-script-error"
-            );
+            this.myCore.ReportLuaError(message);
         }
     }
 

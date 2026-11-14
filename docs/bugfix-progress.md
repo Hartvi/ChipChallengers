@@ -1,5 +1,7 @@
 # Review fixes
 
+Editor Lua diagnostics follow-up: syntax checks run locally after a short typing pause and immediately on submission, without rejecting or discarding drafts. The editor keeps syntax/runtime errors visible until corrected and removes stale diagnostics when switching source. Runtime errors are synchronized from the server to the owning player's editor; observer vehicles do not produce local popups. Unity Editor console warnings are restored for changed syntax errors and failed runtime programs. Native validation: **54/54 Unity tests passed**, including error visibility, draft preservation, correction/clearing and server-diagnostic presentation. Player-source compilation passed with zero warnings/errors.
+
 Follow-up redo 1: unfinished Lua is accepted as editable model data and can be saved/reloaded. Syntax errors disable the runtime program with feedback instead of rejecting and replacing the draft. Structural validation and execution budgets remain in force. Native draft save/load and safe initialization regression passed.
 
 Follow-up redo 2: sensor pastes allocate unique names across existing sensors, variables and the entire pasted batch. Mirrored/repeated pastes and legacy unnamed sensors are supported. Type conversion to Sensor also allocates a free name; variable/sensor conflicts are rejected before mutation. Three native paste regressions passed.

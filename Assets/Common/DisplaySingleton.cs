@@ -150,6 +150,8 @@ public class DisplaySingleton : MonoBehaviour
         foreach (string id in expired) { this.RemoveText(id); }
     }
 
+    public void HideText(string id) => this.RemoveText(id);
+
     void RemoveText(string id)
     {
         if (!displayedTexts.TryGetValue(id, out var info)) { return; }

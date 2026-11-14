@@ -12,6 +12,12 @@ public class ScriptPanel : BaseSidePanel, InputReceiver
     bool initialized;
     Coroutine pendingRefresh;
     VModel boundModel;
+    string checkedSource;
+    string syntaxError;
+    bool syntaxCheckPending;
+    float syntaxCheckAt;
+    bool errorVisible;
+    const string ErrorMessageId = "editor-lua-error";
 
     public override void Setup()
     {
@@ -35,6 +41,10 @@ public class ScriptPanel : BaseSidePanel, InputReceiver
         this.input.input.onEndEdit.RemoveAllListeners();
         // SaveScript resolves the current player model instead of retaining a disconnected core.
         this.input.input.onEndEdit.AddListener(this.SaveScript);
+        this.input.input.onValueChanged.AddListener(_ => {
+            this.syntaxCheckPending = true;
+            this.syntaxCheckAt = Time.unscaledTime + 0.2f;
+        });
         UIUtils.SetFontSize(this.input.input.textComponent, UIUtils.SmallFontSize);
         this.input.input.lineType = TMPro.TMP_InputField.LineType.MultiLineNewline;
         this.btn.AddBtnHoldActions(new Action[] { this.DragBtn });
@@ -65,15 +75,59 @@ public class ScriptPanel : BaseSidePanel, InputReceiver
         // RefreshModel can run from an after-build callback before loadedModelString is updated.
         this.boundModel = core.VirtualModel;
         this.input.input.SetTextWithoutNotify(this.boundModel.script);
+        this.CheckSyntax(this.boundModel.script);
     }
 
     // SaveScript writes edited Lua to the current player model when it is not rebuilding.
     void SaveScript(string script)
     {
+        this.CheckSyntax(script);
+        this.RefreshError();
         if (NetworkClient.localPlayer == null) { return; }
         var core = CoreChip.ClientCoreChip;
         if (core.IsRebuilding) { return; }
         core.VirtualModel.script = script;
+    }
+
+    void CheckSyntax(string source)
+    {
+        string previousError = this.syntaxError;
+        this.syntaxCheckPending = false;
+        this.checkedSource = source;
+        this.syntaxError = null;
+        try { VehicleLuaProgram.ValidateSyntax(source); }
+        catch (Exception error)
+        {
+            this.syntaxError = error is MoonSharp.Interpreter.InterpreterException lua
+                ? lua.DecoratedMessage ?? error.Message : error.Message;
+        }
+#if UNITY_EDITOR
+        if (this.syntaxError != null && this.syntaxError != previousError)
+            Debug.LogWarning("Vehicle Lua: " + this.syntaxError, this);
+#endif
+    }
+
+    void RefreshError()
+    {
+        string error = this.syntaxError;
+        if (error == null && NetworkClient.localPlayer != null)
+        {
+            var core = CoreChip.ClientCoreChip;
+            if (!core.IsRebuilding && core.loadedModelString != null && core.VirtualModel.script == this.input.input.text &&
+                (core.scriptInstance == null || core.scriptInstance.Source == this.input.input.text))
+                error = core.LuaError;
+        }
+        if (string.IsNullOrEmpty(error))
+        {
+            if (this.errorVisible) DisplaySingleton.Instance.HideText(ErrorMessageId);
+            this.errorVisible = false;
+            return;
+        }
+        this.errorVisible = true;
+        DisplaySingleton.Instance.DisplayText(text => {
+            DisplaySingleton.ErrorMsgModification(text);
+            text.SetText(error);
+        }, 0.5f, ErrorMessageId);
     }
 
     void DragBtn()
@@ -109,6 +163,8 @@ public class ScriptPanel : BaseSidePanel, InputReceiver
         if (this.pendingRefresh != null) { StopCoroutine(this.pendingRefresh); }
         this.pendingRefresh = null;
         this.boundModel = null;
+        if (this.errorVisible) DisplaySingleton.Instance.HideText(ErrorMessageId);
+        this.errorVisible = false;
     }
 
     public bool IsPointerOver => this.isActiveAndEnabled && this.insideChipPanel;
@@ -133,6 +189,18 @@ public class ScriptPanel : BaseSidePanel, InputReceiver
             {
                 this.RefreshModel();
             }
+        }
+
+        if (this.initialized)
+        {
+            if (this.input.input.text != this.checkedSource && !this.syntaxCheckPending)
+            {
+                this.syntaxCheckPending = true;
+                this.syntaxCheckAt = Time.unscaledTime + 0.2f;
+            }
+            if (this.syntaxCheckPending && Time.unscaledTime >= this.syntaxCheckAt)
+                this.CheckSyntax(this.input.input.text);
+            this.RefreshError();
         }
 
 
