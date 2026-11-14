@@ -31,6 +31,11 @@ public abstract class BaseMenu : DeclaredProp
         get { return this._isSelected; }
         set
         {
+            if (this._isSelected == value)
+            {
+                if (this.gameObject.activeSelf != value) { this.gameObject.SetActive(value); }
+                return;
+            }
             this._isSelected = value;
             this.gameObject.SetActive(value);
 
