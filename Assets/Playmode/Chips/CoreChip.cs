@@ -779,8 +779,10 @@ public class CoreChip : CommonChip
         }
     }
 
-    public override void OnStopClient()
+    // Remote cores also stop on this client; only losing our local player should change our menu.
+    public override void OnStopLocalPlayer()
     {
+        base.OnStopLocalPlayer();
         BaseMenu.SwitchToMenu(typeof(MainMenu));
     }
 }
