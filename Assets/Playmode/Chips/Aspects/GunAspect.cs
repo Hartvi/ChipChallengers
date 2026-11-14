@@ -20,7 +20,7 @@ public class GunAspect : BaseAspect
         if (!this.myChip.isServer || this.myChip.IsDead || this.rb.isKinematic || this.myChip.myCore.IsRebuilding) { return; }
         if (!this.fireControl.Step(this.value, this.brake > 1e-4f, Time.fixedDeltaTime, out float power)) { return; }
         Vector3 velocity = this.transform.forward * ProjectileVelocity;
-        this.rb.AddForce(-velocity * GunFireControl.ProjectileMass(power), ForceMode.Impulse);
+        this.rb.AddForce(-velocity * GunFireControl.ProjectileMass(power) * GunFireControl.RecoilScale, ForceMode.Impulse);
         this.PlayShot(this.transform.position, velocity, power, true);
         this.myChip.myCore.RpcPlayGunShot(this.myChip.netId, this.transform.position, velocity, power);
     }

@@ -68,8 +68,7 @@ public class Bullet : MonoBehaviour
             this.gameObject.SetActive(false);
             if (this.authoritative && closest.rigidbody != null)
             {
-                // Replace the momentum formerly transferred by the projectile's physical collision.
-                // The gun's recoil parameter is not the projectile Rigidbody's mass.
+                // Transfer the full projectile momentum; the gun's recoil attenuation only affects the shooter.
                 closest.rigidbody.AddForceAtPosition(this.velocity * this.rb.mass,
                     closest.point, ForceMode.Impulse);
             }

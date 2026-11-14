@@ -5,8 +5,48 @@ using UnityEngine;
 
 public class BulletTests
 {
+    [TestCase(500)]
+    [TestCase(1000)]
+    public void StandardShotLaunchesAFreeRollingChallengeBall(int physicsRate)
+    {
+        float previousStep = Time.fixedDeltaTime;
+        bool autoSimulation = Physics.autoSimulation;
+        try
+        {
+            Time.fixedDeltaTime = 1f / physicsRate;
+            Physics.autoSimulation = false;
+            var floor = this.Create("Ball test floor", 4f);
+            floor.transform.position += Vector3.down * 3f;
+            floor.AddComponent<BoxCollider>().size = new Vector3(100f, 1f, 100f);
+            var ball = this.Create("Free rolling challenge ball", 5f);
+            ball.AddComponent<SphereCollider>().radius = 2.5f;
+            var target = ball.AddComponent<Rigidbody>();
+            target.mass = 10f; // Matches dev_balls.lua, including its five-unit diameter.
+            target.drag = 0f;
+            target.angularDrag = 0f;
+            target.maxAngularVelocity = 100f;
+            Physics.SyncTransforms();
+            this.bullet.SetPower(100f); // The bundled gun's normal power, without overriding its mass.
+            this.bullet.Fire(this.origin, Vector3.forward * 333f);
+            Vector3 before = target.position;
+            for (int i = 0; i < physicsRate / 10; ++i)
+            {
+                if (this.bullet.gameObject.activeSelf) this.Step();
+                Physics.Simulate(Time.fixedDeltaTime);
+            }
+            Assert.That(this.bullet.gameObject.activeSelf, Is.False, "The shot never hit the ball");
+            Assert.That(target.velocity.z, Is.GreaterThan(20f), "A normal shot must visibly launch a free ten-kilogram ball");
+            Assert.That(target.position.z - before.z, Is.GreaterThan(1f));
+        }
+        finally
+        {
+            Time.fixedDeltaTime = previousStep;
+            Physics.autoSimulation = autoSimulation;
+        }
+    }
+
     [Test]
-    public void ShotPowerConfiguresTheSameMassUsedForRecoil()
+    public void ShotPowerConfiguresTheProjectileMass()
     {
         foreach (float power in new[] { 0.001f, 100f, 1000f })
         {

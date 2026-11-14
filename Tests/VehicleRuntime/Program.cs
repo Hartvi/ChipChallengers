@@ -57,8 +57,10 @@ partial class Program
         CheckUserModelFiles();
         CheckVariableDefinitions();
         CheckModelNames();
-        Check(Math.Abs(GunFireControl.ProjectileMass(100) - 0.01f) < 1e-8f &&
-            GunFireControl.ProjectileMass(1e-30f) > 0, "Projectile/recoil mass is invalid");
+        Check(Math.Abs(GunFireControl.ProjectileMass(100) - 1f) < 1e-8f &&
+            GunFireControl.ProjectileMass(1e-30f) > 0, "A standard shot lost its original impact mass");
+        Check(Math.Abs(GunFireControl.ProjectileMass(100) * GunFireControl.RecoilScale - 0.01f) < 1e-8f,
+            "Restoring impact strength changed the gun's existing recoil tuning");
         var history = new HistoryStack();
         Check(history.Undo() == null && history.Redo() == null, "Empty history depends on a local player");
         history.SaveState("A"); history.SaveState("B"); history.SaveState("C");

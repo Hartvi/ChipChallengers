@@ -24,7 +24,7 @@ Fixes follow the numbered findings in `code-review-2026-11-14.md`. Each complete
 | 18 — retained runtime child/model trees | Fixed | Clear both attachment directions and variable subscriptions before rebuild/destruction; reparent/clear regression added and compiled |
 | 19 — detached drives retain commands | Fixed | Stop drive commands on the detached branch and replicate death state; wheels can coast; detachment regression added and compiled |
 | 20 — unbounded/zero-power gun allocation | Fixed | Lazy pool capped at 256 bullets, dynamic finite power, max 50 shots/sec, physics-tick charge; rate/zero/tiny/nonfinite power regressions |
-| 21 — inconsistent impact/recoil mass | Fixed | One finite positive projectile mass shared by recoil and reused bullet bodies; mass regression added and compiled |
+| 21 — inconsistent impact/recoil mass | Fixed | Explicit projectile mass and recoil attenuation; the follow-up below restores the original standard-shot knockback while preserving recoil tuning |
 | 22 — missing wheel support reaction | Fixed | Normal and tangential forces share equal/opposite contact distribution; dynamic-platform momentum regression added and compiled |
 | 23 — fresh-install volume/particle defaults | Fixed | All preference reads supply their declared defaults; volume/particle setters apply runtime values; player-source compilation |
 | 24 — clearing numeric settings throws | Fixed | Single parse with invalid-input feedback/restoration; clamp valid integers to the documented range; player-source compilation |
@@ -49,7 +49,7 @@ Fixes follow the numbered findings in `code-review-2026-11-14.md`. Each complete
 | Multiplayer validation — client physics warning flood | Fixed | Use Mirror's silent ServerCallback guard for Unity's automatic FixedUpdate callback |
 | Multiplayer validation — map files opened exclusively for writing | Fixed | Minimal OBJ importer patch opens geometry/materials read-only with shared readers, supporting protected installs and simultaneous local instances; native regression added |
 
-## Final verification
+## Initial review verification
 
 - Standalone production-code checks: **145 vehicle/runtime**, **301 challenge/save**, and **15 bundled challenge** checks passed.
 - Unity **2021.3.16f1**: **31/31 EditMode tests passed**, including native physics, observer variable updates, model trees, aspect/audio ownership, menus, focus and shared read-only map access.
@@ -61,3 +61,13 @@ Fixes follow the numbered findings in `code-review-2026-11-14.md`. Each complete
 The reproducible build/probe sources and instructions are in `Tests/UnityValidation`. The probe remains outside `Assets` in the normal project. An early native run exposed incomplete Mirror lifecycle setup in some test fixtures; those fixtures were corrected before the passing run.
 
 The headless checks do not assess visual design, audible mixing, long-session handling or internet latency. An editor tutorial and menu redesign remain feature work, as described in the original review.
+
+## Bullet knockback follow-up
+
+The user reported that a free rolling ball no longer flew away when shot. Commit `be9f580` had reduced the default 100-power projectile from the prefab's original 1 kg to 0.01 kg while unifying mass calculations. That reduced impact momentum from 333 to 3.33 N·s. The earlier impact test manually overrode bullet mass, so it did not catch the gameplay regression.
+
+The projectile now weighs 1 kg at the standard power, with mass proportional to power. An explicit 1% recoil factor preserves the previous gun kick. This attenuation is intentional gameplay tuning; the target receives the full projectile momentum. Authority checks, exclusion of the firing vehicle, damage and shot rate are preserved.
+
+A native regression fires a normal 333 m/s shot, without overriding its mass, at a rolling 10 kg, five-unit-diameter ball on a floor. Before the fix, both 500 and 1000 Hz cases failed with only about 0.24 m/s remaining velocity. Both now pass the launch checks: more than 20 m/s and over one metre of movement within 0.1 seconds.
+
+Follow-up verification: **33/33 native Unity tests** and **146 vehicle/runtime checks** passed. The Windows build and multiplayer results above refer to the initial review validation.
