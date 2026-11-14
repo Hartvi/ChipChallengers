@@ -277,8 +277,8 @@ public class CoreChip : CommonChip
         try
         {
             model = VModel.FromLuaModel(state);
-            // Reject incomplete source before replacing a working assembly or its script.
-            VehicleLuaProgram.ValidateSyntax(model.script);
+            // Incomplete Lua is editable model data. Runtime initialization reports
+            // syntax errors and disables that program without discarding the draft.
             if (selectedName != null) { selectedName = ModelFileNames.Normalize(selectedName); }
         }
         catch (Exception e)

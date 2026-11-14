@@ -103,7 +103,6 @@ public class LoadPanel : BaseScrollMenu
                 DisplaySingleton.Instance.DisplayText(ModelDoesNotExist, 4f, "model-load-error");
                 return;
             }
-            VehicleLuaProgram.ValidateSyntax(model.script);
             this.loadedModel = model;
             CoreChip.ClientCoreChip.CmdLoadNamedModel(model.ToLuaString(), filename);
             this.DeactivatePanel();

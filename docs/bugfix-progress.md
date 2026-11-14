@@ -1,5 +1,7 @@
 # Review fixes
 
+Follow-up redo 1: unfinished Lua is accepted as editable model data and can be saved/reloaded. Syntax errors disable the runtime program with feedback instead of rejecting and replacing the draft. Structural validation and execution budgets remain in force. Native draft save/load and safe initialization regression passed.
+
 Fixes follow the numbered findings in `code-review-2026-11-14.md`. Each completed finding receives its own commit. Existing unrelated local files are excluded.
 
 | Finding | Status | Validation |
