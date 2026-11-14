@@ -93,6 +93,14 @@ public class CreateChipPanel : BasePanel
     void BtnCallback(string chipName, LocalDirection localDirection, VChip parent)
     {
         VChip newChip = new VChip(chipName, localDirection, parent);
+        if (chipName == VChip.sensorStr && parent.MyModel != null)
+        {
+            var usedNames = parent.MyModel.chips.Select(chip =>
+                ArrayExtensions.AccessLikeDict(VChip.nameStr, chip.keys, chip.vals)).Concat(parent.MyModel.variables.Select(variable => variable.name)).ToHashSet();
+            int number = 1;
+            while (usedNames.Contains("sensor" + number)) { number++; }
+            newChip.vals[Array.IndexOf((string[])newChip.keys, VChip.nameStr)] = "sensor" + number;
+        }
         var core = CoreChip.ClientCoreChip;
         Debug.Assert(core.isClient);
 

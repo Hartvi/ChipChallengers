@@ -44,6 +44,7 @@ partial class Program
         CheckLuaVariables();
         CheckProgramInitialization();
         CheckLuaLimits();
+        CheckModelValidation();
         foreach (string text in new[] { "", "\nleading newline", "\r\nwindows\r\nlines", "--[[ comment ]]\nfunction Loop() end",
             "local s = [=[nested ]] strings]=]", "quotes '\" and \\slashes", "\0" + "123\t\b", "café and 中文" })
         {
@@ -126,5 +127,36 @@ partial class Program
         foreach (string file in new[] { "Assets/StreamingAssets/chips.lua", "Assets/StreamingAssets/optionNames.lua" })
             Check(LuaModelData.Parse(System.IO.File.ReadAllText(file)).Get("keys").Type == DataType.Table,
                 "Chip specification no longer parses");
+    }
+
+    static void CheckModelValidation()
+    {
+        var definitions = LuaModelData.Parse(System.IO.File.ReadAllText("Assets/StreamingAssets/chips.lua"));
+        var optionDefinitions = LuaModelData.Parse(System.IO.File.ReadAllText("Assets/StreamingAssets/optionNames.lua"));
+        var properties = new System.Collections.Generic.Dictionary<string, string[]>();
+        var options = new System.Collections.Generic.Dictionary<string, int>();
+        for (int i = 1; i <= definitions.Get("keys").Table.Length; i++)
+            properties.Add(definitions.Get("keys").Table.Get(i).String,
+                System.Linq.Enumerable.ToArray(System.Linq.Enumerable.Select(definitions.Get("values").Table.Get(i).Table.Values, value => value.String)));
+        for (int i = 1; i <= optionDefinitions.Get("keys").Table.Length; i++)
+            options.Add(optionDefinitions.Get("keys").Table.Get(i).String, optionDefinitions.Get("values").Table.Get(i).Table.Length);
+        foreach (string file in System.IO.Directory.GetFiles("Assets/StreamingAssets/Models", "*.txt"))
+        {
+            ModelValidation.Validate(LuaModelData.Parse(System.IO.File.ReadAllText(file)), properties, options, properties.Keys);
+            Check(true, "Bundled model validation failed: " + file);
+        }
+        const string root = "{id='a',Type='Core',orientation='0',parentId=''}";
+        foreach (string chips in new[] { "", "{id='a',Type='Wheel',orientation='0',parentId=''}", root + "," + root,
+            root + ",{id='b',Type='Chip',orientation='0',parentId='missing'}",
+            root + ",{id='b',Type='Chip',orientation='0',parentId='c'},{id='c',Type='Chip',orientation='0',parentId='b'}",
+            root + ",{id='b',Type='Wheel',orientation='9',parentId='a'}",
+            root + ",{id='b',Type='Wheel',orientation='0',parentId='a',Option='999'}",
+            root + ",{id='b',Type='Chip',orientation='0',parentId='a',Colour='#bad-colour'}" })
+        {
+            bool rejected = false;
+            try { ModelValidation.Validate(LuaModelData.Parse("{chips={" + chips + "},variables={},script=''}"), properties, options, properties.Keys); }
+            catch (ArgumentException) { rejected = true; }
+            Check(rejected, "Malformed model graph was accepted");
+        }
     }
 }

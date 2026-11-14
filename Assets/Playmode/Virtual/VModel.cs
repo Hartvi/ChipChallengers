@@ -195,6 +195,10 @@ end
 
     public VModel(Table luaTable)
     {
+        ModelValidation.Validate(luaTable,
+            ArrayExtensions.ToDictionaryFromArrays(VChip.chipData.keys, VChip.chipData.values),
+            ArrayExtensions.ToDictionaryFromArrays(VChip.optionNames.keys, VChip.optionNames.values.Select(values => values.Length).ToArray()),
+            VChip.chipNames);
         var chipsTable = luaTable.Get("chips").Table;
         if (chipsTable != null)
         {
@@ -220,6 +224,19 @@ end
         }
 
         this.script = (string)luaTable["script"];
+        // Resolve new property bindings before spawning; construction must not trigger nested model loads.
+        foreach (var chip in this.chips)
+        {
+            for (int i = 0; i < chip.keys.Length; ++i)
+            {
+                string key = chip.keys[i], value = chip.vals[i];
+                if (!VChip.dynamicPropertiesStr.Contains(key) || !ModelValidation.IsVariableName(value) ||
+                    (key == VChip.colourStr && StringHelpers.IsColourString(value)) || this.variables.Any(variable => variable.name == value))
+                    continue;
+                if (this.variables.Length >= ModelValidation.MaximumVariables) { throw new ArgumentException("Too many model variables."); }
+                this.variables = this.variables.Append(VVar.DefaultValueVariable(value)).ToArray();
+            }
+        }
         //PRINT.IPrint($"LOADED SCRIPT: {this.script}");
         bool coreFound = false;
         //PRINT.print($"Number of chips: {this.chips.Length}");

@@ -587,6 +587,20 @@ public class VChip
         return ArrayExtensions.AccessLikeDict(this.ChipType, VChip.chipData.keys, VChip.chipData.values).Contains(property);
     }
 
+    public void ChangeType(string type)
+    {
+        var newKeys = ArrayExtensions.AccessLikeDict(type, chipData.keys, chipData.values).ToArray();
+        var newValues = newKeys.Select(key => key == typeStr ? type :
+            ArrayExtensions.AccessLikeDict(key, this.keys, this.vals) ??
+            ArrayExtensions.AccessLikeDict(key, allPropertiesStr, allPropertiesDefaultsStrings)).ToArray();
+        if (newKeys.Contains(optionStr)) { newValues[Array.IndexOf(newKeys, optionStr)] = "0"; }
+        this.keys = newKeys;
+        this.vals = newValues;
+        this.CheckAndSetVals();
+        // Notify once, after keys and values describe a complete valid chip of the new type.
+        this.vals[Array.IndexOf(newKeys, typeStr)] = type;
+    }
+
     public string[] GetOptions()
     {
         return ArrayExtensions.AccessLikeDict(this.ChipType, VChip.optionNames.keys, VChip.optionNames.values);

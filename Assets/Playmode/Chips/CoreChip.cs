@@ -266,7 +266,8 @@ public class CoreChip : CommonChip
             UnityEngine.Debug.LogWarning($"string model could not be loaded.");
             UnityEngine.Debug.Log(e.Message);
             // TODO send debug message to client
-            DisplaySingleton.Instance.DisplayText(LoadPanel.UndoRedoNotValid, 3f);
+            if (this.connectionToClient != null)
+                this.TargetModelLoadFailed(this.connectionToClient, e.Message);
 
             return;
         }
@@ -282,6 +283,17 @@ public class CoreChip : CommonChip
         {
             a();
         }
+    }
+
+    [TargetRpc]
+    void TargetModelLoadFailed(NetworkConnectionToClient target, string message)
+    {
+        // Reload the last accepted snapshot so a rejected local edit cannot leave UI/model references inconsistent.
+        if (this.modelString != null) { this.loadedModelString = null; }
+        DisplaySingleton.Instance.DisplayText(text => {
+            DisplaySingleton.ErrorMsgModification(text);
+            text.SetText("Model was not changed: " + message);
+        }, 5f, "model-load-error");
     }
 
     char[] GetInputCharactersFromModel(string m)

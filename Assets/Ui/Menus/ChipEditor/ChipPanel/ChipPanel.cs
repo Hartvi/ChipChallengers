@@ -309,7 +309,8 @@ public class ChipPanel : BaseSidePanel, InputReceiver
                         bool createsVariable = VChip.dynamicPropertiesStr.Contains(texts[_i].text) &&
                             StringHelpers.IsVariableName(x) &&
                             !vc.MyModel.variables.Any(variable => variable.name == x);
-                        vc.vals[_i] = x;
+                        if (texts[_i].text == VChip.typeStr) { vc.ChangeType(x); }
+                        else { vc.vals[_i] = x; }
                         if (createsVariable)
                         {
                             DisplaySingleton.Instance.DisplayText(text =>
