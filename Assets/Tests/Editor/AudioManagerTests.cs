@@ -48,6 +48,9 @@ public class AudioManagerTests
             Assert.That(manager.allSounds.Count, Is.EqualTo(3));
             Assert.Throws<ArgumentException>(() => manager.ReserveSound("missing", (value, source) => { }));
             Assert.Throws<InvalidOperationException>(() => manager.ReserveSound("invalid", (value, source) => { }));
+            // Awake/OnDestroy are not automatically paired outside Play mode.
+            typeof(AudioManager).GetMethod("OnDestroy", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                .Invoke(manager, null);
             UnityEngine.Object.DestroyImmediate(manager);
             Assert.That(root.GetComponents<AudioSource>(), Is.Empty);
         }
