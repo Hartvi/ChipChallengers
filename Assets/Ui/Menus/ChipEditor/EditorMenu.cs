@@ -491,7 +491,7 @@ public class EditorMenu : BaseMenu, InputReceiver
 
         if (Input.GetKeyDown(KeyCode.F1))
         {
-            this.GetComponentInChildren<ControlsPanel>(true).gameObject.SetActive(true);
+            UIManager.instance.SwitchToMe(this.GetComponentInChildren<ControlsPanel>(true));
         }
 
         if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1))

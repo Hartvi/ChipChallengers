@@ -23,6 +23,15 @@ public class UIManager : MonoBehaviour
 
     void Update()
     {
+        if (this.keyboardReceivers.Count == 0) { return; }
+        var current = this.keyboardReceivers[this.keyboardReceivers.Count - 1];
+        // F1 is also available while an editor side panel owns keyboard focus.
+        if (Input.GetKeyDown(KeyCode.F1) && (current is EditorMenu || current is BaseSidePanel) &&
+            EditorMenu.Instance != null && EditorMenu.Instance.isActiveAndEnabled)
+        {
+            var help = EditorMenu.Instance.GetComponentInChildren<ControlsPanel>(true);
+            if (help != null) { this.SwitchToMe(help); return; }
+        }
         this.keyboardReceivers[this.keyboardReceivers.Count - 1].CoreHandleInputs();
 
         if (this.keyboardReceivers.Count != this.previousReceiverLength) {
