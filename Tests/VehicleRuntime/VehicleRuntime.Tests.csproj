@@ -9,6 +9,7 @@
     <Compile Include="../../Assets/Common/LuaModelData.cs" Link="LuaModelData.cs" />
     <Compile Include="../../Assets/Common/ModelValidation.cs" Link="ModelValidation.cs" />
     <Compile Include="../../Assets/Common/VehicleControlClock.cs" Link="VehicleControlClock.cs" />
+    <Compile Include="../../Assets/Common/InputCoordinates.cs" Link="InputCoordinates.cs" />
     <Compile Include="../../Assets/Multiplayer/InputMessage.cs" Link="InputMessage.cs" />
     <Compile Include="../../Assets/LuaStuff/LuaExecution.cs" Link="LuaExecution.cs" />
     <Compile Include="../../Assets/LuaStuff/VehicleLuaEnvironment.cs" Link="VehicleLuaEnvironment.cs" />

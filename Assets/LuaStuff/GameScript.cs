@@ -176,8 +176,8 @@ public partial class GameScript : MonoBehaviour
     {
         Table tbl = new Table(script);
         var mp = Input.mousePosition;
-        tbl[1] = (mp[0] / Screen.width - 0.5f) * 2f;
-        tbl[2] = (mp[1] / Screen.height - 0.5f) * 2f;
+        tbl[1] = InputCoordinates.Normalize(mp[0], Screen.width);
+        tbl[2] = InputCoordinates.Normalize(mp[1], Screen.height);
         return tbl;
     }
 

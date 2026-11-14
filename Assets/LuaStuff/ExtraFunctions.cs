@@ -197,8 +197,8 @@ public class ScriptInstance
     {
         Table tbl = new Table(script);
         var mp = this.inputMessage.MousePos;
-        tbl[1] = (mp[0] / Screen.width - 0.5f) * 2f;
-        tbl[2] = (mp[1] / Screen.height - 0.5f) * 2f;
+        tbl[1] = mp[0];
+        tbl[2] = mp[1];
         return tbl;
     }
 

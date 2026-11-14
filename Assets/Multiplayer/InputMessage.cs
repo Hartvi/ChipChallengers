@@ -19,7 +19,7 @@ public class InputMessage
         this.KeysDown = new char[0];
         this.KeysUp = new char[0];
         this.Keys = new char[0];
-        this.MousePos = new float[2] { 0.5f, 0.5f };
+        this.MousePos = new float[2];
         this.MouseDown = new bool[3] { false, false, false };
         this.MouseUp = new bool[3] { false, false, false };
         this.MouseClicked = new bool[3] { false, false, false };
@@ -36,7 +36,7 @@ public class InputMessage
             this.MouseDown[i] |= mouseDown[i];
             this.MouseUp[i] |= mouseUp[i];
         }
-        this.MousePos = mouse;
+        this.MousePos = new[] { InputCoordinates.Clamp(mouse[0]), InputCoordinates.Clamp(mouse[1]) };
     }
 
     public void ConsumeEdges()

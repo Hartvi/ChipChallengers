@@ -735,7 +735,8 @@ public class CoreChip : CommonChip
         bool[] bs = new bool[3] { Input.GetMouseButton(0), Input.GetMouseButton(1), Input.GetMouseButton(2) };
         bool[] bds = new bool[3] { Input.GetMouseButtonDown(0), Input.GetMouseButtonDown(1), Input.GetMouseButtonDown(2) };
         bool[] bus = new bool[3] { Input.GetMouseButtonUp(0), Input.GetMouseButtonUp(1), Input.GetMouseButtonUp(2) };
-        float[] mouse = new float[2] { Input.mousePosition.x, Input.mousePosition.y };
+        float[] mouse = { InputCoordinates.Normalize(Input.mousePosition.x, Screen.width),
+            InputCoordinates.Normalize(Input.mousePosition.y, Screen.height) };
         this.CmdSendInputsToServer(ks.ToArray(), kds.ToArray(), kus.ToArray(), bs, bds, bus, mouse);
     }
 

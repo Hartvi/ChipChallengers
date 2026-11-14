@@ -46,6 +46,10 @@ partial class Program
         CheckLuaLimits();
         CheckModelValidation();
         CheckControlTiming();
+        Check(InputCoordinates.Normalize(1440, 1920) == InputCoordinates.Normalize(2880, 3840), "Mouse aim depends on client resolution");
+        Check(InputCoordinates.Normalize(0, 1920) == -1 && InputCoordinates.Normalize(960, 1920) == 0 &&
+            InputCoordinates.Normalize(1920, 1920) == 1, "Mouse viewport coordinates changed");
+        Check(InputCoordinates.Normalize(100, 0) == 0 && InputCoordinates.Clamp(float.NaN) == 0, "Invalid mouse coordinates were accepted");
         foreach (string text in new[] { "", "\nleading newline", "\r\nwindows\r\nlines", "--[[ comment ]]\nfunction Loop() end",
             "local s = [=[nested ]] strings]=]", "quotes '\" and \\slashes", "\0" + "123\t\b", "café and 中文" })
         {
