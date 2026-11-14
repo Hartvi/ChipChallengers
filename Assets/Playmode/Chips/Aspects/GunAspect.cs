@@ -54,7 +54,7 @@ public class GunAspect : BaseAspect
 
     public override void RuntimeFunction()
     {
-        if (this.myChip.IsDead) { return; }
+        if (!this.myChip.isServer || this.myChip.IsDead || this.rb.isKinematic || this.myChip.myCore.IsRebuilding) { return; }
 
         if (this._charge < 1f)
         {
@@ -78,7 +78,15 @@ public class GunAspect : BaseAspect
         this.bulletPool.Next().Fire(initialBulletPosition, forward * this.projectileVelocity,
             this.rb, this.myChip.myCore);
         this.Fired?.Invoke();
+        this.myChip.myCore.RpcPlayGunShot(this.myChip.netId, initialBulletPosition, forward * this.projectileVelocity);
         //Debug.DrawLine(this.transform.position, this.transform.position + this.transform.forward*2f);
+    }
+
+    public void PlayRemoteShot(Vector3 position, Vector3 velocity)
+    {
+        if (this.myChip.isServer || this.bulletPool == null) { return; }
+        this.bulletPool.Next().Fire(position, velocity, this.rb, this.myChip.myCore, authoritative: false);
+        this.Fired?.Invoke();
     }
 
     Bullet GenerateBullet()

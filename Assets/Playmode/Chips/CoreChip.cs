@@ -196,6 +196,7 @@ public class CoreChip : CommonChip
             return;
         }
         if (this.IsDrivingHeld) { return; }
+        if (this.isClientOnly) { this.SetSyncVariableValues(); }
         foreach (var rtf in this.RuntimeFunctions)
         {
             if (rtf != null)
@@ -741,9 +742,11 @@ public class CoreChip : CommonChip
     [Client]
     void SetSyncVariableValues()
     {
+        if (this.variableValues.Length != this.VirtualModel.variables.Length) { return; }
         for (int i = 0; i < this.variableValues.Length; ++i)
         {
-            this.VirtualModel.variables[i].currentValue = this.variableValues[i];
+            var variable = this.VirtualModel.variables[i];
+            if (variable.currentValue != this.variableValues[i]) { variable.currentValue = this.variableValues[i]; }
         }
     }
 
@@ -752,8 +755,15 @@ public class CoreChip : CommonChip
         if (this.isLocalPlayer)
         {
             this.TransferControls();
-            SetSyncVariableValues();
         }
+    }
+
+    [ClientRpc]
+    public void RpcPlayGunShot(uint chipNetId, Vector3 position, Vector3 velocity)
+    {
+        if (this.isServer || this.IsRebuilding) { return; }
+        if (NetworkClient.spawned.TryGetValue(chipNetId, out var identity))
+            identity.GetComponent<GunAspect>()?.PlayRemoteShot(position, velocity);
     }
 
     [Server]

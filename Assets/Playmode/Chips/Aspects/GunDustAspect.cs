@@ -5,7 +5,6 @@ using UnityEngine;
 public class GunDustAspect : BaseAspect
 {
     GunAspect gunAspect;
-    float oldCharge = 0f;
     ParticleSystem particles;
 
     protected override void Awake()
@@ -28,6 +27,7 @@ public class GunDustAspect : BaseAspect
     {
         base.Start();
         this.gunAspect = this.GetComponent<GunAspect>();
+        this.gunAspect.Fired += this.PlayShot;
         var em = this.particles.emission;
         em.rateOverTime = GameManager.RealTimeSettings.ParticleRate * Mathf.Abs(this.value);
         var m = this.particles.main;
@@ -37,21 +37,19 @@ public class GunDustAspect : BaseAspect
 
     public override void RuntimeFunction()
     {
-        if(this.gunAspect == null) { return; }
-        if (this.gunAspect.charge < this.oldCharge)
-        {
-            // TODO FIRE
-            //var em = this.particles.emission;
-            //em.rateOverTime = Mathf.Min(Mathf.Abs(this.value * 0.1f), 100f);
-            var m = this.particles.main;
-            m.startLifetime = 0.051f;
-            this.particles.Play();
-        }
-        this.oldCharge = this.gunAspect.charge;
+    }
+
+    void PlayShot()
+    {
+        if (!this.isActiveAndEnabled) { return; }
+        var main = this.particles.main;
+        main.startLifetime = 0.051f;
+        this.particles.Play();
     }
 
     protected override void OnDestroy()
     {
+        if (this.gunAspect != null) { this.gunAspect.Fired -= this.PlayShot; }
         base.OnDestroy();
         if (this.particles)
         {

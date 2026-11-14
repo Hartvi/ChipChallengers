@@ -10,6 +10,7 @@ public class Bullet : MonoBehaviour
     Rigidbody sourceBody;
     CoreChip sourceCore;
     Vector3 velocity;
+    bool authoritative;
 
     public void SetupBullet(float power)
     {
@@ -22,10 +23,11 @@ public class Bullet : MonoBehaviour
         this.gameObject.SetActive(false);
     }
 
-    public void Fire(Vector3 initialPosition, Vector3 velocity, Rigidbody sourceBody = null, CoreChip sourceCore = null)
+    public void Fire(Vector3 initialPosition, Vector3 velocity, Rigidbody sourceBody = null, CoreChip sourceCore = null, bool authoritative = true)
     {
         this.sourceBody = sourceBody;
         this.sourceCore = sourceCore;
+        this.authoritative = authoritative;
         this.velocity = velocity;
         this.gameObject.SetActive(true);
         this.rb.position = initialPosition;
@@ -57,7 +59,7 @@ public class Bullet : MonoBehaviour
             this.rb.position = closest.point;
             // Consume before damage callbacks, which may destroy the target or the firing gun's pool.
             this.gameObject.SetActive(false);
-            if (closest.rigidbody != null)
+            if (this.authoritative && closest.rigidbody != null)
             {
                 // Replace the momentum formerly transferred by the projectile's physical collision.
                 // The gun's recoil parameter is not the projectile Rigidbody's mass.
@@ -65,7 +67,7 @@ public class Bullet : MonoBehaviour
                     closest.point, ForceMode.Impulse);
             }
             var health = closest.collider.GetComponentInParent<HealthAspect>();
-            if (health != null) { health.ApplyDamage(this.myPower); }
+            if (this.authoritative && health != null) { health.ApplyDamage(this.myPower); }
             return;
         }
 

@@ -135,6 +135,24 @@ public class BulletTests
         Assert.IsFalse(this.bullet.gameObject.activeSelf);
     }
 
+    [Test]
+    public void PresentationBulletCannotDamageOrPushItsTarget()
+    {
+        int deaths = 0;
+        var target = this.Surface("Presentation target", 3f);
+        var body = target.AddComponent<Rigidbody>();
+        body.useGravity = false;
+        var health = target.AddComponent<HealthAspect>();
+        health.SetHealth(1f);
+        health.SetDeathCallbacks(new System.Action[] { () => deaths++ });
+        this.bullet.Fire(this.origin, Vector3.forward * (10f / Time.fixedDeltaTime), authoritative: false);
+        Physics.SyncTransforms();
+        this.Step();
+        Assert.That(deaths, Is.Zero);
+        Assert.That(this.bullet.gameObject.activeSelf, Is.False);
+        Assert.That(body.velocity.sqrMagnitude, Is.Zero);
+    }
+
     GameObject Create(string name, float distance)
     {
         var item = new GameObject(name);
