@@ -22,9 +22,12 @@ class Program
     // Run creates a sample run containing vehicle, rule, timing and physics snapshots.
     static ChallengeRunRecord Run(string id, double time, string model, int version = 1)
     {
+        string mapHash = ChallengeContentHash.Compute(Array.Empty<byte>(), System.Text.Encoding.UTF8.GetBytes("test map"));
         return new ChallengeRunRecord {
-            challengeHash = ChallengeContentHash.Compute(System.Text.Encoding.UTF8.GetBytes("test challenge"), Array.Empty<byte>()),
+            challengeHash = ChallengeContentHash.ComputeForMapHash(System.Text.Encoding.UTF8.GetBytes("test challenge"), mapHash),
             challengeFileName = "test_challenge.lua",
+            mapFileName = "test_map.obj",
+            mapContentHash = mapHash,
             runId = id, hasTime = true, timeSeconds = time, modelName = model,
             playerName = "Driver", finishedAtUtc = "2026-11-04T15:32:18Z",
             gameVersion = "test", challengeLogicVersion = version,
@@ -200,6 +203,13 @@ class Program
             byte[] luaBytes = System.Text.Encoding.UTF8.GetBytes("return 1");
             byte[] mapBytes = System.Text.Encoding.UTF8.GetBytes("v 0 0 0");
             string contentHash = ChallengeContentHash.Compute(luaBytes, mapBytes);
+            string mapHash = ChallengeContentHash.Compute(Array.Empty<byte>(), mapBytes);
+            Check(ChallengeContentHash.ComputeForMapHash(luaBytes, mapHash) !=
+                ChallengeContentHash.ComputeForMapHash(luaBytes, ChallengeContentHash.Compute(Array.Empty<byte>(), new byte[] { 1, 2, 3 })),
+                "Changing only the map did not change the run identity");
+            Check(ChallengeContentHash.ComputeForMapHash(luaBytes, mapHash) != ChallengeContentHash.Compute(luaBytes, Array.Empty<byte>()),
+                "New map-aware identities merged with legacy Lua-only records");
+            Reject(() => ChallengeContentHash.ComputeForMapHash(luaBytes, ""), "A missing map content hash was accepted");
             Check(contentHash.Length == 64 && contentHash == ChallengeContentHash.Compute(luaBytes, mapBytes),
                 "Challenge content hash was not a deterministic SHA-256 digest");
             Check(contentHash != ChallengeContentHash.Compute(System.Text.Encoding.UTF8.GetBytes("return 2"), mapBytes),
@@ -262,7 +272,7 @@ class Program
             Check(hashProgress.bestRun.challengeFileName == "test_challenge.lua" &&
                 hashProgress.lastRun.challengeFileName == "renamed.lua", "Run filenames were overwritten by a rename");
             var editedRun = Run("edited", 9, "Car");
-            editedRun.challengeHash = ChallengeContentHash.Compute(System.Text.Encoding.UTF8.GetBytes("changed Lua"), Array.Empty<byte>());
+            editedRun.challengeHash = ChallengeContentHash.ComputeForMapHash(System.Text.Encoding.UTF8.GetBytes("changed Lua"), editedRun.mapContentHash);
             hashStore.Record(identityMetadata, editedRun);
             Check(hashStore.Load().challenges.Count == 2, "Changed Lua contents shared progress with the original");
             var missingHash = Run("missing-hash", 1, "Car");

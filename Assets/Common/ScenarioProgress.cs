@@ -13,7 +13,7 @@ public class ChallengeProgressSave
 [Serializable]
 public class ChallengeProgress
 {
-    // challengeHash identifies the Lua contents with empty map contents until map hashing is enabled.
+    // challengeHash identifies the Lua and the loaded map's content identity.
     public string challengeHash = "";
     // challengeFileName records the filename, including its extension, of the most recent completed run.
     public string challengeFileName = "";
@@ -35,6 +35,8 @@ public class ChallengeRunRecord
 {
     public string challengeHash = "";
     public string challengeFileName = "";
+    public string mapFileName = "";
+    public string mapContentHash = "";
     // runId identifies an attempt so repeated finish callbacks do not count it twice.
     public string runId = "";
     public string playerName = "";

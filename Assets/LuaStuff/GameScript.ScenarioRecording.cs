@@ -28,14 +28,15 @@ public partial class GameScript
     double? finalRaceTime;
     string fallbackChallengeId;
     bool attemptCompleted;
+    byte[] challengeLuaContents;
     static GameScript physicsOwner;
     ChallengePhysicsSettings previousPhysics;
     readonly Dictionary<Rigidbody, Vector2Int> previousBodySolvers = new Dictionary<Rigidbody, Vector2Int>();
 
-    // RegisterChallengeCallbacks hashes the Lua bytes with empty map contents and registers the Lua recording functions.
+    // The attempt hashes the original Lua bytes together with whichever map the script actually loaded.
     void RegisterChallengeCallbacks(string challengeFileName, byte[] challengeContents)
     {
-        this.ChallengeHash = ChallengeContentHash.Compute(challengeContents, Array.Empty<byte>());
+        this.challengeLuaContents = (byte[])challengeContents.Clone();
         this.ChallengeFileName = Path.GetFileName(challengeFileName);
         // fallbackChallengeId identifies files without explicit metadata by filename; Challenge({id=...}) supplies a permanent ID.
         this.fallbackChallengeId = string.IsNullOrWhiteSpace(challengeFileName)
@@ -70,10 +71,14 @@ public partial class GameScript
         this.CheckRules(counts);
         if (core.freeze || GameManager.RealTimeSettings.InMenu)
             throw new InvalidOperationException("Start the attempt in play mode.");
+        if (!SandboxMenu.myVMap.IsLoaded) { throw new InvalidOperationException("Load the challenge's map before starting an attempt."); }
+        this.ChallengeHash = ChallengeContentHash.ComputeForMapHash(this.challengeLuaContents, SandboxMenu.myVMap.ContentHash);
         this.ApplyChallengePhysics();
         this.activeAttempt = new ChallengeRunRecord {
             challengeHash = this.ChallengeHash,
             challengeFileName = this.ChallengeFileName,
+            mapFileName = SandboxMenu.myVMap.FileName + UIStrings.MapExtension,
+            mapContentHash = SandboxMenu.myVMap.ContentHash,
             runId = Guid.NewGuid().ToString("N"),
             gameVersion = Application.version,
             challengeLogicVersion = ChallengeLuaMetadata.CurrentLogicVersion,
@@ -114,6 +119,7 @@ public partial class GameScript
         var core = CoreChip.ClientCoreChip;
         var physics = this.activeAttempt.physics;
         bool stateIsValid = core == this.attemptCore && !core.freeze && !GameManager.RealTimeSettings.InMenu &&
+            this.activeAttempt.mapContentHash == SandboxMenu.myVMap.ContentHash &&
             core.srvResetCounter == this.attemptResetCounter &&
             Time.fixedDeltaTime == physics.fixedDeltaTime &&
             Physics.defaultSolverIterations == physics.solverIterations &&

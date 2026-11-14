@@ -108,17 +108,29 @@ public class ChallengeMenu : BaseMenu, InputReceiver
             Debug.LogWarning("Could not load challenge best times: " + error.Message);
             return;
         }
+        var currentMapHashes = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        string CurrentMapHash(string filename)
+        {
+            if (string.IsNullOrWhiteSpace(filename) || Path.GetFileName(filename) != filename ||
+                !filename.EndsWith(UIStrings.MapExtension, StringComparison.OrdinalIgnoreCase)) { return null; }
+            if (currentMapHashes.TryGetValue(filename, out string cached)) { return cached; }
+            string path = Path.Combine(IOHelpers.GetMapsDirectory(), filename);
+            string hash = File.Exists(path) ? ChallengeContentHash.Compute(Array.Empty<byte>(), File.ReadAllBytes(path)) : null;
+            currentMapHashes[filename] = hash;
+            return hash;
+        }
         foreach (string name in this.challenges)
         {
             try
             {
                 byte[] contents = File.ReadAllBytes(Path.Combine(IOHelpers.GetChallengesDirectory(), name + UIStrings.ChallengeExtension));
-                string hash = ChallengeContentHash.Compute(contents, Array.Empty<byte>());
                 var best = save.challenges
-                    .Where(progress => progress.challengeHash == hash && progress.challengeLogicVersion == ChallengeLuaMetadata.CurrentLogicVersion)
+                    .Where(progress => progress.challengeLogicVersion == ChallengeLuaMetadata.CurrentLogicVersion)
                     .Select(progress => progress.bestRun)
                     .Where(run => run != null && run.hasTime && !double.IsNaN(run.timeSeconds) &&
-                        !double.IsInfinity(run.timeSeconds) && run.timeSeconds >= 0)
+                        !double.IsInfinity(run.timeSeconds) && run.timeSeconds >= 0 &&
+                        ChallengeContentHash.IsHash(run.mapContentHash) && CurrentMapHash(run.mapFileName) == run.mapContentHash &&
+                        run.challengeHash == ChallengeContentHash.ComputeForMapHash(contents, run.mapContentHash))
                     .OrderBy(run => run.timeSeconds).FirstOrDefault();
                 if (best != null) { this.bestRuns[name] = best; }
             }

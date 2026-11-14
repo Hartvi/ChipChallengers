@@ -32,6 +32,8 @@ public class ChallengeProgressStore
     {
         if (metadata == null || metadata.recordVersion < 1 || run == null ||
             string.IsNullOrWhiteSpace(run.challengeHash) || string.IsNullOrWhiteSpace(run.challengeFileName) ||
+            string.IsNullOrWhiteSpace(run.mapFileName) || Path.GetFileName(run.mapFileName) != run.mapFileName ||
+            !ChallengeContentHash.IsHash(run.mapContentHash) ||
             string.IsNullOrWhiteSpace(run.runId) ||
             run.challengeLogicVersion < 1 || (run.hasTime &&
             (double.IsNaN(run.timeSeconds) || double.IsInfinity(run.timeSeconds) || run.timeSeconds < 0)))
