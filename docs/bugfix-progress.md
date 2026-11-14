@@ -4,6 +4,8 @@ Follow-up redo 1: unfinished Lua is accepted as editable model data and can be s
 
 Follow-up redo 2: sensor pastes allocate unique names across existing sensors, variables and the entire pasted batch. Mirrored/repeated pastes and legacy unnamed sensors are supported. Type conversion to Sensor also allocates a free name; variable/sensor conflicts are rejected before mutation. Three native paste regressions passed.
 
+Follow-up redo 3: chip type changes preserve the selected option when the destination supports the same named variant. Incompatible variants fall back to Basic/the first option. Eight native tests cover material preservation, incompatible options and exactly one model-change notification.
+
 Fixes follow the numbered findings in `code-review-2026-11-14.md`. Each completed finding receives its own commit. Existing unrelated local files are excluded.
 
 | Finding | Status | Validation |

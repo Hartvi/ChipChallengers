@@ -589,11 +589,20 @@ public class VChip
 
     public void ChangeType(string type)
     {
+        var oldOptions = this.GetOptions();
+        string oldOption = ArrayExtensions.AccessLikeDict(optionStr, this.keys, this.vals);
+        string selectedOption = int.TryParse(oldOption, out int option) && option >= 0 && option < oldOptions.Length
+            ? oldOptions[option] : null;
         var newKeys = ArrayExtensions.AccessLikeDict(type, chipData.keys, chipData.values).ToArray();
         var newValues = newKeys.Select(key => key == typeStr ? type :
             ArrayExtensions.AccessLikeDict(key, this.keys, this.vals) ??
             ArrayExtensions.AccessLikeDict(key, allPropertiesStr, allPropertiesDefaultsStrings)).ToArray();
-        if (newKeys.Contains(optionStr)) { newValues[Array.IndexOf(newKeys, optionStr)] = "0"; }
+        if (newKeys.Contains(optionStr))
+        {
+            var newOptions = ArrayExtensions.AccessLikeDict(type, optionNames.keys, optionNames.values);
+            int preserved = selectedOption == null ? -1 : Array.IndexOf(newOptions, selectedOption);
+            newValues[Array.IndexOf(newKeys, optionStr)] = Math.Max(0, preserved).ToString(System.Globalization.CultureInfo.InvariantCulture);
+        }
         this.keys = newKeys;
         this.vals = newValues;
         this.CheckAndSetVals();
