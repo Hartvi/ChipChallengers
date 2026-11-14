@@ -7,9 +7,9 @@ public class AudioManager : MonoBehaviour
 {
     public Sound[] sounds = Array.Empty<Sound>();
     public HashSet<Sound> allSounds = new HashSet<Sound>();
-    int newReservationId = 0;
-    Dictionary<string, int> ReservationCounts = new Dictionary<string, int>();
-    Dictionary<int, Sound> SoundReservations = new Dictionary<int, Sound>();
+    readonly Dictionary<string, List<Sound>> reservations = new Dictionary<string, List<Sound>>();
+    readonly Dictionary<string, int> nextReservation = new Dictionary<string, int>();
+    readonly List<AudioSource> ownedSources = new List<AudioSource>();
     public static float volume = 1f;
     private static AudioManager instance = null;
     public static AudioManager Instance
@@ -35,24 +35,38 @@ public class AudioManager : MonoBehaviour
         foreach (Sound s in this.sounds)
         {
             if (s == null) continue;
-            s.source = gameObject.AddComponent<AudioSource>();
-            s.source.clip = s.clip;
-
-            s.source.volume = s.volume;
-            s.source.pitch = s.pitch;
-            s.source.loop = s.loop;
-            ReservationCounts[s.name] = 0;
+            s.source = this.CreateSource(s);
         }
     }
 
     void OnDestroy()
     {
         if (instance == this) instance = null;
+        foreach (var source in this.ownedSources)
+        {
+            if (source == null) continue;
+            if (Application.isPlaying) Destroy(source);
+            else DestroyImmediate(source);
+        }
+        this.ownedSources.Clear();
+        this.reservations.Clear();
+        this.allSounds.Clear();
+    }
+
+    AudioSource CreateSource(Sound definition)
+    {
+        var source = gameObject.AddComponent<AudioSource>();
+        this.ownedSources.Add(source);
+        source.clip = definition.clip;
+        source.volume = definition.volume;
+        source.pitch = definition.pitch;
+        source.loop = definition.loop;
+        return source;
     }
 
     public bool Play(string name)
     {
-        Sound s = Array.Find(this.sounds, sound => sound.name == name);
+        Sound s = Array.Find(this.sounds, sound => sound != null && sound.name == name);
         if (s == null)
         {
             Debug.LogWarning("Sound " + name + " not found!");
@@ -72,66 +86,51 @@ public class AudioManager : MonoBehaviour
     {
         foreach (Sound s in this.sounds)
         {
-            s.source.Stop();
+            if (s?.source != null) s.source.Stop();
         }
+        this.StopSounds();
     }
     public void PlaySounds()
     {
         foreach (var s in allSounds)
         {
-            s.source.Play();
+            if (s?.source != null) s.source.Play();
         }
     }
     public void Stop(string name)
     {
-        Sound s = Array.Find(this.sounds, sound => sound.name == name);
-        s.source.Stop();
+        Sound s = Array.Find(this.sounds, sound => sound != null && sound.name == name);
+        if (s?.source != null) s.source.Stop();
     }
     public Action<float> ReserveSound(string name, Action<float, AudioSource> soundFunc)
     {
-        print("sounds: " + sounds.Length);
-        Sound s = Array.Find(this.sounds, sound => sound.name == name);
-        Action<float> ret;
-        int _newReservationId;
-        if (ReservationCounts[name] < s.maxInstanceNumber)
+        if (soundFunc == null) throw new ArgumentNullException(nameof(soundFunc));
+        Sound s = Array.Find(this.sounds, sound => sound != null && sound.name == name);
+        if (s == null) throw new ArgumentException("Unknown sound: " + name, nameof(name));
+        if (s.maxInstanceNumber < 1) throw new InvalidOperationException("Sound instance limit must be positive: " + name);
+        if (!this.reservations.TryGetValue(name, out var pool))
         {
-            Sound newSound = new Sound();
-            allSounds.Add(newSound);
-            newSound.name = name;
-            newSound.source = gameObject.AddComponent<AudioSource>();
-            newSound.source.clip = s.clip;
-
-            newSound.source.volume = s.volume;
-            newSound.source.pitch = s.pitch;
-            newSound.source.loop = s.loop;
-            SoundReservations[newReservationId] = newSound;
-            _newReservationId = newReservationId;
-            newSound.source.volume = 0f;
-            newSound.source.Play();
-            newReservationId++;
+            pool = new List<Sound>();
+            this.reservations.Add(name, pool);
+            this.nextReservation.Add(name, 0);
+        }
+        AudioSource src;
+        if (pool.Count < s.maxInstanceNumber)
+        {
+            var reserved = new Sound { name = name, source = this.CreateSource(s) };
+            pool.Add(reserved);
+            this.allSounds.Add(reserved);
+            src = reserved.source;
+            src.volume = 0f;
+            src.Play();
         }
         else
         {
-            Sound[] sounds = new Sound[SoundReservations.Values.Count];
-            SoundReservations.Values.CopyTo(sounds, 0);
-            Sound[] nameSounds = Array.FindAll(sounds, sound => sound.name == name);
-            Sound selectedSound = nameSounds[ReservationCounts[name] % s.maxInstanceNumber];
-            int resId = Array.FindIndex(sounds, sound => sound == selectedSound);
-            _newReservationId = resId;
+            int index = this.nextReservation[name] % pool.Count;
+            src = pool[index].source;
+            this.nextReservation[name] = (index + 1) % pool.Count;
         }
-        AudioSource src = SoundReservations[_newReservationId].source;
-        ret = (slip) => soundFunc(slip, src);
-        // {
-        //     float deltaSlip = slip-0.18f;
-        //     float volume = deltaSlip*0.50f;
-        //     var src = SoundReservations[_newReservationId].source;
-        //     src.volume = volume > 1f ? 1f : volume < 0f ? 0f : volume;
-        //     if(volume > 0f) {
-        //         src.pitch = 0.8f + Mathf.Min(Mathf.Max(0f, 0.01f*deltaSlip), 0.1f);
-        //     }
-        // };
-        ReservationCounts[name]++;
-        return ret;
+        return value => { if (src != null) soundFunc(value, src); };
     }
     public static void TireSoundFunc(float slip, AudioSource src)
     {
@@ -187,6 +186,7 @@ public class AudioManager : MonoBehaviour
     {
         foreach (Sound s in this.allSounds)
         {
+            if (s?.source == null) continue;
             s.source.volume = 0f;
             s.source.Stop();
         }
