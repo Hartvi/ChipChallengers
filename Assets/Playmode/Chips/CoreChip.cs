@@ -275,7 +275,7 @@ public class CoreChip : CommonChip
         this.variableValues = new float[model.variables.Length];
         this.history.SaveState(this.modelString);
 
-        this.keysToCheck = this.GetInputCharactersFromModel(state);
+        this.keysToCheck = this.GetInputCharactersFromModel(model.script ?? string.Empty);
 
         StartCoroutine(this.GenerateChips());
         foreach (Action a in this.OnLoadedCallbacks)

@@ -43,6 +43,7 @@ partial class Program
         CheckNumbers();
         CheckLuaVariables();
         CheckProgramInitialization();
+        CheckLuaLimits();
         foreach (string text in new[] { "", "\nleading newline", "\r\nwindows\r\nlines", "--[[ comment ]]\nfunction Loop() end",
             "local s = [=[nested ]] strings]=]", "quotes '\" and \\slashes", "\0" + "123\t\b", "café and 中文" })
         {
@@ -94,5 +95,36 @@ partial class Program
         Check(!broken.Initialize() && broken.Error != null && !broken.CallLoop(), "Syntax failure escaped initialization");
         var runtimeError = new VehicleLuaProgram(lua, environment, "missing.Read()");
         Check(!runtimeError.Initialize() && runtimeError.Error != null, "Top-level sensor error escaped initialization");
+    }
+
+    static void CheckLuaLimits()
+    {
+        foreach (string source in new[] { "while true do end", "local function spin() return spin() end; spin()",
+            "coroutine.resume(coroutine.create(function() while true do end end))", "string.rep('x', 1000000000)" })
+        {
+            bool rejected = false;
+            try { LuaExecution.Run(LuaExecution.CreateScript(), source); }
+            catch (InterpreterException) { rejected = true; }
+            Check(rejected, "Unbounded script was not stopped");
+        }
+        var valid = LuaExecution.CreateScript();
+        Check(LuaExecution.Run(valid, "local total = 0; for i=1,100 do total=total+i end; return total").Number == 5050,
+            "Instruction limit rejected an ordinary program");
+        foreach (string source in new[] { "{chips = (function() while true do end end)()}", "{}; while true do end", "{x = 1 + 2}" })
+        {
+            bool rejected = false;
+            try { LuaModelData.Parse(source); }
+            catch (FormatException) { rejected = true; }
+            Check(rejected, "Model parser accepted executable code");
+        }
+        foreach (string text in new[] { "--[[nested]]\nlocal value = [=[hello]=]", "\0" + "123\t", "\r\ntext", "quotes '\"\\" })
+            Check(LuaModelData.Parse("{script=" + LuaStrings.Quote(text) + "}").Get("script").String == text,
+                "Literal data parser changed script contents");
+        foreach (string file in System.IO.Directory.GetFiles("Assets/StreamingAssets/Models", "*.txt"))
+            Check(LuaModelData.Parse(System.IO.File.ReadAllText(file)).Get("chips").Type == DataType.Table,
+                "Existing vehicle no longer parses: " + file);
+        foreach (string file in new[] { "Assets/StreamingAssets/chips.lua", "Assets/StreamingAssets/optionNames.lua" })
+            Check(LuaModelData.Parse(System.IO.File.ReadAllText(file)).Get("keys").Type == DataType.Table,
+                "Chip specification no longer parses");
     }
 }

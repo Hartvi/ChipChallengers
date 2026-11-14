@@ -190,14 +190,7 @@ end
 
     public static VModel FromLuaModel(string luaModel)
     {
-        //PRINT.print(luaModel);
-        string a = "a=" + luaModel;
-        var scriptObj = new Script();
-        scriptObj.DoString(a);
-        var luaA = scriptObj.Globals["a"];
-        //PRINT.print($"MODEL:");
-        //PRINT.print((Table)(luaA));
-        return new VModel((Table)luaA);
+        return new VModel(LuaModelData.Parse(luaModel));
     }
 
     public VModel(Table luaTable)

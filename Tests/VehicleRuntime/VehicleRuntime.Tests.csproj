@@ -6,6 +6,8 @@
   <ItemGroup>
     <Compile Include="../../Assets/Common/ModelNumbers.cs" Link="ModelNumbers.cs" />
     <Compile Include="../../Assets/Common/LuaStrings.cs" Link="LuaStrings.cs" />
+    <Compile Include="../../Assets/Common/LuaModelData.cs" Link="LuaModelData.cs" />
+    <Compile Include="../../Assets/LuaStuff/LuaExecution.cs" Link="LuaExecution.cs" />
     <Compile Include="../../Assets/LuaStuff/VehicleLuaEnvironment.cs" Link="VehicleLuaEnvironment.cs" />
     <Compile Include="../../Assets/LuaStuff/VehicleLuaProgram.cs" Link="VehicleLuaProgram.cs" />
     <Compile Include="../../Assets/Playmode/Virtual/VVar.cs" Link="VVar.cs" />

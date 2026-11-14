@@ -18,10 +18,7 @@ public static class LUALoader
     {
         string luaCode = IOHelpers.LoadTextFile(filePath);
         //PRINT.print($"lua code:\n{luaCode}");
-        Script script = new Script();
-        script.DoString(luaCode);
-
-        DynValue luaData = script.Globals.Get("a");
+        DynValue luaData = DynValue.NewTable(LuaModelData.Parse(luaCode));
 
         string[] chips = ConvertTableToArray(luaData.Table.Get("keys").Table, x => x.String).Cast<string>().ToArray();
 

@@ -16,7 +16,7 @@ public sealed class VehicleLuaProgram
         this.source = source ?? string.Empty;
     }
 
-    public static void ValidateSyntax(string source) => new Script().LoadString(source ?? string.Empty, null, "vehicle");
+    public static void ValidateSyntax(string source) => LuaExecution.Compile(LuaExecution.CreateScript(), source ?? string.Empty, null, "vehicle");
 
     public void Fail(Exception error)
     {
@@ -27,7 +27,7 @@ public sealed class VehicleLuaProgram
     {
         if (this.initialized || this.Error != null) { return this.Error == null; }
         this.initialized = true;
-        try { this.script.DoString(this.source, this.environment.Globals, "vehicle"); }
+        try { LuaExecution.Run(this.script, this.source, this.environment.Globals, "vehicle"); }
         catch (Exception error) { this.Fail(error); }
         return this.Error == null;
     }
@@ -38,7 +38,7 @@ public sealed class VehicleLuaProgram
         try
         {
             var loop = this.environment.Get("Loop");
-            if (!loop.IsNil()) { this.script.Call(loop); }
+            if (!loop.IsNil()) { LuaExecution.Call(this.script, loop); }
         }
         catch (Exception error) { this.Fail(error); }
         return this.Error == null;

@@ -25,7 +25,7 @@ public class ScriptInstance
         this.Name2Var = vModel.variables.ToDictionary(x => x.name, x => x);
         this.scriptString = vModel.script == null ? "" : vModel.script;
 
-        this.script = new Script();
+        this.script = LuaExecution.CreateScript();
 
         // USER INPUTS
         this.script.Globals[UIStrings.Key] = (Func<char, bool>)this.Key;

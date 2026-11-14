@@ -198,13 +198,13 @@ public partial class GameScript
             {
                 this.isRace = false;
                 this.DisplayRaceText($"FINISHED IN {seconds:F2} SECONDS - Ctrl+R to retry", 3f, "race-result", false, 0.5f);
-                if (!definition.onFinished.IsNil()) { this.script.Call(definition.onFinished, seconds); }
+                if (!definition.onFinished.IsNil()) { LuaExecution.Call(this.script, definition.onFinished, seconds); }
             }
             else
             {
                 this.Show(this.raceGates[this.raceProgress.NextGate]);
                 if (index > 0 && !definition.onCheckpoint.IsNil())
-                    this.script.Call(definition.onCheckpoint, index, seconds);
+                    LuaExecution.Call(this.script, definition.onCheckpoint, index, seconds);
             }
         }
         catch (Exception error)
@@ -252,7 +252,7 @@ public partial class GameScript
             this.Show(this.raceGates[1]);
             this.DisplayRaceStart("GO!");
             var callback = this.raceDefinition.onStarted;
-            if (!callback.IsNil()) { this.script.Call(callback); }
+            if (!callback.IsNil()) { LuaExecution.Call(this.script, callback); }
         }
         catch (Exception error)
         {

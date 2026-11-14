@@ -25,7 +25,7 @@ public partial class GameScript : MonoBehaviour
         PlayerObjects.Add(player1);
 
         this.scriptString = scriptString;
-        this.script = new Script();
+        this.script = LuaExecution.CreateScript();
 
         this.script.Globals["Key"] = (Func<char, bool>)Key;
         this.script.Globals["KeyDown"] = (Func<char, bool>)KeyDown;
@@ -55,7 +55,7 @@ public partial class GameScript : MonoBehaviour
         try
         {
             CoreChip.ClientCoreChip.CmdResetToDefaultLocation();
-            this.script.DoString(this.scriptString);
+            LuaExecution.Run(this.script, this.scriptString, null, "challenge");
         }
         catch (Exception e)
         {
@@ -309,6 +309,7 @@ public partial class GameScript : MonoBehaviour
 
     public string Spawn(string objectType, Table properties)
     {
+        if (this.SceneObjects.Count >= 512) { throw new InvalidOperationException("Challenge object limit reached."); }
         var _mass = properties.Get("mass");
         var m = (_mass == DynValue.Nil) ? -1f : (float)_mass.Number;
         var _bounciness = properties.Get("bounciness");
@@ -420,7 +421,7 @@ public partial class GameScript : MonoBehaviour
                     if (func != DynValue.Nil)
                     {
                         Closure closure = func.Function;
-                        Action a = () => closure.Call();
+                        Action a = () => this.CallChallengeCallback(func);
                         Checkpoint chk = o.AddComponent<Checkpoint>();
                         chk.Setup(radius, os, a);
                     }
@@ -470,7 +471,7 @@ public partial class GameScript : MonoBehaviour
 
         if (this.isRace)
         {
-            DynValue res = script.Call(script.Globals["RaceLoop"]);
+            this.CallChallengeCallback(script.Globals.Get("RaceLoop"));
         }
     }
 
@@ -478,10 +479,11 @@ public partial class GameScript : MonoBehaviour
     {
         try
         {
-            DynValue res = script.Call(script.Globals["Loop"]);
+            LuaExecution.Call(this.script, script.Globals.Get("Loop"));
         }
         catch (Exception e)
         {
+            this.enabled = false;
             DisplaySingleton.Instance.DisplayText(
                 x =>
                 {
@@ -489,6 +491,17 @@ public partial class GameScript : MonoBehaviour
                     x.SetText(e.Message);
                 }, 5f
             );
+        }
+    }
+
+    void CallChallengeCallback(DynValue function, params object[] arguments)
+    {
+        if (!this.isActiveAndEnabled) { return; }
+        try { LuaExecution.Call(this.script, function, arguments); }
+        catch (Exception error)
+        {
+            this.enabled = false;
+            this.ReportChallengeError(error.Message);
         }
     }
 
