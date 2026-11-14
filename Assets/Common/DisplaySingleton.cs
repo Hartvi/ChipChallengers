@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using System.Linq;
 
 public class DisplaySingleton : MonoBehaviour
 {
@@ -27,6 +28,7 @@ public class DisplaySingleton : MonoBehaviour
         public TMP_Text TextComponent;   // the actual TMP_Text object
         public float Interval;          // how long it stays visible (0 or negative = forever)
         public float LastDisplayTime;   // the last time we called DisplayText on it
+        public bool Anonymous;
     }
 
     // Dictionary keyed by ID => text info
@@ -37,14 +39,14 @@ public class DisplaySingleton : MonoBehaviour
 
     private void Awake()
     {
-        // Standard singleton pattern if you’re embedding in a scene.
+        // Standard singleton pattern if youâ€™re embedding in a scene.
         if (instance != null && instance != this)
         {
             Destroy(this.gameObject);
             return;
         }
         instance = this;
-        DontDestroyOnLoad(this.gameObject);
+        if (Application.isPlaying) { DontDestroyOnLoad(this.gameObject); }
 
         // Find the first Canvas in the scene. Adjust if you want a more robust search.
         Canvas canvas = FindObjectOfType<Canvas>();
@@ -76,15 +78,21 @@ public class DisplaySingleton : MonoBehaviour
     /// <param name="id">Optional unique identifier. If omitted or empty, a new ID is generated each time.</param>
     public void DisplayText(Action<TMP_Text> modification, float interval, string id = "")
     {
+        if (parentCanvas == null) { parentCanvas = FindObjectOfType<Canvas>()?.gameObject; }
         if (parentCanvas == null)
         {
             Debug.LogWarning("No parent canvas found; cannot display text.");
             return;
         }
 
+        bool anonymous = string.IsNullOrEmpty(id);
+        if (anonymous) { id = "anonymous:" + Guid.NewGuid().ToString("N"); }
         DisplayedTextInfo info;
         if (!displayedTexts.TryGetValue(id, out info) || info.TextComponent == null)
         {
+            if (!displayedTexts.ContainsKey(id) && displayedTexts.Count >= 256)
+                this.RemoveText(displayedTexts.OrderByDescending(pair => pair.Value.Anonymous)
+                    .ThenBy(pair => pair.Value.LastDisplayTime).First().Key);
             // Create a new text object
             TMP_Text txt = InitTxt();
 
@@ -92,7 +100,8 @@ public class DisplaySingleton : MonoBehaviour
             {
                 TextComponent = txt,
                 Interval = interval,
-                LastDisplayTime = Time.time
+                LastDisplayTime = Time.time,
+                Anonymous = anonymous
             };
 
             displayedTexts[id] = info;
@@ -116,16 +125,19 @@ public class DisplaySingleton : MonoBehaviour
     private void Update()
     {
         float currentTime = Time.time;
+        var expired = new List<string>();
 
         // Iterate over all displayed texts
         foreach (var kvp in displayedTexts)
         {
             DisplayedTextInfo info = kvp.Value;
+            if (info.TextComponent == null) { expired.Add(kvp.Key); continue; }
             // If interval > 0, we auto-hide after 'interval' seconds
             if (info.Interval > 0f)
             {
                 if (currentTime - info.LastDisplayTime >= info.Interval)
                 {
+                    if (info.Anonymous) { expired.Add(kvp.Key); continue; }
                     // Hide it
                     if (info.TextComponent != null)
                     {
@@ -135,6 +147,16 @@ public class DisplaySingleton : MonoBehaviour
             }
             // If interval <= 0, it stays forever (do nothing here).
         }
+        foreach (string id in expired) { this.RemoveText(id); }
+    }
+
+    void RemoveText(string id)
+    {
+        if (!displayedTexts.TryGetValue(id, out var info)) { return; }
+        displayedTexts.Remove(id);
+        if (info.TextComponent == null) { return; }
+        if (Application.isPlaying) { Destroy(info.TextComponent.gameObject); }
+        else { DestroyImmediate(info.TextComponent.gameObject); }
     }
 
     #region Example Modifications

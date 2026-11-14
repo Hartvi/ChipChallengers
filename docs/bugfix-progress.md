@@ -31,5 +31,6 @@ Fixes follow the numbered findings in `code-review-2026-11-14.md`. Each complete
 | 25 — vehicles saved into installed content | Fixed | User-data model store, non-overwriting legacy migration, bundled fallback; migration/user override/new-example filesystem regressions |
 | 26 — direct overwrite and missing confirmation | Fixed | Atomic replacement/backups, explicit second-step overwrite, errors keep the save dialog open; injected partial-write regression |
 | 27 — editor help cannot receive dismiss input | Fixed | F1 transfers input focus, including from editor side panels; player-source compilation |
+| 28 — independent messages overwrite each other | Fixed | Unique transient IDs with expiry/cap, explicit reusable Lua print slots, canvas reacquisition; message lifecycle regression added and compiled |
 
 Unity Play-mode and multiplayer checks require separate runtime validation; a C# compilation check does not exercise Mirror weaving or physics.

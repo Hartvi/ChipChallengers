@@ -158,7 +158,7 @@ public partial class GameScript : MonoBehaviour
                 txt.overflowMode = TMPro.TextOverflowModes.Overflow;
                 txt.horizontalAlignment = TMPro.HorizontalAlignmentOptions.Center;
                 txt.SetText(s);
-            }, t
+            }, t, "challenge-print:" + this.GetInstanceID() + ":" + ModelNumbers.Format(position.x) + ":" + ModelNumbers.Format(position.y)
         );
     }
 

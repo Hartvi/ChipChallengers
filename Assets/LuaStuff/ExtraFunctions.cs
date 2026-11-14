@@ -251,7 +251,7 @@ public class ScriptInstance
                 txt.transform.position = new Vector2(Screen.width * (0.5f + position.x * 0.5f), Screen.height * (0.5f + position.y * 0.5f));
                 txt.color = new Color(r, g, b);
                 txt.SetText(s);
-            }, 0.5f
+            }, 0.5f, "vehicle-print:" + this.myCore.netId + ":" + ModelNumbers.Format(position.x) + ":" + ModelNumbers.Format(position.y)
         );
     }
 
