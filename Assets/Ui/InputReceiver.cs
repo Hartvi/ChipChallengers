@@ -13,6 +13,7 @@ public interface InputReceiver
         if (!this.IsActive())
         {
             Debug.LogWarning($"InputReceiver: {this.GetType()}: Cannot handle inputs on inactive UI object.");
+            return;
             //throw new InvalidOperationException($"InputReceiver: {this.GetType()}: Cannot handle inputs on inactive UI object.");
         }
         this.HandleInputs();

@@ -23,6 +23,7 @@ public class UIManager : MonoBehaviour
 
     void Update()
     {
+        this.RemoveInactiveReceivers();
         if (this.keyboardReceivers.Count == 0) { return; }
         var current = this.keyboardReceivers[this.keyboardReceivers.Count - 1];
         // F1 is also available while an editor side panel owns keyboard focus.
@@ -42,15 +43,15 @@ public class UIManager : MonoBehaviour
 
     public void SwitchToMe(InputReceiver me)
     {
+        this.RemoveInactiveReceivers();
+        if (keyboardReceivers.Count > 0 && keyboardReceivers[keyboardReceivers.Count - 1] == me) { return; }
         if (keyboardReceivers.Count > 0)
         {
             var lastReceiver = keyboardReceivers[keyboardReceivers.Count - 1];
-            if (lastReceiver != me)
-            {
-                lastReceiver.OnStopReceiving();
-                me.OnStartReceiving();
-            }
+            lastReceiver.OnStopReceiving();
         }
+        me.OnStartReceiving();
+        this.RemoveInactiveReceivers();
 
         //print($"Switching to {me.GetType()}");
         while (keyboardReceivers.Remove(me)) { }
@@ -74,12 +75,18 @@ public class UIManager : MonoBehaviour
             while (keyboardReceivers.Remove(me)) { }
 
             // if I was receiving, that means I'm not last anymore and a new guy is last now
-            if (iWasReceivingAlready)
+            if (iWasReceivingAlready && keyboardReceivers.Count > 0)
             {
                 keyboardReceivers[keyboardReceivers.Count - 1].OnStartReceiving();
             }
         }
         //print($"After removing: {me.GetType()}: {keyboardReceivers.Count}");
+    }
+
+    void RemoveInactiveReceivers()
+    {
+        this.keyboardReceivers.RemoveAll(receiver => receiver is MonoBehaviour component &&
+            (component == null || !component.isActiveAndEnabled));
     }
 
 }
