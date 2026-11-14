@@ -132,7 +132,7 @@ public class VariableFields : BaseImage
 
     private bool IsFloat(string value)
     {
-        return float.TryParse(value, out _);
+        return ModelNumbers.TryParse(value, out _);
     }
 
     void Update()

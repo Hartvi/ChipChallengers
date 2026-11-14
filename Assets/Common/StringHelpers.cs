@@ -69,7 +69,7 @@ public static class StringHelpers
 
     public static bool IsFloat(this string input)
     {
-        return float.TryParse(input, out float _);
+        return ModelNumbers.TryParse(input, out float _);
     }
 
     public static bool IsUInt(this string input)

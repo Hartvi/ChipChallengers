@@ -30,14 +30,14 @@ public abstract class AngleChip : OptionChip
     {
         Action<float, VVar> SetBrakeDelegate = (x, v) => this.SetBrake(x);
         
-        return this.GetProperty<float>(VChip.brakeStr, float.TryParse, SetBrakeDelegate);
+        return this.GetProperty<float>(VChip.brakeStr, ModelNumbers.TryParse, SetBrakeDelegate);
     }
 
     protected float GetValue()
     {
         Action<float, VVar> SetValueDelegate = (x, v) => this.SetValue(x);
         
-        return this.GetProperty<float>(VChip.valueStr, float.TryParse, SetValueDelegate);
+        return this.GetProperty<float>(VChip.valueStr, ModelNumbers.TryParse, SetValueDelegate);
     }
 
     protected Color GetColour()
@@ -53,7 +53,7 @@ public abstract class AngleChip : OptionChip
     {
         Action<float, VVar> SetAngleDelegate = (x, v) => this.SetAngle(x - v.defaultValue);
 
-        return this.GetProperty<float>(VChip.angleStr, float.TryParse, SetAngleDelegate);
+        return this.GetProperty<float>(VChip.angleStr, ModelNumbers.TryParse, SetAngleDelegate);
     }
 
     //[Server]

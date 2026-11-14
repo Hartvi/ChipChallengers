@@ -299,7 +299,7 @@ public class VChip
 
             if (propertyTypes[key] == typeof(float))
             {
-                val = (T)(object)float.Parse(strVal);
+                val = (T)(object)ModelNumbers.Parse(strVal);
             }
             else if (propertyTypes[key] == typeof(int))
             {
@@ -386,7 +386,7 @@ public class VChip
 
             if (expectedType == typeof(float))
             {
-                if (!float.TryParse(this.vals[i], out float result))
+                if (!ModelNumbers.TryParse(this.vals[i], out float result))
                 {
                     PRINT.IPrint($"'{keys[i]}': '{vals[i]}' is a string, perhaps variable");
                     throw new ArgumentException($"Value {this.vals[i]} at index {i} cannot be converted to float.");

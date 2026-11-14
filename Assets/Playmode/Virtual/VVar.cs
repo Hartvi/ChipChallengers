@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using System.Linq;
 using MoonSharp.Interpreter;
 
@@ -38,7 +37,7 @@ public class VVar
         get { return this._currentValue; }
         set
         {
-            this._currentValue = Mathf.Max(Mathf.Min(value, this.maxValue), this.minValue);
+            this._currentValue = Math.Max(Math.Min(value, this.maxValue), this.minValue);
             //if(this.name == "angle")
             //{
             //    PRINT.IPrint($"Setting variable {this.name}: {this._currentValue}. Listeners: {this.valueChangedCallbacks.Length}");
@@ -78,7 +77,7 @@ public class VVar
 
     public void RemoveValueChangedCallback(Action<float, VVar> action)
     {
-        this.valueChangedCallbacks = this.valueChangedCallbacks.RemoveElement(action);
+        this.valueChangedCallbacks = this.valueChangedCallbacks.Where(callback => callback != action).ToArray();
     }
 
     public static VVar DefaultValueVariable(string name) {
@@ -92,10 +91,10 @@ public class VVar
 
         // Add fixed fields
         luaCode += $"name = '{name}', ";
-        luaCode += $"defaultValue = {defaultValue}, ";
-        luaCode += $"maxValue = {maxValue}, ";
-        luaCode += $"minValue = {minValue}, ";
-        luaCode += $"backstep = {backstep}, ";
+        luaCode += $"defaultValue = {ModelNumbers.Format(defaultValue)}, ";
+        luaCode += $"maxValue = {ModelNumbers.Format(maxValue)}, ";
+        luaCode += $"minValue = {ModelNumbers.Format(minValue)}, ";
+        luaCode += $"backstep = {ModelNumbers.Format(backstep)}, ";
 
         // Close table and return
         luaCode += "}";
@@ -133,10 +132,10 @@ public class VVar
         //this.maxValue = float.Parse((string)luaTable["maxValue"]);
         //this.backstep = float.Parse((string)luaTable["backstep"]);
         //this.defaultValue = float.Parse((string)luaTable["defaultValue"]);
-        this.minValue = float.Parse(luaTable["minValue"].ToString());
-        this.maxValue = float.Parse(luaTable["maxValue"].ToString());
-        this.backstep = float.Parse(luaTable["backstep"].ToString());
-        this.defaultValue = float.Parse(luaTable["defaultValue"].ToString());
+        this.minValue = ModelNumbers.Read(luaTable.Get("minValue"));
+        this.maxValue = ModelNumbers.Read(luaTable.Get("maxValue"));
+        this.backstep = ModelNumbers.Read(luaTable.Get("backstep"));
+        this.defaultValue = ModelNumbers.Read(luaTable.Get("defaultValue"));
         this.currentValue = this.defaultValue;
     }
     public static VVar[] FromLuaTables(Table[] luaTables)
@@ -154,25 +153,25 @@ public class VVar
 
         this.name = vals[0];
         float defaultValue;
-        if (!float.TryParse(vals[1], out defaultValue))
+        if (!ModelNumbers.TryParse(vals[1], out defaultValue))
         {
             defaultValue = 0f;
         }
 
         float minValue;
-        if (!float.TryParse(vals[2], out minValue))
+        if (!ModelNumbers.TryParse(vals[2], out minValue))
         {
             minValue = 0f;
         }
 
         float maxValue;
-        if (!float.TryParse(vals[3], out maxValue))
+        if (!ModelNumbers.TryParse(vals[3], out maxValue))
         {
             maxValue = 0f;
         }
 
         float backstep;
-        if (!float.TryParse(vals[4], out backstep))
+        if (!ModelNumbers.TryParse(vals[4], out backstep))
         {
             backstep = 0f;
         }
