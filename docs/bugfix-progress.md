@@ -29,5 +29,6 @@ Fixes follow the numbered findings in `code-review-2026-11-14.md`. Each complete
 | 23 — fresh-install volume/particle defaults | Fixed | All preference reads supply their declared defaults; volume/particle setters apply runtime values; player-source compilation |
 | 24 — clearing numeric settings throws | Fixed | Single parse with invalid-input feedback/restoration; clamp valid integers to the documented range; player-source compilation |
 | 25 — vehicles saved into installed content | Fixed | User-data model store, non-overwriting legacy migration, bundled fallback; migration/user override/new-example filesystem regressions |
+| 26 — direct overwrite and missing confirmation | Fixed | Atomic replacement/backups, explicit second-step overwrite, errors keep the save dialog open; injected partial-write regression |
 
 Unity Play-mode and multiplayer checks require separate runtime validation; a C# compilation check does not exercise Mirror weaving or physics.

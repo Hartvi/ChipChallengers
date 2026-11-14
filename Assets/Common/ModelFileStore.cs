@@ -50,7 +50,7 @@ public sealed class ModelFileStore
     public void Write(string name, string content)
     {
         Directory.CreateDirectory(this.UserDirectory);
-        File.WriteAllText(this.UserPath(name), content);
+        AtomicTextFile.Write(this.UserPath(name), content);
     }
 
     string UserPath(string name)

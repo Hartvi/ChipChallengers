@@ -260,7 +260,14 @@ public class EditorMenu : BaseMenu, InputReceiver
         // leaving online mode back to unspawned core
         if(NetworkClient.localPlayer == null) { return; }
         var core = CoreChip.ClientCoreChip;
-        core.VirtualModel.SaveThisModelToFile(UIStrings.Backup + UIStrings.ModelExtension);
+        try { core.VirtualModel.SaveThisModelToFile(UIStrings.Backup + UIStrings.ModelExtension); }
+        catch (Exception error)
+        {
+            DisplaySingleton.Instance.DisplayText(text => {
+                DisplaySingleton.ErrorMsgModification(text);
+                text.SetText("Automatic backup could not be saved: " + error.Message);
+            }, 5f, "model-backup-error");
+        }
         core.freeze = false;
     }
 

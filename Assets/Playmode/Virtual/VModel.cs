@@ -371,6 +371,8 @@ end
     public string SaveThisModelToFile(string modelName)
     {
         var modelLua = this.ToLuaString();
+        var snapshot = VModel.FromLuaModel(modelLua);
+        VehicleLuaProgram.ValidateSyntax(snapshot.script);
 
         IOHelpers.SaveModel(modelName, modelLua);
         return null;

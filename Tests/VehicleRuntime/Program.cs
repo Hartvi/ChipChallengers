@@ -230,6 +230,11 @@ partial class Program
             files.MigrateLegacyFiles();
             Check(files.Read("car.txt") == "player edit" && System.IO.File.ReadAllText(System.IO.Path.Combine(bundled, "car.txt")) == "legacy car",
                 "User save changed installed content or migration replaced user work");
+            Check(System.IO.File.ReadAllText(System.IO.Path.Combine(user, "car.txt.bak")) == "legacy car", "Atomic overwrite did not retain its backup");
+            try { AtomicTextFile.Write(System.IO.Path.Combine(user, "car.txt"), writer => { writer.Write("partial"); throw new System.IO.IOException("Injected write failure"); }); }
+            catch (System.IO.IOException) { }
+            Check(files.Read("car.txt") == "player edit" && System.IO.Directory.GetFiles(user, "*.tmp").Length == 0,
+                "An interrupted save damaged the model or retained its partial file");
             System.IO.File.WriteAllText(System.IO.Path.Combine(bundled, "new-example.txt"), "new example");
             Check(files.Read("new-example.txt") == "new example" && files.Names().Length == 2, "New bundled examples became unavailable");
         }
