@@ -266,7 +266,7 @@ public class WheelAspects : BaseAspect
         this.totalSlip3 = this.totalSlip2;
         this.totalSlip2 = this.totalSlip1;
         this.totalSlip1 = this.totalSlip;
-        this.ApplyTorque(this.value);
+        this.ApplyTorque(this.myChip.IsDead ? 0f : this.value);
     }
 
     bool RaycastFromBase(out Vector3 point, out float compression, out Vector3 normal)

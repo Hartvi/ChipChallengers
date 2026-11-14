@@ -6,6 +6,25 @@ using UnityEngine;
 public class RuntimeTreeTests
 {
     [Test]
+    public void DetachedDriveStopsItsLastCommand()
+    {
+        var root = new GameObject("Detached drive test");
+        root.SetActive(false);
+        try
+        {
+            var chip = root.AddComponent<CommonChip>();
+            chip.SetValue(100f);
+            chip.SetBrake(10f);
+            chip.Die();
+            Assert.That(chip.IsDead, Is.True);
+            Assert.That(chip.value, Is.Zero);
+            Assert.That(chip.brake, Is.Zero);
+            Assert.DoesNotThrow(chip.Die);
+        }
+        finally { Object.DestroyImmediate(root); }
+    }
+
+    [Test]
     public void ReparentingAndClearingDetachBothDirections()
     {
         var objects = new List<GameObject>();

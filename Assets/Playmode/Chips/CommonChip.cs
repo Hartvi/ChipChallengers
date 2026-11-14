@@ -20,7 +20,21 @@ public class CommonChip : AngleChip
     // Keep the replacement returned by AddComponent; GetComponent can still find
     // the previous sensor until Unity completes its deferred destruction.
     public SensorAspect Sensor { get; private set; }
-    public bool IsDead { get; private set; }
+    [SyncVar(hook = nameof(OnDeadStateChanged))] bool isDead;
+    public bool IsDead => this.isDead;
+
+    void OnDeadStateChanged(bool previous, bool current)
+    {
+        if (current) { this.StopDrive(); }
+    }
+
+    void StopDrive()
+    {
+        this.ReleaseVariableBindings();
+        this.SetValue(0f);
+        this.SetBrake(0f);
+        foreach (var source in this.GetComponents<AudioSource>()) { source.Stop(); }
+    }
 
     public void ReleaseVariableBindings()
     {
@@ -299,7 +313,7 @@ public class CommonChip : AngleChip
     [Client]
     public CommonChip[] AddChildren(CoreChip core)
     {
-        this.IsDead = false;
+        this.isDead = false;
         Color colour = this.GetColour();
         //print($"COLOUR: {colour}");
         this.mrs = this.GetComponentsInChildren<MeshRenderer>().Where(x => x.tag == VChip.colourStr).ToArray();
@@ -524,6 +538,8 @@ public class CommonChip : AngleChip
 
     public void Die()
     {
+        if (this.IsDead) { return; }
+        if (this.cj != null) { this.cj.connectedBody = null; }
         GameObject.Destroy(this.cj);
 
         CommonChip[] myDescendants = this.GetMyDescendants();
@@ -537,32 +553,25 @@ public class CommonChip : AngleChip
     private void SleepyTime()
     {
         if (this.IsDead) { return; }
-        this.IsDead = true;
-        // remove from callbacks to LUA
-        this.RemoveMeFromVariableCallbacks.Invoke();
+        this.isDead = true;
+        this.StopDrive();
     }
 
     CommonChip[] GetMyDescendants()
     {
-        List<CommonChip> myDescendants = new List<CommonChip>();
-        myDescendants.Add(this);
-        /*
-         a-(b,c-(d,e,f))
-        add b
-        add descendants of b => nothing
-        add c
-        add descendants of c =>
-         add d
-         add e
-         add f
-         */
-        for (int i = 0; i < this.childChips.Count; ++i)
+        var result = new List<CommonChip>();
+        var pending = new Stack<CommonChip>();
+        var visited = new HashSet<CommonChip>();
+        pending.Push(this);
+        while (pending.Count > 0)
         {
-            CommonChip myChild = this.childChips[i] as CommonChip;
-            myDescendants.Add(myChild);
-            myDescendants.AddRange(myChild.GetMyDescendants());
+            var chip = pending.Pop();
+            if (chip == null || !visited.Add(chip)) { continue; }
+            result.Add(chip);
+            foreach (var child in chip.childChips)
+                if (child is CommonChip common) { pending.Push(common); }
         }
-        return myDescendants.ToArray();
+        return result.ToArray();
     }
 
 }

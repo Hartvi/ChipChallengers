@@ -23,7 +23,12 @@ public class JetDustAspect : BaseAspect
 
     public override void RuntimeFunction()
     {
-        if (this.brake < 1e-3f) { return; }
+        if (this.brake < 1e-3f || this.myChip.IsDead)
+        {
+            var emission = this.particles.emission;
+            emission.rateOverTime = 0f;
+            return;
+        }
 
         var em = this.particles.emission;
         em.rateOverTime = GameManager.RealTimeSettings.ParticleRate * Mathf.Min(0.01f * this.brake * Mathf.Abs(this.value * 0.1f), 100f);

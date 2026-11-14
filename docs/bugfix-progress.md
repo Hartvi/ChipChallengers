@@ -22,5 +22,6 @@ Fixes follow the numbered findings in `code-review-2026-11-14.md`. Each complete
 | 16 — cubic virtual model linking | Fixed | One parent lookup and ID dictionary; iterative virtual subtree deletion; tree regression added and compiled |
 | 17 — sound sources retained across rebuilds | Fixed | Owned sources stopped/released and runtime callbacks removed; repeated lifecycle regression added and compiled |
 | 18 — retained runtime child/model trees | Fixed | Clear both attachment directions and variable subscriptions before rebuild/destruction; reparent/clear regression added and compiled |
+| 19 — detached drives retain commands | Fixed | Stop drive commands on the detached branch and replicate death state; wheels can coast; detachment regression added and compiled |
 
 Unity Play-mode and multiplayer checks require separate runtime validation; a C# compilation check does not exercise Mirror weaving or physics.
