@@ -46,6 +46,7 @@ partial class Program
         CheckLuaLimits();
         CheckModelValidation();
         CheckControlTiming();
+        CheckGunTiming();
         var history = new HistoryStack();
         Check(history.Undo() == null && history.Redo() == null, "Empty history depends on a local player");
         history.SaveState("A"); history.SaveState("B"); history.SaveState("C");
@@ -190,5 +191,24 @@ partial class Program
         Check(input.KeysDown.Length == 1 && input.MouseDown[0], "An input edge was lost between control ticks");
         input.ConsumeEdges();
         Check(input.KeysDown.Length == 0 && !input.MouseDown[0] && input.Keys.Length == 1, "Input edges repeated or held state was lost");
+    }
+
+    static void CheckGunTiming()
+    {
+        foreach (int rate in new[] { 50, 500, 1000 })
+        {
+            foreach (float power in new[] { 100f, 0.001f })
+            {
+                var fire = new GunFireControl();
+                int shots = 0;
+                for (int i = 0; i < rate; i++) if (fire.Step(power, true, 1f / rate, out _)) { shots++; }
+                Check(shots == (power == 100f ? 10 : 50), "Gun shot rate changed with the physics rate");
+            }
+        }
+        foreach (float power in new[] { 0, -1, float.NaN, float.PositiveInfinity })
+            Check(!new GunFireControl().Step(power, true, 1, out _), "Invalid/disabled gun power fired a shot");
+        var changing = new GunFireControl();
+        Check(!changing.Step(0, true, 1, out _) && changing.Step(100, true, 0.1f, out float activePower) && activePower == 100,
+            "A gun did not respond to changed power");
     }
 }

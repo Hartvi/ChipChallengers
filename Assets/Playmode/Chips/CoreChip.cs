@@ -818,11 +818,11 @@ public class CoreChip : CommonChip
     }
 
     [ClientRpc]
-    public void RpcPlayGunShot(uint chipNetId, Vector3 position, Vector3 velocity)
+    public void RpcPlayGunShot(uint chipNetId, Vector3 position, Vector3 velocity, float power)
     {
         if (this.isServer || this.IsRebuilding) { return; }
         if (NetworkClient.spawned.TryGetValue(chipNetId, out var identity))
-            identity.GetComponent<GunAspect>()?.PlayRemoteShot(position, velocity);
+            identity.GetComponent<GunAspect>()?.PlayRemoteShot(position, velocity, power);
     }
 
     [Server]

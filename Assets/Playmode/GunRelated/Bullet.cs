@@ -23,6 +23,12 @@ public class Bullet : MonoBehaviour
         this.gameObject.SetActive(false);
     }
 
+    public void SetPower(float power)
+    {
+        if (!GunFireControl.TryPower(power, out this.myPower))
+            throw new System.ArgumentException("Bullet power must be finite and positive.");
+    }
+
     public void Fire(Vector3 initialPosition, Vector3 velocity, Rigidbody sourceBody = null, CoreChip sourceCore = null, bool authoritative = true)
     {
         this.sourceBody = sourceBody;

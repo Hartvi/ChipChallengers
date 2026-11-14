@@ -42,7 +42,12 @@ public class GunDustAspect : BaseAspect
     void PlayShot()
     {
         if (!this.isActiveAndEnabled) { return; }
+        float power = this.gunAspect.LastShotPower;
+        var emission = this.particles.emission;
+        emission.rateOverTime = GameManager.RealTimeSettings.ParticleRate * Mathf.Min(power, 1000f);
         var main = this.particles.main;
+        main.startSpeed = Mathf.Min(power * 0.1f, 100f);
+        main.startSize = Mathf.Min(0.1f * power, 1f);
         main.startLifetime = 0.051f;
         this.particles.Play();
     }

@@ -1,107 +1,70 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class GunAspect : BaseAspect
 {
-    public event System.Action Fired;
+    public event Action Fired;
+    const float ProjectileVelocity = 333f;
+    const int MaximumPooledBullets = 256;
+    readonly GunFireControl fireControl = new GunFireControl();
+    readonly List<Bullet> bullets = new List<Bullet>();
+    int recycleIndex;
+    public float charge => this.fireControl.Charge;
+    public float LastShotPower { get; private set; }
 
-    float _charge = 0f;
-    public float charge => _charge;
-    float power = 1f;
-    float dPowerPerFrame = 1f;
+    public override void RuntimeFunction() { }
 
-    float projectileWeight;
-    float projectileVelocity;
-    float recoilImpulse;
-
-    ObjectPool<Bullet> bulletPool;
-
-    protected override void Awake()
-    {
-        base.Awake();
-        this.power = this.value;
-        //print($"gun power: {this.power}");
-
-        this.projectileWeight = 1e-4f * this.power;
-        this.projectileVelocity = 333f;
-        Debug.LogWarning($"TODO: update bullet strengths when physics rate is changed");
-
-        this.recoilImpulse = this.projectileWeight * this.projectileVelocity;
-        // dp/dt = (dm*dv)/dt = m*dv/dt 
-        // dv = vel, dt = fixeddeltatime, m = projectileweight
-
-        float dpowerdt = 1e3f / this.power;
-        this.dPowerPerFrame = dpowerdt;
-
-        // rate = ???
-        // rate = 1/dpowerdt
-        // rate = 5 bullets/second
-        // lifetime = 5 seconds
-        // number of bullets = rate * lifetime
-        //print($"Time.deltaTime {Time.deltaTime} this.dPowerPerFrame {this.dPowerPerFrame} Bullet.LifeTime {Bullet.LifeTime}");
-        int numberOfBullets = Mathf.Max(1, Mathf.CeilToInt(this.dPowerPerFrame * Bullet.LifeTime));
-        //print($"Number of bullets: {numberOfBullets}");
-        this.bulletPool = new ObjectPool<Bullet>(numberOfBullets, GenerateBullet, x =>
-        {
-            if (x)
-            {
-                Destroy(x.gameObject);
-            }
-        }
-        );
-    }
-
-    public override void RuntimeFunction()
+    void FixedUpdate()
     {
         if (!this.myChip.isServer || this.myChip.IsDead || this.rb.isKinematic || this.myChip.myCore.IsRebuilding) { return; }
+        if (!this.fireControl.Step(this.value, this.brake > 1e-4f, Time.fixedDeltaTime, out float power)) { return; }
+        Vector3 velocity = this.transform.forward * ProjectileVelocity;
+        this.rb.AddForce(-velocity * (power * 1e-4f), ForceMode.Impulse);
+        this.PlayShot(this.transform.position, velocity, power, true);
+        this.myChip.myCore.RpcPlayGunShot(this.myChip.netId, this.transform.position, velocity, power);
+    }
 
-        if (this._charge < 1f)
+    public void PlayRemoteShot(Vector3 position, Vector3 velocity, float power)
+    {
+        if (this.myChip.isServer || !GunFireControl.TryPower(power, out power)) { return; }
+        this.PlayShot(position, velocity, power, false);
+    }
+
+    void PlayShot(Vector3 position, Vector3 velocity, float power, bool authoritative)
+    {
+        this.bullets.RemoveAll(bullet => bullet == null);
+        Bullet available = this.bullets.Find(bullet => !bullet.gameObject.activeSelf);
+        if (available == null)
         {
-            this._charge += this.dPowerPerFrame * Time.deltaTime;
-        } // if charge is full then check if shooting
-        else if (this.brake > 1e-4f)
-        {
-            this.Fire();
+            if (this.bullets.Count < MaximumPooledBullets)
+            {
+                available = Instantiate(Resources.Load<GameObject>(UIStrings.GunRelated + "/" + UIStrings.Bullet)).AddComponent<Bullet>();
+                available.SetupBullet(power);
+                this.bullets.Add(available);
+            }
+            else
+            {
+                available = this.bullets[this.recycleIndex];
+                this.recycleIndex = (this.recycleIndex + 1) % MaximumPooledBullets;
+            }
         }
-    }
-
-    void Fire()
-    {
-        // charge is full, shoot
-        Vector3 forward = this.transform.forward;
-        this.rb.AddForce(-forward * this.recoilImpulse, ForceMode.Impulse);
-        this._charge = 0f;
-
-        Vector3 initialBulletPosition = this.transform.position;
-
-        this.bulletPool.Next().Fire(initialBulletPosition, forward * this.projectileVelocity,
-            this.rb, this.myChip.myCore);
+        available.SetPower(power);
+        available.Fire(position, velocity, this.rb, this.myChip.myCore, authoritative);
+        this.LastShotPower = power;
         this.Fired?.Invoke();
-        this.myChip.myCore.RpcPlayGunShot(this.myChip.netId, initialBulletPosition, forward * this.projectileVelocity);
-        //Debug.DrawLine(this.transform.position, this.transform.position + this.transform.forward*2f);
-    }
-
-    public void PlayRemoteShot(Vector3 position, Vector3 velocity)
-    {
-        if (this.myChip.isServer || this.bulletPool == null) { return; }
-        this.bulletPool.Next().Fire(position, velocity, this.rb, this.myChip.myCore, authoritative: false);
-        this.Fired?.Invoke();
-    }
-
-    Bullet GenerateBullet()
-    {
-        Bullet b = Instantiate(Resources.Load(UIStrings.GunRelated + "/" + UIStrings.Bullet) as GameObject).AddComponent<Bullet>();
-        b.SetupBullet(this.power);
-        return b;
     }
 
     protected override void OnDestroy()
     {
-        base.OnDestroy();
-        if (this.bulletPool is not null)
+        foreach (var bullet in this.bullets)
         {
-            this.bulletPool.DeleteObjects();
+            if (bullet == null) { continue; }
+            bullet.gameObject.SetActive(false);
+            if (Application.isPlaying) { Destroy(bullet.gameObject); }
+            else { DestroyImmediate(bullet.gameObject); }
         }
+        this.bullets.Clear();
+        base.OnDestroy();
     }
 }
