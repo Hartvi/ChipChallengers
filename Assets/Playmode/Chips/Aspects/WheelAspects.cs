@@ -128,6 +128,20 @@ public class WheelAspects : BaseAspect
         this.xForce = xImpulse * xDir;
         this.yForce = yImpulse * yDir;
         Vector3 totalForce = ContactForceScale * (this.yForce + this.xForce);
+        this.ApplyContactForces(totalForce);
+
+        float dOmega = WheelPhysics.ContactSpinDelta(ContactForceScale * xImpulse, this.radius,
+            this.inverseInertia, Time.fixedDeltaTime);
+
+        if (this.isServer)
+        {
+            this.myChip.Omega += dOmega;
+        }
+    }
+
+    void ApplyContactForces(Vector3 totalForce)
+    {
+        if (this.contactCount == 0) { return; }
         this.rb.AddForceAtPosition(totalForce, this.point, ForceMode.Force);
         for (int i = 0; i < this.contactCount; ++i)
         {
@@ -139,13 +153,6 @@ public class WheelAspects : BaseAspect
             }
         }
 
-        float dOmega = WheelPhysics.ContactSpinDelta(ContactForceScale * xImpulse, this.radius,
-            this.inverseInertia, Time.fixedDeltaTime);
-
-        if (this.isServer)
-        {
-            this.myChip.Omega += dOmega;
-        }
     }
 
     (float yImpulse, Vector3 yDir, float xImpulse, Vector3 xDir) PhysicsHandle()
@@ -252,7 +259,7 @@ public class WheelAspects : BaseAspect
 
             // Keep the existing tire-friction load units consistent with the bounded support force.
             this.impulse = (supportForce / ContactForceScale) * n;
-            this.rb.AddForceAtPosition(supportForce * n, this.point, ForceMode.Force);
+            this.ApplyContactForces(supportForce * n);
             this.ApplyForce();
         }
         else
