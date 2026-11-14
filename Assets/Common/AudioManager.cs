@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class AudioManager : MonoBehaviour
 {
-    public Sound[] sounds;
+    public Sound[] sounds = Array.Empty<Sound>();
     public HashSet<Sound> allSounds = new HashSet<Sound>();
     int newReservationId = 0;
     Dictionary<string, int> ReservationCounts = new Dictionary<string, int>();
@@ -16,14 +16,25 @@ public class AudioManager : MonoBehaviour
     {
         get
         {
-            return instance ?? new GameObject("AudioManager").AddComponent<AudioManager>();
+            if (instance == null) instance = FindObjectOfType<AudioManager>();
+            if (instance == null) instance = new GameObject("AudioManager").AddComponent<AudioManager>();
+            return instance;
         }
     }
 
     void Awake()
     {
+        if (instance != null && instance != this)
+        {
+            if (Application.isPlaying) Destroy(this);
+            else DestroyImmediate(this);
+            return;
+        }
+        instance = this;
+        if (sounds == null) sounds = Array.Empty<Sound>();
         foreach (Sound s in this.sounds)
         {
+            if (s == null) continue;
             s.source = gameObject.AddComponent<AudioSource>();
             s.source.clip = s.clip;
 
@@ -32,6 +43,11 @@ public class AudioManager : MonoBehaviour
             s.source.loop = s.loop;
             ReservationCounts[s.name] = 0;
         }
+    }
+
+    void OnDestroy()
+    {
+        if (instance == this) instance = null;
     }
 
     public bool Play(string name)

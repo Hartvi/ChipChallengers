@@ -38,5 +38,6 @@ Fixes follow the numbered findings in `code-review-2026-11-14.md`. Each complete
 | 32 — save/load filenames and premature selection | Fixed | One safe filename/display rule, optional .txt, case-compatible lookup, load error recovery, selected name updated only after server acceptance; filename regressions |
 | Additional — repeated menu entry/exit side effects | Fixed | Idempotent selection transitions; lifecycle regression added and compiled |
 | Additional — stale/empty keyboard focus | Fixed | Start first receiver, safely remove last receiver and discard inactive/destroyed receivers; focus regression added and compiled |
+| Additional — legacy audio singleton | Fixed | Cache/discover the instance, clear destroyed instances and initialize empty sound lists safely; Unity lifecycle regression added |
 
 Unity Play-mode and multiplayer checks require separate runtime validation; a C# compilation check does not exercise Mirror weaving or physics.
