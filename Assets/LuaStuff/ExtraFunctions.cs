@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using System;
 using System.Linq;
 using System.Collections;
@@ -13,6 +12,7 @@ public class ScriptInstance
     InputMessage inputMessage => myCore.inputMessage;
 
     Script script;
+    VehicleLuaEnvironment environment;
     string scriptString;
 
     Dictionary<string, VVar> Name2Var;
@@ -51,16 +51,11 @@ public class ScriptInstance
         // register a new function as chip_nameReadOmega that returns sth
         // replace chip_name.ReadOmega() with chip_nameReadOmega()
 
-        // select all variables
-        string[] varNames = vModel.variables.Select(x => x.name).ToArray();
-        // only choose valid ones
-        varNames = varNames.Where(x => x.IsVariableName()).ToArray();
-
-        this.scriptString = ScriptInstance.TransformCode(this.scriptString, varNames);
+        this.environment = new VehicleLuaEnvironment(this.script, this.Name2Var);
 
         try
         {
-            this.script.DoString(this.scriptString);
+            this.script.DoString(this.scriptString, this.environment.Globals);
         }
         catch (Exception e)
         {
@@ -142,40 +137,15 @@ public class ScriptInstance
                     }
             }
             this.scriptString = this.scriptString.Replace("." + UIStrings.Read, UIStrings.Read);
-            this.script.DoString(this.scriptString);
+            this.script.DoString(this.scriptString, this.environment.Globals);
         }
-    }
-
-    public static string TransformCode(string code, string[] vars)
-    {
-        // Check if vars array is empty
-        if (vars.Length == 0)
-        {
-            return code;
-        }
-
-        // Prepare the joined variable names for regex
-        string joinedVars = string.Join("|", vars);
-
-        // 1. Replace assignments: varName = value
-        string patternAssignment = $@"\b({joinedVars})\s*=\s*([^;\n]+)";
-        string replacementAssignment = @"SetVar(""$1"", $2);"; // Close SetVar here
-        code = Regex.Replace(code, patternAssignment, replacementAssignment);
-
-        // 2. Replace variable accesses: varName
-        // Ensure it's not followed by a closing quote and bracket or surrounded by quotes
-        string patternAccess = $@"(?<![""'])\b({joinedVars})\b(?!\s*""\s*\))(?!\s*'\s*\))";
-        string replacementAccess = @"GetVar(""$1"")";
-        code = Regex.Replace(code, patternAccess, replacementAccess);
-
-        return code;
     }
 
     public void CallLoop()
     {
         try
         {
-            this.script.Call(this.script.Globals["Loop"]);
+            this.script.Call(this.environment.Get("Loop"));
         }
         catch (Exception e)
         {
