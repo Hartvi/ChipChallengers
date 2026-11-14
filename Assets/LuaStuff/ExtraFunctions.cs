@@ -13,6 +13,8 @@ public class ScriptInstance
 
     Script script;
     VehicleLuaEnvironment environment;
+    VehicleLuaProgram program;
+    bool errorReported;
     string scriptString;
 
     Dictionary<string, VVar> Name2Var;
@@ -53,21 +55,7 @@ public class ScriptInstance
 
         this.environment = new VehicleLuaEnvironment(this.script, this.Name2Var);
 
-        try
-        {
-            this.script.DoString(this.scriptString, this.environment.Globals);
-        }
-        catch (Exception e)
-        {
-            DisplaySingleton.Instance.DisplayText(
-                x =>
-                {
-                    DisplaySingleton.ErrorMsgModification(x);
-                    x.SetText(e.Message);
-                },
-                3f
-            );
-        }
+        this.program = new VehicleLuaProgram(this.script, this.environment, this.scriptString);
     }
 
     /// <summary>
@@ -75,6 +63,17 @@ public class ScriptInstance
     /// </summary>
     /// <param name="vModel"></param>
     public void LinkSensors(VModel vModel)
+    {
+        try
+        {
+            this.RegisterSensors(vModel);
+            this.program.Initialize();
+        }
+        catch (Exception error) { this.program.Fail(error); }
+        this.ReportProgramError();
+    }
+
+    void RegisterSensors(VModel vModel)
     {
         //foreach(var vc in vModel.chips)
         //{
@@ -136,28 +135,29 @@ public class ScriptInstance
                         break;
                     }
             }
-            this.scriptString = this.scriptString.Replace("." + UIStrings.Read, UIStrings.Read);
-            this.script.DoString(this.scriptString, this.environment.Globals);
+            var sensor = new Table(this.script);
+            sensor.Set(UIStrings.Read, this.script.Globals.Get(sensorStr));
+            this.script.Globals[nameval] = sensor;
         }
     }
 
     public void CallLoop()
     {
-        try
+        if (!this.program.CallLoop()) { this.ReportProgramError(); }
+    }
+
+    void ReportProgramError()
+    {
+        if (this.program.Error != null && !this.errorReported)
         {
-            this.script.Call(this.environment.Get("Loop"));
-        }
-        catch (Exception e)
-        {
-            string message = e is InterpreterException scriptError
-                ? scriptError.DecoratedMessage ?? scriptError.Message
-                : e.Message;
+            this.errorReported = true;
+            string message = this.program.Error;
             DisplaySingleton.Instance.DisplayText(
                 x =>
                 {
                     DisplaySingleton.ErrorMsgModification(x);
                     x.SetText(message);
-                }, 5f, "model-script-loop-error"
+                }, 5f, "model-script-error"
             );
         }
     }

@@ -258,6 +258,8 @@ public class CoreChip : CommonChip
         try
         {
             model = VModel.FromLuaModel(state);
+            // Reject incomplete source before replacing a working assembly or its script.
+            VehicleLuaProgram.ValidateSyntax(model.script);
         }
         catch (Exception e)
         {

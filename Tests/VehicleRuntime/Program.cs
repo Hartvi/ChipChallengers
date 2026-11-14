@@ -42,6 +42,7 @@ partial class Program
     {
         CheckNumbers();
         CheckLuaVariables();
+        CheckProgramInitialization();
         foreach (string text in new[] { "", "\nleading newline", "\r\nwindows\r\nlines", "--[[ comment ]]\nfunction Loop() end",
             "local s = [=[nested ]] strings]=]", "quotes '\" and \\slashes", "\0" + "123\t\b", "café and 中文" })
         {
@@ -71,5 +72,27 @@ partial class Program
             "Lua strings, comments or table fields were changed");
         lua.DoString("_G.a = a + 1", environment.Globals);
         Check(variable.currentValue == 9, "_G did not resolve declared variables");
+    }
+
+    static void CheckProgramInitialization()
+    {
+        var lua = new Script();
+        var environment = new VehicleLuaEnvironment(lua, new System.Collections.Generic.Dictionary<string, VVar>());
+        foreach (string name in new[] { "front", "back" })
+        {
+            var sensor = new Table(lua);
+            sensor["Read"] = (Func<float>)(() => 3f);
+            lua.Globals[name] = sensor;
+        }
+        var program = new VehicleLuaProgram(lua, environment,
+            "count = (count or 0) + 1; initial = front.Read() + back.Read(); function Loop() result = initial end");
+        Check(program.Initialize() && program.Initialize(), "Program did not initialize");
+        Check(environment.Get("count").Number == 1 && environment.Get("initial").Number == 6,
+            "Sensor initialization ran repeatedly or before all bindings existed");
+        Check(program.CallLoop() && environment.Get("result").Number == 6, "Initialized loop failed");
+        var broken = new VehicleLuaProgram(lua, environment, "function Loop(");
+        Check(!broken.Initialize() && broken.Error != null && !broken.CallLoop(), "Syntax failure escaped initialization");
+        var runtimeError = new VehicleLuaProgram(lua, environment, "missing.Read()");
+        Check(!runtimeError.Initialize() && runtimeError.Error != null, "Top-level sensor error escaped initialization");
     }
 }
