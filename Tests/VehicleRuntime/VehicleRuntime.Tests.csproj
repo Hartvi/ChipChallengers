@@ -5,6 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="../../Assets/Common/ModelNumbers.cs" Link="ModelNumbers.cs" />
+    <Compile Include="../../Assets/Common/LuaStrings.cs" Link="LuaStrings.cs" />
     <Compile Include="../../Assets/Playmode/Virtual/VVar.cs" Link="VVar.cs" />
     <Reference Include="Assembly-CSharp-firstpass">
       <HintPath>../../Library/ScriptAssemblies/Assembly-CSharp-firstpass.dll</HintPath>

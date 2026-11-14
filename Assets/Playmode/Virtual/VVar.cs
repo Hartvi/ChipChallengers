@@ -90,7 +90,7 @@ public class VVar
         string luaCode = "{";
 
         // Add fixed fields
-        luaCode += $"name = '{name}', ";
+        luaCode += $"name = {LuaStrings.Quote(name)}, ";
         luaCode += $"defaultValue = {ModelNumbers.Format(defaultValue)}, ";
         luaCode += $"maxValue = {ModelNumbers.Format(maxValue)}, ";
         luaCode += $"minValue = {ModelNumbers.Format(minValue)}, ";

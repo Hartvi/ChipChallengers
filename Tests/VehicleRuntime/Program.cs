@@ -41,6 +41,12 @@ partial class Program
     static void Main()
     {
         CheckNumbers();
+        foreach (string text in new[] { "", "\nleading newline", "\r\nwindows\r\nlines", "--[[ comment ]]\nfunction Loop() end",
+            "local s = [=[nested ]] strings]=]", "quotes '\" and \\slashes", "\0" + "123\t\b", "café and 中文" })
+        {
+            Check(new Script().DoString("return " + LuaStrings.Quote(text)).String == text,
+                "Lua text did not round trip exactly");
+        }
         Console.WriteLine("PASS: " + checks + " vehicle runtime checks.");
     }
 }

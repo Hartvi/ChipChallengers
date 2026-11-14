@@ -175,7 +175,7 @@ end
 
         if (this.script != null)
         {
-            luaCode += $"script = [[{this.script}]] ";
+            luaCode += $"script = {LuaStrings.Quote(this.script)} ";
         }
 
         // Close table and return

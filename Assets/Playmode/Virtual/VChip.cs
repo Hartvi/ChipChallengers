@@ -530,14 +530,14 @@ public class VChip
         // Add fixed fields
         if (this.id != null)
         {
-            luaCode += $"id = '{this.id}', ";
+            luaCode += $"id = {LuaStrings.Quote(this.id)}, ";
         }
-        luaCode += $"orientation = '{this.orientation}', parentId = '{this.parentId}', ";
+        luaCode += $"orientation = {LuaStrings.Quote(this.orientation.ToString())}, parentId = {LuaStrings.Quote(this.parentId)}, ";
 
         // Add keys and values from arrays
         for (int i = 0; i < this.keys.Length; i++)
         {
-            luaCode += $"{this.keys[i]} = '{this.vals[i]}', ";
+            luaCode += $"{this.keys[i]} = {LuaStrings.Quote(this.vals[i])}, ";
         }
 
         // Close table and return
