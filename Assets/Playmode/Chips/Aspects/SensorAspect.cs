@@ -15,6 +15,8 @@ public class SensorAspect : BaseAspect
     public SensorType sensorType;
     RaycastHit hit;
     Vector3 oldVelocity = Vector3.zero;
+    Vector3 acceleration = Vector3.zero;
+    bool hasVelocitySample;
 
     /*
      probably:
@@ -38,10 +40,21 @@ public class SensorAspect : BaseAspect
 
     public override void RuntimeFunction()
     {
-        if (this.sensorType == SensorType.Acceleration)
+    }
+
+    void FixedUpdate()
+    {
+        if (this.sensorType != SensorType.Acceleration) { return; }
+        if (this.rb.isKinematic || (this.myChip.myCore != null && this.myChip.myCore.IsRebuilding))
         {
-            this.oldVelocity = this.rb.velocity;
+            this.hasVelocitySample = false;
+            this.acceleration = Vector3.zero;
+            return;
         }
+        Vector3 velocity = this.rb.velocity;
+        this.acceleration = this.hasVelocitySample ? (velocity - this.oldVelocity) / Time.fixedDeltaTime : Vector3.zero;
+        this.oldVelocity = velocity;
+        this.hasVelocitySample = true;
     }
 
     public float ReadDistance()
@@ -72,7 +85,7 @@ public class SensorAspect : BaseAspect
 
     public Table ReadAcceleration(Script script)
     {
-        var a = (this.rb.velocity - this.oldVelocity) / Time.deltaTime;
+        var a = this.acceleration;
         Table tbl = new Table(script);
 
         for (int i = 1; i <= 3; i++)
