@@ -54,6 +54,7 @@ public class CoreChip : CommonChip
 
     private LoopScript loopScript;
     readonly VehicleControlClock controlClock = new VehicleControlClock();
+    readonly Queue<Action> pendingEdits = new Queue<Action>();
 
     public GeometricChip[] AllChips
     {
@@ -188,6 +189,11 @@ public class CoreChip : CommonChip
             this.IsRebuilding = false;
             this.ResetCompleted?.Invoke();
         }
+        if (this.isServer && !this.IsRebuilding && this.pendingEdits.Count > 0)
+        {
+            this.pendingEdits.Dequeue()();
+            return;
+        }
         // Allow deferred destruction and aspect Start() to finish before running
         // the new runtime functions or Lua loop.
         if (this.IsRebuilding || this.frozen ||
@@ -253,8 +259,13 @@ public class CoreChip : CommonChip
     }
 
     [Server]
-    public void LoadString(string state)
+    public void LoadString(string state, bool recordHistory = true)
     {
+        if (this.IsRebuilding)
+        {
+            this.QueueEdit(() => this.LoadString(state, recordHistory));
+            return;
+        }
         print($"srv: LoadString");
         VModel model = null;
         try
@@ -276,7 +287,7 @@ public class CoreChip : CommonChip
 
         this.VirtualModel = model;
         this.variableValues = new float[model.variables.Length];
-        this.history.SaveState(this.modelString);
+        if (recordHistory) { this.history.SaveState(this.modelString); }
 
         this.keysToCheck = this.GetInputCharactersFromModel(model.script ?? string.Empty);
 
@@ -285,6 +296,40 @@ public class CoreChip : CommonChip
         {
             a();
         }
+    }
+
+    [Server]
+    void QueueEdit(Action action)
+    {
+        if (this.pendingEdits.Count < 32) { this.pendingEdits.Enqueue(action); }
+        else if (this.connectionToClient != null)
+            this.TargetModelLoadFailed(this.connectionToClient, "Too many pending edits; wait for rebuilding to finish.");
+    }
+
+    [Command]
+    public void CmdUndoHistory()
+    {
+        if (this.IsRebuilding) { this.QueueEdit(this.CmdUndoOnServer); }
+        else { this.CmdUndoOnServer(); }
+    }
+
+    void CmdUndoOnServer()
+    {
+        string state = this.history.Undo();
+        if (state != null) { this.LoadString(state, recordHistory: false); }
+    }
+
+    [Command]
+    public void CmdRedoHistory()
+    {
+        if (this.IsRebuilding) { this.QueueEdit(this.CmdRedoOnServer); }
+        else { this.CmdRedoOnServer(); }
+    }
+
+    void CmdRedoOnServer()
+    {
+        string state = this.history.Redo();
+        if (state != null) { this.LoadString(state, recordHistory: false); }
     }
 
     [TargetRpc]

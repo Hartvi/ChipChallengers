@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
+using System.Linq;
 
 public class HistoryStack
 {
@@ -13,12 +13,19 @@ public class HistoryStack
         //PRINT.IPrint($"Pushing new state");
         if (this.pastEdits.Count > 0 && this.pastEdits.Peek() != state)
         {
+            this.futureEdits.Clear();
             this.pastEdits.Push(state);
         }
         else if (this.pastEdits.Count == 0)
         {
             this.pastEdits.Push(state);
         }
+        // Retain useful undo history without retaining unbounded full-model snapshots.
+        var retained = this.pastEdits.ToArray();
+        int count = Math.Min(128, retained.Length);
+        long bytes = retained.Take(count).Sum(value => (long)value.Length * 2);
+        while (count > 1 && bytes > 8 * 1024 * 1024) { bytes -= retained[--count].Length * 2L; }
+        if (count != retained.Length) { this.pastEdits = new Stack<string>(retained.Take(count).Reverse()); }
     }
 
     public string Undo()
@@ -27,7 +34,7 @@ public class HistoryStack
             return this.pastEdits.Peek();
 
         if (this.pastEdits.Count == 0)
-            return CoreChip.ClientCoreChip.VirtualModel.ToLuaString();
+            return null;
 
         this.futureEdits.Push(this.pastEdits.Pop());
         return this.pastEdits.Peek();
@@ -39,7 +46,7 @@ public class HistoryStack
         {
             if (this.pastEdits.Count == 0)
             {
-                return CoreChip.ClientCoreChip.VirtualModel.ToLuaString();
+                return null;
             }
             return this.pastEdits.Peek();
         }

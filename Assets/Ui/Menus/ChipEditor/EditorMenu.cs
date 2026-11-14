@@ -426,31 +426,11 @@ public class EditorMenu : BaseMenu, InputReceiver
 #endif
             if (Input.GetKeyDown(KeyCode.Z))
             {
-#if UNITY_EDITOR
-                var ccc = CoreChip.ClientCoreChip;
-                ccc.CmdLoadString(ccc.history.Undo());
-#else
-            try
-            {
-                var ccc = CoreChip.ClientCoreChip;
-                ccc.CmdLoadString(ccc.history.Undo());
-            }
-            catch {}
-#endif
+                CoreChip.ClientCoreChip.CmdUndoHistory();
             }
             if (Input.GetKeyDown(KeyCode.Y))
             {
-#if UNITY_EDITOR
-                var ccc = CoreChip.ClientCoreChip;
-                ccc.CmdLoadString(ccc.history.Redo());
-#else
-                try
-                {
-                    var ccc = CoreChip.ClientCoreChip;
-                    ccc.CmdLoadString(ccc.history.Redo());
-                }
-                catch {}
-#endif
+                CoreChip.ClientCoreChip.CmdRedoHistory();
             }
             if (Input.GetKeyDown(KeyCode.C))
             {

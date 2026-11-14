@@ -46,6 +46,12 @@ partial class Program
         CheckLuaLimits();
         CheckModelValidation();
         CheckControlTiming();
+        var history = new HistoryStack();
+        Check(history.Undo() == null && history.Redo() == null, "Empty history depends on a local player");
+        history.SaveState("A"); history.SaveState("B"); history.SaveState("C");
+        Check(history.Undo() == "B" && history.Redo() == "C", "Undo/redo did not retain the active branch");
+        history.Undo(); history.SaveState("D");
+        Check(history.Redo() == "D" && history.Undo() == "B", "An abandoned redo branch survived a new edit");
         Check(InputCoordinates.Normalize(1440, 1920) == InputCoordinates.Normalize(2880, 3840), "Mouse aim depends on client resolution");
         Check(InputCoordinates.Normalize(0, 1920) == -1 && InputCoordinates.Normalize(960, 1920) == 0 &&
             InputCoordinates.Normalize(1920, 1920) == 1, "Mouse viewport coordinates changed");
