@@ -45,6 +45,7 @@ partial class Program
         CheckProgramInitialization();
         CheckLuaLimits();
         CheckModelValidation();
+        CheckControlTiming();
         foreach (string text in new[] { "", "\nleading newline", "\r\nwindows\r\nlines", "--[[ comment ]]\nfunction Loop() end",
             "local s = [=[nested ]] strings]=]", "quotes '\" and \\slashes", "\0" + "123\t\b", "café and 中文" })
         {
@@ -158,5 +159,26 @@ partial class Program
             catch (ArgumentException) { rejected = true; }
             Check(rejected, "Malformed model graph was accepted");
         }
+    }
+
+    static void CheckControlTiming()
+    {
+        foreach (int rate in new[] { 30, 50, 60, 120, 500, 1000 })
+        {
+            var clock = new VehicleControlClock();
+            var variable = new VVar { minValue = -100, maxValue = 100, backstep = 1 };
+            variable.currentValue = 50;
+            int ticks = 0;
+            for (int i = 0; i < rate; i++)
+                clock.Advance(1.0 / rate, seconds => { ticks++; VehicleControlClock.Backstep(new[] { variable }); });
+            Check(ticks == 50 && variable.currentValue == 0, "Control/backstep rate changed at " + rate + " Hz");
+        }
+        var input = new InputMessage();
+        var buttons = new[] { false, false, false };
+        input.Accumulate(new[] { 'w' }, new[] { 'w' }, Array.Empty<char>(), buttons, new[] { true, false, false }, buttons, new float[2]);
+        input.Accumulate(new[] { 'w' }, Array.Empty<char>(), Array.Empty<char>(), buttons, buttons, buttons, new float[2]);
+        Check(input.KeysDown.Length == 1 && input.MouseDown[0], "An input edge was lost between control ticks");
+        input.ConsumeEdges();
+        Check(input.KeysDown.Length == 0 && !input.MouseDown[0] && input.Keys.Length == 1, "Input edges repeated or held state was lost");
     }
 }

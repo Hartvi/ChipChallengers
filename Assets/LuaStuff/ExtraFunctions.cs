@@ -42,6 +42,7 @@ public class ScriptInstance
         this.script.Globals["Print"] = (Action<string, Table>)this.Print;
         this.script.Globals["SetVar"] = (Action<string, float>)this.SetVariable;
         this.script.Globals["GetVar"] = (Func<string, float>)this.GetVariable;
+        this.script.Globals["DeltaTime"] = VehicleControlClock.TickSeconds;
 
         // place holder, user can rewrite it later
         this.script.Globals["Loop"] = (Action)(() => { });

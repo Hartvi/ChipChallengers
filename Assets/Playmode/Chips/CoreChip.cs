@@ -53,6 +53,7 @@ public class CoreChip : CommonChip
     public ScriptInstance scriptInstance;
 
     private LoopScript loopScript;
+    readonly VehicleControlClock controlClock = new VehicleControlClock();
 
     public GeometricChip[] AllChips
     {
@@ -398,6 +399,7 @@ public class CoreChip : CommonChip
     // PrepareReset pauses the model and clears retained input and motion before resetting.
     void PrepareReset()
     {
+        this.controlClock.Reset();
         this.SetModelAssemblyVisible(false);
         this.IsRebuilding = true;
         this.inputMessage = new InputMessage();
@@ -744,12 +746,6 @@ public class CoreChip : CommonChip
 
     public void HandleInputs()
     {
-        if (this.isServer)
-        {
-            this.loopScript?.HandleInputs();
-            this.SetVariablesSync();
-        }
-
         if (this.isLocalPlayer)
         {
             this.TransferControls();
@@ -757,17 +753,26 @@ public class CoreChip : CommonChip
         }
     }
 
+    [Server]
+    void FixedUpdate()
+    {
+        if (this.IsRebuilding || this.frozen || this.IsDrivingHeld || this.loopScript == null ||
+            this.srvResetCounter != this.cltResetCounter || this.modelString != this.loadedModelString)
+        {
+            this.controlClock.Reset();
+            return;
+        }
+        this.controlClock.Advance(Time.fixedDeltaTime, _ => {
+            this.loopScript.HandleInputs();
+            this.inputMessage.ConsumeEdges();
+            this.SetVariablesSync();
+        });
+    }
+
     [Command]
     void CmdSendInputsToServer(char[] ks, char[] kds, char[] kus, bool[] bs, bool[] bds, bool[] bus, float[] mouse)
     {
-        this.inputMessage.Keys = ks;
-        this.inputMessage.KeysDown = kds;
-        this.inputMessage.KeysUp = kus;
-
-        this.inputMessage.MouseClicked = bs;
-        this.inputMessage.MouseDown = bds;
-        this.inputMessage.MouseUp = bus;
-        this.inputMessage.MousePos = mouse;
+        this.inputMessage.Accumulate(ks, kds, kus, bs, bds, bus, mouse);
     }
 
     public override void OnStopServer()

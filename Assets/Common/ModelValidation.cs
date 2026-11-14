@@ -11,7 +11,7 @@ public static class ModelValidation
     public const int MaximumAttachmentDepth = 64;
     static readonly HashSet<string> reserved = new HashSet<string>((
         "and break do else elseif end false for function goto if in local nil not or repeat return then true until while " +
-        "_G _ENV Loop Key KeyDown KeyUp Mouse IsClicked MouseDown MouseUp Sin Cos Print SetVar GetVar").Split(' '));
+        "_G _ENV Loop DeltaTime Key KeyDown KeyUp Mouse IsClicked MouseDown MouseUp Sin Cos Print SetVar GetVar").Split(' '));
 
     public static bool IsIdentifier(string name) => !string.IsNullOrEmpty(name) && name.Length <= 64 &&
         (name[0] == '_' || (name[0] >= 'a' && name[0] <= 'z') || (name[0] >= 'A' && name[0] <= 'Z')) &&
