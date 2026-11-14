@@ -47,6 +47,8 @@ partial class Program
         CheckModelValidation();
         CheckControlTiming();
         CheckGunTiming();
+        Check(Math.Abs(GunFireControl.ProjectileMass(100) - 0.01f) < 1e-8f &&
+            GunFireControl.ProjectileMass(1e-30f) > 0, "Projectile/recoil mass is invalid");
         var history = new HistoryStack();
         Check(history.Undo() == null && history.Redo() == null, "Empty history depends on a local player");
         history.SaveState("A"); history.SaveState("B"); history.SaveState("C");

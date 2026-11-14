@@ -13,6 +13,12 @@ public sealed class GunFireControl
         return !float.IsNaN(requested) && !float.IsInfinity(requested) && requested > 0;
     }
 
+    public static float ProjectileMass(float requested)
+    {
+        if (!TryPower(requested, out float power)) { throw new ArgumentException("Projectile power must be finite and positive."); }
+        return Math.Max(1e-7f, power * 1e-4f);
+    }
+
     public bool Step(float requested, bool trigger, float seconds, out float power)
     {
         if (!TryPower(requested, out power)) { this.charge = 0; return false; }

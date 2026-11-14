@@ -14,8 +14,8 @@ public class Bullet : MonoBehaviour
 
     public void SetupBullet(float power)
     {
-        this.myPower = power;
         this.rb = this.GetComponent<Rigidbody>();
+        this.SetPower(power);
         // Flight and impacts are handled below; a solid projectile would push its own gun on spawn.
         this.rb.isKinematic = true;
         this.rb.detectCollisions = false;
@@ -27,6 +27,7 @@ public class Bullet : MonoBehaviour
     {
         if (!GunFireControl.TryPower(power, out this.myPower))
             throw new System.ArgumentException("Bullet power must be finite and positive.");
+        this.rb.mass = GunFireControl.ProjectileMass(this.myPower);
     }
 
     public void Fire(Vector3 initialPosition, Vector3 velocity, Rigidbody sourceBody = null, CoreChip sourceCore = null, bool authoritative = true)

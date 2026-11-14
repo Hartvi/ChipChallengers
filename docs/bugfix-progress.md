@@ -24,5 +24,6 @@ Fixes follow the numbered findings in `code-review-2026-11-14.md`. Each complete
 | 18 — retained runtime child/model trees | Fixed | Clear both attachment directions and variable subscriptions before rebuild/destruction; reparent/clear regression added and compiled |
 | 19 — detached drives retain commands | Fixed | Stop drive commands on the detached branch and replicate death state; wheels can coast; detachment regression added and compiled |
 | 20 — unbounded/zero-power gun allocation | Fixed | Lazy pool capped at 256 bullets, dynamic finite power, max 50 shots/sec, physics-tick charge; rate/zero/tiny/nonfinite power regressions |
+| 21 — inconsistent impact/recoil mass | Fixed | One finite positive projectile mass shared by recoil and reused bullet bodies; mass regression added and compiled |
 
 Unity Play-mode and multiplayer checks require separate runtime validation; a C# compilation check does not exercise Mirror weaving or physics.

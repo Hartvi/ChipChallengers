@@ -5,6 +5,16 @@ using UnityEngine;
 
 public class BulletTests
 {
+    [Test]
+    public void ShotPowerConfiguresTheSameMassUsedForRecoil()
+    {
+        foreach (float power in new[] { 0.001f, 100f, 1000f })
+        {
+            this.bullet.SetPower(power);
+            Assert.That(this.bullet.GetComponent<Rigidbody>().mass, Is.EqualTo(GunFireControl.ProjectileMass(power)).Within(1e-8f));
+        }
+    }
+
     readonly List<GameObject> objects = new List<GameObject>();
     readonly Vector3 origin = new Vector3(10000f, 10000f, 10000f);
     Bullet bullet;
