@@ -11,6 +11,7 @@ public class VariableFields : BaseImage
     BaseInput[] inputs = new BaseInput[5];
     BaseButton[] buttons = new BaseButton[2];
     bool initialized;
+    bool focusNameAfterSubmit;
 
     public override void Setup()
     {
@@ -58,6 +59,8 @@ public class VariableFields : BaseImage
             this.inputs[i].input.onEndEdit.RemoveAllListeners();
             this.inputs[i].input.onEndEdit.AddListener(x => SanitizeInputField(this.inputs[_i].input, x));
         }
+        foreach (var field in this.inputs)
+            field.input.onSubmit.AddListener(_ => this.SubmitVariable());
 
         for(int i = 0; i < this.texts.Length; ++i)
         {
@@ -134,7 +137,14 @@ public class VariableFields : BaseImage
 
     void Update()
     {
-        if (!this.initialized || !this.inputs.Any(input => input.input.isFocused)) { return; }
+        if (!this.initialized) { return; }
+        if (this.focusNameAfterSubmit)
+        {
+            this.focusNameAfterSubmit = false;
+            this.inputs[0].input.Select();
+            this.inputs[0].input.ActivateInputField();
+        }
+        if (!this.inputs.Any(input => input.input.isFocused)) { return; }
         if (Input.GetKeyDown(KeyCode.Tab) && (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)))
         {
             bool wasFocused = false;
@@ -171,20 +181,23 @@ public class VariableFields : BaseImage
             }
         }
 
-        if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
+    }
+
+    // TMP consumes Enter and clears focus before our Update can poll it.
+    // Its submit event covers both Return and keypad Enter without a global shortcut.
+    void SubmitVariable()
+    {
+        if (!this.initialized || !this.isActiveAndEnabled) { return; }
+        for(int i = 0; i < this.inputs.Length; ++i)
         {
-            for(int i = 0; i < this.inputs.Length; ++i)
+            if (string.IsNullOrWhiteSpace(this.inputs[i].input.text))
             {
-                if (string.IsNullOrWhiteSpace(this.inputs[i].input.text))
-                {
-                    this.inputs[i].input.SetTextWithoutNotify(UIStrings.DefaultVariableValues[i]);
-                }
-            } 
-            AddVariable();
-            // TODO: doesn't work ofc, somehow it selects the second guy instead
-            UnityEngine.Debug.LogWarning($"Selecting the first input field is still not working for some reason after pressing enter.");
-            this.inputs[0].input.Select();
+                this.inputs[i].input.SetTextWithoutNotify(UIStrings.DefaultVariableValues[i]);
+            }
         }
+        this.AddVariable();
+        // Let TMP finish deactivating the submitted field before restoring typing focus.
+        this.focusNameAfterSubmit = true;
     }
 
 }

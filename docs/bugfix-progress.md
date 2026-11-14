@@ -71,3 +71,9 @@ The projectile now weighs 1 kg at the standard power, with mass proportional to 
 A native regression fires a normal 333 m/s shot, without overriding its mass, at a rolling 10 kg, five-unit-diameter ball on a floor. Before the fix, both 500 and 1000 Hz cases failed with only about 0.24 m/s remaining velocity. Both now pass the launch checks: more than 20 m/s and over one metre of movement within 0.1 seconds.
 
 Follow-up verification: **33/33 native Unity tests** and **146 vehicle/runtime checks** passed. The Windows build and multiplayer results above refer to the initial review validation.
+
+## Variable panel Enter follow-up
+
+The focus guard introduced in `3617dbd` could skip Enter after TextMeshPro had already consumed the key and cleared input focus. Variable fields now use TMP's own submit event for Return and keypad Enter, with no duplicate global Enter polling. Submission retains default filling and definition validation, and typing focus returns to the name field after TMP finishes deactivating the submitted input.
+
+Native regressions submit each of the five fields without relying on polled focus, verify adding and updating exactly once, and verify that a hidden panel ignores submissions. All five cases failed before the fix. **38/38 native Unity tests passed** after the fix.
