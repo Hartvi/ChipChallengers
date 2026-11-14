@@ -6,6 +6,10 @@ Follow-up redo 2: sensor pastes allocate unique names across existing sensors, v
 
 Follow-up redo 3: chip type changes preserve the selected option when the destination supports the same named variant. Incompatible variants fall back to Basic/the first option. Eight native tests cover material preservation, incompatible options and exactly one model-change notification.
 
+Redo integration correction: sensor-name checks tolerate an editable model whose chip list has not initialized. The full native suite includes the five existing Enter submission tests and catches this initialization case.
+
+Follow-up redo 4: migration records the original hashes of copied examples. Unchanged copies read the current bundled version; explicit saves and external edits retain user ownership. Older identical copies acquire tracking safely; older differing copies remain protected. The load menu also exposes `Bundled: <name>` entries so current examples remain accessible even behind protected legacy files. Originals are retained and bundled assets are never overwritten. Final verification: **51/51 native Unity tests** and **155 vehicle/runtime checks** passed. No new Windows build or multiplayer probe was needed for this follow-up; earlier results remain historical.
+
 Fixes follow the numbered findings in `code-review-2026-11-14.md`. Each completed finding receives its own commit. Existing unrelated local files are excluded.
 
 | Finding | Status | Validation |

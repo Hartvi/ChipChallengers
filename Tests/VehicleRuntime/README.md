@@ -15,3 +15,7 @@ Vehicle `Loop()` and variable backstep run at 50 Hz, retaining the original defa
 Gun projectiles retain the original impact strength at the standard power: power 100 produces a 1 kg projectile at 333 m/s. Mass scales with power, and the gun's recoil is attenuated to 1% for gameplay. The runtime checks pin both the standard impact mass and the existing recoil scale; native BulletTests also launch a rolling challenge ball at 500 and 1000 Hz without overriding bullet mass.
 
 Model names accept an optional final `.txt` suffix. Other dots are part of the vehicle name, so `car.v2` saves as `car.v2.txt` and reloads by either form. Paths, control characters and reserved device names are rejected. User files live in `Application.persistentDataPath/Models`; legacy installed files are copied once without replacing existing user work.
+
+Migration tracks original copied-file hashes. Untouched examples follow bundled updates; explicit saves and externally edited copies keep priority. Legacy files with unknown differing contents remain protected, and the load menu offers separate `Bundled: <name>` selections to open current examples. Tests cover updates, explicit ownership (including identical saves), external edits, old migration upgrades, protected legacy work and safe bundled selection names.
+
+Unfinished Lua can be saved and reloaded as model data. Runtime initialization reports syntax errors and disables that script while preserving its source for editing.

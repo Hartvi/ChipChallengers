@@ -31,6 +31,9 @@ public class IOHelpers
     }
 
     public static string GetModelsDirectory() => Models.UserDirectory;
+    public static string[] GetLoadableModels() => Models.LoadableNames();
+    public static bool BundledModelExists(string name) => Models.BundledExists(name);
+    public static string LoadBundledModel(string name) => Models.ReadBundled(name);
 
     public static string EnsureFileExtension(string fileName)
     {

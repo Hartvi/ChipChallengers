@@ -55,6 +55,7 @@ partial class Program
         Check(!keyInput.Held('w') && keyInput.KeysDown.Length == 0, "Malformed input did not clear retained controls");
         CheckGunTiming();
         CheckUserModelFiles();
+        CheckBundledModelUpdates();
         CheckVariableDefinitions();
         CheckModelNames();
         Check(Math.Abs(GunFireControl.ProjectileMass(100) - 1f) < 1e-8f &&
@@ -256,6 +257,63 @@ partial class Program
             var caseFiles = new ModelFileStore(caseUser, bundled);
             caseFiles.MigrateLegacyFiles();
             Check(caseFiles.Read("car") == "existing player work", "Migration replaced a user model with different filename casing");
+        }
+        finally
+        {
+            if (System.IO.Path.GetFullPath(root).StartsWith(System.IO.Path.GetFullPath(System.IO.Path.GetTempPath()), StringComparison.OrdinalIgnoreCase))
+                System.IO.Directory.Delete(root, true);
+        }
+    }
+
+    static void CheckBundledModelUpdates()
+    {
+        string root = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "chip-example-updates-" + Guid.NewGuid().ToString("N"));
+        string bundled = System.IO.Path.Combine(root, "bundled"), user = System.IO.Path.Combine(root, "user");
+        System.IO.Directory.CreateDirectory(bundled);
+        string source = System.IO.Path.Combine(bundled, "example.txt");
+        try
+        {
+            System.IO.File.WriteAllText(source, "version 1");
+            var files = new ModelFileStore(user, bundled);
+            files.MigrateLegacyFiles();
+            System.IO.File.WriteAllText(source, "version 2");
+            Check(new ModelFileStore(user, bundled).Read("example") == "version 2", "Untouched migrated example hid a bundled update");
+            Check(System.IO.File.ReadAllText(System.IO.Path.Combine(user, "example.txt")) == "version 1", "Reading an update overwrote the preserved copy");
+            System.IO.File.WriteAllText(System.IO.Path.Combine(user, "example.txt"), "external player edit");
+            Check(files.Read("example") == "external player edit", "An external user edit was hidden by an example");
+            files.Write("example", "version 1");
+            files.MigrateLegacyFiles();
+            Check(new ModelFileStore(user, bundled).Read("example") == "version 1", "An explicit save matching the old example lost ownership");
+
+            string legacyUser = System.IO.Path.Combine(root, "legacy-user");
+            System.IO.Directory.CreateDirectory(legacyUser);
+            System.IO.File.WriteAllText(System.IO.Path.Combine(legacyUser, "example.txt"), "version 2");
+            System.IO.File.WriteAllText(System.IO.Path.Combine(legacyUser, ".legacy-models-migrated"), "old migration");
+            var legacy = new ModelFileStore(legacyUser, bundled);
+            legacy.MigrateLegacyFiles();
+            System.IO.File.WriteAllText(source, "version 3");
+            Check(legacy.Read("example") == "version 3", "Identical legacy examples were not upgraded to tracked migration");
+
+            string unknownUser = System.IO.Path.Combine(root, "unknown-user");
+            System.IO.Directory.CreateDirectory(unknownUser);
+            System.IO.File.WriteAllText(System.IO.Path.Combine(unknownUser, "example.txt"), "unknown player work");
+            System.IO.File.WriteAllText(System.IO.Path.Combine(unknownUser, ".legacy-models-migrated"), "old migration");
+            var unknown = new ModelFileStore(unknownUser, bundled);
+            unknown.MigrateLegacyFiles();
+            Check(unknown.Read("example") == "unknown player work", "Legacy work without provenance was replaced");
+            Check(unknown.ReadBundled("example") == "version 3" && Array.IndexOf(unknown.LoadableNames(), ModelFileStore.BundledPrefix + "example") >= 0,
+                "Protected legacy work hid the current bundled example");
+            bool unsafeSelectionRejected = false;
+            try { ModelFileStore.SelectionFileName(ModelFileStore.BundledPrefix + "../escape"); }
+            catch (ArgumentException) { unsafeSelectionRejected = true; }
+            Check(unsafeSelectionRejected, "Bundled selections bypassed safe filename validation");
+
+            string explicitUser = System.IO.Path.Combine(root, "explicit-user");
+            var explicitFiles = new ModelFileStore(explicitUser, bundled);
+            explicitFiles.Write("example", "version 3");
+            explicitFiles.MigrateLegacyFiles();
+            System.IO.File.WriteAllText(source, "version 4");
+            Check(explicitFiles.Read("example") == "version 3", "A pre-migration explicit save was treated as an untouched example");
         }
         finally
         {

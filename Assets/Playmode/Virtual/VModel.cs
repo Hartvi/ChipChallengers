@@ -252,7 +252,7 @@ end
     {
         if (v == null || !ModelValidation.IsVariableName(v.name)) { throw new ArgumentException("Choose a valid variable name."); }
         v.ValidateDefinition();
-        if (this.chips.Any(chip => chip.ChipType == VChip.sensorStr &&
+        if (this.chips != null && this.chips.Any(chip => chip.ChipType == VChip.sensorStr &&
             SensorBindingName(chip) == v.name))
             throw new ArgumentException("A sensor already uses this name. Choose a different variable name.");
         VVar existingVariable = this.variables.FirstOrDefault(x => x.name == v.name);
@@ -415,13 +415,14 @@ end
 
     public static VModel LoadModelFromFile(string modelName)
     {
-        modelName = ModelFileNames.Normalize(modelName);
-        if (!IOHelpers.ModelExists(modelName))
+        bool bundled = ModelFileStore.IsBundledSelection(modelName);
+        modelName = ModelFileStore.SelectionFileName(modelName);
+        if (!(bundled ? IOHelpers.BundledModelExists(modelName) : IOHelpers.ModelExists(modelName)))
         {
             return null;
         }
 
-        string luaModel = IOHelpers.LoadModel(modelName);
+        string luaModel = bundled ? IOHelpers.LoadBundledModel(modelName) : IOHelpers.LoadModel(modelName);
         VModel m = VModel.FromLuaModel(luaModel);
         m.modelName = ModelFileNames.DisplayName(modelName);
         //PRINT.IPrint(m.variables.Length);

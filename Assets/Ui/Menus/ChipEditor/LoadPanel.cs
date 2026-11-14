@@ -25,7 +25,7 @@ public class LoadPanel : BaseScrollMenu
 
         base.Start();
 
-        this.itemScroll.SetupItemList(FillInput, Screen.height / 70, IOHelpers.GetAllModels());
+        this.itemScroll.SetupItemList(FillInput, Screen.height / 70, IOHelpers.GetLoadableModels());
 
         this.btns[0].btn.onClick.AddListener(this.RebuildWithNewModelOnline);
 
@@ -88,7 +88,7 @@ public class LoadPanel : BaseScrollMenu
     public override void OnEnable()
     {
         base.OnEnable();
-        if (this.itemScroll is not null) this.itemScroll.virtualContainer.UpdateLabels(IOHelpers.GetAllModels());
+        if (this.itemScroll is not null) this.itemScroll.virtualContainer.UpdateLabels(IOHelpers.GetLoadableModels());
     }
 
 
@@ -96,8 +96,8 @@ public class LoadPanel : BaseScrollMenu
     {
         try
         {
-            string filename = ModelFileNames.Normalize(this.input.input.text);
-            var model = VModel.LoadModelFromFile(filename);
+            string filename = ModelFileStore.SelectionFileName(this.input.input.text);
+            var model = VModel.LoadModelFromFile(this.input.input.text);
             if (model == null)
             {
                 DisplaySingleton.Instance.DisplayText(ModelDoesNotExist, 4f, "model-load-error");
