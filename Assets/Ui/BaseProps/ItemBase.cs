@@ -44,23 +44,23 @@ public class ItemBase : TopProp
                 return siblings[i];
             }
         }
-        var newSibling = GameObject.Instantiate<ItemBase>(this);
-        newSibling.transform.SetParent(this.transform.parent);
+        var newSibling = GameObject.Instantiate<ItemBase>(this, this.transform.parent, false);
         return newSibling;
     }
     public void HideItem()
     {
         var siblings = this.Siblings<ItemBase>(takeInactive: false);
-        siblings[siblings.Length - 1].gameObject.SetActive(false);
+        if (siblings.Length > 0) siblings[siblings.Length - 1].gameObject.SetActive(false);
     }
     public T[] DisplayNItems<T>(int n) where T : ItemBase
     {
+        if (n < 0) throw new ArgumentOutOfRangeException(nameof(n));
         var siblings = this.Siblings<ItemBase>(takeInactive: true);
         if (n > siblings.Length)
         {
             for (int i = 0; i < n - siblings.Length; ++i)
             {
-                AddItem();
+                GameObject.Instantiate<ItemBase>(this, this.transform.parent, false);
             }
             siblings = this.Siblings<ItemBase>(takeInactive: true);
         }
