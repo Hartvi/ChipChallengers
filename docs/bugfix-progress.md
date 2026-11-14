@@ -46,6 +46,7 @@ Fixes follow the numbered findings in `code-review-2026-11-14.md`. Each complete
 | Additional — legacy sound reservations | Fixed | Per-sound bounded pools, positive limits, safe missing sounds and owned-source teardown; Unity regression added |
 | Additional — self-closing input receivers | Fixed | Remove obsolete bookkeeping that indexed an empty stack after a receiver closed itself during Update; regression expanded |
 | Additional — detachment after the joint is already gone | Fixed | Avoid requesting destruction of a missing joint; native detachment regression |
+| Multiplayer validation — client physics warning flood | Fixed | Use Mirror's silent ServerCallback guard for Unity's automatic FixedUpdate callback |
 
 Unity Play-mode and multiplayer checks require separate runtime validation; a C# compilation check does not exercise Mirror weaving or physics.
 

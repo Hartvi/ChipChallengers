@@ -801,7 +801,7 @@ public class CoreChip : CommonChip
             identity.GetComponent<GunAspect>()?.PlayRemoteShot(position, velocity, power);
     }
 
-    [Server]
+    [ServerCallback]
     void FixedUpdate()
     {
         if (this.IsRebuilding || this.frozen || this.IsDrivingHeld || this.loopScript == null ||
