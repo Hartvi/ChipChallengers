@@ -473,20 +473,6 @@ public class SandboxMenu : BaseMenu, InputReceiver
             if (Input.GetKeyDown(KeyCode.Escape)) { GoToMainMenu.Function(false); }
             return;
         }
-        //#if UNITY_EDITOR
-        // if (Input.GetKey(KeyCode.Space))
-        // {
-        //     //core.transform.position += 0.1f*Vector3.up;
-        //     Rigidbody r = core.GetComponent<Rigidbody>();
-        //     r.AddForce(10f * Vector3.up, ForceMode.VelocityChange);
-        // }
-        if (Input.GetKey(KeyCode.UpArrow))
-        {
-            //core.transform.position += 0.1f*Vector3.up;
-            Rigidbody r = core.GetComponent<Rigidbody>();
-            r.AddForce(1f * Vector3.forward, ForceMode.VelocityChange);
-        }
-        //#endif
         bool ctrlPressed = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
         bool shiftPressed = Input.GetKey(KeyCode.RightShift) || Input.GetKey(KeyCode.LeftShift);
 
