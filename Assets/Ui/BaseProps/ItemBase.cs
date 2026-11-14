@@ -10,35 +10,28 @@ public class ItemBase : TopProp
 
     public ItemBase Next(bool takeInactive = false)
     {
-        List<ItemBase> siblings = new List<ItemBase>();
-        bool hasBeenInactive = false;
-        int numberOfChildren = 0;
-        for (int i = 0; i < this.transform.childCount; ++i)
+        var parent = this.transform.parent;
+        if (parent == null) return takeInactive || this.isActiveAndEnabled ? this : null;
+        var siblings = this.Siblings<ItemBase>(takeInactive)
+            .Where(item => takeInactive || item.isActiveAndEnabled).ToArray();
+        if (siblings.Length == 0) return null;
+        int current = Array.IndexOf(siblings, this);
+        int next = (current + 1) % siblings.Length;
+        if (current < 0)
         {
-            var newSibling = this.transform.parent.GetChild(i).GetComponent<ItemBase>();
-            if (newSibling == null) continue;
-
-            ++numberOfChildren;
-            if (newSibling.isActiveAndEnabled)
+            // A hidden item can still advance to the next visible sibling.
+            int siblingIndex = this.transform.GetSiblingIndex();
+            for (int i = 0; i < siblings.Length; ++i)
             {
-                if (hasBeenInactive)
+                if (siblings[i].transform.GetSiblingIndex() > siblingIndex)
                 {
-                    throw new ArgumentNullException($"Items are not continuously inactive. Active: {i} after inactive {i - 1}.");
+                    next = i;
+                    break;
                 }
-                siblings.Add(newSibling);
-            }
-            else
-            {
-                hasBeenInactive = true;
             }
         }
-        int CurrentIndex = (MyIndex + 1) % (takeInactive ? numberOfChildren : siblings.Count);
-
-        // pass information to the next guy that he is selected
-        var nextGuy = siblings[CurrentIndex];
-        nextGuy.MyIndex = CurrentIndex;
-
-        return nextGuy;
+        siblings[next].MyIndex = next;
+        return siblings[next];
     }
     public ItemBase AddItem()
     {

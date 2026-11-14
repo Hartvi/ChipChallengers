@@ -39,5 +39,6 @@ Fixes follow the numbered findings in `code-review-2026-11-14.md`. Each complete
 | Additional — repeated menu entry/exit side effects | Fixed | Idempotent selection transitions; lifecycle regression added and compiled |
 | Additional — stale/empty keyboard focus | Fixed | Start first receiver, safely remove last receiver and discard inactive/destroyed receivers; focus regression added and compiled |
 | Additional — legacy audio singleton | Fixed | Cache/discover the instance, clear destroyed instances and initialize empty sound lists safely; Unity lifecycle regression added |
+| Additional — item sibling navigation | Fixed | Traverse the parent's actual items, handle inactive gaps/empty lists and ignore stale cached indices; Unity regression added |
 
 Unity Play-mode and multiplayer checks require separate runtime validation; a C# compilation check does not exercise Mirror weaving or physics.
