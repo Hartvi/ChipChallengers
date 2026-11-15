@@ -27,7 +27,9 @@ public static class WheelPhysics
         float speed = Math.Abs(omega);
         float resistance = (brake * inverseInertia + LinearResistancePerSecond * speed +
             QuadraticResistancePerSecond * speed * speed) * seconds;
-        return omega + torque * inverseInertia * seconds - Math.Sign(omega) * Math.Min(speed, resistance);
+        float drivenOmega = omega + torque * inverseInertia * seconds;
+        // Brakes oppose the resulting spin, including drive applied while stationary.
+        return drivenOmega - Math.Sign(drivenOmega) * Math.Min(Math.Abs(drivenOmega), resistance);
     }
 
     // ContactSpinDelta converts the tire's longitudinal force into its opposing wheel angular-velocity change.

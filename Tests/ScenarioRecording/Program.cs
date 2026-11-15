@@ -194,6 +194,19 @@ class Program
             Check(coastingTwoSeconds > 48f && coastingTwoSeconds < 51f, "Free wheel spin did not halve in about two seconds");
             Check(WheelPhysics.IntegrateSpin(1, 0, 1000, 1, 0.01f) == 0 &&
                 WheelPhysics.IntegrateSpin(-1, 0, 1000, 1, 0.01f) == 0, "Braking reversed wheel direction");
+            foreach (int rate in new[] { 50, 500, 1000 })
+            {
+                foreach (float drive in new[] { -40f, 40f })
+                {
+                    Check(WheelPhysics.IntegrateSpin(0, drive, 40, baseWheelInertia, 1f / rate) == 0,
+                        "Equal brake and drive failed to hold a stationary wheel");
+                    Check(WheelPhysics.IntegrateSpin(0, drive, 100, baseWheelInertia, 1f / rate) == 0,
+                        "A strong brake allowed a powered wheel to spin");
+                    float limited = WheelPhysics.IntegrateSpin(0, drive, 10, baseWheelInertia, 1f / rate);
+                    Check(Math.Abs(limited - Math.Sign(drive) * 30f * baseWheelInertia / rate) < 1e-5f,
+                        "Drive stronger than the brake did not apply the remaining torque");
+                }
+            }
             foreach (int fps in new[] { 30, 60, 120 })
             {
                 float angle = 0f;

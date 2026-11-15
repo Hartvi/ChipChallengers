@@ -105,19 +105,20 @@ public class WheelAspects : BaseAspect
         this.oldUp = Vector3.zero;
     }
 
-    // ApplyTorque integrates wheel spin and applies motor and axle-turning reaction impulses to its body.
-    void ApplyTorque(float torque)
+    // Visual spin is -Omega * up, so the body's opposite reaction is +delta(I * Omega * up).
+    void ApplyTorque(float torque, float previousOmega)
     {
+        if (!this.isServer) { return; }
         Vector3 up = this.transform.up;
-        Vector3 turningImpulse = this.oldUp == Vector3.zero ? Vector3.zero :
-            this.myChip.Omega / this.inverseInertia * (up - this.oldUp);
-        this.rb.AddTorque(turningImpulse + Time.fixedDeltaTime * torque * up, ForceMode.Impulse);
+        Vector3 previousUp = this.oldUp == Vector3.zero ? up : this.oldUp;
+        float nextOmega = WheelPhysics.IntegrateSpin(this.myChip.Omega, torque, this.brake,
+            this.inverseInertia, Time.fixedDeltaTime);
+        // Include tire-induced spin changes from this tick; their torque must not
+        // accelerate both the virtual wheel spin and the body independently.
+        Vector3 reactionImpulse = (nextOmega * up - previousOmega * previousUp) / this.inverseInertia;
+        this.rb.AddTorque(reactionImpulse, ForceMode.Impulse);
         this.oldUp = up;
-        if (this.isServer)
-        {
-            this.myChip.Omega = WheelPhysics.IntegrateSpin(this.myChip.Omega, torque, this.brake,
-                this.inverseInertia, Time.fixedDeltaTime);
-        }
+        this.myChip.Omega = nextOmega;
     }
 
     // ApplyForce applies the same tire force to the vehicle, contacted body and opposing wheel spin.
@@ -236,6 +237,7 @@ public class WheelAspects : BaseAspect
     void FixedUpdate()
     {
         if (this.rb.isKinematic || this.myChip.myCore.IsRebuilding) { return; }
+        float previousOmega = this.myChip.Omega;
         if (this.RaycastFromBase(out this.point, out this.compression, out this.normal))
         {
             Vector3 n = this.normal;
@@ -273,7 +275,7 @@ public class WheelAspects : BaseAspect
         this.totalSlip3 = this.totalSlip2;
         this.totalSlip2 = this.totalSlip1;
         this.totalSlip1 = this.totalSlip;
-        this.ApplyTorque(this.myChip.IsDead ? 0f : this.value);
+        this.ApplyTorque(this.myChip.IsDead ? 0f : this.value, previousOmega);
     }
 
     bool RaycastFromBase(out Vector3 point, out float compression, out Vector3 normal)

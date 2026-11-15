@@ -89,3 +89,9 @@ Follow-up verification: **33/33 native Unity tests** and **146 vehicle/runtime c
 The focus guard introduced in `3617dbd` could skip Enter after TextMeshPro had already consumed the key and cleared input focus. Variable fields now use TMP's own submit event for Return and keypad Enter, with no duplicate global Enter polling. Submission retains default filling and definition validation, and typing focus returns to the name field after TMP finishes deactivating the submitted input.
 
 Native regressions submit each of the five fields without relying on polled focus, verify adding and updating exactly once, and verify that a hidden panel ignores submissions. All five cases failed before the fix. **38/38 native Unity tests passed** after the fix.
+
+## Wheel braking reaction follow-up
+
+The body received raw motor torque even when the brake cancelled the wheel's spin, and received no reaction from braking a spinning wheel. Reaction impulse now follows the virtual wheel's actual angular momentum change over the physics tick, including tire-induced spin changes and axle direction changes. Braking also opposes drive applied in the same tick, so an equal or stronger brake holds a stationary wheel without a torque kick. A weaker brake leaves the remaining drive torque available.
+
+Before the fix, six of eight initial native cases failed: four stationary brake/drive cases and two braking reactions. The final suite includes twelve wheel torque cases covering both directions, braking, ground-contact angular momentum and axle turning at 500 and 1000 Hz. **67/67 native Unity EditMode tests**, **319 standalone challenge/save/physics checks**, and both editor/player source compilation passed. These checks do not replace a full vehicle handling session. The user's existing wheel stiffness edit remains separate from this fix.
