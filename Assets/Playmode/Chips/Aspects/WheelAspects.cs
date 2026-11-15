@@ -30,7 +30,7 @@ public class WheelAspects : BaseAspect
 
     // tire parameters:
     // Support spring strength: higher values reduce tire penetration under load.
-    public const float stiffness = 20;
+    public const float stiffness = 50;
     public const float B = 10f;
     public const float C = 1.9f;
     public const float D = 1.0f;
