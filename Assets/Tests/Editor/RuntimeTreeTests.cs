@@ -24,6 +24,57 @@ public class RuntimeTreeTests
         finally { Object.DestroyImmediate(root); }
     }
 
+    [TestCase(false, typeof(JetFlameAspect), UIStrings.JetFlame)]
+    [TestCase(true, typeof(JetFlameAspect), UIStrings.JetFlame)]
+    [TestCase(false, typeof(JetDustAspect), UIStrings.JetDust)]
+    [TestCase(true, typeof(JetDustAspect), UIStrings.JetDust)]
+    public void DetachedJetStopsItsEffectsEvenIfPowerIsSetAgain(bool breakParent, System.Type effectType, string resource)
+    {
+        var parentObject = new GameObject("Jet attachment test");
+        var jetObject = new GameObject("Detached jet test");
+        parentObject.SetActive(false);
+        jetObject.SetActive(false);
+        var particles = Object.Instantiate(Resources.Load<ParticleSystem>(resource));
+        float previousParticleRate = GameManager.RealTimeSettings.ParticleRate;
+        try
+        {
+            var parent = NetworkTestObjects.Add<CommonChip>(parentObject);
+            var jet = NetworkTestObjects.Add<CommonChip>(jetObject);
+            jet.SetParent(parent);
+            var effect = (BaseAspect)jetObject.AddComponent(effectType);
+            effect.myChip = jet;
+            var flags = BindingFlags.Instance | BindingFlags.NonPublic;
+            effectType.GetField("particles", flags).SetValue(effect, particles);
+            GameManager.RealTimeSettings.ParticleRate = 1f;
+            jet.SetValue(1000f);
+            jet.SetBrake(10f);
+            effect.RuntimeFunction();
+            particles.Play();
+            particles.Emit(1);
+            Assert.That(particles.emission.rateOverTime.constant, Is.GreaterThan(0f));
+            Assert.That(particles.particleCount, Is.GreaterThan(0));
+
+            typeof(CommonChip).GetMethod("OnJointBreak", flags)
+                .Invoke(breakParent ? parent : jet, new object[] { 1f });
+            Assert.That(jet.IsDead, Is.True);
+            // A later script command must not restart a detached engine's effects.
+            jet.SetValue(1000f);
+            jet.SetBrake(10f);
+            effect.RuntimeFunction();
+
+            Assert.That(particles.emission.rateOverTime.constant, Is.Zero);
+            Assert.That(particles.isStopped, Is.True);
+            Assert.That(particles.particleCount, Is.Zero);
+        }
+        finally
+        {
+            GameManager.RealTimeSettings.ParticleRate = previousParticleRate;
+            Object.DestroyImmediate(particles.gameObject);
+            Object.DestroyImmediate(jetObject);
+            Object.DestroyImmediate(parentObject);
+        }
+    }
+
     [Test]
     public void ReparentingAndClearingDetachBothDirections()
     {

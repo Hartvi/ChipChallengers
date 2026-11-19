@@ -23,6 +23,14 @@ public class JetFlameAspect : BaseAspect
 
     public override void RuntimeFunction()
     {
+        if (this.myChip.IsDead)
+        {
+            var emission = this.particles.emission;
+            emission.rateOverTime = 0f;
+            this.particles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            return;
+        }
+
         var em = this.particles.emission;
         em.rateOverTime = GameManager.RealTimeSettings.ParticleRate * Mathf.Min(Mathf.Abs(this.value * 0.1f), 50f);
         var m = this.particles.main;

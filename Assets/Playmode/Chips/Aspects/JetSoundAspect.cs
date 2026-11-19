@@ -25,6 +25,8 @@ public class JetSoundAspect : BaseSoundAspect
 
     void Update()
     {
+        if (this.myChip.IsDead) { return; }
+
         if (everyNthCounter++ >= everyNth)
         {
             var s = this.soundPool.Next();

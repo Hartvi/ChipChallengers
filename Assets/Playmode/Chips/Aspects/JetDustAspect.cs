@@ -23,7 +23,15 @@ public class JetDustAspect : BaseAspect
 
     public override void RuntimeFunction()
     {
-        if (this.brake < 1e-3f || this.myChip.IsDead)
+        if (this.myChip.IsDead)
+        {
+            var emission = this.particles.emission;
+            emission.rateOverTime = 0f;
+            this.particles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            return;
+        }
+
+        if (this.brake < 1e-3f)
         {
             var emission = this.particles.emission;
             emission.rateOverTime = 0f;
