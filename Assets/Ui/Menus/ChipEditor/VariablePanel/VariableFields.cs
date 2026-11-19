@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using System.Linq;
+using Mirror;
 
 public class VariableFields : BaseImage
 {
@@ -46,18 +47,11 @@ public class VariableFields : BaseImage
         this.texts = this.gameObject.GetComponentsInChildren<BaseText>();
         this.buttons = this.gameObject.GetComponentsInChildren<BaseButton>();
 
-        this.inputs[0].input.onEndEdit.RemoveAllListeners();
-        this.inputs[0].input.onEndEdit.AddListener(
-            x => {
-                if (!string.IsNullOrEmpty(x) && !ModelValidation.IsVariableName(x))
-                    this.ShowError("Use a Lua variable name that is separate from keywords and the control API.");
-            }
-        );
-        for(int i = 1; i < this.inputs.Length; ++i)
+        for(int i = 0; i < this.inputs.Length; ++i)
         {
             int _i = i;
             this.inputs[i].input.onEndEdit.RemoveAllListeners();
-            this.inputs[i].input.onEndEdit.AddListener(x => SanitizeInputField(this.inputs[_i].input, x));
+            this.inputs[i].input.onEndEdit.AddListener(x => this.EndEditField(this.inputs[_i].input, x));
         }
         foreach (var field in this.inputs)
             field.input.onSubmit.AddListener(_ => this.SubmitVariable());
@@ -101,11 +95,23 @@ public class VariableFields : BaseImage
             this.ShowError("Choose a valid Lua variable name.");
             return;
         }
+        for (int i = 1; i < this.inputs.Length; ++i)
+        {
+            if (string.IsNullOrWhiteSpace(this.inputs[i].input.text))
+                this.inputs[i].input.SetTextWithoutNotify(UIStrings.DefaultVariableValues[i]);
+        }
         string[] vals = this.inputs.Select(x => x.input.text).ToArray();
         try
         {
             VVar v = new VVar(vals);
-            CoreChip.ClientCoreChip.VirtualModel.AddAndSelectVariable(v);
+            var model = CoreChip.ClientCoreChip.VirtualModel;
+            var existing = model.variables.FirstOrDefault(variable => variable.name == v.name);
+            if (existing != null && existing.ToStringArray().SequenceEqual(v.ToStringArray()))
+            {
+                if (!ReferenceEquals(model.GetSelectedVariable(), existing)) { model.SetSelectedVariable(v.name); }
+                return;
+            }
+            model.AddAndSelectVariable(v);
         }
         catch (Exception error) when (error is ArgumentException || error is FormatException)
         {
@@ -120,11 +126,25 @@ public class VariableFields : BaseImage
         CoreChip.ClientCoreChip.VirtualModel.DeleteSelectedVariable();
     }
 
-    private void SanitizeInputField(TMP_InputField inputField, string input)
+    void EndEditField(TMP_InputField inputField, string value)
+    {
+        if (!this.initialized || inputField.wasCanceled ||
+            NetworkClient.localPlayer == null) { return; }
+        if (inputField != this.inputs[0].input && !this.SanitizeInputField(inputField, value)) { return; }
+        if (string.IsNullOrWhiteSpace(this.inputs[0].input.text)) { return; }
+        this.AddVariable();
+    }
+
+    private bool SanitizeInputField(TMP_InputField inputField, string input)
     {
         if (string.IsNullOrWhiteSpace(input)) { inputField.SetTextWithoutNotify("0"); }
         else if (ModelNumbers.TryParse(input, out float value)) { inputField.SetTextWithoutNotify(ModelNumbers.Format(value)); }
-        else { this.ShowError("Enter a finite number."); }
+        else
+        {
+            this.ShowError("Enter a finite number.");
+            return false;
+        }
+        return true;
     }
 
     void ShowError(string message)
