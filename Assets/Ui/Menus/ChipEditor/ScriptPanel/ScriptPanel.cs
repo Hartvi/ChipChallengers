@@ -48,6 +48,9 @@ public class ScriptPanel : BaseSidePanel, InputReceiver
         UIUtils.SetFontSize(this.input.input.textComponent, UIUtils.SmallFontSize);
         this.input.input.lineType = TMPro.TMP_InputField.LineType.MultiLineNewline;
         this.input.input.onFocusSelectAll = false;
+        this.input.input.customCaretColor = true;
+        this.input.input.caretColor = Color.black;
+        this.input.input.caretWidth = 2;
         this.btn.AddBtnHoldActions(new Action[] { this.DragBtn });
         this.initialized = true;
         this.pendingRefresh = StartCoroutine(this.RefreshWhenReady());
