@@ -42,7 +42,8 @@ public static class UIStrings
         "Ctrl+R",
         "Ctrl+E",
         "Ctrl+S",
-        "Ctrl+P"
+        "Ctrl+P",
+        "Mouse wheel (2)"
     };
     public static readonly string[] ControlsActions = new string[] {
         "Display this panel",
@@ -53,7 +54,8 @@ public static class UIStrings
         "Reset model / restart challenge",
         "Go to editor",
         "Save model (in editor)",
-        "Go to playmode (from editor)"
+        "Go to playmode (from editor)",
+        "Free-camera speed (playmode)"
     };
 
     public const string ModelExtension = ".txt";

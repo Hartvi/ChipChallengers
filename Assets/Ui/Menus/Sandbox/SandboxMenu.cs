@@ -88,6 +88,8 @@ public class SandboxMenu : BaseMenu, InputReceiver
     NetworkManager manager;
 
     Camera mainCamera;
+    float freeCameraSpeed = 3f;
+    const float MaxFreeCameraSpeed = 300f;
     const float MaxFollowElevation = 80f;
     const float WakeFollowSpeed = 1f;
     const float WakeHorizontalHalfAngle = 30f;
@@ -412,6 +414,9 @@ public class SandboxMenu : BaseMenu, InputReceiver
 
     void CameraFreeMove()
     {
+        this.freeCameraSpeed = Mathf.Clamp(
+            this.freeCameraSpeed * Mathf.Pow(1.15f, Input.mouseScrollDelta.y), 0.3f, MaxFreeCameraSpeed);
+
         if (Input.GetMouseButton(1))
         {
             // 
@@ -449,7 +454,9 @@ public class SandboxMenu : BaseMenu, InputReceiver
                 deltaPos = cam.transform.up;
             }
 
-            float sensitivity = Input.GetKey(KeyCode.LeftShift) ? Time.deltaTime * 10f : Time.deltaTime * 3f;
+            float speed = this.freeCameraSpeed *
+                (Input.GetKey(KeyCode.LeftShift) ? 10f / 3f : 1f);
+            float sensitivity = Time.deltaTime * Mathf.Min(speed, MaxFreeCameraSpeed);
             cam.transform.position = cam.transform.position + sensitivity * deltaPos;
         }
     }
