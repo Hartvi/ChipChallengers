@@ -47,6 +47,7 @@ public class ScriptPanel : BaseSidePanel, InputReceiver
         });
         UIUtils.SetFontSize(this.input.input.textComponent, UIUtils.SmallFontSize);
         this.input.input.lineType = TMPro.TMP_InputField.LineType.MultiLineNewline;
+        this.input.input.onFocusSelectAll = false;
         this.btn.AddBtnHoldActions(new Action[] { this.DragBtn });
         this.initialized = true;
         this.pendingRefresh = StartCoroutine(this.RefreshWhenReady());
